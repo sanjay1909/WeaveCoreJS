@@ -43,9 +43,27 @@
 
                 <li><a href="../classes/CallbackCollection.html">CallbackCollection</a></li>
 
+                <li><a href="../classes/CallbackEntry.html">CallbackEntry</a></li>
+
+                <li><a href="../classes/ChildListCallbackInterface.html">ChildListCallbackInterface</a></li>
+
+                <li><a href="../classes/DynamicState.html">DynamicState</a></li>
+
                 <li><a href="../classes/Event.html">Event</a></li>
 
                 <li><a href="../classes/EventDispatcher.html">EventDispatcher</a></li>
+
+                <li><a href="../classes/GroupedCallbackEntry.html">GroupedCallbackEntry</a></li>
+
+                <li><a href="../classes/ILinkableObject.html">ILinkableObject</a></li>
+
+                <li><a href="../classes/LinkableDynamicObject.html">LinkableDynamicObject</a></li>
+
+                <li><a href="../classes/LinkableHashMap.html">LinkableHashMap</a></li>
+
+                <li><a href="../classes/LinkableWatcher.html">LinkableWatcher</a></li>
+
+                <li><a href="../classes/SessionManager.html">SessionManager</a></li>
 
                 <li><a href="../classes/Ticker.html">Ticker</a></li>
 
@@ -54,6 +72,8 @@
             <ul id="api-modules" class="apis modules">
 
                 <li><a href="../modules/CreateJS.html">CreateJS</a></li>
+
+                <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
         </div>
@@ -94,24 +114,30 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
+/**
+ * @module weavecore
+ */
+
+//namesapce
 if (!this.weavecore)
     this.weavecore = {};
 
-/**
- * An object that implements this empty interface has an associated CallbackCollection and session state,
- * accessible through the global functions in the WeaveAPI Object. In order for an ILinkableObject to
- * be created dynamically at runtime, it must not require any constructor parameters.
- *
- * @author adufilie
- * @author sanjay1909
- */
 (function () {
+    &quot;use strict&quot;;
+
+    // constructor:
+    /**
+     * An object that implements this empty interface has an associated CallbackCollection and session state,
+     * accessible through the global functions in the WeaveAPI Object. In order for an ILinkableObject to
+     * be created dynamically at runtime, it must not require any constructor parameters.
+     * @class ILinkableObject
+     * @constructor
+     */
     function ILinkableObject() {}
 
     weavecore.ILinkableObject = ILinkableObject;
 
 }());
-
     </pre>
 </div>
 

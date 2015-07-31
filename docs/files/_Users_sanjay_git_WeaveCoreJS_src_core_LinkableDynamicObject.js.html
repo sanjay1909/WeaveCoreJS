@@ -43,9 +43,27 @@
 
                 <li><a href="../classes/CallbackCollection.html">CallbackCollection</a></li>
 
+                <li><a href="../classes/CallbackEntry.html">CallbackEntry</a></li>
+
+                <li><a href="../classes/ChildListCallbackInterface.html">ChildListCallbackInterface</a></li>
+
+                <li><a href="../classes/DynamicState.html">DynamicState</a></li>
+
                 <li><a href="../classes/Event.html">Event</a></li>
 
                 <li><a href="../classes/EventDispatcher.html">EventDispatcher</a></li>
+
+                <li><a href="../classes/GroupedCallbackEntry.html">GroupedCallbackEntry</a></li>
+
+                <li><a href="../classes/ILinkableObject.html">ILinkableObject</a></li>
+
+                <li><a href="../classes/LinkableDynamicObject.html">LinkableDynamicObject</a></li>
+
+                <li><a href="../classes/LinkableHashMap.html">LinkableHashMap</a></li>
+
+                <li><a href="../classes/LinkableWatcher.html">LinkableWatcher</a></li>
+
+                <li><a href="../classes/SessionManager.html">SessionManager</a></li>
 
                 <li><a href="../classes/Ticker.html">Ticker</a></li>
 
@@ -54,6 +72,8 @@
             <ul id="api-modules" class="apis modules">
 
                 <li><a href="../modules/CreateJS.html">CreateJS</a></li>
+
+                <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
         </div>
@@ -95,19 +115,24 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * This object links to an internal ILinkableObject.
- * The internal object can be either a local one or a global one identified by a global name.
- *
- * @author adufilie
- * @author sanjay1909
+ * @module weavecore
  */
-// namespace
 
+//namesapce
 if (!this.weavecore)
     this.weavecore = {};
+
 (function () {
+    &quot;use strict&quot;;
+
+    // constructor:
     /**
-     * @param typeRestriction If specified, this will limit the type of objects that can be added to this LinkableHashMap.
+     * This object links to an internal ILinkableObject.
+     * The internal object can be either a local one or a global one identified by a global name.
+     * @class LinkableDynamicObject
+     * @extends LinkableWatcher
+     * @constructor
+     * @param {Class} typeRestriction If specified, this will limit the type of objects that can be added to this LinkableHashMap.
      */
     function LinkableDynamicObject(typeRestriction) {
         if (typeRestriction === undefined) typeRestriction = null;
@@ -445,7 +470,6 @@ if (!this.weavecore)
 
 
 }());
-
     </pre>
 </div>
 

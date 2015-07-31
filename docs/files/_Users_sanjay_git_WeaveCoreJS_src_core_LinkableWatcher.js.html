@@ -43,9 +43,27 @@
 
                 <li><a href="../classes/CallbackCollection.html">CallbackCollection</a></li>
 
+                <li><a href="../classes/CallbackEntry.html">CallbackEntry</a></li>
+
+                <li><a href="../classes/ChildListCallbackInterface.html">ChildListCallbackInterface</a></li>
+
+                <li><a href="../classes/DynamicState.html">DynamicState</a></li>
+
                 <li><a href="../classes/Event.html">Event</a></li>
 
                 <li><a href="../classes/EventDispatcher.html">EventDispatcher</a></li>
+
+                <li><a href="../classes/GroupedCallbackEntry.html">GroupedCallbackEntry</a></li>
+
+                <li><a href="../classes/ILinkableObject.html">ILinkableObject</a></li>
+
+                <li><a href="../classes/LinkableDynamicObject.html">LinkableDynamicObject</a></li>
+
+                <li><a href="../classes/LinkableHashMap.html">LinkableHashMap</a></li>
+
+                <li><a href="../classes/LinkableWatcher.html">LinkableWatcher</a></li>
+
+                <li><a href="../classes/SessionManager.html">SessionManager</a></li>
 
                 <li><a href="../classes/Ticker.html">Ticker</a></li>
 
@@ -54,6 +72,8 @@
             <ul id="api-modules" class="apis modules">
 
                 <li><a href="../modules/CreateJS.html">CreateJS</a></li>
+
+                <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
         </div>
@@ -94,26 +114,30 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-// namespace
+/**
+ * @module weavecore
+ */
 
+// namespace
 if (!this.weavecore)
     this.weavecore = {};
 
-/**
- * This is used to dynamically attach a set of callbacks to different targets.
- * The callbacks of the LinkableWatcher will be triggered automatically when the
- * target triggers callbacks, changes, becomes null or is disposed.
- * @author adufilie
- */
 (function () {
+    &quot;use strict&quot;;
+
+    // constructor:
     /**
-     * Instead of calling this constructor directly, consider using one of the global functions
-     * newLinkableChild() or newDisposableChild() to make sure the watcher will get disposed automatically.
-     * @param typeRestriction Optionally restricts which type of targets this watcher accepts.
-     * @param immediateCallback A function to add as an immediate callback.
-     * @param groupedCallback A function to add as a grouped callback.
-     * @see weave.api.core.newLinkableChild()
-     * @see weave.api.core.newDisposableChild()
+     * This is used to dynamically attach a set of callbacks to different targets.
+     * The callbacks of the LinkableWatcher will be triggered automatically when the
+     * target triggers callbacks, changes, becomes null or is disposed.
+     * Instead of calling this constructor directly, consider using one of the {{#crossLink &quot;SessionManager&quot;}}{{/crossLink}} functions
+     * {{#crossLink &quot;SessionManager/registerLinkableChild:method&quot;}}{{/crossLink}} or  {{#crossLink &quot;SessionManager/registerDisposableChild:method&quot;}}{{/crossLink}} to make sure the watcher will get disposed automatically.
+     * @class LinkableWatcher
+     * @extends ILinkableObject
+     * @constructor
+     * @param {Class} typeRestriction Optionally restricts which type of targets this watcher accepts.
+     * @param {Function} immediateCallback A function to add as an immediate callback.
+     * @param {Function} groupedCallback A function to add as a grouped callback.
      */
     function LinkableWatcher(typeRestriction, immediateCallback, groupedCallback) {
         if (typeRestriction === undefined) typeRestriction = null;
@@ -367,7 +391,6 @@ if (!this.weavecore)
 			// a.getState(null): &quot;b value&quot;
 		*/
 }());
-
     </pre>
 </div>
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>CallbackCollection - weavecore</title>
+    <title>ChildListCallbackInterface - weavecore</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -110,15 +110,19 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>CallbackCollection Class</h1>
+                        <h1>ChildListCallbackInterface Class</h1>
 <div class="box meta">
 
 
 
+        <div class="extends">
+            Extends <a href="../classes/CallbackCollection.html" class="crosslink">CallbackCollection</a>
+        </div>
+
 
 
         <div class="foundat">
-            Defined in: <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l28"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:28</code></a>
+            Defined in: <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l13"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:13</code></a>
         </div>
 
 
@@ -134,40 +138,26 @@
 
 
 <div class="box intro">
-    <p>This class manages a list of callback functions.
-If specified, the preCallback function will be called immediately before running each
-callback using the parameters passed to _runCallbacksImmediately(). This means if there
-are five callbacks added, preCallback() gets called five times whenever
-_runCallbacksImmediately() is called.  An example usage of this is to make sure a relevant
-variable is set to the appropriate value while each callback is running.  The preCallback
-function will not be called before grouped callbacks.</p>
+    <p>Private Class for use with <a href="../classes/LinkableHashMap.html" class="crosslink">LinkableHashMap</a></p>
 
 </div>
 
 
     <div class="constructor">
         <h2>Constructor</h2>
-        <div id="method_CallbackCollection" class="method item">
-    <h3 class="name"><code>CallbackCollection</code></h3>
+        <div id="method_ChildListCallbackInterface" class="method item private">
+    <h3 class="name"><code>ChildListCallbackInterface</code></h3>
 
 
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-
-                <li class="arg">
-
-                        <code>preCallback</code>
-
-                </li>
-
-            </ul><span class="paren">)</span>
-        </div>
+        <span class="paren">()</span>
 
 
 
 
 
 
+
+        <span class="flag private">private</span>
 
 
 
@@ -189,7 +179,7 @@ function will not be called before grouped callbacks.</p>
 
 
 
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l28"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:28</code></a>
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l13"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:13</code></a>
 
         </p>
 
@@ -203,30 +193,6 @@ function will not be called before grouped callbacks.</p>
 
     </div>
 
-
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-
-                <li class="param">
-
-                        <code class="param-name">preCallback</code>
-                        <span class="type">Function</span>
-
-
-
-
-                    <div class="param-description">
-                        <p>An optional function to call before each immediate callback.</p>
-
-                    </div>
-
-
-                </li>
-
-            </ul>
-        </div>
 
 
 
@@ -259,99 +225,72 @@ function will not be called before grouped callbacks.</p>
                 <div class="index-section methods">
                     <h3>Methods</h3>
 
-                    <ul class="index-list methods">
+                    <ul class="index-list methods extends">
 
-                            <li class="index-item method private">
-                                <a href="#method__handleGroupedCallbacks">_handleGroupedCallbacks</a>
-
-
-                                    <span class="flag static">static</span>
-
-
-                            </li>
-
-                            <li class="index-item method protected">
+                            <li class="index-item method protected inherited">
                                 <a href="#method__runCallbacksImmediately">_runCallbacksImmediately</a>
 
 
 
                             </li>
 
-                            <li class="index-item method">
+                            <li class="index-item method private">
+                                <a href="#method__setCallbackVariables">_setCallbackVariables</a>
+
+
+
+                            </li>
+
+                            <li class="index-item method inherited">
                                 <a href="#method_addDisposeCallback">addDisposeCallback</a>
 
 
 
                             </li>
 
-                            <li class="index-item method">
-                                <a href="#method_addGroupedCallback">addGroupedCallback</a>
-
-
-                                    <span class="flag static">static</span>
-
-
-                            </li>
-
-                            <li class="index-item method">
+                            <li class="index-item method inherited">
                                 <a href="#method_addGroupedCallback">addGroupedCallback</a>
 
 
 
                             </li>
 
-                            <li class="index-item method">
+                            <li class="index-item method inherited">
                                 <a href="#method_addImmediateCallback">addImmediateCallback</a>
 
 
 
                             </li>
 
-                            <li class="index-item method">
+                            <li class="index-item method inherited">
                                 <a href="#method_delayCallbacks">delayCallbacks</a>
 
 
 
                             </li>
 
-                            <li class="index-item method">
+                            <li class="index-item method inherited inherited">
                                 <a href="#method_dispose">dispose</a>
 
 
 
                             </li>
 
-                            <li class="index-item method">
-                                <a href="#method_dispose">dispose</a>
-
-
-
-                            </li>
-
-                            <li class="index-item method">
+                            <li class="index-item method inherited">
                                 <a href="#method_handleGroupedCallback">handleGroupedCallback</a>
 
 
 
                             </li>
 
-                            <li class="index-item method">
+                            <li class="index-item method inherited">
                                 <a href="#method_removeCallback">removeCallback</a>
 
 
 
                             </li>
 
-                            <li class="index-item method">
-                                <a href="#method_removeGroupedCallback">removeGroupedCallback</a>
-
-
-                                    <span class="flag static">static</span>
-
-
-                            </li>
-
-                            <li class="index-item method">
+                            <li class="index-item method inherited">
                                 <a href="#method_resumeCallbacks">resumeCallbacks</a>
 
 
@@ -359,13 +298,20 @@ function will not be called before grouped callbacks.</p>
                             </li>
 
                             <li class="index-item method">
+                                <a href="#method_runCallbacks">runCallbacks</a>
+
+
+
+                            </li>
+
+                            <li class="index-item method inherited">
                                 <a href="#method_trigger">trigger</a>
 
 
 
                             </li>
 
-                            <li class="index-item method">
+                            <li class="index-item method inherited">
                                 <a href="#method_triggerCallbacks">triggerCallbacks</a>
 
 
@@ -380,23 +326,23 @@ function will not be called before grouped callbacks.</p>
                 <div class="index-section properties">
                     <h3>Properties</h3>
 
-                    <ul class="index-list properties">
+                    <ul class="index-list properties extends">
 
-                            <li class="index-item property private">
+                            <li class="index-item property private inherited">
                                 <a href="#property__callbackEntries">_callbackEntries</a>
 
 
 
                             </li>
 
-                            <li class="index-item property private">
+                            <li class="index-item property private inherited">
                                 <a href="#property__delayCount">_delayCount</a>
 
 
 
                             </li>
 
-                            <li class="index-item property private">
+                            <li class="index-item property private inherited">
                                 <a href="#property__disposeCallbackEntries">_disposeCallbackEntries</a>
 
 
@@ -404,77 +350,69 @@ function will not be called before grouped callbacks.</p>
                             </li>
 
                             <li class="index-item property private">
-                                <a href="#property__entryLookup">_entryLookup</a>
+                                <a href="#property__lastNameAdded">_lastNameAdded</a>
 
-
-                                    <span class="flag static">static</span>
 
 
                             </li>
 
                             <li class="index-item property private">
-                                <a href="#property__handlingGroupedCallbacks">_handlingGroupedCallbacks</a>
+                                <a href="#property__lastNameRemoved">_lastNameRemoved</a>
 
-
-                                    <span class="flag static">static</span>
 
 
                             </li>
 
                             <li class="index-item property private">
-                                <a href="#property__handlingRecursiveGroupedCallbacks">_handlingRecursiveGroupedCallbacks</a>
+                                <a href="#property__lastObjectAdded">_lastObjectAdded</a>
 
-
-                                    <span class="flag static">static</span>
 
 
                             </li>
 
                             <li class="index-item property private">
-                                <a href="#property__initialized">_initialized</a>
+                                <a href="#property__lastObjectRemoved">_lastObjectRemoved</a>
 
-
-                                    <span class="flag static">static</span>
 
 
                             </li>
 
-                            <li class="index-item property private">
+                            <li class="index-item property private inherited">
                                 <a href="#property__lastTriggerStackTrace">_lastTriggerStackTrace</a>
 
 
 
                             </li>
 
-                            <li class="index-item property private">
+                            <li class="index-item property private inherited">
                                 <a href="#property__linkableObject">_linkableObject</a>
 
 
 
                             </li>
 
-                            <li class="index-item property private">
+                            <li class="index-item property private inherited">
                                 <a href="#property__oldEntries">_oldEntries</a>
 
 
 
                             </li>
 
-                            <li class="index-item property protected">
+                            <li class="index-item property protected inherited">
                                 <a href="#property__precallback">_precallback</a>
 
 
 
                             </li>
 
-                            <li class="index-item property private">
+                            <li class="index-item property private inherited">
                                 <a href="#property__runCallbacksCompleted">_runCallbacksCompleted</a>
 
 
 
                             </li>
 
-                            <li class="index-item property private">
+                            <li class="index-item property private inherited inherited">
                                 <a href="#property__runCallbacksIsPending">_runCallbacksIsPending</a>
 
 
@@ -482,50 +420,41 @@ function will not be called before grouped callbacks.</p>
                             </li>
 
                             <li class="index-item property private">
-                                <a href="#property__runCallbacksIsPending">_runCallbacksIsPending</a>
+                                <a href="#property__verifier">_verifier</a>
 
 
 
                             </li>
 
-                            <li class="index-item property private">
-                                <a href="#property__triggeredEntries">_triggeredEntries</a>
-
-
-                                    <span class="flag static">static</span>
-
-
-                            </li>
-
-                            <li class="index-item property private">
+                            <li class="index-item property private inherited">
                                 <a href="#property__wasDisposed">_wasDisposed</a>
 
 
 
                             </li>
 
-                            <li class="index-item property public">
+                            <li class="index-item property public inherited">
                                 <a href="#property_addCallback_stackTrace">addCallback_stackTrace</a>
 
 
 
                             </li>
 
-                            <li class="index-item property public">
+                            <li class="index-item property public inherited">
                                 <a href="#property_callback">callback</a>
 
 
 
                             </li>
 
-                            <li class="index-item property public">
+                            <li class="index-item property public inherited">
                                 <a href="#property_callbacksAreDelayed">callbacksAreDelayed</a>
 
 
 
                             </li>
 
-                            <li class="index-item property public">
+                            <li class="index-item property public inherited">
                                 <a href="#property_context">context</a>
 
 
@@ -533,84 +462,76 @@ function will not be called before grouped callbacks.</p>
                             </li>
 
                             <li class="index-item property public">
-                                <a href="#property_DEFAULT_TRIGGER_COUNT">DEFAULT_TRIGGER_COUNT</a>
+                                <a href="#property_lastNameAdded">lastNameAdded</a>
 
-
-                                    <span class="flag static">static</span>
 
 
                             </li>
 
                             <li class="index-item property public">
+                                <a href="#property_lastNameRemoved">lastNameRemoved</a>
+
+
+
+                            </li>
+
+                            <li class="index-item property public">
+                                <a href="#property_lastObjectAdded">lastObjectAdded</a>
+
+
+
+                            </li>
+
+                            <li class="index-item property public">
+                                <a href="#property_lastObjectRemoved">lastObjectRemoved</a>
+
+
+
+                            </li>
+
+                            <li class="index-item property public inherited">
                                 <a href="#property_recursionCount">recursionCount</a>
 
 
 
                             </li>
 
-                            <li class="index-item property public">
+                            <li class="index-item property public inherited">
                                 <a href="#property_removeCallback_stackTrace">removeCallback_stackTrace</a>
 
 
 
                             </li>
 
-                            <li class="index-item property public">
+                            <li class="index-item property public inherited">
                                 <a href="#property_schedule">schedule</a>
 
 
 
                             </li>
 
-                            <li class="index-item property private">
-                                <a href="#property_STACK_TRACE_ADD">STACK_TRACE_ADD</a>
-
-
-                                    <span class="flag static">static</span>
-
-
-                            </li>
-
-                            <li class="index-item property private">
-                                <a href="#property_STACK_TRACE_REMOVE">STACK_TRACE_REMOVE</a>
-
-
-                                    <span class="flag static">static</span>
-
-
-                            </li>
-
-                            <li class="index-item property private">
-                                <a href="#property_STACK_TRACE_TRIGGER">STACK_TRACE_TRIGGER</a>
-
-
-                                    <span class="flag static">static</span>
-
-
-                            </li>
-
-                            <li class="index-item property public">
+                            <li class="index-item property public inherited">
                                 <a href="#property_triggerCounter">triggerCounter</a>
 
 
 
                             </li>
 
-                            <li class="index-item property public">
+                            <li class="index-item property public inherited">
                                 <a href="#property_triggered">triggered</a>
 
 
 
                             </li>
 
-                            <li class="index-item property public">
+                            <li class="index-item property public inherited">
                                 <a href="#property_triggeredAgain">triggeredAgain</a>
 
 
 
                             </li>
 
-                            <li class="index-item property public">
+                            <li class="index-item property public inherited">
                                 <a href="#property_wasDisposed">wasDisposed</a>
 
 
@@ -631,66 +552,7 @@ function will not be called before grouped callbacks.</p>
                 <h2 class="off-left">Methods</h2>
 
 
-                    <div id="method__handleGroupedCallbacks" class="method item private">
-    <h3 class="name"><code>_handleGroupedCallbacks</code></h3>
-
-
-        <span class="paren">()</span>
-
-
-
-
-
-
-
-        <span class="flag private">private</span>
-
-
-
-
-
-        <span class="flag static">static</span>
-
-
-
-
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l690"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:690</code></a>
-
-        </p>
-
-
-
-
-
-    </div>
-
-    <div class="description">
-        <p>This function gets called once per frame and allows grouped callbacks to run.</p>
-
-    </div>
-
-
-
-
-
-
-</div>
-
-
-                    <div id="method__runCallbacksImmediately" class="method item protected">
+                    <div id="method__runCallbacksImmediately" class="method item protected inherited">
     <h3 class="name"><code>_runCallbacksImmediately</code></h3>
 
 
@@ -728,11 +590,8 @@ function will not be called before grouped callbacks.</p>
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#method__runCallbacksImmediately">CallbackCollection</a>:
 
 
 
@@ -784,7 +643,143 @@ The preCallback function will be called with the specified preCallbackParams arg
 </div>
 
 
-                    <div id="method_addDisposeCallback" class="method item">
+                    <div id="method__setCallbackVariables" class="method item private">
+    <h3 class="name"><code>_setCallbackVariables</code></h3>
+
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+
+                <li class="arg">
+
+                        <code>name</code>
+
+                </li>
+
+                <li class="arg">
+
+                        <code>objectAdded</code>
+
+                </li>
+
+                <li class="arg">
+
+                        <code>objectRemoved</code>
+
+                </li>
+
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+
+
+
+
+
+    <div class="meta">
+
+
+
+                <p>
+
+                Defined in
+
+
+
+
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l116"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:116</code></a>
+
+        </p>
+
+
+
+
+
+    </div>
+
+    <div class="description">
+        <p>This function will set the list callback variables:
+    lastNameAdded, lastObjectAdded, lastNameRemoved, lastObjectRemoved, childListChanged</p>
+
+    </div>
+
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+
+                <li class="param">
+
+                        <code class="param-name">name</code>
+                        <span class="type">String</span>
+
+
+
+
+                    <div class="param-description">
+                        <p>This is the name of the object that was just added or removed from the hash map.</p>
+
+                    </div>
+
+
+                </li>
+
+                <li class="param">
+
+                        <code class="param-name">objectAdded</code>
+                        <span class="type"><a href="../classes/ILinkableObject.html" class="crosslink">ILinkableObject</a></span>
+
+
+
+
+                    <div class="param-description">
+                        <p>This is the object that was just added to the hash map.</p>
+
+                    </div>
+
+
+                </li>
+
+                <li class="param">
+
+                        <code class="param-name">objectRemoved</code>
+                        <span class="type"><a href="../classes/ILinkableObject.html" class="crosslink">ILinkableObject</a></span>
+
+
+
+
+                    <div class="param-description">
+                        <p>This is the object that was just removed from the hash map.</p>
+
+                    </div>
+
+
+                </li>
+
+            </ul>
+        </div>
+
+
+
+
+
+</div>
+
+
+                    <div id="method_addDisposeCallback" class="method item inherited">
     <h3 class="name"><code>addDisposeCallback</code></h3>
 
 
@@ -824,11 +819,8 @@ The preCallback function will be called with the specified preCallbackParams arg
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#method_addDisposeCallback">CallbackCollection</a>:
 
 
 
@@ -895,159 +887,7 @@ The preCallback function will be called with the specified preCallbackParams arg
 </div>
 
 
-                    <div id="method_addGroupedCallback" class="method item">
-    <h3 class="name"><code>addGroupedCallback</code></h3>
-
-
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-
-                <li class="arg">
-
-                        <code>callbackCollection</code>
-
-                </li>
-
-                <li class="arg">
-
-                        <code>relevantContext</code>
-
-                </li>
-
-                <li class="arg">
-
-                        <code>groupedCallback</code>
-
-                </li>
-
-                <li class="arg">
-
-                        <code>triggerCallbackNow</code>
-
-                </li>
-
-            </ul><span class="paren">)</span>
-        </div>
-
-
-
-
-
-
-
-
-
-
-
-        <span class="flag static">static</span>
-
-
-
-
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l643"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:643</code></a>
-
-        </p>
-
-
-
-
-
-    </div>
-
-    <div class="description">
-
-    </div>
-
-
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-
-                <li class="param">
-
-                        <code class="param-name">callbackCollection</code>
-                        <span class="type"><a href="../classes/CallbackCollection.html" class="crosslink">CallbackCollection</a></span>
-
-
-
-
-                    <div class="param-description">
-
-                    </div>
-
-
-                </li>
-
-                <li class="param">
-
-                        <code class="param-name">relevantContext</code>
-                        <span class="type">Object</span>
-
-
-
-
-                    <div class="param-description">
-
-                    </div>
-
-
-                </li>
-
-                <li class="param">
-
-                        <code class="param-name">groupedCallback</code>
-                        <span class="type">Function</span>
-
-
-
-
-                    <div class="param-description">
-
-                    </div>
-
-
-                </li>
-
-                <li class="param">
-
-                        <code class="param-name">triggerCallbackNow</code>
-                        <span class="type">Boolean</span>
-
-
-
-
-                    <div class="param-description">
-
-                    </div>
-
-
-                </li>
-
-            </ul>
-        </div>
-
-
-
-
-
-</div>
-
-
-                    <div id="method_addGroupedCallback" class="method item">
+                    <div id="method_addGroupedCallback" class="method item inherited">
     <h3 class="name"><code>addGroupedCallback</code></h3>
 
 
@@ -1093,11 +933,8 @@ The preCallback function will be called with the specified preCallbackParams arg
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#method_addGroupedCallback">CallbackCollection</a>:
 
 
 
@@ -1184,7 +1021,7 @@ same ICallbackCollection.  The callback function will not be called recursively 
 </div>
 
 
-                    <div id="method_addImmediateCallback" class="method item">
+                    <div id="method_addImmediateCallback" class="method item inherited">
     <h3 class="name"><code>addImmediateCallback</code></h3>
 
 
@@ -1236,11 +1073,8 @@ same ICallbackCollection.  The callback function will not be called recursively 
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#method_addImmediateCallback">CallbackCollection</a>:
 
 
 
@@ -1340,7 +1174,7 @@ The callback function will not be called recursively as a result of it triggerin
 </div>
 
 
-                    <div id="method_delayCallbacks" class="method item">
+                    <div id="method_delayCallbacks" class="method item inherited">
     <h3 class="name"><code>delayCallbacks</code></h3>
 
 
@@ -1364,11 +1198,8 @@ The callback function will not be called recursively as a result of it triggerin
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#method_delayCallbacks">CallbackCollection</a>:
 
 
 
@@ -1396,7 +1227,7 @@ As long as the delay count is greater than zero, effects of triggerCallbacks() w
 </div>
 
 
-                    <div id="method_dispose" class="method item">
+                    <div id="method_dispose" class="method item inherited">
     <h3 class="name"><code>dispose</code></h3>
 
 
@@ -1419,67 +1250,12 @@ As long as the delay count is greater than zero, effects of triggerCallbacks() w
 
     <div class="meta">
 
+            <p>Inherited from
+            <a href="../classes/CallbackCollection.html#method_dispose">
+                CallbackCollection
+            </a>
 
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l534"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:534</code></a>
-
-        </p>
-
-
-
-
-
-    </div>
-
-    <div class="description">
-        <p>Call this when the callback entry is no longer needed.</p>
-
-    </div>
-
-
-
-
-
-
-</div>
-
-
-                    <div id="method_dispose" class="method item">
-    <h3 class="name"><code>dispose</code></h3>
-
-
-        <span class="paren">()</span>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
+            but overwritten in
 
 
 
@@ -1507,7 +1283,7 @@ Use disposeObject() instead so parent-child relationships get cleaned up automat
 </div>
 
 
-                    <div id="method_handleGroupedCallback" class="method item">
+                    <div id="method_handleGroupedCallback" class="method item inherited">
     <h3 class="name"><code>handleGroupedCallback</code></h3>
 
 
@@ -1531,11 +1307,8 @@ Use disposeObject() instead so parent-child relationships get cleaned up automat
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#method_handleGroupedCallback">CallbackCollection</a>:
 
 
 
@@ -1562,7 +1335,7 @@ Use disposeObject() instead so parent-child relationships get cleaned up automat
 </div>
 
 
-                    <div id="method_removeCallback" class="method item">
+                    <div id="method_removeCallback" class="method item inherited">
     <h3 class="name"><code>removeCallback</code></h3>
 
 
@@ -1596,11 +1369,8 @@ Use disposeObject() instead so parent-child relationships get cleaned up automat
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#method_removeCallback">CallbackCollection</a>:
 
 
 
@@ -1651,117 +1421,7 @@ Use disposeObject() instead so parent-child relationships get cleaned up automat
 </div>
 
 
-                    <div id="method_removeGroupedCallback" class="method item">
-    <h3 class="name"><code>removeGroupedCallback</code></h3>
-
-
-        <div class="args">
-            <span class="paren">(</span><ul class="args-list inline commas">
-
-                <li class="arg">
-
-                        <code>callbackCollection</code>
-
-                </li>
-
-                <li class="arg">
-
-                        <code>groupedCallback</code>
-
-                </li>
-
-            </ul><span class="paren">)</span>
-        </div>
-
-
-
-
-
-
-
-
-
-
-
-        <span class="flag static">static</span>
-
-
-
-
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l677"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:677</code></a>
-
-        </p>
-
-
-
-
-
-    </div>
-
-    <div class="description">
-
-    </div>
-
-
-        <div class="params">
-            <h4>Parameters:</h4>
-
-            <ul class="params-list">
-
-                <li class="param">
-
-                        <code class="param-name">callbackCollection</code>
-                        <span class="type"><a href="../classes/CallbackCollection.html" class="crosslink">CallbackCollection</a></span>
-
-
-
-
-                    <div class="param-description">
-
-                    </div>
-
-
-                </li>
-
-                <li class="param">
-
-                        <code class="param-name">groupedCallback</code>
-                        <span class="type">Function</span>
-
-
-
-
-                    <div class="param-description">
-
-                    </div>
-
-
-                </li>
-
-            </ul>
-        </div>
-
-
-
-
-
-</div>
-
-
-                    <div id="method_resumeCallbacks" class="method item">
+                    <div id="method_resumeCallbacks" class="method item inherited">
     <h3 class="name"><code>resumeCallbacks</code></h3>
 
 
@@ -1785,11 +1445,8 @@ Use disposeObject() instead so parent-child relationships get cleaned up automat
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#method_resumeCallbacks">CallbackCollection</a>:
 
 
 
@@ -1817,11 +1474,33 @@ If triggerCallbacks() was called while the delay count was greater than zero, im
 </div>
 
 
-                    <div id="method_trigger" class="method item">
-    <h3 class="name"><code>trigger</code></h3>
+                    <div id="method_runCallbacks" class="method item">
+    <h3 class="name"><code>runCallbacks</code></h3>
 
 
-        <span class="paren">()</span>
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+
+                <li class="arg">
+
+                        <code>name</code>
+
+                </li>
+
+                <li class="arg">
+
+                        <code>objectAdded</code>
+
+                </li>
+
+                <li class="arg">
+
+                        <code>objectRemoved</code>
+
+                </li>
+
+            </ul><span class="paren">)</span>
+        </div>
 
 
 
@@ -1846,6 +1525,111 @@ If triggerCallbacks() was called while the delay count was greater than zero, im
 
                 Defined in
 
+
+
+
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l132"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:132</code></a>
+
+        </p>
+
+
+
+
+
+    </div>
+
+    <div class="description">
+        <p>This function will run callbacks immediately, setting the list callback variables before each one.</p>
+
+    </div>
+
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+
+                <li class="param">
+
+                        <code class="param-name">name</code>
+                        <span class="type">String</span>
+
+
+
+
+                    <div class="param-description">
+
+                    </div>
+
+
+                </li>
+
+                <li class="param">
+
+                        <code class="param-name">objectAdded</code>
+                        <span class="type"><a href="../classes/ILinkableObject.html" class="crosslink">ILinkableObject</a></span>
+
+
+
+
+                    <div class="param-description">
+
+                    </div>
+
+
+                </li>
+
+                <li class="param">
+
+                        <code class="param-name">objectRemoved</code>
+                        <span class="type"><a href="../classes/ILinkableObject.html" class="crosslink">ILinkableObject</a></span>
+
+
+
+
+                    <div class="param-description">
+
+                    </div>
+
+
+                </li>
+
+            </ul>
+        </div>
+
+
+
+
+
+</div>
+
+
+                    <div id="method_trigger" class="method item inherited">
+    <h3 class="name"><code>trigger</code></h3>
+
+
+        <span class="paren">()</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="meta">
+
+
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#method_trigger">CallbackCollection</a>:
 
 
 
@@ -1873,7 +1657,7 @@ This also takes care of preventing recursion.</p>
 </div>
 
 
-                    <div id="method_triggerCallbacks" class="method item">
+                    <div id="method_triggerCallbacks" class="method item inherited">
     <h3 class="name"><code>triggerCallbacks</code></h3>
 
 
@@ -1897,11 +1681,8 @@ This also takes care of preventing recursion.</p>
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#method_triggerCallbacks">CallbackCollection</a>:
 
 
 
@@ -1937,7 +1718,7 @@ If the delay count is greater than zero, the callbacks will not be called immedi
                 <h2 class="off-left">Properties</h2>
 
 
-                    <div id="property__callbackEntries" class="property item private">
+                    <div id="property__callbackEntries" class="property item private inherited">
     <h3 class="name"><code>_callbackEntries</code></h3>
     <span class="type">Array</span>
 
@@ -1954,11 +1735,8 @@ If the delay count is greater than zero, the callbacks will not be called immedi
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property__callbackEntries">CallbackCollection</a>:
 
 
 
@@ -1984,7 +1762,7 @@ If the delay count is greater than zero, the callbacks will not be called immedi
 </div>
 
 
-                    <div id="property__delayCount" class="property item private">
+                    <div id="property__delayCount" class="property item private inherited">
     <h3 class="name"><code>_delayCount</code></h3>
     <span class="type">Number</span>
 
@@ -2001,11 +1779,8 @@ If the delay count is greater than zero, the callbacks will not be called immedi
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property__delayCount">CallbackCollection</a>:
 
 
 
@@ -2034,7 +1809,7 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
 </div>
 
 
-                    <div id="property__disposeCallbackEntries" class="property item private">
+                    <div id="property__disposeCallbackEntries" class="property item private inherited">
     <h3 class="name"><code>_disposeCallbackEntries</code></h3>
     <span class="type">Array</span>
 
@@ -2051,11 +1826,8 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property__disposeCallbackEntries">CallbackCollection</a>:
 
 
 
@@ -2081,210 +1853,8 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
 </div>
 
 
-                    <div id="property__entryLookup" class="property item private">
-    <h3 class="name"><code>_entryLookup</code></h3>
-    <span class="type">Map</span>
-
-
-
-
-        <span class="flag private">private</span>
-
-
-
-
-
-        <span class="flag static">static</span>
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l617"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:617</code></a>
-
-        </p>
-
-
-
-
-    </div>
-
-    <div class="description">
-        <p>This maps a groupedCallback function to its corresponding GroupedCallbackEntry.</p>
-
-    </div>
-
-
-
-
-
-
-</div>
-
-
-                    <div id="property__handlingGroupedCallbacks" class="property item private">
-    <h3 class="name"><code>_handlingGroupedCallbacks</code></h3>
-    <span class="type">Boolean</span>
-
-
-
-
-        <span class="flag private">private</span>
-
-
-
-
-
-        <span class="flag static">static</span>
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l587"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:587</code></a>
-
-        </p>
-
-
-
-
-    </div>
-
-    <div class="description">
-        <p>True while handling grouped callbacks.</p>
-
-    </div>
-
-
-        <p><strong>Default:</strong> false</p>
-
-
-
-
-
-</div>
-
-
-                    <div id="property__handlingRecursiveGroupedCallbacks" class="property item private">
-    <h3 class="name"><code>_handlingRecursiveGroupedCallbacks</code></h3>
-    <span class="type">Boolean</span>
-
-
-
-
-        <span class="flag private">private</span>
-
-
-
-
-
-        <span class="flag static">static</span>
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l597"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:597</code></a>
-
-        </p>
-
-
-
-
-    </div>
-
-    <div class="description">
-        <p>True while handling grouped callbacks called recursively from other grouped callbacks.</p>
-
-    </div>
-
-
-        <p><strong>Default:</strong> false</p>
-
-
-
-
-
-</div>
-
-
-                    <div id="property__initialized" class="property item private">
-    <h3 class="name"><code>_initialized</code></h3>
-    <span class="type">Boolean</span>
-
-
-
-
-        <span class="flag private">private</span>
-
-
-
-
-
-        <span class="flag static">static</span>
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l607"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:607</code></a>
-
-        </p>
-
-
-
-
-    </div>
-
-    <div class="description">
-        <p>This gets set to true when the static _handleGroupedCallbacks() callback has been added as a frame listener.</p>
-
-    </div>
-
-
-        <p><strong>Default:</strong> false</p>
-
-
-
-
-
-</div>
-
-
-                    <div id="property__lastTriggerStackTrace" class="property item private">
-    <h3 class="name"><code>_lastTriggerStackTrace</code></h3>
+                    <div id="property__lastNameAdded" class="property item private">
+    <h3 class="name"><code>_lastNameAdded</code></h3>
     <span class="type">String</span>
 
 
@@ -2305,6 +1875,199 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
 
                 Defined in
 
+
+
+
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l25"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:25</code></a>
+
+        </p>
+
+
+
+
+    </div>
+
+    <div class="description">
+        <p>returned by public getter</p>
+
+    </div>
+
+
+        <p><strong>Default:</strong> null</p>
+
+
+
+
+
+</div>
+
+
+                    <div id="property__lastNameRemoved" class="property item private">
+    <h3 class="name"><code>_lastNameRemoved</code></h3>
+    <span class="type">String</span>
+
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+
+    <div class="meta">
+
+
+
+                <p>
+
+                Defined in
+
+
+
+
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l41"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:41</code></a>
+
+        </p>
+
+
+
+
+    </div>
+
+    <div class="description">
+        <p>returned by public getter</p>
+
+    </div>
+
+
+        <p><strong>Default:</strong> null</p>
+
+
+
+
+
+</div>
+
+
+                    <div id="property__lastObjectAdded" class="property item private">
+    <h3 class="name"><code>_lastObjectAdded</code></h3>
+    <span class="type"><a href="../classes/ILinkableObject.html" class="crosslink">ILinkableObject</a></span>
+
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+
+    <div class="meta">
+
+
+
+                <p>
+
+                Defined in
+
+
+
+
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l33"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:33</code></a>
+
+        </p>
+
+
+
+
+    </div>
+
+    <div class="description">
+        <p>returned by public getter</p>
+
+    </div>
+
+
+        <p><strong>Default:</strong> null</p>
+
+
+
+
+
+</div>
+
+
+                    <div id="property__lastObjectRemoved" class="property item private">
+    <h3 class="name"><code>_lastObjectRemoved</code></h3>
+    <span class="type"><a href="../classes/ILinkableObject.html" class="crosslink">ILinkableObject</a></span>
+
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+
+    <div class="meta">
+
+
+
+                <p>
+
+                Defined in
+
+
+
+
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l49"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:49</code></a>
+
+        </p>
+
+
+
+
+    </div>
+
+    <div class="description">
+        <p>returned by public getter</p>
+
+    </div>
+
+
+        <p><strong>Default:</strong> null</p>
+
+
+
+
+
+</div>
+
+
+                    <div id="property__lastTriggerStackTrace" class="property item private inherited">
+    <h3 class="name"><code>_lastTriggerStackTrace</code></h3>
+    <span class="type">String</span>
+
+
+
+
+        <span class="flag private">private</span>
+
+
+
+
+
+
+    <div class="meta">
+
+
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property__lastTriggerStackTrace">CallbackCollection</a>:
 
 
 
@@ -2330,7 +2093,7 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
 </div>
 
 
-                    <div id="property__linkableObject" class="property item private">
+                    <div id="property__linkableObject" class="property item private inherited">
     <h3 class="name"><code>_linkableObject</code></h3>
     <span class="type"><a href="../classes/ILinkableObject.html" class="crosslink">ILinkableObject</a></span>
 
@@ -2347,11 +2110,8 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property__linkableObject">CallbackCollection</a>:
 
 
 
@@ -2377,7 +2137,7 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
 </div>
 
 
-                    <div id="property__oldEntries" class="property item private">
+                    <div id="property__oldEntries" class="property item private inherited">
     <h3 class="name"><code>_oldEntries</code></h3>
     <span class="type">Array</span>
 
@@ -2394,11 +2154,8 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property__oldEntries">CallbackCollection</a>:
 
 
 
@@ -2423,7 +2180,7 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
 </div>
 
 
-                    <div id="property__precallback" class="property item protected">
+                    <div id="property__precallback" class="property item protected inherited">
     <h3 class="name"><code>_precallback</code></h3>
     <span class="type">Function</span>
 
@@ -2440,11 +2197,8 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property__precallback">CallbackCollection</a>:
 
 
 
@@ -2470,7 +2224,7 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
 </div>
 
 
-                    <div id="property__runCallbacksCompleted" class="property item private">
+                    <div id="property__runCallbacksCompleted" class="property item private inherited">
     <h3 class="name"><code>_runCallbacksCompleted</code></h3>
     <span class="type">Boolean</span>
 
@@ -2487,11 +2241,8 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property__runCallbacksCompleted">CallbackCollection</a>:
 
 
 
@@ -2517,7 +2268,7 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
 </div>
 
 
-                    <div id="property__runCallbacksIsPending" class="property item private">
+                    <div id="property__runCallbacksIsPending" class="property item private inherited">
     <h3 class="name"><code>_runCallbacksIsPending</code></h3>
     <span class="type">Boolean</span>
 
@@ -2533,62 +2284,12 @@ While this is greater than zero, effects of triggerCallbacks() will be delayed.<
 
     <div class="meta">
 
+            <p>Inherited from
+            <a href="../classes/CallbackCollection.html#property__runCallbacksIsPending">
+                CallbackCollection
+            </a>
 
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l104"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:104</code></a>
-
-        </p>
-
-
-
-
-    </div>
-
-    <div class="description">
-        <p>This value keeps track of how many times callbacks were triggered, and is returned by the public triggerCounter accessor function.
-The value starts at 1 to simplify code that compares the counter to a previous value.
-This allows the previous value to be set to zero so change will be detected the first time the counter is compared.
-This fixes potential bugs where the base case of zero is not considered.</p>
-
-    </div>
-
-
-
-
-
-
-</div>
-
-
-                    <div id="property__runCallbacksIsPending" class="property item private">
-    <h3 class="name"><code>_runCallbacksIsPending</code></h3>
-    <span class="type">Boolean</span>
-
-
-
-
-        <span class="flag private">private</span>
-
-
-
-
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
+            but overwritten in
 
 
 
@@ -2614,9 +2315,9 @@ This fixes potential bugs where the base case of zero is not considered.</p>
 </div>
 
 
-                    <div id="property__triggeredEntries" class="property item private">
-    <h3 class="name"><code>_triggeredEntries</code></h3>
-    <span class="type">Array</span>
+                    <div id="property__verifier" class="property item private">
+    <h3 class="name"><code>_verifier</code></h3>
+    <span class="type">Function</span>
 
 
 
@@ -2626,8 +2327,6 @@ This fixes potential bugs where the base case of zero is not considered.</p>
 
 
 
-
-        <span class="flag static">static</span>
 
 
     <div class="meta">
@@ -2641,7 +2340,7 @@ This fixes potential bugs where the base case of zero is not considered.</p>
 
 
 
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l629"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:629</code></a>
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_LinkableVariable.js.html#l29"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;LinkableVariable.js:29</code></a>
 
         </p>
 
@@ -2651,7 +2350,8 @@ This fixes potential bugs where the base case of zero is not considered.</p>
     </div>
 
     <div class="description">
-        <p>This is a list of GroupedCallbackEntry objects in the order they were triggered.</p>
+        <p>This function is used to prevent the session state from having unwanted values.
+Function signature should be  function(value:*):Boolean</p>
 
     </div>
 
@@ -2663,7 +2363,7 @@ This fixes potential bugs where the base case of zero is not considered.</p>
 </div>
 
 
-                    <div id="property__wasDisposed" class="property item private">
+                    <div id="property__wasDisposed" class="property item private inherited">
     <h3 class="name"><code>_wasDisposed</code></h3>
     <span class="type">Boolean</span>
 
@@ -2680,11 +2380,8 @@ This fixes potential bugs where the base case of zero is not considered.</p>
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property__wasDisposed">CallbackCollection</a>:
 
 
 
@@ -2712,7 +2409,7 @@ This fixes potential bugs where the base case of zero is not considered.</p>
 </div>
 
 
-                    <div id="property_addCallback_stackTrace" class="property item public">
+                    <div id="property_addCallback_stackTrace" class="property item public inherited">
     <h3 class="name"><code>addCallback_stackTrace</code></h3>
     <span class="type">String</span>
 
@@ -2729,11 +2426,8 @@ This fixes potential bugs where the base case of zero is not considered.</p>
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property_addCallback_stackTrace">CallbackCollection</a>:
 
 
 
@@ -2759,7 +2453,7 @@ This fixes potential bugs where the base case of zero is not considered.</p>
 </div>
 
 
-                    <div id="property_callback" class="property item public">
+                    <div id="property_callback" class="property item public inherited">
     <h3 class="name"><code>callback</code></h3>
     <span class="type">Function</span>
 
@@ -2776,11 +2470,8 @@ This fixes potential bugs where the base case of zero is not considered.</p>
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property_callback">CallbackCollection</a>:
 
 
 
@@ -2806,7 +2497,7 @@ This fixes potential bugs where the base case of zero is not considered.</p>
 </div>
 
 
-                    <div id="property_callbacksAreDelayed" class="property item public">
+                    <div id="property_callbacksAreDelayed" class="property item public inherited">
     <h3 class="name"><code>callbacksAreDelayed</code></h3>
     <span class="type">Boolean</span>
 
@@ -2823,11 +2514,8 @@ This fixes potential bugs where the base case of zero is not considered.</p>
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property_callbacksAreDelayed">CallbackCollection</a>:
 
 
 
@@ -2854,7 +2542,7 @@ triggerCallbacks() are delayed until resumeCallbacks() is called to reduce the d
 </div>
 
 
-                    <div id="property_context" class="property item public">
+                    <div id="property_context" class="property item public inherited">
     <h3 class="name"><code>context</code></h3>
     <span class="type">Object</span>
 
@@ -2871,11 +2559,8 @@ triggerCallbacks() are delayed until resumeCallbacks() is called to reduce the d
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property_context">CallbackCollection</a>:
 
 
 
@@ -2902,9 +2587,9 @@ When the context is disposed, the callback should not be called anymore.</p>
 </div>
 
 
-                    <div id="property_DEFAULT_TRIGGER_COUNT" class="property item public">
-    <h3 class="name"><code>DEFAULT_TRIGGER_COUNT</code></h3>
-    <span class="type">Number</span>
+                    <div id="property_lastNameAdded" class="property item public">
+    <h3 class="name"><code>lastNameAdded</code></h3>
+    <span class="type">String</span>
 
 
 
@@ -2914,8 +2599,6 @@ When the context is disposed, the callback should not be called anymore.</p>
 
 
 
-
-        <span class="flag static">static</span>
 
 
     <div class="meta">
@@ -2929,7 +2612,7 @@ When the context is disposed, the callback should not be called anymore.</p>
 
 
 
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l14"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:14</code></a>
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l58"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:58</code></a>
 
         </p>
 
@@ -2939,12 +2622,10 @@ When the context is disposed, the callback should not be called anymore.</p>
     </div>
 
     <div class="description">
-        <p>The name of the property containing the name assigned to the object when the session state is generated.</p>
+        <p>This is the name of the object that was added prior to running callbacks.</p>
 
     </div>
 
-
-        <p><strong>Default:</strong> 1</p>
 
 
 
@@ -2953,7 +2634,148 @@ When the context is disposed, the callback should not be called anymore.</p>
 </div>
 
 
-                    <div id="property_recursionCount" class="property item public">
+                    <div id="property_lastNameRemoved" class="property item public">
+    <h3 class="name"><code>lastNameRemoved</code></h3>
+    <span class="type">String</span>
+
+
+
+
+        <span class="flag public">public</span>
+
+
+
+
+
+
+    <div class="meta">
+
+
+
+                <p>
+
+                Defined in
+
+
+
+
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l84"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:84</code></a>
+
+        </p>
+
+
+
+
+    </div>
+
+    <div class="description">
+        <p>This is the name of the object that was removed prior to running callbacks.</p>
+
+    </div>
+
+
+
+
+
+
+</div>
+
+
+                    <div id="property_lastObjectAdded" class="property item public">
+    <h3 class="name"><code>lastObjectAdded</code></h3>
+    <span class="type"><a href="../classes/ILinkableObject.html" class="crosslink">ILinkableObject</a></span>
+
+
+
+
+        <span class="flag public">public</span>
+
+
+
+
+
+
+    <div class="meta">
+
+
+
+                <p>
+
+                Defined in
+
+
+
+
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l71"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:71</code></a>
+
+        </p>
+
+
+
+
+    </div>
+
+    <div class="description">
+        <p>This is the object that was added prior to running callbacks.</p>
+
+    </div>
+
+
+
+
+
+
+</div>
+
+
+                    <div id="property_lastObjectRemoved" class="property item public">
+    <h3 class="name"><code>lastObjectRemoved</code></h3>
+    <span class="type"><a href="../classes/ILinkableObject.html" class="crosslink">ILinkableObject</a></span>
+
+
+
+
+        <span class="flag public">public</span>
+
+
+
+
+
+
+    <div class="meta">
+
+
+
+                <p>
+
+                Defined in
+
+
+
+
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ChildListCallbackInterface.js.html#l97"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ChildListCallbackInterface.js:97</code></a>
+
+        </p>
+
+
+
+
+    </div>
+
+    <div class="description">
+        <p>This is the object that was removed prior to running callbacks.</p>
+
+    </div>
+
+
+
+
+
+
+</div>
+
+
+                    <div id="property_recursionCount" class="property item public inherited">
     <h3 class="name"><code>recursionCount</code></h3>
     <span class="type">Number</span>
 
@@ -2970,11 +2792,8 @@ When the context is disposed, the callback should not be called anymore.</p>
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property_recursionCount">CallbackCollection</a>:
 
 
 
@@ -3001,7 +2820,7 @@ If this is greater than zero, it means the function is currently running.</p>
 </div>
 
 
-                    <div id="property_removeCallback_stackTrace" class="property item public">
+                    <div id="property_removeCallback_stackTrace" class="property item public inherited">
     <h3 class="name"><code>removeCallback_stackTrace</code></h3>
     <span class="type">String</span>
 
@@ -3018,11 +2837,8 @@ If this is greater than zero, it means the function is currently running.</p>
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property_removeCallback_stackTrace">CallbackCollection</a>:
 
 
 
@@ -3048,7 +2864,7 @@ If this is greater than zero, it means the function is currently running.</p>
 </div>
 
 
-                    <div id="property_schedule" class="property item public">
+                    <div id="property_schedule" class="property item public inherited">
     <h3 class="name"><code>schedule</code></h3>
     <span class="type">Number</span>
 
@@ -3065,11 +2881,8 @@ If this is greater than zero, it means the function is currently running.</p>
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property_schedule">CallbackCollection</a>:
 
 
 
@@ -3095,160 +2908,7 @@ If this is greater than zero, it means the function is currently running.</p>
 </div>
 
 
-                    <div id="property_STACK_TRACE_ADD" class="property item private">
-    <h3 class="name"><code>STACK_TRACE_ADD</code></h3>
-    <span class="type">String</span>
-
-
-
-
-        <span class="flag private">private</span>
-
-
-
-
-
-        <span class="flag static">static</span>
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l509"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:509</code></a>
-
-        </p>
-
-
-
-
-    </div>
-
-    <div class="description">
-        <p>Internal Static const properties for Debugging</p>
-
-    </div>
-
-
-        <p><strong>Default:</strong> &quot;This is the stack trace from when the callback was added.&quot;</p>
-
-
-
-
-
-</div>
-
-
-                    <div id="property_STACK_TRACE_REMOVE" class="property item private">
-    <h3 class="name"><code>STACK_TRACE_REMOVE</code></h3>
-    <span class="type">String</span>
-
-
-
-
-        <span class="flag private">private</span>
-
-
-
-
-
-        <span class="flag static">static</span>
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l521"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:521</code></a>
-
-        </p>
-
-
-
-
-    </div>
-
-    <div class="description">
-        <p>Internal Static const properties for Debugging</p>
-
-    </div>
-
-
-        <p><strong>Default:</strong> &quot;This is the stack trace from when the callback was removed.&quot;</p>
-
-
-
-
-
-</div>
-
-
-                    <div id="property_STACK_TRACE_TRIGGER" class="property item private">
-    <h3 class="name"><code>STACK_TRACE_TRIGGER</code></h3>
-    <span class="type">String</span>
-
-
-
-
-        <span class="flag private">private</span>
-
-
-
-
-
-        <span class="flag static">static</span>
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_CallbackCollection.js.html#l497"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;CallbackCollection.js:497</code></a>
-
-        </p>
-
-
-
-
-    </div>
-
-    <div class="description">
-        <p>Internal Static const properties for Debugging</p>
-
-    </div>
-
-
-        <p><strong>Default:</strong> &quot;This is the stack trace from when the callbacks were last triggered.&quot;</p>
-
-
-
-
-
-</div>
-
-
-                    <div id="property_triggerCounter" class="property item public">
+                    <div id="property_triggerCounter" class="property item public inherited">
     <h3 class="name"><code>triggerCounter</code></h3>
     <span class="type">Number</span>
 
@@ -3265,11 +2925,8 @@ If this is greater than zero, it means the function is currently running.</p>
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property_triggerCounter">CallbackCollection</a>:
 
 
 
@@ -3296,7 +2953,7 @@ It is necessary in some situations to check this counter to determine if cached 
 </div>
 
 
-                    <div id="property_triggered" class="property item public">
+                    <div id="property_triggered" class="property item public inherited">
     <h3 class="name"><code>triggered</code></h3>
     <span class="type">Boolean</span>
 
@@ -3313,11 +2970,8 @@ It is necessary in some situations to check this counter to determine if cached 
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property_triggered">CallbackCollection</a>:
 
 
 
@@ -3345,7 +2999,7 @@ It is necessary in some situations to check this counter to determine if cached 
 </div>
 
 
-                    <div id="property_triggeredAgain" class="property item public">
+                    <div id="property_triggeredAgain" class="property item public inherited">
     <h3 class="name"><code>triggeredAgain</code></h3>
     <span class="type">Boolean</span>
 
@@ -3362,11 +3016,8 @@ It is necessary in some situations to check this counter to determine if cached 
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property_triggeredAgain">CallbackCollection</a>:
 
 
 
@@ -3394,7 +3045,7 @@ It is necessary in some situations to check this counter to determine if cached 
 </div>
 
 
-                    <div id="property_wasDisposed" class="property item public">
+                    <div id="property_wasDisposed" class="property item public inherited">
     <h3 class="name"><code>wasDisposed</code></h3>
     <span class="type">Boolean</span>
 
@@ -3411,11 +3062,8 @@ It is necessary in some situations to check this counter to determine if cached 
     <div class="meta">
 
 
-
-                <p>
-
-                Defined in
-
+                <p>Inherited from
+                <a href="../classes/CallbackCollection.html#property_wasDisposed">CallbackCollection</a>:
 
 
 
