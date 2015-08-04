@@ -71,6 +71,8 @@
 
             <ul id="api-modules" class="apis modules">
 
+                <li><a href="../modules/CreateJS.html">CreateJS</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -117,8 +119,11 @@
  */
 
 // namespace
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === &#x27;undefined&#x27;) {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 (function () {
     &quot;use strict&quot;;
@@ -389,7 +394,6 @@ if (!this.weavecore)
 			// a.getState(null): &quot;b value&quot;
 		*/
 }());
-
     </pre>
 </div>
 

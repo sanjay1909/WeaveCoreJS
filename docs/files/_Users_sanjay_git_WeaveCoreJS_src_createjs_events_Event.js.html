@@ -71,6 +71,8 @@
 
             <ul id="api-modules" class="apis modules">
 
+                <li><a href="../modules/CreateJS.html">CreateJS</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -148,12 +150,16 @@
  *
  *      myObject.addEventListener(&quot;change&quot;, createjs.proxy(myMethod, scope));
  *
- * @module weavecore
- * @main weavecore
+ * @module CreateJS
+ * @main CreateJS
  */
 
 // namespace:
-this.weavecore = this.weavecore || {};
+if (typeof window === &#x27;undefined&#x27;) {
+    this.createjs = this.createjs || {};
+} else {
+    window.createjs = window.createjs || {};
+}
 
 (function () {
     &quot;use strict&quot;;
@@ -374,7 +380,7 @@ this.weavecore = this.weavecore || {};
         return &quot;[Event (type=&quot; + this.type + &quot;)]&quot;;
     };
 
-    weavecore.Event = Event;
+    createjs.Event = Event;
 }());
     </pre>
 </div>

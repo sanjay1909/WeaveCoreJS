@@ -71,6 +71,8 @@
 
             <ul id="api-modules" class="apis modules">
 
+                <li><a href="../modules/CreateJS.html">CreateJS</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -112,9 +114,11 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-if (!this.weavecore)
-    this.weavecore = {};
-
+if (typeof window === &#x27;undefined&#x27;) {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 /**
  * LinkableVariable allows callbacks to be added that will be called when the value changes.
  * A LinkableVariable has an optional type restriction on the values it holds.
@@ -325,7 +329,6 @@ if (!this.weavecore)
     weavecore.LinkableVariable = LinkableVariable;
 
 }());
-
     </pre>
 </div>
 

@@ -34,12 +34,16 @@
  *
  *      myObject.addEventListener("change", createjs.proxy(myMethod, scope));
  *
- * @module weavecore
- * @main weavecore
+ * @module CreateJS
+ * @main CreateJS
  */
 
 // namespace:
-this.weavecore = this.weavecore || {};
+if (typeof window === 'undefined') {
+    this.createjs = this.createjs || {};
+} else {
+    window.createjs = window.createjs || {};
+}
 
 (function () {
     "use strict";
@@ -260,7 +264,7 @@ this.weavecore = this.weavecore || {};
         return "[Event (type=" + this.type + ")]";
     };
 
-    weavecore.Event = Event;
+    createjs.Event = Event;
 }());
 /*
  * EventDispatcher
@@ -291,11 +295,15 @@ this.weavecore = this.weavecore || {};
  */
 
 /**
- * @module weavecore
+ * @module CreateJS
  */
 
 // namespace:
-this.weavecore = this.weavecore || {};
+if (typeof window === 'undefined') {
+    this.createjs = this.createjs || {};
+} else {
+    window.createjs = window.createjs || {};
+}
 
 (function () {
     "use strict";
@@ -575,7 +583,7 @@ this.weavecore = this.weavecore || {};
      *      this.dispatchEvent("complete");
      *
      *      // Use an Event instance
-     *      var event = new weavecore.Event("progress");
+     *      var event = new createjs.Event("progress");
      *      this.dispatchEvent(event);
      *
      * @method dispatchEvent
@@ -591,7 +599,7 @@ this.weavecore = this.weavecore || {};
             if (!listeners || !listeners[eventObj]) {
                 return false;
             }
-            eventObj = new weavecore.Event(eventObj);
+            eventObj = new createjs.Event(eventObj);
         } else if (eventObj.target && eventObj.clone) {
             // redispatching an active event object, so clone it:
             eventObj = eventObj.clone();
@@ -704,7 +712,7 @@ this.weavecore = this.weavecore || {};
     };
 
 
-    weavecore.EventDispatcher = EventDispatcher;
+    createjs.EventDispatcher = EventDispatcher;
 }());
 /*
  * Ticker
@@ -735,11 +743,15 @@ this.weavecore = this.weavecore || {};
  */
 
 /**
- * @module weavecore
+ * @module CreateJS
  */
 
 // namespace:
-this.weavecore = this.weavecore || {};
+if (typeof window === 'undefined') {
+    this.createjs = this.createjs || {};
+} else {
+    window.createjs = window.createjs || {};
+}
 
 (function () {
     "use strict";
@@ -756,7 +768,7 @@ this.weavecore = this.weavecore || {};
      *
      * <h4>Example</h4>
      *
-     *      weavecore.Ticker.addEventListener("tick", handleTick);
+     *      createjs.Ticker.addEventListener("tick", handleTick);
      *      function handleTick(event) {
      *          // Actions carried out each tick (aka frame)
      *          if (!event.paused) {
@@ -828,7 +840,7 @@ this.weavecore = this.weavecore || {};
      *
      * <h4>Example</h4>
      *
-     *      weavecore.Ticker.addEventListener("tick", handleTick);
+     *      createjs.Ticker.addEventListener("tick", handleTick);
      *      function handleTick(event) {
      *          console.log("Paused:", event.paused, event.delta);
      *      }
@@ -892,12 +904,12 @@ this.weavecore = this.weavecore || {};
      *
      * <h4>Example</h4>
      *
-     *      weavecore.Ticker.addEventListener("tick", handleTick);
-     *      weavecore.Ticker.paused = true;
+     *      createjs.Ticker.addEventListener("tick", handleTick);
+     *      createjs.Ticker.paused = true;
      *      function handleTick(event) {
      *          console.log(event.paused,
-     *          	weavecore.Ticker.getTime(false),
-     *          	weavecore.Ticker.getTime(true));
+     *          	createjs.Ticker.getTime(false),
+     *          	createjs.Ticker.getTime(true));
      *      }
      *
      * @property paused
@@ -915,7 +927,7 @@ this.weavecore = this.weavecore || {};
     Ticker.dispatchEvent = null;
     Ticker.hasEventListener = null;
     Ticker._listeners = null;
-    weavecore.EventDispatcher.initialize(Ticker); // inject EventDispatcher methods.
+    createjs.EventDispatcher.initialize(Ticker); // inject EventDispatcher methods.
     Ticker._addEventListener = Ticker.addEventListener;
     Ticker.addEventListener = function () {
         !Ticker._inited && Ticker.init();
@@ -1330,7 +1342,7 @@ this.weavecore = this.weavecore || {};
         }
 
         if (Ticker.hasEventListener("tick")) {
-            var event = new weavecore.Event("tick");
+            var event = new createjs.Event("tick");
             var maxDelta = Ticker.maxDelta;
             event.delta = (maxDelta && elapsedTime > maxDelta) ? maxDelta : elapsedTime;
             event.paused = paused;
@@ -1361,7 +1373,7 @@ this.weavecore = this.weavecore || {};
     };
 
 
-    weavecore.Ticker = Ticker;
+    createjs.Ticker = Ticker;
 }());
 /*
     Weave (Web-based Analysis and Visualization Environment)
@@ -1379,8 +1391,11 @@ this.weavecore = this.weavecore || {};
 */
 
 // namespace
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * This provides a set of useful static functions for Object Comparison.
@@ -1530,8 +1545,11 @@ if (!this.weavecore)
 */
 
 // namespace
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * This provides a set of useful static functions.
@@ -1633,14 +1651,16 @@ if (!this.weavecore)
 
     weavecore.StandardLib = StandardLib;
 }());
-
 /**
  * @module weavecore
  */
 
 //namesapce
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 (function () {
     "use strict";
@@ -1758,14 +1778,16 @@ if (!this.weavecore)
     weavecore.DynamicState = DynamicState;
 
 }());
-
 /**
  * @module weavecore
  */
 
 //namesapce
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 (function () {
     "use strict";
@@ -1783,9 +1805,11 @@ if (!this.weavecore)
     weavecore.ILinkableObject = ILinkableObject;
 
 }());
-
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * This is an interface to a composite object with dynamic state, meaning child objects can be dynamically added or removed.
@@ -1828,14 +1852,16 @@ if (!this.weavecore)
     weavecore.ILinkableCompositeObject = ILinkableCompositeObject;
 
 }());
-
 /**
  * @module weavecore
  */
 
 //namesapce
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 
 (function () {
@@ -2618,14 +2644,16 @@ if (!this.weavecore)
     weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());
-
 /**
  * @module weavecore
  */
 
 // namespace
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 
 (function () {
@@ -3655,7 +3683,6 @@ if (!this.weavecore)
     weavecore.SessionManager = SessionManager;
 
 }());
-
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -3676,8 +3703,11 @@ if (!this.weavecore)
 */
 
 
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * Facilitates the creation of dynamic trees.
@@ -4013,7 +4043,6 @@ if (!this.weavecore)
     weavecore.WeaveTreeItem = WeaveTreeItem;
 
 }());
-
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -4033,9 +4062,11 @@ if (!this.weavecore)
     along with Weave.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * This is a wrapper for a 2-dimensional Dictionary.
@@ -4121,10 +4152,11 @@ if (!this.weavecore)
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
-
-if (!this.weavecore)
-    this.weavecore = {};
-
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 /**
  * LinkableVariable allows callbacks to be added that will be called when the value changes.
  * A LinkableVariable has an optional type restriction on the values it holds.
@@ -4335,9 +4367,11 @@ if (!this.weavecore)
     weavecore.LinkableVariable = LinkableVariable;
 
 }());
-
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * This is a LinkableVariable which limits its session state to Number values.
@@ -4391,9 +4425,11 @@ if (!this.weavecore)
     weavecore.LinkableNumber = LinkableNumber;
 
 }());
-
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * This is a LinkableVariable which limits its session state to Boolean values.
@@ -4434,9 +4470,11 @@ if (!this.weavecore)
     weavecore.LinkableBoolean = LinkableBoolean;
 
 }());
-
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * This is a LinkableVariable which limits its session state to string values.
@@ -4478,14 +4516,16 @@ if (!this.weavecore)
     weavecore.LinkableString = LinkableString;
 
 }());
-
 /**
  * @module weavecore
  */
 
 //namesapce
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 (function () {
     "use strict";
@@ -4634,14 +4674,16 @@ if (!this.weavecore)
     weavecore.ChildListCallbackInterface = ChildListCallbackInterface;
 
 }());
-
 /**
  * @module weavecore
  */
 
 // namespace
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 (function () {
     "use strict";
@@ -4912,14 +4954,16 @@ if (!this.weavecore)
 			// a.getState(null): "b value"
 		*/
 }());
-
 /**
  * @module weavecore
  */
 
 //namesapce
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 (function () {
     "use strict";
@@ -5493,13 +5537,16 @@ if (!this.weavecore)
 
     weavecore.LinkableHashMap = LinkableHashMap;
 }());
-
-this.weavecore.Ticker.setFPS(50);
+createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
 // constructor:
 
-this.WeaveAPI = {};
+if (typeof window === 'undefined') {
+    this.WeaveAPI = this.WeaveAPI || {};
+} else {
+    window.WeaveAPI = window.WeaveAPI || {};
+}
 
 //Object.defineProperty(WeaveAPI, '_sessionManager', {
 // value: new SessionManager()
@@ -5508,19 +5555,19 @@ this.WeaveAPI = {};
 //value: new weave.core.StageUtils()
 //});
 
-Object.defineProperty(this.WeaveAPI, 'TASK_PRIORITY_IMMEDIATE', {
+Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_IMMEDIATE', {
     value: 0
 });
 
-Object.defineProperty(this.WeaveAPI, 'TASK_PRIORITY_HIGH', {
+Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_HIGH', {
     value: 1
 });
 
-Object.defineProperty(this.WeaveAPI, 'TASK_PRIORITY_NORMAL', {
+Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_NORMAL', {
     value: 2
 });
 
-Object.defineProperty(this.WeaveAPI, 'TASK_PRIORITY_LOW', {
+Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_LOW', {
     value: 3
 });
 
@@ -5538,8 +5585,11 @@ WeaveAPI.globalHashMap = new weavecore.LinkableHashMap();
  */
 
 //namesapce
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 (function () {
     "use strict";
@@ -5889,7 +5939,6 @@ if (!this.weavecore)
 
 
 }());
-
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -5973,12 +6022,12 @@ if (!this.weavecore)
 
         // If the target is the stage, the capture listener won't be called, so add
         // an additional listener that runs callbacks when the stage is the target.
-        weavecore.Ticker.addEventListener(this._eventType, this._tickerListener.bind(this)); // do not use capture phase
+        createjs.Ticker.addEventListener(this._eventType, this._tickerListener.bind(this)); // do not use capture phase
 
         // when callbacks are disposed, remove the listeners
         this.addDisposeCallback(null, function () {
             //stage.removeEventListener(eventType, captureListener, true);
-            weavecore.Ticker.removeEventListener(this._eventType, this._tickerListener.bind(this));
+            createjs.Ticker.removeEventListener(this._eventType, this._tickerListener.bind(this));
         });
     };
 
@@ -6321,8 +6370,12 @@ if (!this.weavecore)
 
 
 }());
-if (!this.weavecore)
-    this.weavecore = {};
+
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * This class saves the session history of an ILinkableObject.

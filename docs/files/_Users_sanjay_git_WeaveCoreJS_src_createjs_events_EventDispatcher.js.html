@@ -71,6 +71,8 @@
 
             <ul id="api-modules" class="apis modules">
 
+                <li><a href="../modules/CreateJS.html">CreateJS</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -141,11 +143,15 @@
  */
 
 /**
- * @module weavecore
+ * @module CreateJS
  */
 
 // namespace:
-this.weavecore = this.weavecore || {};
+if (typeof window === &#x27;undefined&#x27;) {
+    this.createjs = this.createjs || {};
+} else {
+    window.createjs = window.createjs || {};
+}
 
 (function () {
     &quot;use strict&quot;;
@@ -425,7 +431,7 @@ this.weavecore = this.weavecore || {};
      *      this.dispatchEvent(&quot;complete&quot;);
      *
      *      // Use an Event instance
-     *      var event = new weavecore.Event(&quot;progress&quot;);
+     *      var event = new createjs.Event(&quot;progress&quot;);
      *      this.dispatchEvent(event);
      *
      * @method dispatchEvent
@@ -441,7 +447,7 @@ this.weavecore = this.weavecore || {};
             if (!listeners || !listeners[eventObj]) {
                 return false;
             }
-            eventObj = new weavecore.Event(eventObj);
+            eventObj = new createjs.Event(eventObj);
         } else if (eventObj.target &amp;&amp; eventObj.clone) {
             // redispatching an active event object, so clone it:
             eventObj = eventObj.clone();
@@ -554,7 +560,7 @@ this.weavecore = this.weavecore || {};
     };
 
 
-    weavecore.EventDispatcher = EventDispatcher;
+    createjs.EventDispatcher = EventDispatcher;
 }());
     </pre>
 </div>

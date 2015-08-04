@@ -71,6 +71,8 @@
 
             <ul id="api-modules" class="apis modules">
 
+                <li><a href="../modules/CreateJS.html">CreateJS</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -112,8 +114,11 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === &#x27;undefined&#x27;) {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * This class saves the session history of an ILinkableObject.
@@ -583,7 +588,6 @@ if (!this.weavecore)
     weavecore.SessionStateLog = SessionStateLog;
 
 }());
-
     </pre>
 </div>
 

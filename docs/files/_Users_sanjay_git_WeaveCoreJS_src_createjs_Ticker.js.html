@@ -71,6 +71,8 @@
 
             <ul id="api-modules" class="apis modules">
 
+                <li><a href="../modules/CreateJS.html">CreateJS</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -141,11 +143,15 @@
  */
 
 /**
- * @module weavecore
+ * @module CreateJS
  */
 
 // namespace:
-this.weavecore = this.weavecore || {};
+if (typeof window === &#x27;undefined&#x27;) {
+    this.createjs = this.createjs || {};
+} else {
+    window.createjs = window.createjs || {};
+}
 
 (function () {
     &quot;use strict&quot;;
@@ -162,7 +168,7 @@ this.weavecore = this.weavecore || {};
      *
      * &lt;h4&gt;Example&lt;/h4&gt;
      *
-     *      weavecore.Ticker.addEventListener(&quot;tick&quot;, handleTick);
+     *      createjs.Ticker.addEventListener(&quot;tick&quot;, handleTick);
      *      function handleTick(event) {
      *          // Actions carried out each tick (aka frame)
      *          if (!event.paused) {
@@ -234,7 +240,7 @@ this.weavecore = this.weavecore || {};
      *
      * &lt;h4&gt;Example&lt;/h4&gt;
      *
-     *      weavecore.Ticker.addEventListener(&quot;tick&quot;, handleTick);
+     *      createjs.Ticker.addEventListener(&quot;tick&quot;, handleTick);
      *      function handleTick(event) {
      *          console.log(&quot;Paused:&quot;, event.paused, event.delta);
      *      }
@@ -298,12 +304,12 @@ this.weavecore = this.weavecore || {};
      *
      * &lt;h4&gt;Example&lt;/h4&gt;
      *
-     *      weavecore.Ticker.addEventListener(&quot;tick&quot;, handleTick);
-     *      weavecore.Ticker.paused = true;
+     *      createjs.Ticker.addEventListener(&quot;tick&quot;, handleTick);
+     *      createjs.Ticker.paused = true;
      *      function handleTick(event) {
      *          console.log(event.paused,
-     *          	weavecore.Ticker.getTime(false),
-     *          	weavecore.Ticker.getTime(true));
+     *          	createjs.Ticker.getTime(false),
+     *          	createjs.Ticker.getTime(true));
      *      }
      *
      * @property paused
@@ -321,7 +327,7 @@ this.weavecore = this.weavecore || {};
     Ticker.dispatchEvent = null;
     Ticker.hasEventListener = null;
     Ticker._listeners = null;
-    weavecore.EventDispatcher.initialize(Ticker); // inject EventDispatcher methods.
+    createjs.EventDispatcher.initialize(Ticker); // inject EventDispatcher methods.
     Ticker._addEventListener = Ticker.addEventListener;
     Ticker.addEventListener = function () {
         !Ticker._inited &amp;&amp; Ticker.init();
@@ -736,7 +742,7 @@ this.weavecore = this.weavecore || {};
         }
 
         if (Ticker.hasEventListener(&quot;tick&quot;)) {
-            var event = new weavecore.Event(&quot;tick&quot;);
+            var event = new createjs.Event(&quot;tick&quot;);
             var maxDelta = Ticker.maxDelta;
             event.delta = (maxDelta &amp;&amp; elapsedTime &gt; maxDelta) ? maxDelta : elapsedTime;
             event.paused = paused;
@@ -767,7 +773,7 @@ this.weavecore = this.weavecore || {};
     };
 
 
-    weavecore.Ticker = Ticker;
+    createjs.Ticker = Ticker;
 }());
     </pre>
 </div>

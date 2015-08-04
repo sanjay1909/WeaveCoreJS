@@ -71,6 +71,8 @@
 
             <ul id="api-modules" class="apis modules">
 
+                <li><a href="../modules/CreateJS.html">CreateJS</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -131,9 +133,11 @@
     along with Weave.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 */
 
-
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === &#x27;undefined&#x27;) {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * This is a wrapper for a 2-dimensional Dictionary.
@@ -219,7 +223,6 @@ if (!this.weavecore)
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
-
     </pre>
 </div>
 

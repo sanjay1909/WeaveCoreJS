@@ -71,6 +71,8 @@
 
             <ul id="api-modules" class="apis modules">
 
+                <li><a href="../modules/CreateJS.html">CreateJS</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -112,8 +114,11 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-if (!this.weavecore)
-    this.weavecore = {};
+if (typeof window === &#x27;undefined&#x27;) {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
 /**
  * This is an interface to a composite object with dynamic state, meaning child objects can be dynamically added or removed.
@@ -156,7 +161,6 @@ if (!this.weavecore)
     weavecore.ILinkableCompositeObject = ILinkableCompositeObject;
 
 }());
-
     </pre>
 </div>
 
