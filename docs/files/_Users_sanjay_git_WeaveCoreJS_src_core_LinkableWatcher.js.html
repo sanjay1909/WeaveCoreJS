@@ -19,7 +19,7 @@
 
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.0.1</em>
+            <em>API Docs for: 1.0.0</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -209,6 +209,17 @@ if (typeof window === &#x27;undefined&#x27;) {
             },
             configurable: true
         });
+
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, &#x27;ns&#x27;, {
+            value: &#x27;weavecore&#x27;
+        });
     }
 
     LinkableWatcher.prototype = new weavecore.ILinkableObject();
@@ -394,6 +405,7 @@ if (typeof window === &#x27;undefined&#x27;) {
 			// a.getState(null): &quot;b value&quot;
 		*/
 }());
+
     </pre>
 </div>
 

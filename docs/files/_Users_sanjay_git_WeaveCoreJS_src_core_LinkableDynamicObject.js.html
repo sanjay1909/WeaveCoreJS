@@ -19,7 +19,7 @@
 
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.0.1</em>
+            <em>API Docs for: 1.0.0</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -268,6 +268,17 @@ if (typeof window === &#x27;undefined&#x27;) {
             }
 
         });
+
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, &#x27;ns&#x27;, {
+            value: &#x27;weavecore&#x27;
+        });
     }
 
     LinkableDynamicObject.prototype = new weavecore.LinkableWatcher();
@@ -378,7 +389,8 @@ if (typeof window === &#x27;undefined&#x27;) {
 
 
     //private
-
+    //to-do
+    // replace weavecore with ns and figure out best way to deal this
     p._setLocalObjectType = function (className) {
         // stop if locked
         if (this._locked)
@@ -388,7 +400,7 @@ if (typeof window === &#x27;undefined&#x27;) {
 
         this.targetPath = null;
 
-        var classDef = eval(&#x27;weavecore.&#x27; + className);
+        var classDef = eval(className);
         if (classDef instanceof weavecore.ILinkableObject &amp;&amp; (this._typeRestriction === null || this._typeRestriction === undefined || classDef instanceof this._typeRestriction)) {
 
             var obj = target;
@@ -409,8 +421,12 @@ if (typeof window === &#x27;undefined&#x27;) {
     p.requestLocalObject = function (objectType, lockObject) {
         this._cc.delayCallbacks();
 
+        //To-do
+        // this will fail if we minify the weavecore, as constructor name wont be same in minified version
+        // we nee dot get namespace of that object here too
+        // temp solution store  Ns name in the object instance as String
         if (objectType)
-            this._setLocalObjectType(objectType.constructor.name);
+            this._setLocalObjectType(objectType.ns + &#x27;.&#x27; + objectType.constructor.name);
         else
             this.target = null;
 
@@ -473,6 +489,7 @@ if (typeof window === &#x27;undefined&#x27;) {
 
 
 }());
+
     </pre>
 </div>
 

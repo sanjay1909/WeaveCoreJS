@@ -19,7 +19,7 @@
 
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.0.1</em>
+            <em>API Docs for: 1.0.0</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -258,13 +258,17 @@ if (typeof window === &#x27;undefined&#x27;) {
         if (useGroupedCallback === undefined)
             useGroupedCallback = false;
         if (!(linkableParent instanceof weavecore.ILinkableObject)) {
-            console.log(&quot;registerLinkableChild(): Parent does not inherit ILinkableObject.&quot;);
-            return;
+            if (!linkableParent.sessionable) {
+                console.log(&quot;registerLinkableChild(): Parent does not inherit ILinkableObject. or sessionablepropery is not true&quot;);
+                return;
+            }
         }
 
         if (!(linkableChild instanceof weavecore.ILinkableObject)) {
-            console.log(&quot;registerLinkableChild(): child does not inherit ILinkableObject.&quot;);
-            return;
+            if (!linkableChild.sessionable) {
+                console.log(&quot;registerLinkableChild(): child does not inherit ILinkableObject. or sessionablepropery is not true&quot;);
+                return;
+            }
         }
 
         if (callback !== null &amp;&amp; callback !== undefined) {
@@ -813,7 +817,7 @@ if (typeof window === &#x27;undefined&#x27;) {
             return true; // added by sanjay:
         if (object === null) //null means :Object parameter is null i.e Object has no parameters
             return false;
-        if (object instanceof weavecore.ILinkableObject) {
+        if (object instanceof weavecore.ILinkableObject || object.sessionable) {
             var cc = this.getCallbackCollection(object);
             if (cc)
                 return cc.wasDisposed;
@@ -1153,6 +1157,7 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.SessionManager = SessionManager;
 
 }());
+
     </pre>
 </div>
 

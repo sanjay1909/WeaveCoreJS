@@ -266,6 +266,7 @@ if (typeof window === 'undefined') {
 
     createjs.Event = Event;
 }());
+
 /*
  * EventDispatcher
  * Visit http://createjs.com/ for documentation, updates and examples.
@@ -714,6 +715,7 @@ if (typeof window === 'undefined') {
 
     createjs.EventDispatcher = EventDispatcher;
 }());
+
 /*
  * Ticker
  * Visit http://createjs.com/ for documentation, updates and examples.
@@ -1375,6 +1377,7 @@ if (typeof window === 'undefined') {
 
     createjs.Ticker = Ticker;
 }());
+
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -1651,6 +1654,7 @@ if (typeof window === 'undefined') {
 
     weavecore.StandardLib = StandardLib;
 }());
+
 /**
  * @module weavecore
  */
@@ -1778,6 +1782,7 @@ if (typeof window === 'undefined') {
     weavecore.DynamicState = DynamicState;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -1800,11 +1805,23 @@ if (typeof window === 'undefined') {
      * @class ILinkableObject
      * @constructor
      */
-    function ILinkableObject() {}
+    function ILinkableObject() {
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
+        });
+    }
 
     weavecore.ILinkableObject = ILinkableObject;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -1822,7 +1839,16 @@ if (typeof window === 'undefined') {
  */
 (function () {
     function ILinkableCompositeObject() {
-
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
+        });
     }
 
 
@@ -1852,6 +1878,7 @@ if (typeof window === 'undefined') {
     weavecore.ILinkableCompositeObject = ILinkableCompositeObject;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -2035,6 +2062,17 @@ if (typeof window === 'undefined') {
             get: function () {
                 return this._wasDisposed;
             }
+        });
+
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
         });
 
     }
@@ -2644,6 +2682,7 @@ if (typeof window === 'undefined') {
     weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -2788,13 +2827,17 @@ if (typeof window === 'undefined') {
         if (useGroupedCallback === undefined)
             useGroupedCallback = false;
         if (!(linkableParent instanceof weavecore.ILinkableObject)) {
-            console.log("registerLinkableChild(): Parent does not inherit ILinkableObject.");
-            return;
+            if (!linkableParent.sessionable) {
+                console.log("registerLinkableChild(): Parent does not inherit ILinkableObject. or sessionablepropery is not true");
+                return;
+            }
         }
 
         if (!(linkableChild instanceof weavecore.ILinkableObject)) {
-            console.log("registerLinkableChild(): child does not inherit ILinkableObject.");
-            return;
+            if (!linkableChild.sessionable) {
+                console.log("registerLinkableChild(): child does not inherit ILinkableObject. or sessionablepropery is not true");
+                return;
+            }
         }
 
         if (callback !== null && callback !== undefined) {
@@ -3343,7 +3386,7 @@ if (typeof window === 'undefined') {
             return true; // added by sanjay:
         if (object === null) //null means :Object parameter is null i.e Object has no parameters
             return false;
-        if (object instanceof weavecore.ILinkableObject) {
+        if (object instanceof weavecore.ILinkableObject || object.sessionable) {
             var cc = this.getCallbackCollection(object);
             if (cc)
                 return cc.wasDisposed;
@@ -3683,6 +3726,7 @@ if (typeof window === 'undefined') {
     weavecore.SessionManager = SessionManager;
 
 }());
+
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -4043,6 +4087,7 @@ if (typeof window === 'undefined') {
     weavecore.WeaveTreeItem = WeaveTreeItem;
 
 }());
+
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -4152,6 +4197,7 @@ if (typeof window === 'undefined') {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4236,6 +4282,17 @@ if (typeof window === 'undefined') {
             if (defaultValueTriggersCallbacks && this._triggerCounter > weavecore.CallbackCollection.DEFAULT_TRIGGER_COUNT)
                 weavecore.StageUtils.callLater(this, _defaultValueTrigger.bind(this));
         }
+
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
+        });
     }
 
     function _defaultValueTrigger() {
@@ -4367,6 +4424,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableVariable = LinkableVariable;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4397,6 +4455,16 @@ if (typeof window === 'undefined') {
                 this.setSessionState(val);
             }
         });
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
+        });
     }
 
     LinkableNumber.prototype = new weavecore.LinkableVariable();
@@ -4425,6 +4493,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableNumber = LinkableNumber;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4452,6 +4521,16 @@ if (typeof window === 'undefined') {
                 this.setSessionState(val);
             }
         });
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
+        });
     }
 
     LinkableBoolean.prototype = new weavecore.LinkableVariable();
@@ -4470,6 +4549,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableBoolean = LinkableBoolean;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4500,6 +4580,16 @@ if (typeof window === 'undefined') {
                 this.setSessionState(val);
             }
         });
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
+        });
     }
 
     LinkableString.prototype = new weavecore.LinkableVariable();
@@ -4516,6 +4606,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableString = LinkableString;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -4628,6 +4719,17 @@ if (typeof window === 'undefined') {
             }
         });
 
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
+        });
+
     }
 
     ChildListCallbackInterface.prototype = new weavecore.CallbackCollection();
@@ -4674,6 +4776,7 @@ if (typeof window === 'undefined') {
     weavecore.ChildListCallbackInterface = ChildListCallbackInterface;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -4768,6 +4871,17 @@ if (typeof window === 'undefined') {
                 cc.resumeCallbacks();
             },
             configurable: true
+        });
+
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
         });
     }
 
@@ -4954,6 +5068,7 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
+
 /**
  * @module weavecore
  */
@@ -5092,6 +5207,17 @@ if (typeof window === 'undefined') {
             get: function () {
                 return this._childListCallbacks;
             }
+        });
+
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
         });
     }
 
@@ -5537,6 +5663,7 @@ if (typeof window === 'undefined') {
 
     weavecore.LinkableHashMap = LinkableHashMap;
 }());
+
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -5580,6 +5707,7 @@ Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_LOW', {
  });*/
 WeaveAPI.SessionManager = new weavecore.SessionManager();
 WeaveAPI.globalHashMap = new weavecore.LinkableHashMap();
+
 /**
  * @module weavecore
  */
@@ -5734,6 +5862,17 @@ if (typeof window === 'undefined') {
             }
 
         });
+
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
+        });
     }
 
     LinkableDynamicObject.prototype = new weavecore.LinkableWatcher();
@@ -5844,7 +5983,8 @@ if (typeof window === 'undefined') {
 
 
     //private
-
+    //to-do
+    // replace weavecore with ns and figure out best way to deal this
     p._setLocalObjectType = function (className) {
         // stop if locked
         if (this._locked)
@@ -5854,7 +5994,7 @@ if (typeof window === 'undefined') {
 
         this.targetPath = null;
 
-        var classDef = eval('weavecore.' + className);
+        var classDef = eval(className);
         if (classDef instanceof weavecore.ILinkableObject && (this._typeRestriction === null || this._typeRestriction === undefined || classDef instanceof this._typeRestriction)) {
 
             var obj = target;
@@ -5875,8 +6015,12 @@ if (typeof window === 'undefined') {
     p.requestLocalObject = function (objectType, lockObject) {
         this._cc.delayCallbacks();
 
+        //To-do
+        // this will fail if we minify the weavecore, as constructor name wont be same in minified version
+        // we nee dot get namespace of that object here too
+        // temp solution store  Ns name in the object instance as String
         if (objectType)
-            this._setLocalObjectType(objectType.constructor.name);
+            this._setLocalObjectType(objectType.ns + '.' + objectType.constructor.name);
         else
             this.target = null;
 
@@ -5939,6 +6083,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -6478,6 +6623,17 @@ if (typeof window === 'undefined') {
             get: function () {
                 return this._redoHistory;
             }
+        });
+
+        /**
+         * temporary solution to save the namespace for this class/prototype
+         * @public
+         * @property ns
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, 'ns', {
+            value: 'weavecore'
         });
 
 
