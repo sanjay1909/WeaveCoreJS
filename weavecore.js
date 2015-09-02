@@ -1833,6 +1833,7 @@ if (typeof window === 'undefined') {
     weavecore.ILinkableObject = ILinkableObject;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -2706,6 +2707,7 @@ if (typeof window === 'undefined') {
     weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -4461,6 +4463,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableVariable = LinkableVariable;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4542,6 +4545,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableNumber = LinkableNumber;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4610,6 +4614,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableBoolean = LinkableBoolean;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4679,6 +4684,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableString = LinkableString;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -5165,6 +5171,7 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
+
 /**
  * @module weavecore
  */
@@ -5447,7 +5454,7 @@ if (typeof window === 'undefined') {
      * @return {Object} The object under the requested name of the requested type, or null if an error occurred.
      */
     p.requestObject = function (name, classDef, lockObject) {
-        var className = classDef ? classDef.ns + '.' + classDef.name : null;
+        var className = classDef ? classDef.NS + '.' + classDef.name : null;
         var result = this._initObjectByClassName.call(this, name, className, lockObject);
         return classDef ? result : null;
     };
@@ -5516,7 +5523,7 @@ if (typeof window === 'undefined') {
         if (className) {
             // if no name is specified, generate a unique one now.
             if (!name)
-                name = generateUniqueName(className.split("::").pop());
+                name = generateUniqueName(className);
             if (className !== "delete") // to-do Add Support for class Utils - delete is temp solution
             {
                 // If this name is not associated with an object of the specified type,
@@ -6206,6 +6213,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
