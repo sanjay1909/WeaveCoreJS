@@ -139,6 +139,18 @@ if (typeof window === &#x27;undefined&#x27;) {
         value: &#x27;weavecore&#x27;
     });
 
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won&#x27;t work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableNumber, &#x27;CLASS_NAME&#x27;, {
+        value: &#x27;LinkableNumber&#x27;
+    });
+
     function LinkableNumber(defaultValue, verifier, defaultValueTriggersCallbacks) {
         // set default values for Parameters
         if (defaultValue === undefined) defaultValue = NaN;
@@ -195,7 +207,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.LinkableNumber = LinkableNumber;
 
 }());
-
     </pre>
 </div>
 

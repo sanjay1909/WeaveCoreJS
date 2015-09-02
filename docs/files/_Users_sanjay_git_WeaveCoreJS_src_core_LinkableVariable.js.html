@@ -143,6 +143,18 @@ if (typeof window === &#x27;undefined&#x27;) {
     });
 
     /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won&#x27;t work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableVariable, &#x27;CLASS_NAME&#x27;, {
+        value: &#x27;LinkableVariable&#x27;
+    });
+
+    /**
      * If a defaultValue is specified, callbacks will be triggered in a later frame unless they have already been triggered before then.
      * This behavior is desirable because it allows the initial value to be handled by the same callbacks that handles new values.
      * @param sessionStateType The type of values accepted for this sessioned property.
@@ -354,7 +366,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.LinkableVariable = LinkableVariable;
 
 }());
-
     </pre>
 </div>
 

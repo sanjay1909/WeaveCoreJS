@@ -1809,6 +1809,18 @@ if (typeof window === 'undefined') {
         value: 'weavecore'
     });
 
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(ILinkableObject, 'CLASS_NAME', {
+        value: 'ILinkableObject'
+    });
+
     // constructor:
     /**
      * An object that implements this empty interface has an associated CallbackCollection and session state,
@@ -1833,7 +1845,6 @@ if (typeof window === 'undefined') {
     weavecore.ILinkableObject = ILinkableObject;
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -1921,16 +1932,27 @@ if (typeof window === 'undefined') {
     });
 
     /**
-     * temporary solution to save the namespace for this class/prototype
+     * TO-DO:temporary solution to save the namespace for this class/prototype
      * @static
      * @public
      * @property NS
-     * @default weavecore
      * @readOnly
      * @type String
      */
     Object.defineProperty(CallbackCollection, 'NS', {
         value: 'weavecore'
+    });
+
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(CallbackCollection, 'CLASS_NAME', {
+        value: 'CallbackCollection'
     });
 
     // constructor:
@@ -2707,7 +2729,6 @@ if (typeof window === 'undefined') {
     weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());
-
 /**
  * @module weavecore
  */
@@ -4252,6 +4273,18 @@ if (typeof window === 'undefined') {
     });
 
     /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableVariable, 'CLASS_NAME', {
+        value: 'LinkableVariable'
+    });
+
+    /**
      * If a defaultValue is specified, callbacks will be triggered in a later frame unless they have already been triggered before then.
      * This behavior is desirable because it allows the initial value to be handled by the same callbacks that handles new values.
      * @param sessionStateType The type of values accepted for this sessioned property.
@@ -4463,7 +4496,6 @@ if (typeof window === 'undefined') {
     weavecore.LinkableVariable = LinkableVariable;
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4487,6 +4519,18 @@ if (typeof window === 'undefined') {
      */
     Object.defineProperty(LinkableNumber, 'NS', {
         value: 'weavecore'
+    });
+
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableNumber, 'CLASS_NAME', {
+        value: 'LinkableNumber'
     });
 
     function LinkableNumber(defaultValue, verifier, defaultValueTriggersCallbacks) {
@@ -4545,7 +4589,6 @@ if (typeof window === 'undefined') {
     weavecore.LinkableNumber = LinkableNumber;
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4569,6 +4612,19 @@ if (typeof window === 'undefined') {
      */
     Object.defineProperty(LinkableBoolean, 'NS', {
         value: 'weavecore'
+    });
+
+
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableBoolean, 'CLASS_NAME', {
+        value: 'LinkableBoolean'
     });
 
     function LinkableBoolean(defaultValue, verifier, defaultValueTriggersCallbacks) {
@@ -4614,7 +4670,6 @@ if (typeof window === 'undefined') {
     weavecore.LinkableBoolean = LinkableBoolean;
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4638,6 +4693,18 @@ if (typeof window === 'undefined') {
      */
     Object.defineProperty(LinkableString, 'NS', {
         value: 'weavecore'
+    });
+
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableString, 'CLASS_NAME', {
+        value: 'LinkableString'
     });
 
     function LinkableString(defaultValue, verifier, defaultValueTriggersCallbacks) {
@@ -4684,7 +4751,6 @@ if (typeof window === 'undefined') {
     weavecore.LinkableString = LinkableString;
 
 }());
-
 /**
  * @module weavecore
  */
@@ -4700,17 +4766,29 @@ if (typeof window === 'undefined') {
     "use strict";
 
     /**
- * temporary solution to save the namespace for this class/prototype
- * @static
- * @public
- * @property NS
- * @default weavecore
- * @readOnly
- * @type String
- */
-Object.defineProperty(ChildListCallbackInterface, 'NS', {
-    value: 'weavecore'
-});
+     * temporary solution to save the namespace for this class/prototype
+     * @static
+     * @public
+     * @property NS
+     * @default weavecore
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(ChildListCallbackInterface, 'NS', {
+        value: 'weavecore'
+    });
+
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(ChildListCallbackInterface, 'CLASS_NAME', {
+        value: 'ChildListCallbackInterface'
+    });
     // constructor:
     /**
      * Private Class for use with {{#crossLink "LinkableHashMap"}}{{/crossLink}}
@@ -4866,7 +4944,6 @@ Object.defineProperty(ChildListCallbackInterface, 'NS', {
     weavecore.ChildListCallbackInterface = ChildListCallbackInterface;
 
 }());
-
 /**
  * @module weavecore
  */
@@ -4892,6 +4969,18 @@ if (typeof window === 'undefined') {
      */
     Object.defineProperty(LinkableWatcher, 'NS', {
         value: 'weavecore'
+    });
+
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableWatcher, 'CLASS_NAME', {
+        value: 'LinkableWatcher'
     });
 
     // constructor:
@@ -5171,7 +5260,6 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
-
 /**
  * @module weavecore
  */
@@ -5197,6 +5285,18 @@ if (typeof window === 'undefined') {
      */
     Object.defineProperty(LinkableHashMap, 'NS', {
         value: 'weavecore'
+    });
+
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableHashMap, 'CLASS_NAME', {
+        value: 'LinkableHashMap'
     });
 
     // constructor:
@@ -5454,7 +5554,7 @@ if (typeof window === 'undefined') {
      * @return {Object} The object under the requested name of the requested type, or null if an error occurred.
      */
     p.requestObject = function (name, classDef, lockObject) {
-        var className = classDef ? classDef.NS + '.' + classDef.name : null;
+        var className = classDef ? classDef.NS + '.' + (classDef.CLASS_NAME ? classDef.CLASS_NAME : classDef.name) : null;
         var result = this._initObjectByClassName.call(this, name, className, lockObject);
         return classDef ? result : null;
     };
@@ -5851,6 +5951,18 @@ if (typeof window === 'undefined') {
         value: 'weavecore'
     });
 
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableDynamicObject, 'CLASS_NAME', {
+        value: 'LinkableDynamicObject'
+    });
+
     // constructor:
     /**
      * This object links to an internal ILinkableObject.
@@ -6213,7 +6325,6 @@ if (typeof window === 'undefined') {
 
 
 }());
-
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell

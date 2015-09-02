@@ -141,6 +141,18 @@ if (typeof window === &#x27;undefined&#x27;) {
         value: &#x27;weavecore&#x27;
     });
 
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won&#x27;t work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableDynamicObject, &#x27;CLASS_NAME&#x27;, {
+        value: &#x27;LinkableDynamicObject&#x27;
+    });
+
     // constructor:
     /**
      * This object links to an internal ILinkableObject.
@@ -503,7 +515,6 @@ if (typeof window === &#x27;undefined&#x27;) {
 
 
 }());
-
     </pre>
 </div>
 
