@@ -128,6 +128,19 @@ if (typeof window === &#x27;undefined&#x27;) {
 (function () {
     &quot;use strict&quot;;
 
+    /**
+     * temporary solution to save the namespace for this class/prototype
+     * @static
+     * @public
+     * @property NS
+     * @default weavecore
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableHashMap, &#x27;NS&#x27;, {
+        value: &#x27;weavecore&#x27;
+    });
+
     // constructor:
     /**
      * Allows dynamically creating instances of objects inheriting ILinkableObject at runtime.
@@ -383,7 +396,7 @@ if (typeof window === &#x27;undefined&#x27;) {
      * @return {Object} The object under the requested name of the requested type, or null if an error occurred.
      */
     p.requestObject = function (name, classDef, lockObject) {
-        var className = classDef ? classDef.name : null;
+        var className = classDef ? classDef.ns + &#x27;.&#x27; + classDef.name : null;
         var result = this._initObjectByClassName.call(this, name, className, lockObject);
         return classDef ? result : null;
     };
@@ -458,7 +471,8 @@ if (typeof window === &#x27;undefined&#x27;) {
                 // If this name is not associated with an object of the specified type,
                 // associate the name with a new object of the specified type.
                 console.log(className);
-                var classDef = eval(&#x27;weavecore.&#x27; + className); //TODO:remove hardcoded weavecore with namespace
+                var classDef = eval(className);
+                //var classDef = window[&#x27;weavecore&#x27;][className]; //TODO:remove hardcoded weavecore with namespace
                 var object = this._nameToObjectMap[name];
                 if (!object || object.constructor !== classDef)
                     this._createAndSaveNewObject.call(this, name, classDef, lockObject);
@@ -708,7 +722,6 @@ if (typeof window === &#x27;undefined&#x27;) {
 
     weavecore.LinkableHashMap = LinkableHashMap;
 }());
-
     </pre>
 </div>
 

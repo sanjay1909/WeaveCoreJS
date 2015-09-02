@@ -126,6 +126,19 @@ if (typeof window === &#x27;undefined&#x27;) {
  * @author sanjay1909
  */
 (function () {
+    /**
+     * temporary solution to save the namespace for this class/prototype
+     * @static
+     * @public
+     * @property NS
+     * @default weavecore
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableBoolean, &#x27;NS&#x27;, {
+        value: &#x27;weavecore&#x27;
+    });
+
     function LinkableBoolean(defaultValue, verifier, defaultValueTriggersCallbacks) {
         // set default values for Parameters
         if (verifier === undefined) verifier = null;
@@ -169,7 +182,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.LinkableBoolean = LinkableBoolean;
 
 }());
-
     </pre>
 </div>
 

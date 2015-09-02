@@ -128,6 +128,20 @@ if (typeof window === &#x27;undefined&#x27;) {
  */
 
 (function () {
+
+    /**
+     * temporary solution to save the namespace for this class/prototype
+     * @static
+     * @public
+     * @property NS
+     * @default weavecore
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableVariable, &#x27;NS&#x27;, {
+        value: &#x27;weavecore&#x27;
+    });
+
     /**
      * If a defaultValue is specified, callbacks will be triggered in a later frame unless they have already been triggered before then.
      * This behavior is desirable because it allows the initial value to be handled by the same callbacks that handles new values.
@@ -340,7 +354,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.LinkableVariable = LinkableVariable;
 
 }());
-
     </pre>
 </div>
 
