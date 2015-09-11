@@ -477,7 +477,7 @@ if (typeof window === &#x27;undefined&#x27;) {
         if (className) {
             // if no name is specified, generate a unique one now.
             if (!name)
-                name = generateUniqueName(className);
+                name = this.f(className);
             if (className !== &quot;delete&quot;) // to-do Add Support for class Utils - delete is temp solution
             {
                 // If this name is not associated with an object of the specified type,
@@ -734,6 +734,7 @@ if (typeof window === &#x27;undefined&#x27;) {
 
     weavecore.LinkableHashMap = LinkableHashMap;
 }());
+
     </pre>
 </div>
 
