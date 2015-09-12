@@ -3637,7 +3637,7 @@ if (typeof window === 'undefined') {
 
             // find old properties that changed value
             for (var oldName in oldState) {
-                diffValue = computeDiff(oldState[oldName], newState[oldName]);
+                diffValue = this.computeDiff(oldState[oldName], newState[oldName]);
                 if (diffValue !== undefined) {
                     if (!diff)
                         diff = {};
@@ -3774,7 +3774,6 @@ if (typeof window === 'undefined') {
     weavecore.SessionManager = SessionManager;
 
 }());
-
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -5888,6 +5887,7 @@ if (typeof window === 'undefined') {
 
     weavecore.LinkableHashMap = LinkableHashMap;
 }());
+
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
