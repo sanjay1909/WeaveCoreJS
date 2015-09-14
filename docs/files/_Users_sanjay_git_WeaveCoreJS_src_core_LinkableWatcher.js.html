@@ -235,27 +235,6 @@ if (typeof window === &#x27;undefined&#x27;) {
             configurable: true
         });
 
-        /**
-         * temporary solution to save the namespace for this class/prototype
-         * @public
-         * @property ns
-         * @readOnly
-         * @type String
-         */
-        Object.defineProperty(this, &#x27;ns&#x27;, {
-            value: &#x27;weavecore&#x27;
-        });
-
-        /**
-         * temporary solution to save the className for this class/prototype
-         * @public
-         * @property className
-         * @readOnly
-         * @type String
-         */
-        Object.defineProperty(this, &#x27;className&#x27;, {
-            value: &#x27;LinkableWatcher&#x27;
-        });
     }
 
     LinkableWatcher.prototype = new weavecore.ILinkableObject();
@@ -441,7 +420,6 @@ if (typeof window === &#x27;undefined&#x27;) {
 			// a.getState(null): &quot;b value&quot;
 		*/
 }());
-
     </pre>
 </div>
 

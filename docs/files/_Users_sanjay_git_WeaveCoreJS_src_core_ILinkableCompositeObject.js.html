@@ -130,28 +130,32 @@ if (typeof window === &#x27;undefined&#x27;) {
  * @author sanjay1909
  */
 (function () {
-    function ILinkableCompositeObject() {
-        /**
-         * temporary solution to save the namespace for this class/prototype
-         * @public
-         * @property ns
-         * @readOnly
-         * @type String
-         */
-        Object.defineProperty(this, &#x27;ns&#x27;, {
-            value: &#x27;weavecore&#x27;
-        });
 
-        /**
-         * temporary solution to save the className for this class/prototype
-         * @public
-         * @property className
-         * @readOnly
-         * @type String
-         */
-        Object.defineProperty(this, &#x27;className&#x27;, {
-            value: &#x27;ILinkableCompositeObject&#x27;
-        });
+    /**
+     * temporary solution to save the namespace for this class/prototype
+     * @public
+     * @property NS
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(ILinkableCompositeObject, &#x27;NS&#x27;, {
+        value: &#x27;weavecore&#x27;
+    });
+
+    /**
+     * temporary solution to save the className for this class/prototype
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(ILinkableCompositeObject, &#x27;CLASS_NAME&#x27;, {
+        value: &#x27;ILinkableCompositeObject&#x27;
+    });
+
+
+    function ILinkableCompositeObject() {
+
     }
 
 
@@ -181,7 +185,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.ILinkableCompositeObject = ILinkableCompositeObject;
 
 }());
-
     </pre>
 </div>
 
