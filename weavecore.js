@@ -3265,12 +3265,12 @@ if (typeof window === 'undefined') {
         // in jS we couldnt do that, thats why linkableObject.setSessionState is used
         else if (linkableObject instanceof weavecore.ILinkableCompositeObject || linkableObject.getSessionState) {
             result = linkableObject.getSessionState();
-        } else {
+        } else if (linkableObject.sessionable) { //sessionbale variable creation is must as there is no interface concept in JS
             // implicit session state
             // first pass: get property names
-
             // cache property names if necessary
-            var className = linkableObject.constructor.name;
+            //var className = linkableObject.constructor.name; // we can't use constructor.name as minified verisons have different names
+            var className = linkableObject.NS + linkableObject.CLASS_NAME;
 
             if (!this._classNameToSessionedPropertyNames[className])
                 this._cacheClassInfo(linkableObject, className);
