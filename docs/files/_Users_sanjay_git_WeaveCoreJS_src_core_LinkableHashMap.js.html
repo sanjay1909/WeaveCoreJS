@@ -632,7 +632,7 @@ if (typeof window === &#x27;undefined&#x27;) {
             var object = this._nameToObjectMap[name];
             result[i] = weavecore.DynamicState.create(
                 name,
-                object.constructor.name,
+                object.constructor.NS + &#x27;.&#x27; + object.constructor.CLASS_NAME,
                 WeaveAPI.SessionManager.getSessionState(object)
             );
         }
@@ -725,7 +725,6 @@ if (typeof window === &#x27;undefined&#x27;) {
 
     weavecore.LinkableHashMap = LinkableHashMap;
 }());
-
     </pre>
 </div>
 
