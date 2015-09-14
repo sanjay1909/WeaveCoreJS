@@ -289,6 +289,17 @@ if (typeof window === &#x27;undefined&#x27;) {
         Object.defineProperty(this, &#x27;ns&#x27;, {
             value: &#x27;weavecore&#x27;
         });
+
+        /**
+         * temporary solution to save the className for this class/prototype
+         * @public
+         * @property className
+         * @readOnly
+         * @type String
+         */
+        Object.defineProperty(this, &#x27;className&#x27;, {
+            value: &#x27;LinkableHashMap&#x27;
+        });
     }
 
     LinkableHashMap.prototype = new weavecore.CallbackCollection();

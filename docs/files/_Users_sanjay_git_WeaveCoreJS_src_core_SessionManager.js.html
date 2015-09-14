@@ -571,7 +571,7 @@ if (typeof window === &#x27;undefined&#x27;) {
         objectCC.delayCallbacks();
 
         // cache property names if necessary
-        var className = (linkableObject.constructor.name);
+        var className = (linkableObject.ns + linkableObject.className);
         if (!this._classNameToSessionedPropertyNames[className])
             this._cacheClassInfo(linkableObject, className);
 
@@ -653,7 +653,7 @@ if (typeof window === &#x27;undefined&#x27;) {
             // first pass: get property names
             // cache property names if necessary
             //var className = linkableObject.constructor.name; // we can&#x27;t use constructor.name as minified verisons have different names
-            var className = linkableObject.NS + linkableObject.CLASS_NAME;
+            var className = linkableObject.ns + linkableObject.className;
 
             if (!this._classNameToSessionedPropertyNames[className])
                 this._cacheClassInfo(linkableObject, className);
@@ -670,7 +670,7 @@ if (typeof window === &#x27;undefined&#x27;) {
                     property = null; // must set this to null first because accessing the property may fail
                     property = linkableObject[name];
                 } catch (e) {
-                    console.log(&#x27;Unable to get property &quot;&#x27; + name + &#x27;&quot; of class &quot;&#x27; + linkableObject.constructor.name + &#x27;&quot;&#x27;);
+                    console.log(&#x27;Unable to get property &quot;&#x27; + name + &#x27;&quot; of class &quot;&#x27; + linkableObject.ns + linkableObject.className + &#x27;&quot;&#x27;);
                 }
 
                 // first pass: set result[name] to the ILinkableObject
@@ -757,7 +757,7 @@ if (typeof window === &#x27;undefined&#x27;) {
             return [];
         }
 
-        var className = linkableObject.constructor.name;
+        var className = linkableObject.ns + linkableObject.className;
         var propertyNames = this._classNameToSessionedPropertyNames[className];
         if (propertyNames === null || propertyNames === undefined) {
             this._cacheClassInfo(linkableObject, className);
@@ -1157,6 +1157,7 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.SessionManager = SessionManager;
 
 }());
+
     </pre>
 </div>
 
