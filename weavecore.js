@@ -2951,7 +2951,7 @@ if (typeof window === 'undefined') {
         if (this._childToParentMap.get(child))
             this._childToParentMap.get(child).delete(parent);
         if (this._parentToChildMap.get(parent))
-            this._parentToChildMap(parent).delete(child);
+            this._parentToChildMap.get(parent).delete(child);
         this.getCallbackCollection(child).removeCallback(this.getCallbackCollection(parent).triggerCallbacks.bind(parent));
 
         this._treeCallbacks.triggerCallbacks("Session Tree: Child un-Registered");
@@ -3306,21 +3306,17 @@ if (typeof window === 'undefined') {
                 }
 
                 // first pass: set result[name] to the ILinkableObject
-                if (property !== null && !this._getSessionStateIgnoreList[property]) {
+                if (property !== null && !this._getSessionStateIgnoreList.get(property)) {
                     // skip this property if it should not appear in the session state under the parent.
                     if (this._childToParentMap.get(property) === undefined || !this._childToParentMap.get(property).get(linkableObject))
                         continue;
                     // avoid infinite recursion in implicit session states
-                    this._getSessionStateIgnoreList[property] = true;
+                    this._getSessionStateIgnoreList.set(property, true);
                     resultNames.push(name);
                     resultProperties.push(property);
                 } else {
-                    if (debug) {
-                        if (property !== null)
-                            console.log("ignoring duplicate object:", name, property);
-                    }
-
-
+                    if (property !== null)
+                        console.log("ignoring duplicate object:", name, property);
                 }
 
             }
@@ -3337,13 +3333,11 @@ if (typeof window === 'undefined') {
                         continue;
                     result[resultNames[i]] = value;
 
-                    if (debug)
-                        console.log("getState", sessionedObject.constructor.name, resultNames[i], result[resultNames[i]]);
                 }
             }
         }
 
-        this._getSessionStateIgnoreList[linkableObject] = undefined;
+        this._getSessionStateIgnoreList.set(linkableObject, undefined);
 
         return result;
     };
@@ -3503,7 +3497,7 @@ if (typeof window === 'undefined') {
             if (this._childToParentMap.get(object) !== undefined) {
                 // remove the parent-to-child mappings
                 for (var parent in this._childToParentMap.get(object))
-                    if (this._parentToChildMap(parent) !== undefined)
+                    if (this._parentToChildMap.get(parent) !== undefined)
                         this._parentToChildMap.get(parent).delete(object);
                     // remove child-to-parent mapping
                 this._childToParentMap.delete(object);
