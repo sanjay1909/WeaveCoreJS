@@ -1836,6 +1836,7 @@ if (typeof window === 'undefined') {
     weavecore.ILinkableObject = ILinkableObject;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -1907,6 +1908,7 @@ if (typeof window === 'undefined') {
     weavecore.ILinkableCompositeObject = ILinkableCompositeObject;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -2723,6 +2725,7 @@ if (typeof window === 'undefined') {
     weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -3338,8 +3341,13 @@ if (typeof window === 'undefined') {
         var sessionedPublicProperties = propertyNames.filter(function (propName) {
             if (propName.charAt(0) === '_')
                 return false; //Private properties are ignored
-            else
-                return linkableObject[propName] instanceof weavecore.ILinkableObject;
+            else {
+                var isSessionable = false;
+                if (linkableObject[propName] instanceof weavecore.ILinkableObject || linkableObject[propName].sessionable) {
+                    isSessionable = true
+                }
+            }
+            return isSessionable;
         });
 
         this._classNameToSessionedPropertyNames[className] = sessionedPublicProperties.sort();
@@ -4480,6 +4488,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableVariable = LinkableVariable;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4564,6 +4573,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableNumber = LinkableNumber;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4636,6 +4646,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableBoolean = LinkableBoolean;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4708,6 +4719,7 @@ if (typeof window === 'undefined') {
     weavecore.LinkableString = LinkableString;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -4890,6 +4902,7 @@ if (typeof window === 'undefined') {
     weavecore.ChildListCallbackInterface = ChildListCallbackInterface;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -5196,6 +5209,7 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
+
 /**
  * @module weavecore
  */
@@ -5807,6 +5821,7 @@ if (typeof window === 'undefined') {
 
     weavecore.LinkableHashMap = LinkableHashMap;
 }());
+
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -6243,6 +6258,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
