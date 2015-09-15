@@ -153,6 +153,18 @@ if (typeof window === &#x27;undefined&#x27;) {
         value: &#x27;LinkableDynamicObject&#x27;
     });
 
+    /**
+     * TO-DO:temporary solution for checking class in sessionable
+     * @static
+     * @public
+     * @property SESSIONABLE
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableDynamicObject, &#x27;SESSIONABLE&#x27;, {
+        value: true
+    });
+
     // constructor:
     /**
      * This object links to an internal ILinkableObject.
@@ -172,7 +184,7 @@ if (typeof window === &#x27;undefined&#x27;) {
 
         weavecore.LinkableWatcher.call(this, typeRestriction);
         if (typeRestriction)
-            this._typeRestrictionClassName = typeRestriction.constructor.name;
+            this._typeRestrictionClassName = typeRestriction.NS + &#x27;.&#x27; + typeRestriction.CLASS_NAME;
 
         // the callback collection for this object
         // private const
@@ -317,7 +329,7 @@ if (typeof window === &#x27;undefined&#x27;) {
         if (!obj)
             return [];
 
-        var className = obj.constructor.name;
+        var className = obj.constructor.NS + obj.constructor.CLASS_NAME;
         var sessionState = obj || WeaveAPI.SessionManager.getSessionState(obj);
         return [weavecore.DynamicState.create(null, className, sessionState)];
     };
@@ -418,7 +430,7 @@ if (typeof window === &#x27;undefined&#x27;) {
         this.targetPath = null;
 
         var classDef = eval(className);
-        if (classDef instanceof weavecore.ILinkableObject &amp;&amp; (this._typeRestriction === null || this._typeRestriction === undefined || classDef instanceof this._typeRestriction)) {
+        if ((classDef.prototype instanceof weavecore.ILinkableObject || classDef.SESSIONABLE) &amp;&amp; (this._typeRestriction === null || this._typeRestriction === undefined || classDef === this._typeRestriction)) {
 
             var obj = target;
             if (!obj || obj.constructor !== classDef)
@@ -506,7 +518,6 @@ if (typeof window === &#x27;undefined&#x27;) {
 
 
 }());
-
     </pre>
 </div>
 

@@ -155,6 +155,18 @@ if (typeof window === &#x27;undefined&#x27;) {
     });
 
     /**
+     * TO-DO:temporary solution for checking class in sessionable
+     * @static
+     * @public
+     * @property SESSIONABLE
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableVariable, &#x27;SESSIONABLE&#x27;, {
+        value: true
+    });
+
+    /**
      * If a defaultValue is specified, callbacks will be triggered in a later frame unless they have already been triggered before then.
      * This behavior is desirable because it allows the initial value to be handled by the same callbacks that handles new values.
      * @param sessionStateType The type of values accepted for this sessioned property.
@@ -357,7 +369,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.LinkableVariable = LinkableVariable;
 
 }());
-
     </pre>
 </div>
 

@@ -151,6 +151,19 @@ if (typeof window === &#x27;undefined&#x27;) {
         value: &#x27;LinkableString&#x27;
     });
 
+
+    /**
+     * TO-DO:temporary solution for checking class in sessionable
+     * @static
+     * @public
+     * @property SESSIONABLE
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableString, &#x27;SESSIONABLE&#x27;, {
+        value: true
+    });
+
     function LinkableString(defaultValue, verifier, defaultValueTriggersCallbacks) {
         // set default values for Parameters
 
@@ -186,7 +199,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.LinkableString = LinkableString;
 
 }());
-
     </pre>
 </div>
 

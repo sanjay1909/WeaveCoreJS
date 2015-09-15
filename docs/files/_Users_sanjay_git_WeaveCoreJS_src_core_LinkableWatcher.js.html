@@ -153,6 +153,18 @@ if (typeof window === &#x27;undefined&#x27;) {
         value: &#x27;LinkableWatcher&#x27;
     });
 
+    /**
+     * TO-DO:temporary solution for checking class in sessionable
+     * @static
+     * @public
+     * @property SESSIONABLE
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableWatcher, &#x27;SESSIONABLE&#x27;, {
+        value: true
+    });
+
     // constructor:
     /**
      * This is used to dynamically attach a set of callbacks to different targets.
@@ -420,7 +432,6 @@ if (typeof window === &#x27;undefined&#x27;) {
 			// a.getState(null): &quot;b value&quot;
 		*/
 }());
-
     </pre>
 </div>
 

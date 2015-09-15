@@ -152,6 +152,18 @@ if (typeof window === &#x27;undefined&#x27;) {
         value: &#x27;LinkableBoolean&#x27;
     });
 
+    /**
+     * TO-DO:temporary solution for checking class in sessionable
+     * @static
+     * @public
+     * @property SESSIONABLE
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableBoolean, &#x27;SESSIONABLE&#x27;, {
+        value: true
+    });
+
     function LinkableBoolean(defaultValue, verifier, defaultValueTriggersCallbacks) {
         // set default values for Parameters
         if (verifier === undefined) verifier = null;
@@ -186,7 +198,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.LinkableBoolean = LinkableBoolean;
 
 }());
-
     </pre>
 </div>
 

@@ -167,6 +167,18 @@ if (typeof window === &#x27;undefined&#x27;) {
         value: &#x27;CallbackCollection&#x27;
     });
 
+    /**
+     * TO-DO:temporary solution for checking class in sessionable
+     * @static
+     * @public
+     * @property SESSIONABLE
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(CallbackCollection, &#x27;SESSIONABLE&#x27;, {
+        value: true
+    });
+
     // constructor:
     /**
      * This class manages a list of callback functions.
@@ -930,7 +942,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());
-
     </pre>
 </div>
 
