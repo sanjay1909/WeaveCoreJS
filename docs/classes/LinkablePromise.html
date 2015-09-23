@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>ILinkableObject - weavecore</title>
+    <title>LinkablePromise - weavecore</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -112,7 +112,7 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1>ILinkableObject Class</h1>
+                        <h1>LinkablePromise Class</h1>
 <div class="box meta">
 
 
@@ -120,7 +120,7 @@
 
 
         <div class="foundat">
-            Defined in: <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ILinkableObject.js.html#l52"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ILinkableObject.js:52</code></a>
+            Defined in: <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_LinkablePromise.js.html#l18"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;LinkablePromise.js:18</code></a>
         </div>
 
 
@@ -136,20 +136,39 @@
 
 
 <div class="box intro">
-    <p>An object that implements this empty interface has an associated CallbackCollection and session state,
-accessible through the global functions in the WeaveAPI Object. In order for an ILinkableObject to
-be created dynamically at runtime, it must not require any constructor parameters.</p>
 
 </div>
 
 
     <div class="constructor">
         <h2>Constructor</h2>
-        <div id="method_ILinkableObject" class="method item">
-    <h3 class="name"><code>ILinkableObject</code></h3>
+        <div id="method_LinkablePromise" class="method item">
+    <h3 class="name"><code>LinkablePromise</code></h3>
 
 
-        <span class="paren">()</span>
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+
+                <li class="arg">
+
+                        <code>A</code>
+
+                </li>
+
+                <li class="arg">
+
+                        <code>A</code>
+
+                </li>
+
+                <li class="arg">
+
+                        <code>UNKNOWN</code>
+
+                </li>
+
+            </ul><span class="paren">)</span>
+        </div>
 
 
 
@@ -177,7 +196,7 @@ be created dynamically at runtime, it must not require any constructor parameter
 
 
 
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ILinkableObject.js.html#l52"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ILinkableObject.js:52</code></a>
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_LinkablePromise.js.html#l18"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;LinkablePromise.js:18</code></a>
 
         </p>
 
@@ -191,6 +210,61 @@ be created dynamically at runtime, it must not require any constructor parameter
 
     </div>
 
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+
+                <li class="param">
+
+                        <code class="param-name">A</code>
+                        <span class="type">Function</span>
+
+
+
+
+                    <div class="param-description">
+                        <p>function to invoke, which must take zero parameters and may return an AsyncToken.</p>
+
+                    </div>
+
+
+                </li>
+
+                <li class="param">
+
+                        <code class="param-name">A</code>
+                        <span class="type">Object</span>
+
+
+
+
+                    <div class="param-description">
+                        <p>description of the task as a String, or a function to call which returns a descriptive string.</p>
+
+                    </div>
+
+
+                </li>
+
+                <li class="param">
+
+                        <code class="param-name">UNKNOWN</code>
+                        <span class="type">Boolean</span>
+
+
+
+
+                    <div class="param-description">
+
+                    </div>
+
+
+                </li>
+
+            </ul>
+        </div>
 
 
 
@@ -206,6 +280,8 @@ be created dynamically at runtime, it must not require any constructor parameter
         <li class="api-class-tab index"><a href="#index">Index</a></li>
 
 
+            <li class="api-class-tab methods"><a href="#methods">Methods</a></li>
+
 
             <li class="api-class-tab properties"><a href="#properties">Properties</a></li>
 
@@ -218,6 +294,21 @@ be created dynamically at runtime, it must not require any constructor parameter
             <h2 class="off-left">Item Index</h2>
 
 
+                <div class="index-section methods">
+                    <h3>Methods</h3>
+
+                    <ul class="index-list methods">
+
+                            <li class="index-item method">
+                                <a href="#method_depend">depend</a>
+
+
+
+                            </li>
+
+                    </ul>
+                </div>
+
 
 
                 <div class="index-section properties">
@@ -226,28 +317,15 @@ be created dynamically at runtime, it must not require any constructor parameter
                     <ul class="index-list properties">
 
                             <li class="index-item property public">
-                                <a href="#property_CLASS_NAME">CLASS_NAME</a>
+                                <a href="#property_error">error</a>
 
-
-                                    <span class="flag static">static</span>
 
 
                             </li>
 
                             <li class="index-item property public">
-                                <a href="#property_NS">NS</a>
+                                <a href="#property_result">result</a>
 
-
-                                    <span class="flag static">static</span>
-
-
-                            </li>
-
-                            <li class="index-item property public">
-                                <a href="#property_SESSIONABLE">SESSIONABLE</a>
-
-
-                                    <span class="flag static">static</span>
 
 
                             </li>
@@ -262,15 +340,110 @@ be created dynamically at runtime, it must not require any constructor parameter
         </div>
 
 
+            <div id="methods" class="api-class-tabpanel">
+                <h2 class="off-left">Methods</h2>
+
+
+                    <div id="method_depend" class="method item">
+    <h3 class="name"><code>depend</code></h3>
+
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+
+                <li class="arg">
+
+                        <code>dependencies</code>
+
+                </li>
+
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="meta">
+
+
+
+                <p>
+
+                Defined in
+
+
+
+
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_LinkablePromise.js.html#l207"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;LinkablePromise.js:207</code></a>
+
+        </p>
+
+
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Registers dependencies of the LinkablePromise.</p>
+
+    </div>
+
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+
+                <li class="param">
+
+                        <code class="param-name">dependencies</code>
+                        <span class="type">Array</span>
+
+
+
+
+                    <div class="param-description">
+                        <p>Array of dependencies, Taken form JS Arguments Parameter</p>
+
+                    </div>
+
+
+                </li>
+
+            </ul>
+        </div>
+
+
+
+
+
+</div>
+
+
+            </div>
+
 
 
             <div id="properties" class="api-class-tabpanel">
                 <h2 class="off-left">Properties</h2>
 
 
-                    <div id="property_CLASS_NAME" class="property item public">
-    <h3 class="name"><code>CLASS_NAME</code></h3>
-    <span class="type">String</span>
+                    <div id="property_error" class="property item public">
+    <h3 class="name"><code>error</code></h3>
+    <span class="type">Object</span>
 
 
 
@@ -280,8 +453,6 @@ be created dynamically at runtime, it must not require any constructor parameter
 
 
 
-
-        <span class="flag static">static</span>
 
 
     <div class="meta">
@@ -295,7 +466,7 @@ be created dynamically at runtime, it must not require any constructor parameter
 
 
 
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ILinkableObject.js.html#l27"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ILinkableObject.js:27</code></a>
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_LinkablePromise.js.html#l64"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;LinkablePromise.js:64</code></a>
 
         </p>
 
@@ -305,7 +476,8 @@ be created dynamically at runtime, it must not require any constructor parameter
     </div>
 
     <div class="description">
-        <p>TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won&#39;t work</p>
+        <p>The error that occurred calling the invoke function.
+When this value is accessed, validate() will be called.</p>
 
     </div>
 
@@ -317,9 +489,9 @@ be created dynamically at runtime, it must not require any constructor parameter
 </div>
 
 
-                    <div id="property_NS" class="property item public">
-    <h3 class="name"><code>NS</code></h3>
-    <span class="type">String</span>
+                    <div id="property_result" class="property item public">
+    <h3 class="name"><code>result</code></h3>
+    <span class="type">Object</span>
 
 
 
@@ -329,8 +501,6 @@ be created dynamically at runtime, it must not require any constructor parameter
 
 
 
-
-        <span class="flag static">static</span>
 
 
     <div class="meta">
@@ -344,7 +514,7 @@ be created dynamically at runtime, it must not require any constructor parameter
 
 
 
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ILinkableObject.js.html#l14"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ILinkableObject.js:14</code></a>
+        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_LinkablePromise.js.html#l49"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;LinkablePromise.js:49</code></a>
 
         </p>
 
@@ -354,58 +524,8 @@ be created dynamically at runtime, it must not require any constructor parameter
     </div>
 
     <div class="description">
-        <p>temporary solution to save the namespace for this class/prototype</p>
-
-    </div>
-
-
-        <p><strong>Default:</strong> weavecore</p>
-
-
-
-
-
-</div>
-
-
-                    <div id="property_SESSIONABLE" class="property item public">
-    <h3 class="name"><code>SESSIONABLE</code></h3>
-    <span class="type">String</span>
-
-
-
-
-        <span class="flag public">public</span>
-
-
-
-
-
-        <span class="flag static">static</span>
-
-
-    <div class="meta">
-
-
-
-                <p>
-
-                Defined in
-
-
-
-
-        <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_core_ILinkableObject.js.html#l39"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;core&#x2F;ILinkableObject.js:39</code></a>
-
-        </p>
-
-
-
-
-    </div>
-
-    <div class="description">
-        <p>TO-DO:temporary solution for checking class in sessionable</p>
+        <p>The result of calling the invoke function.
+When this value is accessed, validate() will be called.</p>
 
     </div>
 

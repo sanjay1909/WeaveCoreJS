@@ -11,6 +11,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "ILinkableObject",
         "LinkableDynamicObject",
         "LinkableHashMap",
+        "LinkablePromise",
         "LinkableWatcher",
         "SessionManager",
         "Ticker"
