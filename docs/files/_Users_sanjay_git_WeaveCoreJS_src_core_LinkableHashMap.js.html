@@ -435,6 +435,9 @@ if (typeof window === &#x27;undefined&#x27;) {
         this.delayCallbacks(); // make sure callbacks only trigger once
         var classDef = objectToCopy.constructor; //ClassUtils.getClassDefinition(className);
         var sessionState = WeaveAPI.SessionManager.getSessionState(objectToCopy);
+        //  if the name refers to the same object, remove the existing object so it can be replaced with a new one.
+        if (name === this.getName(objectToCopy))
+            this.removeObject(name);
         var object = requestObject(name, classDef, false);
         if (object !== null &amp;&amp; object !== undefined)
             WeaveAPI.SessionManager.setSessionState(object, sessionState);
@@ -670,6 +673,8 @@ if (typeof window === &#x27;undefined&#x27;) {
 
         // first pass: make sure the types match and sessioned properties are instantiated.
         var i;
+        var delayed = [];
+        var callbacks;
         var objectName;
         var className;
         var typedState;
@@ -677,10 +682,17 @@ if (typeof window === &#x27;undefined&#x27;) {
         var newObjects = {}; // maps an objectName to a value of true if the object is newly created as a result of setting the session state
         var newNameOrder = []; // the order the object names appear in the vector
         if (newStateArray !== null &amp;&amp; newStateArray !== undefined) {
+            // first pass: delay callbacks of all children
+            for (var m = 0; m &lt; this._orderedNames.length; m++) {
+                objectName = this._orderedNames[m]
+                callbacks = WeaveAPI.SessionManager.getCallbackCollection(this._nameToObjectMap[objectName]);
+                delayed.push(callbacks)
+                callbacks.delayCallbacks();
+            }
             // initialize all the objects before setting their session states because they may refer to each other.
             for (i = 0; i &lt; newStateArray.length; i++) {
                 typedState = newStateArray[i];
-                if (!weavecore.DynamicState.isDynamicState(typedState))
+                if (!weavecore.DynamicState.isDynamicState(typedState, true))
                     continue;
                 objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
                 className = typedState[weavecore.DynamicState.CLASS_NAME];
@@ -694,7 +706,16 @@ if (typeof window === &#x27;undefined&#x27;) {
                 if (this._nameToObjectMap[objectName] !== this._initObjectByClassName.call(this, objectName, className))
                     newObjects[objectName] = true;
             }
-            // second pass: copy the session state for each property that is defined.
+
+            // next pass: delay callbacks of all children (again, because there may be new children)
+            for (var n = 0; n &lt; this._orderedNames.length; n++) {
+                objectName = this._orderedNames[n]
+                callbacks = WeaveAPI.SessionManager.getCallbackCollection(this._nameToObjectMap[objectName]);
+                delayed.push(callbacks)
+                callbacks.delayCallbacks();
+            }
+
+            // next pass: copy the session state for each property that is defined.
             // Also remember the ordered list of names that appear in the session state.
             for (i = 0; i &lt; newStateArray.length; i++) {
                 typedState = newStateArray[i];
@@ -706,7 +727,7 @@ if (typeof window === &#x27;undefined&#x27;) {
                     continue;
                 }
 
-                if (!weavecore.DynamicState.isDynamicState(typedState))
+                if (!weavecore.DynamicState.isDynamicState(typedState, true))
                     continue;
                 objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
                 if (objectName === null || objectName === undefined)
@@ -734,6 +755,12 @@ if (typeof window === &#x27;undefined&#x27;) {
         }
         // update name order AFTER objects have been added and removed.
         this.setNameOrder(newNameOrder);
+
+        for (var k = 0; k &lt; delayed.length; k++) {
+            callbacks = delayed[k]
+            if (!WeaveAPI.SessionManager.objectWasDisposed(callbacks))
+                callbacks.resumeCallbacks();
+        }
 
         this.resumeCallbacks();
     };

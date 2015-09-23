@@ -1577,7 +1577,8 @@ if (typeof window === 'undefined') {
      * @param b Second dynamic object or primitive value.
      * @return A value of zero if the two objects are equal, nonzero if not equal.
      */
-    StandardLib.compare = function (a, b) {
+    StandardLib.compare = function (a, b, objectCompare) {
+        objectCompare = (objectCompare === undefined ? null : objectCompare);
         var c;
         var ObjectUtil = weavecore.ObjectUtil;
         if (a === b)
@@ -1616,6 +1617,12 @@ if (typeof window === 'undefined') {
                     return c;
             }
             return 0;
+        }
+
+        if (objectCompare !== null) {
+            var result = objectCompare(a, b);
+            if (isFinite(result))
+                return result;
         }
 
         var qna = a.constructor.name;
@@ -1718,6 +1725,19 @@ if (typeof window === 'undefined') {
         value: "sessionState"
     });
 
+    /**
+     * The name of the property used to make isDynamicState() return false in order to bypass special diff logic for dynamic state arrays.
+     * @static
+     * @public
+     * @property BYPASS_DIFF
+     * @readOnly
+     * @default "bypassDiff"
+     * @type String
+     */
+    Object.defineProperty(DynamicState, 'BYPASS_DIFF ', {
+        value: "bypassDiff"
+    });
+
     //static Public Methods
     /**
      * Creates an Object having three properties: objectName, className, sessionState
@@ -1744,11 +1764,14 @@ if (typeof window === 'undefined') {
      * @param {Object} object An object to check.
      * @return {Boolean} true if the object has all three properties and no extras.
      */
-    DynamicState.isDynamicState = function (object) {
+    DynamicState.isDynamicState = function (object, handleBypassDiff) {
+        handleBypassDiff = (handleBypassDiff === undefined ? false : handleBypassDiff);
         var matchCount = 0;
         for (var name in object) {
             if (name === DynamicState.OBJECT_NAME || name === DynamicState.CLASS_NAME || name === DynamicState.SESSION_STATE)
                 matchCount++;
+            else if (handleBypassDiff && name === DynamicState.BYPASS_DIFF)
+                continue;
             else
                 return false;
         }
@@ -1763,7 +1786,8 @@ if (typeof window === 'undefined') {
      * @param {Object} state
      * @return {Boolean} A value of true if the Array looks like a dynamic session state or diff.
      */
-    DynamicState.isDynamicStateArray = function (state) {
+    DynamicState.isDynamicStateArray = function (state, handleBypassDiff) {
+        handleBypassDiff = (handleBypassDiff === undefined ? false : handleBypassDiff);
         if (!Array.isArray(state))
             return false;
         var result = false;
@@ -1771,12 +1795,30 @@ if (typeof window === 'undefined') {
             var item = state[i];
             if (typeof item == 'string' || item instanceof String)
                 continue; // dynamic state diffs can contain String values.
-            if (DynamicState.isDynamicState(item))
+            if (DynamicState.isDynamicState(item, handleBypassDiff))
                 result = true;
             else
                 return false;
         }
         return result;
+    };
+
+    /**
+     * Alters a session state object to bypass special diff logic for dynamic state arrays.
+     * It does so by adding the "bypassDiff" property to any part for which isDynamicState(part) returns true.
+     * @method alterSessionStateToBypassDiff
+     * @static
+     * @param {Object} state
+     * @return {Boolean} A value of true if the Array looks like a dynamic session state or diff.
+     */
+    DynamicState.alterSessionStateToBypassDiff = function (object) {
+        if (DynamicState.isDynamicState(object)) {
+            object[DynamicState.BYPASS_DIFF] = true;
+            object = object[DynamicState.SESSION_STATE];
+        }
+        for (var name in object)
+            DynamicState.alterSessionStateToBypassDiff(object[name]);
+
     };
 
     weavecore.DynamicState = DynamicState;
@@ -2876,6 +2918,80 @@ if (typeof window === 'undefined') {
             value: new Map()
         });
 
+
+        /**
+         * @private
+         * @readOnly
+         * @property _dTaskStackTrace
+         * @type Map
+         */
+        Object.defineProperty(this, "_dTaskStackTrace", {
+            value: new Map()
+        });
+
+        /**
+         * @private
+         * @readOnly
+         * @property _d2dOwnerTask
+         * @type weavecore.Dictionary2D
+         */
+        Object.defineProperty(this, "_d2dOwnerTask", {
+            value: new weavecore.Dictionary2D()
+        });
+
+        /**
+         * @private
+         * @readOnly
+         * @property _d2dTaskOwner
+         * @type weavecore.Dictionary2D
+         */
+        Object.defineProperty(this, "_d2dTaskOwner", {
+            value: new weavecore.Dictionary2D()
+        });
+
+        /**
+         * ILinkableObject -> Boolean
+         * @private
+         * @readOnly
+         * @property _dBusyTraversal
+         * @type Map
+         */
+        Object.defineProperty(this, "_dBusyTraversal", {
+            value: new Map()
+        });
+
+        /**
+         * @private
+         * @readOnly
+         * @property _aBusyTraversal
+         * @type Array
+         */
+        Object.defineProperty(this, "_aBusyTraversal", {
+            value: []
+        });
+
+        /**
+         * ILinkableObject -> int
+         * @private
+         * @readOnly
+         * @property _dUnbusyTriggerCounts
+         * @type Map
+         */
+        Object.defineProperty(this, "_dUnbusyTriggerCounts", {
+            value: new Map()
+        });
+
+        /**
+         * ILinkableObject -> String
+         * @private
+         * @readOnly
+         * @property _dUnbusyStackTraces
+         * @type Map
+         */
+        Object.defineProperty(this, "_dUnbusyStackTraces", {
+            value: new Map()
+        });
+
     }
 
     var p = SessionManager.prototype;
@@ -3175,7 +3291,7 @@ if (typeof window === 'undefined') {
      * @param {Object} diff
      */
     p._applyDiff = function (base, diff) {
-        if (base === null || base === undefined || typeof (base) !== 'object')
+        if (base === null || base === undefined || typeof (base) !== 'object' || diff === null || diff === undefined || typeof (diff) !== 'object')
             return diff;
 
         for (var key in diff)
@@ -3445,6 +3561,57 @@ if (typeof window === 'undefined') {
         }
         return propertyNames;
     };
+
+    p.linkableObjectIsBusy = function (linkableObject) {
+        var busy = false;
+
+        this._aBusyTraversal[this._aBusyTraversal.length] = linkableObject; // push
+        this._dBusyTraversal.set(linkableObject, true);
+
+        outerLoop: for (var i = 0; i < this._aBusyTraversal.length; i++) {
+            linkableObject = this._aBusyTraversal[i];
+
+            if (linkableObject.isBusy) {
+                if (linkableObject.isBusy()) {
+                    busy = true;
+                    break;
+                }
+                // do not check children
+                continue;
+            }
+
+            // if the object is assigned a task, it's busy
+            for (var task in _d2dOwnerTask.dictionary.get(linkableObject)) {
+                if (this.debugBusyTasks) {
+                    var stackTrace = this._dTaskStackTrace.get(task);
+                    console.log(stackTrace);
+                }
+                busy = true;
+                break outerLoop;
+            }
+
+            // see if children are busy
+            var dChild = this._parentToChildMap.get(linkableObject);
+            for (var child in dChild) {
+                // queue all the children that haven't been queued yet
+                if (!this._dBusyTraversal.get(child)) {
+                    this._aBusyTraversal[this._aBusyTraversal.length] = child; // push
+                    this._dBusyTraversal.set(child, true);
+                }
+            }
+        }
+
+        // reset traversal dictionary for next time
+        for (var i = 0; i < this._aBusyTraversal.length; i++) {
+            var linkableObject = this._aBusyTraversal[i];
+            this._dBusyTraversal.set(linkableObject, false);
+        }
+
+        this._aBusyTraversal.length = 0;
+
+        return busy;
+
+    }
 
     /**
      * This function gets the CallbackCollection associated with an ILinkableObject.
@@ -4494,6 +4661,8 @@ if (typeof window === 'undefined') {
                     value = Object.create(value);
             }
 
+            weavecore.DynamicState.alterSessionStateToBypassDiff(value);
+
 
             // save external copy, accessible via getSessionState()
             this._sessionStateExternal = value;
@@ -4523,8 +4692,15 @@ if (typeof window === 'undefined') {
         if (this._primitiveType)
             return this._sessionStateInternal === otherSessionState;
 
-        return weavecore.StandardLib.compare(this._sessionStateInternal, otherSessionState) === 0;
+        return weavecore.StandardLib.compare(this._sessionStateInternal, otherSessionState, objectCompare.bind(this)) === 0;
     };
+
+    function objectCompare(a, b) {
+        if (weavecore.DynamicState.isDynamicState(a, true) && weavecore.DynamicState.isDynamicState(b, true) && a[weavecore.DynamicState.CLASS_NAME] === b[weavecore.DynamicState.CLASS_NAME] && a[weavecore.DynamicState.OBJECT_NAME] === b[weavecore.DynamicState.OBJECT_NAME]) {
+            return weavecore.StandardLib.compare(a[weavecore.DynamicState.SESSION_STATE], b[weavecore.DynamicState.SESSION_STATE], objectCompare);
+        }
+
+    }
 
 
     /**
@@ -5654,6 +5830,9 @@ if (typeof window === 'undefined') {
         this.delayCallbacks(); // make sure callbacks only trigger once
         var classDef = objectToCopy.constructor; //ClassUtils.getClassDefinition(className);
         var sessionState = WeaveAPI.SessionManager.getSessionState(objectToCopy);
+        //  if the name refers to the same object, remove the existing object so it can be replaced with a new one.
+        if (name === this.getName(objectToCopy))
+            this.removeObject(name);
         var object = requestObject(name, classDef, false);
         if (object !== null && object !== undefined)
             WeaveAPI.SessionManager.setSessionState(object, sessionState);
@@ -5889,6 +6068,8 @@ if (typeof window === 'undefined') {
 
         // first pass: make sure the types match and sessioned properties are instantiated.
         var i;
+        var delayed = [];
+        var callbacks;
         var objectName;
         var className;
         var typedState;
@@ -5896,10 +6077,17 @@ if (typeof window === 'undefined') {
         var newObjects = {}; // maps an objectName to a value of true if the object is newly created as a result of setting the session state
         var newNameOrder = []; // the order the object names appear in the vector
         if (newStateArray !== null && newStateArray !== undefined) {
+            // first pass: delay callbacks of all children
+            for (var m = 0; m < this._orderedNames.length; m++) {
+                objectName = this._orderedNames[m]
+                callbacks = WeaveAPI.SessionManager.getCallbackCollection(this._nameToObjectMap[objectName]);
+                delayed.push(callbacks)
+                callbacks.delayCallbacks();
+            }
             // initialize all the objects before setting their session states because they may refer to each other.
             for (i = 0; i < newStateArray.length; i++) {
                 typedState = newStateArray[i];
-                if (!weavecore.DynamicState.isDynamicState(typedState))
+                if (!weavecore.DynamicState.isDynamicState(typedState, true))
                     continue;
                 objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
                 className = typedState[weavecore.DynamicState.CLASS_NAME];
@@ -5913,7 +6101,16 @@ if (typeof window === 'undefined') {
                 if (this._nameToObjectMap[objectName] !== this._initObjectByClassName.call(this, objectName, className))
                     newObjects[objectName] = true;
             }
-            // second pass: copy the session state for each property that is defined.
+
+            // next pass: delay callbacks of all children (again, because there may be new children)
+            for (var n = 0; n < this._orderedNames.length; n++) {
+                objectName = this._orderedNames[n]
+                callbacks = WeaveAPI.SessionManager.getCallbackCollection(this._nameToObjectMap[objectName]);
+                delayed.push(callbacks)
+                callbacks.delayCallbacks();
+            }
+
+            // next pass: copy the session state for each property that is defined.
             // Also remember the ordered list of names that appear in the session state.
             for (i = 0; i < newStateArray.length; i++) {
                 typedState = newStateArray[i];
@@ -5925,7 +6122,7 @@ if (typeof window === 'undefined') {
                     continue;
                 }
 
-                if (!weavecore.DynamicState.isDynamicState(typedState))
+                if (!weavecore.DynamicState.isDynamicState(typedState, true))
                     continue;
                 objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
                 if (objectName === null || objectName === undefined)
@@ -5953,6 +6150,12 @@ if (typeof window === 'undefined') {
         }
         // update name order AFTER objects have been added and removed.
         this.setNameOrder(newNameOrder);
+
+        for (var k = 0; k < delayed.length; k++) {
+            callbacks = delayed[k]
+            if (!WeaveAPI.SessionManager.objectWasDisposed(callbacks))
+                callbacks.resumeCallbacks();
+        }
 
         this.resumeCallbacks();
     };
@@ -6197,6 +6400,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -6228,6 +6432,7 @@ Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_LOW', {
 
 WeaveAPI.SessionManager = new weavecore.SessionManager();
 WeaveAPI.globalHashMap = new weavecore.LinkableHashMap();
+
 /**
  * @module weavecore
  */
@@ -6472,7 +6677,7 @@ if (typeof window === 'undefined') {
             }
 
             // if it's not a dynamic state array, treat it as a path
-            if (!weavecore.DynamicState.isDynamicStateArray(newState)) {
+            if (!weavecore.DynamicState.isDynamicStateArray(newState, true)) {
                 this.targetPath = newState;
                 return;
             }

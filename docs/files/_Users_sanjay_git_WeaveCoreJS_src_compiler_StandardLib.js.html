@@ -161,7 +161,8 @@ if (typeof window === &#x27;undefined&#x27;) {
      * @param b Second dynamic object or primitive value.
      * @return A value of zero if the two objects are equal, nonzero if not equal.
      */
-    StandardLib.compare = function (a, b) {
+    StandardLib.compare = function (a, b, objectCompare) {
+        objectCompare = (objectCompare === undefined ? null : objectCompare);
         var c;
         var ObjectUtil = weavecore.ObjectUtil;
         if (a === b)
@@ -200,6 +201,12 @@ if (typeof window === &#x27;undefined&#x27;) {
                     return c;
             }
             return 0;
+        }
+
+        if (objectCompare !== null) {
+            var result = objectCompare(a, b);
+            if (isFinite(result))
+                return result;
         }
 
         var qna = a.constructor.name;

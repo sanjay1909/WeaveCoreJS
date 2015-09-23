@@ -230,6 +230,80 @@ if (typeof window === &#x27;undefined&#x27;) {
             value: new Map()
         });
 
+
+        /**
+         * @private
+         * @readOnly
+         * @property _dTaskStackTrace
+         * @type Map
+         */
+        Object.defineProperty(this, &quot;_dTaskStackTrace&quot;, {
+            value: new Map()
+        });
+
+        /**
+         * @private
+         * @readOnly
+         * @property _d2dOwnerTask
+         * @type weavecore.Dictionary2D
+         */
+        Object.defineProperty(this, &quot;_d2dOwnerTask&quot;, {
+            value: new weavecore.Dictionary2D()
+        });
+
+        /**
+         * @private
+         * @readOnly
+         * @property _d2dTaskOwner
+         * @type weavecore.Dictionary2D
+         */
+        Object.defineProperty(this, &quot;_d2dTaskOwner&quot;, {
+            value: new weavecore.Dictionary2D()
+        });
+
+        /**
+         * ILinkableObject -&gt; Boolean
+         * @private
+         * @readOnly
+         * @property _dBusyTraversal
+         * @type Map
+         */
+        Object.defineProperty(this, &quot;_dBusyTraversal&quot;, {
+            value: new Map()
+        });
+
+        /**
+         * @private
+         * @readOnly
+         * @property _aBusyTraversal
+         * @type Array
+         */
+        Object.defineProperty(this, &quot;_aBusyTraversal&quot;, {
+            value: []
+        });
+
+        /**
+         * ILinkableObject -&gt; int
+         * @private
+         * @readOnly
+         * @property _dUnbusyTriggerCounts
+         * @type Map
+         */
+        Object.defineProperty(this, &quot;_dUnbusyTriggerCounts&quot;, {
+            value: new Map()
+        });
+
+        /**
+         * ILinkableObject -&gt; String
+         * @private
+         * @readOnly
+         * @property _dUnbusyStackTraces
+         * @type Map
+         */
+        Object.defineProperty(this, &quot;_dUnbusyStackTraces&quot;, {
+            value: new Map()
+        });
+
     }
 
     var p = SessionManager.prototype;
@@ -529,7 +603,7 @@ if (typeof window === &#x27;undefined&#x27;) {
      * @param {Object} diff
      */
     p._applyDiff = function (base, diff) {
-        if (base === null || base === undefined || typeof (base) !== &#x27;object&#x27;)
+        if (base === null || base === undefined || typeof (base) !== &#x27;object&#x27; || diff === null || diff === undefined || typeof (diff) !== &#x27;object&#x27;)
             return diff;
 
         for (var key in diff)
@@ -799,6 +873,57 @@ if (typeof window === &#x27;undefined&#x27;) {
         }
         return propertyNames;
     };
+
+    p.linkableObjectIsBusy = function (linkableObject) {
+        var busy = false;
+
+        this._aBusyTraversal[this._aBusyTraversal.length] = linkableObject; // push
+        this._dBusyTraversal.set(linkableObject, true);
+
+        outerLoop: for (var i = 0; i &lt; this._aBusyTraversal.length; i++) {
+            linkableObject = this._aBusyTraversal[i];
+
+            if (linkableObject.isBusy) {
+                if (linkableObject.isBusy()) {
+                    busy = true;
+                    break;
+                }
+                // do not check children
+                continue;
+            }
+
+            // if the object is assigned a task, it&#x27;s busy
+            for (var task in _d2dOwnerTask.dictionary.get(linkableObject)) {
+                if (this.debugBusyTasks) {
+                    var stackTrace = this._dTaskStackTrace.get(task);
+                    console.log(stackTrace);
+                }
+                busy = true;
+                break outerLoop;
+            }
+
+            // see if children are busy
+            var dChild = this._parentToChildMap.get(linkableObject);
+            for (var child in dChild) {
+                // queue all the children that haven&#x27;t been queued yet
+                if (!this._dBusyTraversal.get(child)) {
+                    this._aBusyTraversal[this._aBusyTraversal.length] = child; // push
+                    this._dBusyTraversal.set(child, true);
+                }
+            }
+        }
+
+        // reset traversal dictionary for next time
+        for (var i = 0; i &lt; this._aBusyTraversal.length; i++) {
+            var linkableObject = this._aBusyTraversal[i];
+            this._dBusyTraversal.set(linkableObject, false);
+        }
+
+        this._aBusyTraversal.length = 0;
+
+        return busy;
+
+    }
 
     /**
      * This function gets the CallbackCollection associated with an ILinkableObject.
