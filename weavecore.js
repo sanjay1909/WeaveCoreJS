@@ -3581,7 +3581,7 @@ if (typeof window === 'undefined') {
             }
 
             // if the object is assigned a task, it's busy
-            for (var task in _d2dOwnerTask.dictionary.get(linkableObject)) {
+            for (var task in this._d2dOwnerTask.dictionary.get(linkableObject)) {
                 if (this.debugBusyTasks) {
                     var stackTrace = this._dTaskStackTrace.get(task);
                     console.log(stackTrace);
