@@ -1734,7 +1734,7 @@ if (typeof window === 'undefined') {
      * @default "bypassDiff"
      * @type String
      */
-    Object.defineProperty(DynamicState, 'BYPASS_DIFF ', {
+    Object.defineProperty(DynamicState, 'BYPASS_DIFF', {
         value: "bypassDiff"
     });
 
