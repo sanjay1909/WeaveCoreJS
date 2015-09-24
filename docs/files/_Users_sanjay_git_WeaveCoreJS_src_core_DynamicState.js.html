@@ -270,8 +270,13 @@ if (typeof window === &#x27;undefined&#x27;) {
             object[DynamicState.BYPASS_DIFF] = true;
             object = object[DynamicState.SESSION_STATE];
         }
-        for (var name in object)
-            DynamicState.alterSessionStateToBypassDiff(object[name]);
+        // in JS String (for Name in Object ) will return index number of all characters and Length as Properties of string
+        // so this flag is required
+        if (Object.hasOwnProperty(object) &amp;&amp; object.constructor.name !== &#x27;String&#x27;) {
+            for (var name in object)
+                DynamicState.alterSessionStateToBypassDiff(object[name]);
+        }
+
 
     };
 
