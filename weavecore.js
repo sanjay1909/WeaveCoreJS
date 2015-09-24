@@ -3404,7 +3404,7 @@ if (typeof window === 'undefined') {
                     if (linkableObject.handleMissingSessionStateProperty) {
                         linkableObject.handleMissingSessionStateProperty(newState, name);
                     } else {
-                        console.log('implement handleMissingSessionStateProperty in ' + linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME + );
+                        console.log('implement handleMissingSessionStateProperty in ' + linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME);
                     }
 
             });
