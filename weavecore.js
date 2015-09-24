@@ -3401,7 +3401,12 @@ if (typeof window === 'undefined') {
         if (foundMissingProperty)
             propertyNames.forEach(function (name) {
                 if (!newState.hasOwnProperty(name))
-                    linkableObject.handleMissingSessionStateProperty(newState, name);
+                    if (linkableObject.handleMissingSessionStateProperty) {
+                        linkableObject.handleMissingSessionStateProperty(newState, name);
+                    } else {
+                        console.log('implement handleMissingSessionStateProperty in ' + linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME + );
+                    }
+
             });
 
         // resume callbacks after setting session state
@@ -7358,7 +7363,7 @@ if (typeof window === 'undefined') {
         this._savePending = false; // true when a diff should be computed
 
         Object.defineProperty(SessionStateLog, 'debug', {
-            value: true,
+            value: false,
             writable: true
         });
         Object.defineProperty(SessionStateLog, 'enableHistoryRewrite', {
