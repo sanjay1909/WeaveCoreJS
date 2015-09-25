@@ -3436,12 +3436,18 @@ if (typeof window === 'undefined') {
 
         // special cases (explicit session state)
         if (linkableObject instanceof weavecore.LinkableVariable) {
+            // in As3, when we try to set undefined it will get ignored , where as JS its get accepted
+            // we want result to be null not repalced with undefined to avoid undesire results, while generating log entries
             result = linkableObject.getSessionState();
+            result = result === undefined ? null : sessionStateValue;
         }
         //linkableHashmap is handled, In As3 version it implements ILinkableCompositeObject
         // in jS we couldnt do that, thats why linkableObject.setSessionState is used
         else if (linkableObject instanceof weavecore.ILinkableCompositeObject || linkableObject.getSessionState) {
+            // in As3, when we try to set undefined it will get ignored , where as JS its get accepted
+            // we want result to be null not repalced with undefined to avoid undesire results, while generating log entries
             result = linkableObject.getSessionState();
+            result = result === undefined ? null : sessionStateValue;
         } else if (linkableObject.sessionable) { //sessionbale variable creation is must as there is no interface concept in JS
             // implicit session state
             // first pass: get property names
@@ -4813,6 +4819,13 @@ if (typeof window === 'undefined') {
 
     var p = LinkableNumber.prototype;
 
+    // override is important to avoid sending undefiend value
+    // getSessionState usally called from Sessionmanager, main purpose is to create log entries..
+    p.getSessionState = function () {
+        // this make sure Number(undefined) will return NaN.
+        return Number(this._sessionStateExternal)
+
+    };
 
     p.setSessionState = function (val) {
         if (typeof (val) != "number") {
