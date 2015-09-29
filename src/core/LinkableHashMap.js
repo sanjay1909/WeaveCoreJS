@@ -628,7 +628,7 @@ if (typeof window === 'undefined') {
             // third pass: remove objects based on the Boolean flags in remainingObjects.
             var orderedNamesCopy = this._orderedNames.concat();
             for (var j = 0; j < orderedNamesCopy.length; j++) {
-                objectName = torderedNamesCopy[j];
+                objectName = orderedNamesCopy[j];
                 if (remainingObjects[objectName] !== true) {
                     //trace(LinkableHashMap, "missing value: "+objectName);
                     this.removeObject(objectName);
