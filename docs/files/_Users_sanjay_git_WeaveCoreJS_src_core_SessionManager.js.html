@@ -304,6 +304,19 @@ if (typeof window === &#x27;undefined&#x27;) {
             value: new Map()
         });
 
+        /**
+         * @private
+         * @readOnly
+         * @property _treeCache
+         * @type weavecore.Dictionary2D
+         */
+        Object.defineProperty(this, &quot;_treeCache&quot;, {
+            value: new weavecore.Dictionary2D(weavecore.WeaveTreeItem)
+        });
+
+
+        this._getTreeItemChildren = this._getTreeItemChildren.bind(this);
+
     }
 
     var p = SessionManager.prototype;
@@ -483,6 +496,70 @@ if (typeof window === &#x27;undefined&#x27;) {
     };
     //TODO: Port Busy task from As3
 
+
+    function _getPath(tree, descendant) {
+        if (tree.data === descendant)
+            return [];
+        var children = tree.children;
+        if (children) {
+            for (var i = 0; i &lt; children.length; i++) {
+                var child = children[i];
+                var path = _getPath(child, descendant);
+                if (path) {
+                    path.unshift(child.label);
+                    console.log(&#x27;Path returned:&#x27;, path);
+                    return path;
+                }
+            }
+        }
+        console.log(&#x27;null returned&#x27;);
+        return null;
+    }
+
+    /**
+     * Gets the path of names in the session state tree of the root object.
+     * @param root The root(Ilinkableobject or sessionable) object used to generate a session state tree.
+     * @param child (Ilinkableobject or sessionable) The descendant object to find in the session state tree.
+     * @return {Array}The path from root to descendant, or null if the descendant does not appear in the session state.
+     */
+    p.getPath = function (root, descendant) {
+        if (!descendant)
+            return null;
+        var tree = this.getSessionStateTree(root, null);
+        var path = _getPath(tree, descendant);
+        return path;
+    }
+
+    /**
+     * This function returns a pointer to an ILinkableObject appearing in the session state.
+     * @param root The root object used to find a descendant object.
+     * @param path A sequence of child names used to refer to an object appearing in the session state.
+     *             A child index number may be used in place of a name in the path when its parent object is a LinkableHashMap.
+     * @return A pointer to the object referred to by objectPath.
+     * @see #getPath()
+     */
+    p.getObject = function (root, path) {
+        var object = root;
+        path.forEach(function (propertyName) {
+            if (object == null || this._disposedObjectsMap[object])
+                return null;
+            if (object instanceof weavecore.LinkableHashMap) {
+                if (propertyName.constructor === Number)
+                    object = object.getObjects()[propertyName];
+                else
+                    object = object.getObject(String(propertyName));
+            } else if (object instanceof weavecore.LinkableDynamicObject) {
+                // ignore propertyName and always return the internalObject
+                object = object.internalObject;
+            } else {
+                if (this.getLinkablePropertyNames(object).indexOf(propertyName) &lt; 0)
+                    return null;
+                object = object[propertyName];
+            }
+        }.bind(this));
+        return this._disposedObjectsMap[object] ? null : object;
+    }
+
     /**
      * @method getSessionStateTree
      * @param {ILinkableObject} root The linkable object to be placed at the root node of the tree.
@@ -490,12 +567,16 @@ if (typeof window === &#x27;undefined&#x27;) {
      * @param {Object} objectTypeFilter
      * @return {WeaveTreeItem} A tree of nodes with the properties &quot;label&quot;, &quot;object&quot;, and &quot;children&quot;
      */
-    p.getSessionStateTree = function (root, objectName, objectTypeFilter) {
-        var treeItem = new weavecore.WeaveTreeItem();
-        treeItem.label = objectName;
-        treeItem.source = root;
-        treeItem.children = SessionManager.prototype._getTreeItemChildren.bind(this);
-        treeItem.data = objectTypeFilter;
+    p.getSessionStateTree = function (root, objectName) {
+        var treeItem = this._treeCache.get(root, objectName);
+        if (!treeItem.data) {
+            treeItem.data = root;
+            treeItem.label = objectName;
+            treeItem.children = this._getTreeItemChildren;
+            // dependency is used to determine when to recalculate children array
+            treeItem.dependency = root instanceof weavecore.LinkableHashMap ? root.childListCallbacks : root;
+
+        }
         return treeItem;
     };
 
@@ -505,8 +586,10 @@ if (typeof window === &#x27;undefined&#x27;) {
      * @return {Array}
      */
     p._getTreeItemChildren = function (treeItem) {
-        var object = treeItem.source;
-        var objectTypeFilter = treeItem.data;
+        if (!treeItem) {
+            console.warn(&#x27;Argument Warning: Need treeItem as Argument&#x27;);
+        }
+        var object = treeItem.data;
         var children = [];
         var names = [];
         var childObject;
@@ -521,17 +604,14 @@ if (typeof window === &#x27;undefined&#x27;) {
                     if (ignoreList.get(childObject) !== undefined)
                         continue;
                     ignoreList.set(childObject, true);
-
-                    subtree = this.getSessionStateTree(childObject, names[i], objectTypeFilter);
-                    if (subtree !== null &amp;&amp; subtree !== undefined)
-                        children.push(subtree);
+                    children.push(this.getSessionStateTree(childObject, names[i]));
                 }
             }
         } else {
             var deprecatedLookup = null;
             if (object instanceof weavecore.LinkableDynamicObject) {
-                //TODO: support for Linkable dynamic object
-                console.log(&quot;Linkable dynamic object not yet supported - only Linkablehashmap&quot;);
+                names = object.targetPath ? null : [null];
+                Linkablehashmap;
             } else if (Object) {
                 names = this.getLinkablePropertyNames(object);
             }
@@ -554,10 +634,7 @@ if (typeof window === &#x27;undefined&#x27;) {
         }
         if (children.length === 0)
             children = null;
-        if (objectTypeFilter === null || objectTypeFilter === undefined)
-            return children;
-        if ((children === null || children === undefined) &amp;&amp; !(object instanceof objectTypeFilter))
-            return null;
+
         return children;
     };
 
@@ -643,8 +720,8 @@ if (typeof window === &#x27;undefined&#x27;) {
             return;
         }
         //linkableHashmap is handled, In As3 version it implements ILinkableCompositeObject
-        // in jS we couldnt do that, thats why linkableObject.setSessionState is used
-        if (linkableObject instanceof weavecore.ILinkableCompositeObject || linkableObject.setSessionState) {
+        // in jS we couldnt do that, thats why linkableObject.getNames is used
+        if (linkableObject.getNames) {
             if (newState.constructor.name === &quot;String&quot;)
                 newState = [newState];
 
@@ -1314,7 +1391,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.SessionManager = SessionManager;
 
 }());
-
     </pre>
 </div>
 
