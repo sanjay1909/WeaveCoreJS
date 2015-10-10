@@ -31,8 +31,9 @@ if (typeof window === 'undefined') {
  */
 
 (function () {
-    function Dictionary2D() {
+    function Dictionary2D(defaultType) {
         this.dictionary = new Map();
+        this.defaultType = defaultType;
     }
 
     var p = Dictionary2D.prototype;
@@ -44,8 +45,15 @@ if (typeof window === 'undefined') {
      * @return The value in the dictionary.
      */
     p.get = function (key1, key2) {
+        var value;
         var d2 = this.dictionary.get(key1);
-        return d2 ? d2.get(key2) : undefined;
+        if (d2)
+            value = d2.get(key2);
+        if (value === undefined && this.defaultType) {
+            value = new this.defaultType();
+            this.set(key1, key2, value);
+        }
+        return value;
     };
 
     /**

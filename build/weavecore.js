@@ -2997,6 +2997,19 @@ if (typeof window === 'undefined') {
             value: new Map()
         });
 
+        /**
+         * @private
+         * @readOnly
+         * @property _treeCache
+         * @type weavecore.Dictionary2D
+         */
+        Object.defineProperty(this, "_treeCache", {
+            value: new weavecore.Dictionary2D(weavecore.WeaveTreeItem)
+        });
+
+
+        this._getTreeItemChildren = this._getTreeItemChildren.bind(this);
+
     }
 
     var p = SessionManager.prototype;
@@ -3176,6 +3189,70 @@ if (typeof window === 'undefined') {
     };
     //TODO: Port Busy task from As3
 
+
+    function _getPath(tree, descendant) {
+        if (tree.data === descendant)
+            return [];
+        var children = tree.children;
+        if (children) {
+            for (var i = 0; i < children.length; i++) {
+                var child = children[i];
+                var path = _getPath(child, descendant);
+                if (path) {
+                    path.unshift(child.label);
+                    console.log('Path returned:', path);
+                    return path;
+                }
+            }
+        }
+        console.log('null returned');
+        return null;
+    }
+
+    /**
+     * Gets the path of names in the session state tree of the root object.
+     * @param root The root(Ilinkableobject or sessionable) object used to generate a session state tree.
+     * @param child (Ilinkableobject or sessionable) The descendant object to find in the session state tree.
+     * @return {Array}The path from root to descendant, or null if the descendant does not appear in the session state.
+     */
+    p.getPath = function (root, descendant) {
+        if (!descendant)
+            return null;
+        var tree = this.getSessionStateTree(root, null);
+        var path = _getPath(tree, descendant);
+        return path;
+    }
+
+    /**
+     * This function returns a pointer to an ILinkableObject appearing in the session state.
+     * @param root The root object used to find a descendant object.
+     * @param path A sequence of child names used to refer to an object appearing in the session state.
+     *             A child index number may be used in place of a name in the path when its parent object is a LinkableHashMap.
+     * @return A pointer to the object referred to by objectPath.
+     * @see #getPath()
+     */
+    p.getObject = function (root, path) {
+        var object = root;
+        path.forEach(function (propertyName) {
+            if (object == null || this._disposedObjectsMap[object])
+                return null;
+            if (object instanceof weavecore.LinkableHashMap) {
+                if (propertyName.constructor === Number)
+                    object = object.getObjects()[propertyName];
+                else
+                    object = object.getObject(String(propertyName));
+            } else if (object instanceof weavecore.LinkableDynamicObject) {
+                // ignore propertyName and always return the internalObject
+                object = object.internalObject;
+            } else {
+                if (this.getLinkablePropertyNames(object).indexOf(propertyName) < 0)
+                    return null;
+                object = object[propertyName];
+            }
+        }.bind(this));
+        return this._disposedObjectsMap[object] ? null : object;
+    }
+
     /**
      * @method getSessionStateTree
      * @param {ILinkableObject} root The linkable object to be placed at the root node of the tree.
@@ -3183,12 +3260,16 @@ if (typeof window === 'undefined') {
      * @param {Object} objectTypeFilter
      * @return {WeaveTreeItem} A tree of nodes with the properties "label", "object", and "children"
      */
-    p.getSessionStateTree = function (root, objectName, objectTypeFilter) {
-        var treeItem = new weavecore.WeaveTreeItem();
-        treeItem.label = objectName;
-        treeItem.source = root;
-        treeItem.children = SessionManager.prototype._getTreeItemChildren.bind(this);
-        treeItem.data = objectTypeFilter;
+    p.getSessionStateTree = function (root, objectName) {
+        var treeItem = this._treeCache.get(root, objectName);
+        if (!treeItem.data) {
+            treeItem.data = root;
+            treeItem.label = objectName;
+            treeItem.children = this._getTreeItemChildren;
+            // dependency is used to determine when to recalculate children array
+            treeItem.dependency = root instanceof weavecore.LinkableHashMap ? root.childListCallbacks : root;
+
+        }
         return treeItem;
     };
 
@@ -3198,8 +3279,10 @@ if (typeof window === 'undefined') {
      * @return {Array}
      */
     p._getTreeItemChildren = function (treeItem) {
-        var object = treeItem.source;
-        var objectTypeFilter = treeItem.data;
+        if (!treeItem) {
+            console.warn('Argument Warning: Need treeItem as Argument');
+        }
+        var object = treeItem.data;
         var children = [];
         var names = [];
         var childObject;
@@ -3214,17 +3297,14 @@ if (typeof window === 'undefined') {
                     if (ignoreList.get(childObject) !== undefined)
                         continue;
                     ignoreList.set(childObject, true);
-
-                    subtree = this.getSessionStateTree(childObject, names[i], objectTypeFilter);
-                    if (subtree !== null && subtree !== undefined)
-                        children.push(subtree);
+                    children.push(this.getSessionStateTree(childObject, names[i]));
                 }
             }
         } else {
             var deprecatedLookup = null;
             if (object instanceof weavecore.LinkableDynamicObject) {
-                //TODO: support for Linkable dynamic object
-                console.log("Linkable dynamic object not yet supported - only Linkablehashmap");
+                names = object.targetPath ? null : [null];
+                Linkablehashmap;
             } else if (Object) {
                 names = this.getLinkablePropertyNames(object);
             }
@@ -3247,10 +3327,7 @@ if (typeof window === 'undefined') {
         }
         if (children.length === 0)
             children = null;
-        if (objectTypeFilter === null || objectTypeFilter === undefined)
-            return children;
-        if ((children === null || children === undefined) && !(object instanceof objectTypeFilter))
-            return null;
+
         return children;
     };
 
@@ -3336,8 +3413,8 @@ if (typeof window === 'undefined') {
             return;
         }
         //linkableHashmap is handled, In As3 version it implements ILinkableCompositeObject
-        // in jS we couldnt do that, thats why linkableObject.setSessionState is used
-        if (linkableObject instanceof weavecore.ILinkableCompositeObject || linkableObject.setSessionState) {
+        // in jS we couldnt do that, thats why linkableObject.getNames is used
+        if (linkableObject.getNames) {
             if (newState.constructor.name === "String")
                 newState = [newState];
 
@@ -4007,27 +4084,6 @@ if (typeof window === 'undefined') {
     weavecore.SessionManager = SessionManager;
 
 }());
-
-/*
-    Weave (Web-based Analysis and Visualization Environment)
-    Copyright (C) 2008-2011 University of Massachusetts Lowell
-
-    This file is a part of Weave.
-
-    Weave is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, Version 3,
-    as published by the Free Software Foundation.
-
-    Weave is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Weave.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4039,6 +4095,34 @@ if (typeof window === 'undefined') {
  */
 (function () {
 
+
+    WeaveTreeItem.createItems = function (WeaveTreeItem_implementation, items) {
+        var n = 0;
+        while (n !== items.length) {
+            n = items.length;
+            items = [].concat.apply(null, items);
+        }
+
+        return items.map(WeaveTreeItem._mapItems, WeaveTreeItem_implementation).filter(WeaveTreeItem._filterItemsRemoveNullsAndUndefined);
+
+    }
+
+    WeaveTreeItem._mapItems = function (item, i, a) {
+        if (item.constructor === Function) // to identify its a class object
+            return new item();
+        if (item.constructor === String || ((item !== null || item !== undefined) && item.constructor === Object)) {
+            var ItemClass = this || WeaveTreeItem;
+            return new ItemClass(item);
+        }
+        return item;
+
+    }
+
+    WeaveTreeItem._filterItemsRemoveNullsAndUndefined = function (item, i, a) {
+
+        return item !== null && item !== undefined;
+
+    }
 
     //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
 
@@ -4059,7 +4143,7 @@ if (typeof window === 'undefined') {
         this._recursion = {}; // recursionName -> Boolean
         this._label = "";
         this._children = null;
-        this._source = null;
+        this._dependency = null;
         /**
          * Cached values that get invalidated when the source triggers callbacks.
          */
@@ -4106,15 +4190,23 @@ if (typeof window === 'undefined') {
              */
             get: function () {
                 const id = 'children';
+
+                var items;
                 if (this.isCached(id))
-                    return this._cache[id];
+                    items = this._cache[id];
+                else
+                    items = this.getObject(this._children, id);
+                if (items) {
+                    // overwrite original array to support filling it asynchronously
+                    var iOut = 0;
+                    for (var i = 0; i < items.length; i++) {
+                        var item = WeaveTreeItem._mapItems.call(this.childItemClass, items[i], i, items);
+                        if (item != null)
+                            items[iOut++] = item;
+                    }
+                }
 
-                var items = this.getObject(this._children, id);
-                if (!items)
-                    return this.cache(id, null);
-
-                var result = items.map(WeaveTreeItem._mapItems.bind(this), this.childItemClass).filter(WeaveTreeItem._filterItems.bind(this));
-                return this.cache(id, result);
+                return this.cache(id, items);
             },
             /**
              * This can be set to either an Array or a Function that returns an Array.
@@ -4132,17 +4224,17 @@ if (typeof window === 'undefined') {
          * A pointer to the ILinkableObject that created this node.
          * This is used to determine when to invalidate cached values.
          */
-        Object.defineProperty(this, 'source', {
+        Object.defineProperty(this, 'dependency', {
             get: function () {
-                if (this._source && WeaveAPI.SessionManager.objectWasDisposed(this._source)) {
-                    this.source = null;
+                if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency)) {
+                    this.dependency = null;
                 }
-                return this._source;
+                return this._dependency;
             },
             set: function (value) {
-                if (this._source != value)
+                if (this._dependency != value)
                     this._counter = {};
-                this._source = value;
+                this._dependency = value;
             }
         });
 
@@ -4205,8 +4297,7 @@ if (typeof window === 'undefined') {
      * Checks if an object has a single specified property.
      */
     p.isSimpleObject = function (object, singlePropertyName) {
-        if (!(object instanceof Object) || object.constructor !== Object)
-            return false;
+
 
         var found = false;
         for (var key in object) {
@@ -4255,7 +4346,7 @@ if (typeof window === 'undefined') {
                 this._recursion[recursionName] = true;
 
                 if (typeof (param) === "function")
-                    param = this.evalFunction(param);
+                    param = this.evalFunction.call(this, param);
             } finally {
                 this._recursion[recursionName] = false;
             }
@@ -4269,20 +4360,27 @@ if (typeof window === 'undefined') {
      */
     p.evalFunction = function (func) {
         try {
-            // first try calling the function with no parameters
-            return func.call(this);
-        } catch (e) {
-            console.log(e);
-            /*if (!(e is ArgumentError))
+            try {
+                // first try calling the function with no parameters
+                return func();
+            } catch (e) {
+                console.log(e);
+                /*if (!(e is ArgumentError))
 				{
 					if (e is Error)
 						trace((e as Error).getStackTrace());
 					throw e;
 				}*/
+            }
+
+            // on ArgumentError, pass in this WeaveTreeItem as the first parameter
+            console.log('executing after ArgumentError');
+            return func(this);
+
+        } catch (e) {
+            console.error(e);
         }
 
-        // on ArgumentError, pass in this WeaveTreeItem as the first parameter
-        return func.call(this, this);
     };
 
     //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
@@ -4294,9 +4392,9 @@ if (typeof window === 'undefined') {
      * @return true if the property value has been cached.
      */
     p.isCached = function (id) {
-        if (this._source && WeaveAPI.SessionManager.objectWasDisposed(this._source))
+        if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency))
             source = null;
-        return this._source && this._counter[id] === WeaveAPI.SessionManager.getCallbackCollection(this._source).triggerCounter;
+        return this._dependency && this._counter[id] === WeaveAPI.SessionManager.getCallbackCollection(this._dependency).triggerCounter;
     };
 
     /**
@@ -4320,55 +4418,13 @@ if (typeof window === 'undefined') {
     };
 
 
-    /**
-     * Initializes an Array of WeaveTreeItems using an Array of objects to pass to the constructor.
-     * Any Arrays passed in will be flattened.
-     * @param WeaveTreeItem_implementation The implementation of WeaveTreeItem to use.
-     * @param items Item descriptors.
-     */
-    WeaveTreeItem.createItems = function (WeaveTreeItem_implementation, items) {
-        // flatten
-        var n = 0;
-        while (n !== items.length) {
-            n = items.length;
-            items = [].concat.apply(null, items);
-        }
 
-        return items.map(_mapItems, WeaveTreeItem_implementation).filter(_filterItems);
-    };
-
-    /**
-     * Used for mapping an Array of params objects to an Array of WeaveTreeItem objects.
-     * The "this" argument is used to specify a particular WeaveTreeItem implementation.
-     */
-    WeaveTreeItem._mapItems = function (item, i, a) {
-        // If the item is a Class definition, create an instance of that Class.
-        if (typeof (item) === 'function')
-            return new item();
-
-        // If the item is a String or an Object, we can pass it to the constructor.
-        if (typeof (item) === 'string' || (item !== null && item !== undefined && item.constructor.name === "Object")) {
-            var ItemClass = WeaveTreeItem;
-            return new ItemClass(item);
-        }
-
-        // If the item is any other type, return the original item.
-        return item;
-    };
-
-    /**
-     * Filters out null items.
-     */
-    WeaveTreeItem._filterItems = function (item, i, a) {
-        return item !== null || item !== undefined;
-    };
 
 
 
     weavecore.WeaveTreeItem = WeaveTreeItem;
 
 }());
-
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -4402,8 +4458,9 @@ if (typeof window === 'undefined') {
  */
 
 (function () {
-    function Dictionary2D() {
+    function Dictionary2D(defaultType) {
         this.dictionary = new Map();
+        this.defaultType = defaultType;
     }
 
     var p = Dictionary2D.prototype;
@@ -4415,8 +4472,15 @@ if (typeof window === 'undefined') {
      * @return The value in the dictionary.
      */
     p.get = function (key1, key2) {
+        var value;
         var d2 = this.dictionary.get(key1);
-        return d2 ? d2.get(key2) : undefined;
+        if (d2)
+            value = d2.get(key2);
+        if (value === undefined && this.defaultType) {
+            value = new this.defaultType();
+            this.set(key1, key2, value);
+        }
+        return value;
     };
 
     /**
@@ -4478,7 +4542,6 @@ if (typeof window === 'undefined') {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {

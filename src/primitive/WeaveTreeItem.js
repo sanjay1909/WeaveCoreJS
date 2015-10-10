@@ -1,23 +1,3 @@
-/*
-    Weave (Web-based Analysis and Visualization Environment)
-    Copyright (C) 2008-2011 University of Massachusetts Lowell
-
-    This file is a part of Weave.
-
-    Weave is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, Version 3,
-    as published by the Free Software Foundation.
-
-    Weave is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Weave.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -29,6 +9,34 @@ if (typeof window === 'undefined') {
  */
 (function () {
 
+
+    WeaveTreeItem.createItems = function (WeaveTreeItem_implementation, items) {
+        var n = 0;
+        while (n !== items.length) {
+            n = items.length;
+            items = [].concat.apply(null, items);
+        }
+
+        return items.map(WeaveTreeItem._mapItems, WeaveTreeItem_implementation).filter(WeaveTreeItem._filterItemsRemoveNullsAndUndefined);
+
+    }
+
+    WeaveTreeItem._mapItems = function (item, i, a) {
+        if (item.constructor === Function) // to identify its a class object
+            return new item();
+        if (item.constructor === String || ((item !== null || item !== undefined) && item.constructor === Object)) {
+            var ItemClass = this || WeaveTreeItem;
+            return new ItemClass(item);
+        }
+        return item;
+
+    }
+
+    WeaveTreeItem._filterItemsRemoveNullsAndUndefined = function (item, i, a) {
+
+        return item !== null && item !== undefined;
+
+    }
 
     //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
 
@@ -49,7 +57,7 @@ if (typeof window === 'undefined') {
         this._recursion = {}; // recursionName -> Boolean
         this._label = "";
         this._children = null;
-        this._source = null;
+        this._dependency = null;
         /**
          * Cached values that get invalidated when the source triggers callbacks.
          */
@@ -96,15 +104,23 @@ if (typeof window === 'undefined') {
              */
             get: function () {
                 const id = 'children';
+
+                var items;
                 if (this.isCached(id))
-                    return this._cache[id];
+                    items = this._cache[id];
+                else
+                    items = this.getObject(this._children, id);
+                if (items) {
+                    // overwrite original array to support filling it asynchronously
+                    var iOut = 0;
+                    for (var i = 0; i < items.length; i++) {
+                        var item = WeaveTreeItem._mapItems.call(this.childItemClass, items[i], i, items);
+                        if (item != null)
+                            items[iOut++] = item;
+                    }
+                }
 
-                var items = this.getObject(this._children, id);
-                if (!items)
-                    return this.cache(id, null);
-
-                var result = items.map(WeaveTreeItem._mapItems.bind(this), this.childItemClass).filter(WeaveTreeItem._filterItems.bind(this));
-                return this.cache(id, result);
+                return this.cache(id, items);
             },
             /**
              * This can be set to either an Array or a Function that returns an Array.
@@ -122,17 +138,17 @@ if (typeof window === 'undefined') {
          * A pointer to the ILinkableObject that created this node.
          * This is used to determine when to invalidate cached values.
          */
-        Object.defineProperty(this, 'source', {
+        Object.defineProperty(this, 'dependency', {
             get: function () {
-                if (this._source && WeaveAPI.SessionManager.objectWasDisposed(this._source)) {
-                    this.source = null;
+                if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency)) {
+                    this.dependency = null;
                 }
-                return this._source;
+                return this._dependency;
             },
             set: function (value) {
-                if (this._source != value)
+                if (this._dependency != value)
                     this._counter = {};
-                this._source = value;
+                this._dependency = value;
             }
         });
 
@@ -195,8 +211,7 @@ if (typeof window === 'undefined') {
      * Checks if an object has a single specified property.
      */
     p.isSimpleObject = function (object, singlePropertyName) {
-        if (!(object instanceof Object) || object.constructor !== Object)
-            return false;
+
 
         var found = false;
         for (var key in object) {
@@ -245,7 +260,7 @@ if (typeof window === 'undefined') {
                 this._recursion[recursionName] = true;
 
                 if (typeof (param) === "function")
-                    param = this.evalFunction(param);
+                    param = this.evalFunction.call(this, param);
             } finally {
                 this._recursion[recursionName] = false;
             }
@@ -259,20 +274,29 @@ if (typeof window === 'undefined') {
      */
     p.evalFunction = function (func) {
         try {
-            // first try calling the function with no parameters
-            return func.call(this);
-        } catch (e) {
-            console.log(e);
-            /*if (!(e is ArgumentError))
+            try {
+                // first try calling the function with no parameters
+                return func();
+            } catch (e) {
+                //To-Docreate Argument error object
+                // and on each function if the argument is required, and if not passed throw that Argument error object
+                console.log(e);
+                /*if (!(e is ArgumentError))
 				{
 					if (e is Error)
 						trace((e as Error).getStackTrace());
 					throw e;
 				}*/
+            }
+
+            // on ArgumentError, pass in this WeaveTreeItem as the first parameter
+            console.log('executing after ArgumentError');
+            return func(this);
+
+        } catch (e) {
+            console.error(e);
         }
 
-        // on ArgumentError, pass in this WeaveTreeItem as the first parameter
-        return func.call(this, this);
     };
 
     //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
@@ -284,9 +308,9 @@ if (typeof window === 'undefined') {
      * @return true if the property value has been cached.
      */
     p.isCached = function (id) {
-        if (this._source && WeaveAPI.SessionManager.objectWasDisposed(this._source))
+        if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency))
             source = null;
-        return this._source && this._counter[id] === WeaveAPI.SessionManager.getCallbackCollection(this._source).triggerCounter;
+        return this._dependency && this._counter[id] === WeaveAPI.SessionManager.getCallbackCollection(this._dependency).triggerCounter;
     };
 
     /**
@@ -310,48 +334,7 @@ if (typeof window === 'undefined') {
     };
 
 
-    /**
-     * Initializes an Array of WeaveTreeItems using an Array of objects to pass to the constructor.
-     * Any Arrays passed in will be flattened.
-     * @param WeaveTreeItem_implementation The implementation of WeaveTreeItem to use.
-     * @param items Item descriptors.
-     */
-    WeaveTreeItem.createItems = function (WeaveTreeItem_implementation, items) {
-        // flatten
-        var n = 0;
-        while (n !== items.length) {
-            n = items.length;
-            items = [].concat.apply(null, items);
-        }
 
-        return items.map(_mapItems, WeaveTreeItem_implementation).filter(_filterItems);
-    };
-
-    /**
-     * Used for mapping an Array of params objects to an Array of WeaveTreeItem objects.
-     * The "this" argument is used to specify a particular WeaveTreeItem implementation.
-     */
-    WeaveTreeItem._mapItems = function (item, i, a) {
-        // If the item is a Class definition, create an instance of that Class.
-        if (typeof (item) === 'function')
-            return new item();
-
-        // If the item is a String or an Object, we can pass it to the constructor.
-        if (typeof (item) === 'string' || (item !== null && item !== undefined && item.constructor.name === "Object")) {
-            var ItemClass = WeaveTreeItem;
-            return new ItemClass(item);
-        }
-
-        // If the item is any other type, return the original item.
-        return item;
-    };
-
-    /**
-     * Filters out null items.
-     */
-    WeaveTreeItem._filterItems = function (item, i, a) {
-        return item !== null || item !== undefined;
-    };
 
 
 
