@@ -396,6 +396,8 @@ if (typeof window === &#x27;undefined&#x27;) {
                 // first try calling the function with no parameters
                 return func();
             } catch (e) {
+                //To-Docreate Argument error object
+                // and on each function if the argument is required, and if not passed throw that Argument error object
                 console.log(e);
                 /*if (!(e is ArgumentError))
 				{
@@ -457,6 +459,7 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.WeaveTreeItem = WeaveTreeItem;
 
 }());
+
     </pre>
 </div>
 

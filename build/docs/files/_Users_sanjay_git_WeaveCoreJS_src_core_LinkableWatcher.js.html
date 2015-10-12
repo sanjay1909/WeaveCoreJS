@@ -265,7 +265,7 @@ if (typeof window === &#x27;undefined&#x27;) {
             newTarget = newTarget;
 
         // do nothing if the targets are the same.
-        if (_target === newTarget)
+        if (this._target === newTarget)
             return;
 
         var sm = WeaveAPI.SessionManager;
@@ -286,7 +286,7 @@ if (typeof window === &#x27;undefined&#x27;) {
         // link to new target
         if (this._target) {
             // we want to register the target as a linkable child (for busy status)
-            sm.registerLinkableChild(this, _target);
+            sm.registerLinkableChild(this, this._target);
             // we don&#x27;t want the target triggering our callbacks directly
             sm.getCallbackCollection(this._target).removeCallback(sm.getCallbackCollection(this).triggerCallbacks);
             sm.getCallbackCollection(this._target).addImmediateCallback(this, this._handleTargetTrigger.bind(this), false, true);
