@@ -541,7 +541,7 @@ if (typeof window === &#x27;undefined&#x27;) {
     p.getObject = function (root, path) {
         var object = root;
         path.forEach(function (propertyName) {
-            if (object == null || this._disposedObjectsMap[object])
+            if (object === null || this._disposedObjectsMap[object])
                 return null;
             if (object instanceof weavecore.LinkableHashMap) {
                 if (propertyName.constructor === Number)
@@ -1391,6 +1391,7 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.SessionManager = SessionManager;
 
 }());
+
     </pre>
 </div>
 

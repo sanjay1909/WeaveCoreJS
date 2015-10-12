@@ -3234,7 +3234,7 @@ if (typeof window === 'undefined') {
     p.getObject = function (root, path) {
         var object = root;
         path.forEach(function (propertyName) {
-            if (object == null || this._disposedObjectsMap[object])
+            if (object === null || this._disposedObjectsMap[object])
                 return null;
             if (object instanceof weavecore.LinkableHashMap) {
                 if (propertyName.constructor === Number)
@@ -4084,6 +4084,7 @@ if (typeof window === 'undefined') {
     weavecore.SessionManager = SessionManager;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4364,6 +4365,8 @@ if (typeof window === 'undefined') {
                 // first try calling the function with no parameters
                 return func();
             } catch (e) {
+                //To-Docreate Argument error object
+                // and on each function if the argument is required, and if not passed throw that Argument error object
                 console.log(e);
                 /*if (!(e is ArgumentError))
 				{
@@ -4425,6 +4428,7 @@ if (typeof window === 'undefined') {
     weavecore.WeaveTreeItem = WeaveTreeItem;
 
 }());
+
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -4542,6 +4546,7 @@ if (typeof window === 'undefined') {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -5427,7 +5432,7 @@ if (typeof window === 'undefined') {
             newTarget = newTarget;
 
         // do nothing if the targets are the same.
-        if (_target === newTarget)
+        if (this._target === newTarget)
             return;
 
         var sm = WeaveAPI.SessionManager;
@@ -5448,7 +5453,7 @@ if (typeof window === 'undefined') {
         // link to new target
         if (this._target) {
             // we want to register the target as a linkable child (for busy status)
-            sm.registerLinkableChild(this, _target);
+            sm.registerLinkableChild(this, this._target);
             // we don't want the target triggering our callbacks directly
             sm.getCallbackCollection(this._target).removeCallback(sm.getCallbackCollection(this).triggerCallbacks);
             sm.getCallbackCollection(this._target).addImmediateCallback(this, this._handleTargetTrigger.bind(this), false, true);
