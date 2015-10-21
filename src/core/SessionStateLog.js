@@ -204,7 +204,7 @@ if (typeof window === 'undefined') {
         if (!immediately && getTimer() < this._saveTime) {
             // console.log("save difference is Paused");
             // we have to wait until the next frame to save the diff because grouped callbacks haven't finished.
-            weavecore.StageUtils.callLater(this, this._saveDiff.bind(this));
+            WeaveAPI.StageUtils.callLater(this, this._saveDiff.bind(this));
             return;
         }
 

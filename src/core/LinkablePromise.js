@@ -106,8 +106,8 @@ if (typeof window === 'undefined') {
         this._result = null;
         this._error = null;
 
-        // TO-DO: Progress Indicator we are no longer waiting for the async task
-        // WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        //  Progress Indicator we are no longer waiting for the async task
+        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
 
         // stop if lazy
         if (this._lazy)
@@ -128,8 +128,8 @@ if (typeof window === 'undefined') {
         else
             _tmp_description = this._description;
 
-        //TO-DO:Progress Indicator mark as busy starting now because we plan to start the task inside _groupedCallback()
-        //WeaveAPI.ProgressIndicator.addTask(_groupedCallback, this, _tmp_description);
+        //Progress Indicator mark as busy starting now because we plan to start the task inside _groupedCallback()
+        WeaveAPI.ProgressIndicator.addTask(_groupedCallback, this, _tmp_description);
     }
 
     function _groupedCallback() {
@@ -147,24 +147,24 @@ if (typeof window === 'undefined') {
             // set _invalidated to false now since we invoked the task
             this._invalidated = false;
 
-            if (invokeResult instanceof Promise)
+            if (invokeResult instanceof weavecore.CustomPromise)
+                invokeResult.addResponder({
+                    result: _handleResult.bind(this),
+                    fault: _handleFault.bind(this),
+                    token: invokeResult
+                });
+            else if (invokeResult instanceof Promise) {
                 invokeResult.then(_handleResult.bind(this), _handleFault.bind(this));
-            else {
-                _result = invokeResult;
-                weavecore.StageUtils.callLater(this, _handleResult.bind(this));
-                //_asyncToken = invokeResult as AsyncToken;
+            } else {
+                this._result = invokeResult;
+                WeaveAPI.StageUtils.callLater(this, _handleResult.bind(this));
             }
 
-            /*if (_asyncToken) {
-                _asyncToken.addResponder(new AsyncResponder(_handleResult, _handleFault, _asyncToken));
-            } else {
-                _result = invokeResult;
-                weavecore.StageUtils.callLater(this, _handleResult);
-            }*/
+
         } catch (invokeError) {
             this._invalidated = false;
             this._error = invokeError;
-            weavecore.StageUtils.callLater(this, _handleFault.bind(this));
+            WeaveAPI.StageUtils.callLater(this, _handleFault.bind(this));
         }
     }
 
@@ -174,8 +174,8 @@ if (typeof window === 'undefined') {
         if (this._invalidated)
             return;
 
-        //TO-DO: ProgressIndicator no longer busy
-        // WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        // ProgressIndicator no longer busy
+        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
 
         // if there is an result, save the result
         if (result)
@@ -191,11 +191,11 @@ if (typeof window === 'undefined') {
         if (this._invalidated)
             return;
 
-        //TO-DO:Progress Indicator no longer busy
-        // WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        //Progress Indicator no longer busy
+        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
 
         // if there is an fault, save the error
-        if (event)
+        if (fault)
             this._error = fault;
 
         this._selfTriggeredCount = this._callbackCollection.triggerCounter + 1;
@@ -223,8 +223,7 @@ if (typeof window === 'undefined') {
     }
 
     p.dispose = function () {
-        //TO-DO: Progress Indicator
-        // WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
         this._lazy = true;
         this._invalidated = true;
         this._result = null;

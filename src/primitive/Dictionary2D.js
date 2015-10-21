@@ -83,9 +83,10 @@ if (typeof window === 'undefined') {
      * @param key2 The second dictionary key.
      */
     p.removeAllSecondary = function (key2) {
-        for (var key1 of this.dictionary.keys()) {
+        this.dictionary.forEach(function (value, key1) {
             this.dictionary.get(key1).delete(key2);
-        }
+
+        }, this.dictionary);
 
     };
 
@@ -103,7 +104,7 @@ if (typeof window === 'undefined') {
             d2.delete(key2);
         }
 
-        // if entries remain in d2, keep it
+
         for (var v2 of d2.values())
             return value;
 

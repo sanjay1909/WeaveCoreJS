@@ -118,7 +118,7 @@ if (typeof window === 'undefined') {
             // If callbacks were triggered, make sure callbacks are triggered again one frame later when
             // it is possible for other classes to have a pointer to this object and retrieve the value.
             if (defaultValueTriggersCallbacks && this._triggerCounter > weavecore.CallbackCollection.DEFAULT_TRIGGER_COUNT)
-                weavecore.StageUtils.callLater(this, _defaultValueTrigger.bind(this));
+                WeaveAPI.StageUtils.callLater(this, _defaultValueTrigger.bind(this));
         }
 
 

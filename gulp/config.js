@@ -3,6 +3,8 @@ var outputDocsFolder = dest + "/docs"
 var src = './src';
 var core = src + '/core';
 var primitive = src + '/primitive';
+var api = src + '/api';
+var utils = src + '/utils';
 var pkg = require('../package');
 
 //used both for Source reference and Order reference
@@ -18,21 +20,33 @@ var buildOrder = [
                     primitive + '/WeaveTreeItem.js',
                     primitive + '/Dictionary2D.js',
 
+                    utils + '/URLUtil.js',
+                    utils + '/URLRequestUtils.js',
+                    utils + '/DebugUtils.js',
+                    api + '/debugId.js',
+
                     core + '/LinkableVariable.js',
                     core + '/LinkableNumber.js',
                     core + '/LinkableBoolean.js',
                     core + '/LinkableString.js',
                     core + '/ChildListCallbackInterface.js',
+                    core + '/ProgressIndicator.js',
                     core + '/LinkableWatcher.js',
                     core + '/LinkableHashMap.js',
                     core + '/LinkablePromise.js',
+                    core + '/LinkableFile.js',
+
+
 
                     src + '/WeaveAPI.js',
+
 
                     core + '/LinkableDynamicObject.js',
                     core + '/StageUtils.js',
                     core + '/ExternalSessionStateInterface',
                     core + '/SessionStateLog.js'
+
+
                ];
 
 module.exports = {

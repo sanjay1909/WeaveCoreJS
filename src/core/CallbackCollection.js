@@ -617,7 +617,7 @@ if (typeof window === 'undefined') {
 
 
         if (!GroupedCallbackEntry._initialized) {
-            weavecore.StageUtils.addEventCallback("tick", null, GroupedCallbackEntry._handleGroupedCallbacks.bind(this));
+            WeaveAPI.StageUtils.addEventCallback("tick", null, GroupedCallbackEntry._handleGroupedCallbacks.bind(this));
             GroupedCallbackEntry._initialized = true;
         }
     }

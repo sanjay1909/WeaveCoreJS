@@ -2515,7 +2515,7 @@ if (typeof window === 'undefined') {
 
 
         if (!GroupedCallbackEntry._initialized) {
-            weavecore.StageUtils.addEventCallback("tick", null, GroupedCallbackEntry._handleGroupedCallbacks.bind(this));
+            WeaveAPI.StageUtils.addEventCallback("tick", null, GroupedCallbackEntry._handleGroupedCallbacks.bind(this));
             GroupedCallbackEntry._initialized = true;
         }
     }
@@ -2724,7 +2724,6 @@ if (typeof window === 'undefined') {
     weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());
-
 /**
  * @module weavecore
  */
@@ -3571,6 +3570,139 @@ if (typeof window === 'undefined') {
         return propertyNames;
     };
 
+
+    function disposeBusyTaskPointers(disposedObject) {
+        this._d2dOwnerTask.removeAllPrimary(disposedObject);
+        this._d2dTaskOwner.removeAllSecondary(disposedObject);
+    }
+
+    /**
+     * Returns a mapping from owner debugId to an Array of debugIds for its busy tasks.
+     */
+    p.debugBusyObjects = function () {
+        var result = {};
+        this._d2dOwnerTask.dictionary.forEach(function (value, owner) {
+            var tasks = [];
+            var taskDictionary = this._d2dOwnerTask.dictionary.get(owner);
+            taskDictionary.forEach(function (value, task) {
+                tasks.push(WeaveAPI.debugId(task));
+            }, taskDictionary);
+            result[WeaveAPI.debugId(owner)] = tasks;
+
+        }, this._d2dOwnerTask.dictionary);
+
+        return result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    p.assignBusyTask = function (taskToken, busyObject) {
+        if (this.debugBusyTasks)
+            this._dTaskStackTrace.set(taskToken, new Error("Stack trace when task was last assigned").getStackTrace());
+
+        // stop if already assigned
+        var test = this._d2dTaskOwner.dictionary.get(taskToken);
+        if (test && test.get(busyObject))
+            return;
+
+        if (taskToken instanceof weavecore.CustomPromise && !WeaveAPI.ProgressIndicator.hasTask(taskToken))
+            taskToken.addResponder({
+                result: unassignAsyncToken.bind(this),
+                fault: unassignAsyncToken.bind(this),
+                token: taskToken
+            });
+
+        this._d2dOwnerTask.set(busyObject, taskToken, true);
+        this._d2dTaskOwner.set(taskToken, busyObject, true);
+    }
+
+
+
+    function unassignAsyncToken(resposne, token) {
+        this.unassignBusyTask(token);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    p.unassignBusyTask = function (taskToken) {
+        if (WeaveAPI.ProgressIndicator.hasTask(taskToken)) {
+            WeaveAPI.ProgressIndicator.removeTask(taskToken);
+            return;
+        }
+
+        var dOwner = this._d2dTaskOwner.dictionary.get(taskToken);
+        if (!dOwner)
+            return;
+
+        this._d2dTaskOwner.dictionary.delete(taskToken);
+
+
+        nextOwner: for (var owner of dOwner.keys()) {
+            var dTask = this._d2dOwnerTask.dictionary.get(owner);
+            dTask.delete(taskToken);
+
+            // if there are other tasks, continue to next owner
+            for (var task of dTask.keys())
+                continue nextOwner;
+
+            // when there are no more tasks, check later to see if callbacks trigger
+            this._dUnbusyTriggerCounts.set(owner, WeaveAPI.SessionManager.getCallbackCollection(owner).triggerCounter);
+            // immediate priority because we want to trigger as soon as possible
+            WeaveAPI.StageUtils.startTask(null, unbusyTrigger.bind(this), WeaveAPI.TASK_PRIORITY_IMMEDIATE);
+
+            if (this.debugBusyTasks) {
+                var stackTrace = new Error("Stack trace when last task was unassigned").getStackTrace();
+                this._dUnbusyStackTraces.set(owner, {
+                    assigned: _dTaskStackTrace[taskToken],
+                    unassigned: stackTrace,
+                    token: taskToken
+                });
+            }
+        }
+    }
+
+    /**
+     * Called the frame after an owner's last busy task is unassigned.
+     * Triggers callbacks if they have not been triggered since then.
+     */
+    function unbusyTrigger(stopTime) {
+        var owner;
+        do {
+            if (new Date().getTime() > stopTime)
+                return 0;
+
+            owner = null;
+            for (var owner of this._dUnbusyTriggerCounts.keys()) {
+                var triggerCount = this._dUnbusyTriggerCounts.get(owner);
+                this._dUnbusyTriggerCounts.delete(owner); // affects next for loop iteration - mitigated by outer loop
+
+                var cc = WeaveAPI.SessionManager.getCallbackCollection(owner);
+                if (cc instanceof weavecore.CallbackCollection ? cc.wasDisposed : this.objectWasDisposed(owner))
+                    continue; // already disposed
+
+                if (cc.triggerCounter !== triggerCount)
+                    continue; // already triggered
+
+                if (this.linkableObjectIsBusy(owner))
+                    continue; // busy again
+
+                if (this.debugBusyTasks) {
+                    var stackTraces = this._dUnbusyStackTraces.get(owner);
+                    console.log('Triggering callbacks because they have not triggered since owner has becoming unbusy:', WeaveAPI.debugId(owner));
+                    console.log(stackTraces.assigned);
+                    console.log(stackTraces.unassigned);
+                }
+
+                cc.triggerCallbacks();
+            }
+        } while (owner);
+
+        return 1;
+    }
+
+
     p.linkableObjectIsBusy = function (linkableObject) {
         var busy = false;
 
@@ -3679,8 +3811,8 @@ if (typeof window === 'undefined') {
         if (object !== null && object !== undefined && !this._disposedObjectsMap.get(object)) {
             this._disposedObjectsMap.set(object, true);
 
-            // TODO: clean up pointers to busy tasks
-            //disposeBusyTaskPointers(object as ILinkableObject);
+            //  clean up pointers to busy tasks
+            disposeBusyTaskPointers.call(this, object);
 
             try {
                 // if the object implements IDisposableObject, call its dispose() function now
@@ -4000,7 +4132,6 @@ if (typeof window === 'undefined') {
     weavecore.SessionManager = SessionManager;
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4430,9 +4561,10 @@ if (typeof window === 'undefined') {
      * @param key2 The second dictionary key.
      */
     p.removeAllSecondary = function (key2) {
-        for (var key1 of this.dictionary.keys()) {
+        this.dictionary.forEach(function (value, key1) {
             this.dictionary.get(key1).delete(key2);
-        }
+
+        }, this.dictionary);
 
     };
 
@@ -4450,7 +4582,7 @@ if (typeof window === 'undefined') {
             d2.delete(key2);
         }
 
-        // if entries remain in d2, keep it
+
         for (var v2 of d2.values())
             return value;
 
@@ -4462,7 +4594,123 @@ if (typeof window === 'undefined') {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
+(function () {
+
+    function URLUtil() {
+
+    }
+
+    URLUtil.isHttpURL = function (url) {
+        return url !== null &&
+            (url.indexOf("http://") === 0 ||
+                url.indexOf("https://") === 0);
+
+    }
+
+    URLUtil.getFullURL = function (rootURL, url) {
+        if (url !== null && !URLUtil.isHttpURL(url)) {
+            if (url.indexOf("./") === 0) {
+                url = url.substring(2);
+            }
+            if (URLUtil.isHttpURL(rootURL)) {
+                var slashPos;
+
+                if (url.charAt(0) === '/') {
+                    // non-relative path, "/dev/foo.bar".
+                    slashPos = rootURL.indexOf("/", 8);
+                    if (slashPos === -1)
+                        slashPos = rootURL.length;
+                } else {
+                    // relative path, "dev/foo.bar".
+                    slashPos = rootURL.lastIndexOf("/") + 1;
+                    if (slashPos <= 8) {
+                        rootURL += "/";
+                        slashPos = rootURL.length;
+                    }
+                }
+
+                if (slashPos > 0)
+                    url = rootURL.substring(0, slashPos) + url;
+            }
+        }
+
+        return url;
+    }
+
+    weavecore.URLUtil = URLUtil;
+
+}());
+if (typeof window === 'undefined') {
+    this.WeaveAPI = this.WeaveAPI || {};
+    this.weavecore = this.weavecore || {};
+} else {
+    window.WeaveAPI = window.WeaveAPI || {};
+    window.weavecore = window.weavecore || {};
+}
+
+(function () {
+
+    function DebugUtils() {
+
+    }
+
+    /****************************
+     **  Object id and lookup  **
+     ****************************/
+
+    DebugUtils._idToObjRef = new Map();
+    DebugUtils._objToId = new Map(); // weakKeys=true to avoid memory leak
+    DebugUtils._nextId = 0;
+
+    /**
+     * This function generates or returns a previously generated identifier for an object.
+     */
+    DebugUtils.debugId = function (object) {
+        var type = typeof (object);
+        if (object === null || type !== 'object' && type !== 'function')
+            return String(object);
+        var idString = DebugUtils._objToId.get(object);
+        if (!idString) {
+            var idNumber = DebugUtils._nextId++;
+            var className = object.constructor.name;
+            idString = className + '#' + idNumber;
+
+            var ref = new Map();
+            ref.set(object, true);
+            // save lookup from object to idString
+            DebugUtils._objToId.set(object, idString);
+            // save lookup from idString and idNumber to weak object reference
+            DebugUtils._idToObjRef.set(idNumber, ref);
+            DebugUtils._idToObjRef.set(idString, ref);
+        }
+        return idString;
+    }
+
+    weavecore.DebugUtils = DebugUtils;
+    WeaveAPI.DebugUtils = new DebugUtils();
+
+}());
+/**
+ * @module WeaveAPI
+ */
+
+//namesapce
+if (typeof window === 'undefined') {
+    this.WeaveAPI = this.WeaveAPI || {};
+} else {
+    window.WeaveAPI = window.WeaveAPI || {};
+}
+
+
+WeaveAPI.debugID = function (object) {
+    return WeaveAPI.DebugUtils.debugId(object);
+}
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -4583,7 +4831,7 @@ if (typeof window === 'undefined') {
             // If callbacks were triggered, make sure callbacks are triggered again one frame later when
             // it is possible for other classes to have a pointer to this object and retrieve the value.
             if (defaultValueTriggersCallbacks && this._triggerCounter > weavecore.CallbackCollection.DEFAULT_TRIGGER_COUNT)
-                weavecore.StageUtils.callLater(this, _defaultValueTrigger.bind(this));
+                WeaveAPI.StageUtils.callLater(this, _defaultValueTrigger.bind(this));
         }
 
 
@@ -4727,7 +4975,6 @@ if (typeof window === 'undefined') {
     weavecore.LinkableVariable = LinkableVariable;
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -5199,6 +5446,228 @@ if (typeof window === 'undefined') {
 
 }());
 
+if (typeof window === 'undefined') {
+    this.WeaveAPI = this.WeaveAPI || {};
+    this.weavecore = this.weavecore || {};
+} else {
+    window.WeaveAPI = window.WeaveAPI || {};
+    window.weavecore = window.weavecore || {};
+}
+
+/**
+ * This is a LinkableVariable which limits its session state to Number values.
+ * @author adufilie
+ * @author sanjay1909
+ */
+(function () {
+    /**
+     * temporary solution to save the namespace for this class/prototype
+     * @static
+     * @public
+     * @property NS
+     * @default weavecore
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(ProgressIndicator, 'NS', {
+        value: 'weavecore'
+    });
+
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(ProgressIndicator, 'CLASS_NAME', {
+        value: 'ProgressIndicator'
+    });
+
+    /**
+     * TO-DO:temporary solution for checking class in sessionable
+     * @static
+     * @public
+     * @property SESSIONABLE
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(ProgressIndicator, 'SESSIONABLE', {
+        value: true
+    });
+
+
+    Object.defineProperty(ProgressIndicator, 'debug', {
+        value: false
+    });
+
+    function ProgressIndicator() {
+
+        weavecore.ILinkableObject.call(this);
+
+        this._taskCount = 0;
+        this._maxTaskCount = 0;
+        Object.defineProperties(this, {
+            '_progress': {
+                value: new Map()
+            },
+            '_description': {
+                value: new Map()
+            },
+            '_stackTrace': {
+                value: new Map()
+            }
+        });
+
+    }
+
+    ProgressIndicator.prototype = new weavecore.ILinkableObject();
+    ProgressIndicator.prototype.constructor = ProgressIndicator;
+
+    var p = ProgressIndicator.prototype;
+
+    /**
+     * For debugging, returns debugIds for active tasks.
+     */
+    p.debugTasks = function () {
+        var result = [];
+        this._progress.forEach(function (value, task) {
+            result.push(WeaveAPI.debugId(task));
+        }, this._progress);
+
+        return result;
+    }
+
+    p.getDescriptions = function () {
+        var result = [];
+        this._progress.forEach(function (value, task) {
+            var desc = this._description.get(task) || "Unnamed task";
+            if (desc)
+                result.push(WeaveAPI.debugId(task) + " (" + (100 * this._progress.get(task)) + "%) " + desc);
+
+        }, this._progress);
+
+        WeaveAPI.StandardLib.sort(result);
+        return result;
+    }
+
+
+    /**
+     * @inheritDoc
+     */
+    p.getTaskCount = function () {
+        return this._taskCount;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    p.addTask = function (taskToken, busyObject, description) {
+        busyObject = (busyObject === undefined) ? null : busyObject;
+        description = (description === undefined) ? null : description;
+
+        var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
+        cc.delayCallbacks();
+
+        if (taskToken instanceof weavecore.CustomPromise && this._progress.get(taskToken) === undefined)
+            taskToken.addResponder({
+                result: handleAsyncToken.bind(this),
+                fault: handleAsyncToken.bind(this),
+                token: taskToken
+            });
+
+        this._description.set(taskToken, description);
+
+        // add task before WeaveAPI.SessionManager.assignBusyTask()
+        this.updateTask(taskToken, NaN); // NaN is used as a special case when adding the task
+
+        if (busyObject)
+            WeaveAPI.SessionManager.assignBusyTask(taskToken, busyObject);
+
+        cc.resumeCallbacks();
+    }
+
+    function handleAsyncToken(response, token) {
+        this.removeTask(token);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    p.hasTask = function (taskToken) {
+        return this._progress.get(taskToken) !== undefined;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    p.updateTask = function (taskToken, progress) {
+        // if this token isn't in the Dictionary yet, increase count
+        if (this._progress.get(taskToken) === undefined) {
+            // expecting NaN from addTask()
+            if (!isNaN(progress))
+                console.error("updateTask() called, but task was not previously added with addTask()");
+            if (ProgressIndicator.debug)
+                this._stackTrace.set(taskToken, new Error("Stack trace").getStackTrace());
+
+            // increase count when new task is added
+            this._taskCount++;
+            this._maxTaskCount++;
+        }
+
+        if (this._progress.get(taskToken) !== progress) {
+            this._progress.set(taskToken, progress);
+            WeaveAPI.SessionManager.getCallbackCollection(this).triggerCallbacks();
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    p.removeTask = function (taskToken) {
+        // if the token isn't in the dictionary, do nothing
+        if (this._progress.get(taskToken) === undefined)
+            return;
+
+        var stackTrace = this._stackTrace.get(taskToken); // check this when debugging
+
+        this._progress.delete(taskToken);
+        this._description.delete(taskToken);
+        this._stackTrace.delete(taskToken);
+        this._taskCount--;
+        // reset max count when count drops to 1
+        if (this._taskCount == 1)
+            this._maxTaskCount = this._taskCount;
+
+        WeaveAPI.SessionManager.unassignBusyTask(taskToken);
+
+        WeaveAPI.SessionManager.getCallbackCollection(this).triggerCallbacks();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    p.getNormalizedProgress = function () {
+        // add up the percentages
+        var sum = 0;
+        this._progress.forEach(function (value, task) {
+            var stackTrace = this._stackTrace.get(task); // check this when debugging
+            var progress = this._progress.get(task);
+            if (isFinite(progress))
+                sum += progress;
+        }, this._progress);
+
+        // make any pending requests that no longer exist count as 100% done
+        sum += _maxTaskCount - _taskCount;
+        // divide by the max count to get overall percentage
+        return sum / _maxTaskCount;
+    }
+
+    weavecore.ProgressIndicator = ProgressIndicator;
+    WeaveAPI.ProgressIndicator = new ProgressIndicator();
+
+}());
 /**
  * @module weavecore
  */
@@ -6278,8 +6747,8 @@ if (typeof window === 'undefined') {
         this._result = null;
         this._error = null;
 
-        // TO-DO: Progress Indicator we are no longer waiting for the async task
-        // WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        //  Progress Indicator we are no longer waiting for the async task
+        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
 
         // stop if lazy
         if (this._lazy)
@@ -6300,8 +6769,8 @@ if (typeof window === 'undefined') {
         else
             _tmp_description = this._description;
 
-        //TO-DO:Progress Indicator mark as busy starting now because we plan to start the task inside _groupedCallback()
-        //WeaveAPI.ProgressIndicator.addTask(_groupedCallback, this, _tmp_description);
+        //Progress Indicator mark as busy starting now because we plan to start the task inside _groupedCallback()
+        WeaveAPI.ProgressIndicator.addTask(_groupedCallback, this, _tmp_description);
     }
 
     function _groupedCallback() {
@@ -6319,24 +6788,24 @@ if (typeof window === 'undefined') {
             // set _invalidated to false now since we invoked the task
             this._invalidated = false;
 
-            if (invokeResult instanceof Promise)
+            if (invokeResult instanceof weavecore.CustomPromise)
+                invokeResult.addResponder({
+                    result: _handleResult.bind(this),
+                    fault: _handleFault.bind(this),
+                    token: invokeResult
+                });
+            else if (invokeResult instanceof Promise) {
                 invokeResult.then(_handleResult.bind(this), _handleFault.bind(this));
-            else {
-                _result = invokeResult;
-                weavecore.StageUtils.callLater(this, _handleResult.bind(this));
-                //_asyncToken = invokeResult as AsyncToken;
+            } else {
+                this._result = invokeResult;
+                WeaveAPI.StageUtils.callLater(this, _handleResult.bind(this));
             }
 
-            /*if (_asyncToken) {
-                _asyncToken.addResponder(new AsyncResponder(_handleResult, _handleFault, _asyncToken));
-            } else {
-                _result = invokeResult;
-                weavecore.StageUtils.callLater(this, _handleResult);
-            }*/
+
         } catch (invokeError) {
             this._invalidated = false;
             this._error = invokeError;
-            weavecore.StageUtils.callLater(this, _handleFault.bind(this));
+            WeaveAPI.StageUtils.callLater(this, _handleFault.bind(this));
         }
     }
 
@@ -6346,8 +6815,8 @@ if (typeof window === 'undefined') {
         if (this._invalidated)
             return;
 
-        //TO-DO: ProgressIndicator no longer busy
-        // WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        // ProgressIndicator no longer busy
+        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
 
         // if there is an result, save the result
         if (result)
@@ -6363,11 +6832,11 @@ if (typeof window === 'undefined') {
         if (this._invalidated)
             return;
 
-        //TO-DO:Progress Indicator no longer busy
-        // WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        //Progress Indicator no longer busy
+        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
 
         // if there is an fault, save the error
-        if (event)
+        if (fault)
             this._error = fault;
 
         this._selfTriggeredCount = this._callbackCollection.triggerCounter + 1;
@@ -6395,8 +6864,7 @@ if (typeof window === 'undefined') {
     }
 
     p.dispose = function () {
-        //TO-DO: Progress Indicator
-        // WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
         this._lazy = true;
         this._invalidated = true;
         this._result = null;
@@ -6407,7 +6875,118 @@ if (typeof window === 'undefined') {
 
 
 }());
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
 
+/**
+ * This is a LinkableString that handles the process of managing a promise for file content from a URL.
+ * @author pkovac
+ * @author sanjay1909
+ */
+(function () {
+    /**
+     * temporary solution to save the namespace for this class/prototype
+     * @static
+     * @public
+     * @property NS
+     * @default weavecore
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableFile, 'NS', {
+        value: 'weavecore'
+    });
+
+    /**
+     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableFile, 'CLASS_NAME', {
+        value: 'LinkableFile'
+    });
+
+    /**
+     * TO-DO:temporary solution for checking class in sessionable
+     * @static
+     * @public
+     * @property SESSIONABLE
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(LinkableFile, 'SESSIONABLE', {
+        value: true
+    });
+
+    function LinkableFile(defaultValue, taskDescription) {
+        // set default values for Parameters
+        if (defaultValue === undefined) defaultValue = null;
+        if (taskDescription === undefined) taskDescription = null;
+
+        // Note: Calling  weavecore.LinkableVariable.call() will set all the default values for member variables defined in the super class,
+        // which means we can't set _sessionStateInternal = NaN here.
+        weavecore.LinkableVariable.call(this);
+
+        this._contentPromise = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkablePromise(requestContent.bind(this), taskDescription));
+        this._url = WeaveAPI.SessionManager.registerLinkableChild(this._contentPromise, new weavecore.LinkableString(defaultValue));
+
+        Object.defineProperty(this, 'value', {
+            get: function () {
+                return this._url.value;
+            },
+            set: function (new_value) {
+                this._url.value = new_value;
+            }
+
+        });
+
+        Object.defineProperty(this, 'result', {
+            get: function () {
+                return this._contentPromise.result;
+            }
+
+        });
+
+        Object.defineProperty(this, 'error', {
+            get: function () {
+                return this._contentPromise.error;
+            }
+
+        });
+
+    }
+
+    function requestContent() {
+        if (!this._url.value)
+            return null;
+        return WeaveAPI.URLRequestUtils.getPromise(this._contentPromise, this._url.value, null, null, null, 'binary', true);
+    }
+
+    LinkableFile.prototype = new weavecore.LinkableVariable();
+    LinkableFile.prototype.constructor = LinkableFile;
+
+    var p = LinkableFile.prototype;
+
+    p.setSessionState = function (value) {
+        this._url.setSessionState(value);
+    }
+
+    p.getSessionState = function () {
+        return this._url.getSessionState();
+    }
+
+
+
+
+    weavecore.LinkableFile = LinkableFile;
+
+}());
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -6845,25 +7424,13 @@ if (typeof window === 'undefined') {
 
 }());
 
-/*
-    Weave (Web-based Analysis and Visualization Environment)
-    Copyright (C) 2008-2011 University of Massachusetts Lowell
-    This file is a part of Weave.
-    Weave is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, Version 3,
-    as published by the Free Software Foundation.
-    Weave is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-    You should have received a copy of the GNU General Public License
-    along with Weave.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 // namespace
 
 if (!this.weavecore)
     this.weavecore = {};
+
+if (!this.WeaveAPI)
+    this.WeaveAPI = {};
 
 /**
  * This allows you to add callbacks that will be called when an event occurs on the stage.
@@ -6954,6 +7521,10 @@ if (!this.weavecore)
 
     weavecore.EventCallbackCollection = EventCallbackCollection;
 
+    StageUtils.debug_async_time = false;
+    StageUtils.debug_async_stack = false;
+    StageUtils.debug_delayTasks = false; // set this to true to delay async tasks
+    StageUtils.debug_callLater = false; // set this to true to delay async tasks
     //constructor
     function StageUtils() {
 
@@ -6977,6 +7548,12 @@ if (!this.weavecore)
             },
 
         });
+
+        Object.defineProperty(this, 'currentFrameElapsedTime', {
+            get: function () {
+                return getTimer() - this.eventManager.currentFrameStartTime;
+            }
+        });
         this._currentTaskStopTime = 0;
 
         /**
@@ -6999,6 +7576,8 @@ if (!this.weavecore)
         this.addEventCallback("tick", null, this._handleCallLater.bind(this));
         this.maxComputationTimePerFrame = 100;
         this.maxComputationTimePerFrame_noActivity = 250;
+
+        this._debugTaskTimes = new Map();
 
     }
 
@@ -7032,8 +7611,8 @@ if (!this.weavecore)
         this._priorityCallLaterQueues[this._nextCallLaterPriority].push(arguments);
         this._nextCallLaterPriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE;
 
-        //if (this.debug_async_stack)
-        //_stackTraceMap[arguments] = new Error("This is the stack trace from when callLater() was called.").getStackTrace();
+        if (StageUtils.debug_async_stack)
+            this._stackTraceMap.set(arguments, new Error("This is the stack trace from when callLater() was called.").getStackTrace());
     };
 
     suP._handleCallLater = function () {
@@ -7109,7 +7688,7 @@ if (!this.weavecore)
 
             // args: (relevantContext:Object, method:Function, parameters:Array, priority:uint)
             args = queue.shift();
-            stackTrace = this._stackTraceMap[args];
+            stackTrace = this._stackTraceMap.get(args);
 
             // don't call the function if the relevantContext was disposed.
             if (!WeaveAPI.SessionManager.objectWasDisposed(args[0])) {
@@ -7190,12 +7769,12 @@ if (!this.weavecore)
             countdown--;
 
             //				trace('p',_activePriority,pElapsed,'/',pAlloc);
-            _currentTaskStopTime = pStop; // make sure _iterateTask knows when to stop
+            this._currentTaskStopTime = pStop; // make sure _iterateTask knows when to stop
 
             // call the next function in the queue
             // args: (relevantContext:Object, method:Function, parameters:Array, priority:uint)
             args = queue.shift();
-            stackTrace = this._stackTraceMap[args]; // check this for debugging where the call came from
+            stackTrace = this._stackTraceMap.get(args); // check this for debugging where the call came from
 
             //				WeaveAPI.SessionManager.unassignBusyTask(args);
 
@@ -7229,9 +7808,130 @@ if (!this.weavecore)
         }
     };
 
+    suP.startTask = function (relevantContext, iterativeTask, priority, finalCallback, description) {
+
+        finalCallback = (finalCallback === undefined) ? null : finalCallback;
+        description = (description === undefined) ? null : description;
+
+        // do nothing if task already active
+        if (WeaveAPI.ProgressIndicator.hasTask(iterativeTask))
+            return;
+
+        if (StageUtils.debug_async_time) {
+            if (this._debugTaskTimes.get(iterativeTask))
+                console.log('interrupted', (new Date().getTime()) - this._debugTaskTimes.get(iterativeTask)[0], priority, this._debugTaskTimes.get(iterativeTask)[1], this._debugTaskTimes.delete(iterativeTask));
+            this._debugTaskTimes.set(iterativeTask, [(new Date().getTime()), weavecore.DebugUtils.getCompactStackTrace(new Error())]);
+        }
+
+        if (priority >= this._priorityCallLaterQueues.length) {
+            console.error("Invalid priority value: " + priority);
+            priority = WeaveAPI.TASK_PRIORITY_NORMAL;
+        }
+
+        if (StageUtils.debug_async_stack) {
+            this._stackTraceMap.set(iterativeTask, debugId(iterativeTask) + ' ' + weavecore.DebugUtils.getCompactStackTrace(new Error("Stack trace")));
+            this._taskStartTime.set(iterativeTask, (new Date().getTime()));
+            this._taskElapsedTime.set(iterativeTask, 0);
+        }
+        WeaveAPI.ProgressIndicator.addTask(iterativeTask, relevantContext, description);
+
+        var useTimeParameter = iterativeTask.length > 0;
+
+        // Set relevantContext as null for callLater because we always want _iterateTask to be called later.
+        // This makes sure that the task is removed when the actual context is disposed.
+        this._nextCallLaterPriority = priority;
+        this.callLater(null, _iterateTask.bind(this), [relevantContext, iterativeTask, priority, finalCallback, useTimeParameter]);
+        //_iterateTask(relevantContext, iterativeTask, priority, finalCallback);
 
 
-    weavecore.StageUtils = new StageUtils();
+    }
+
+    function getTimer() {
+        return new Date().getTime();
+    }
+
+    function _iterateTask(context, task, priority, finalCallback, useTimeParameter) {
+        // remove the task if the context was disposed
+        if (WeaveAPI.SessionManager.objectWasDisposed(context)) {
+            var arr = this._debugTaskTimes.get(task);
+            if (StageUtils.debug_async_time && arr)
+                console.log('disposed', (new Date().getTime()) - arr[0], priority, arr[1], this._debugTaskTimes.delete(task));
+            WeaveAPI.ProgressIndicator.removeTask(task);
+            return;
+        }
+
+        var debug_time = StageUtils.debug_async_stack ? (new Date().getTime()) : -1;
+        var stackTrace = StageUtils.debug_async_stack ? this._stackTraceMap.get(task) : null;
+
+        var progress = undefined;
+        // iterate on the task until _currentTaskStopTime is reached
+        var time;
+        while ((time = getTimer()) <= this._currentTaskStopTime) {
+            // perform the next iteration of the task
+            if (useTimeParameter)
+                progress = task(this._currentTaskStopTime);
+            else
+                progress = task();
+
+            if (progress === null || isNaN(progress) || progress < 0 || progress > 1) {
+                console.error("Received unexpected result from iterative task (" + progress + ").  Expecting a number between 0 and 1.  Task cancelled.");
+                if (StageUtils.debug_async_stack) {
+                    console.log(stackTrace);
+                    // this is incorrect behavior, but we can put a breakpoint here
+                    if (useTimeParameter)
+                        progress = task(this._currentTaskStopTime);
+                    else
+                        progress = task();
+                }
+                progress = 1;
+            }
+            if (StageUtils.debug_async_stack && this.currentFrameElapsedTime > 3000) {
+                console.log(getTimer() - time, stackTrace);
+                // this is incorrect behavior, but we can put a breakpoint here
+                if (useTimeParameter)
+                    progress = task(_currentTaskStopTime);
+                else
+                    progress = task();
+            }
+            if (progress === 1) {
+                var arr = this._debugTaskTimes.get(task);
+                if (StageUtils.debug_async_time && arr)
+                    trace('completed', getTimer() - arr[0], priority, arr[1], this._debugTaskTimes.delete(task));
+                // task is done, so remove the task
+                WeaveAPI.ProgressIndicator.removeTask(task);
+                // run final callback after task completes and is removed
+                if (finalCallback !== null)
+                    finalCallback();
+                return;
+            }
+
+            // If the time parameter is accepted, only call the task once in succession.
+            if (useTimeParameter)
+                break;
+
+            if (debug_delayTasks)
+                break;
+        }
+        if (false && StageUtils.debug_async_stack) {
+            var start = Number(this._taskStartTime.get(task));
+            var elapsed = Number(this._taskElapsedTime.get(task)) + (time - debug_time);
+            this._taskElapsedTime.set(task, elapsed);
+            console.log(elapsed, '/', (time - start), '=', weavecore.StandardLib.roundSignificant(elapsed / (time - start), 2), stackTrace);
+        }
+
+        // max computation time reached without finishing the task, so update the progress indicator and continue the task later
+        if (progress !== undefined)
+            WeaveAPI.ProgressIndicator.updateTask(task, progress);
+
+        // Set relevantContext as null for callLater because we always want _iterateTask to be called later.
+        // This makes sure that the task is removed when the actual context is disposed.
+        this._nextCallLaterPriority = priority;
+        this.callLater(null, _iterateTask.bind(this), arguments);
+    }
+
+
+    weavecore.StageUtils = StageUtils;
+    WeaveAPI.StageUtils = new StageUtils();
 
 
     function EventManager() {
@@ -7276,7 +7976,6 @@ if (!this.weavecore)
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -7483,7 +8182,7 @@ if (typeof window === 'undefined') {
         if (!immediately && getTimer() < this._saveTime) {
             // console.log("save difference is Paused");
             // we have to wait until the next frame to save the diff because grouped callbacks haven't finished.
-            weavecore.StageUtils.callLater(this, this._saveDiff.bind(this));
+            WeaveAPI.StageUtils.callLater(this, this._saveDiff.bind(this));
             return;
         }
 
@@ -7748,5 +8447,606 @@ if (typeof window === 'undefined') {
         }
     };
     weavecore.SessionStateLog = SessionStateLog;
+
+}());
+if (typeof window === 'undefined') {
+    this.WeaveAPI = this.WeaveAPI || {};
+    this.weavecore = this.weavecore || {};
+} else {
+    window.WeaveAPI = window.WeaveAPI || {};
+    window.weavecore = window.weavecore || {};
+}
+
+
+(function () {
+
+    URLRequestUtils.debug = false;
+    URLRequestUtils.delayResults = false; // when true, delays result/fault handling and fills the 'delayed' Array.
+
+    // array of objects with properties:  label:String, resume:Function
+    Object.defineProperty(URLRequestUtils, 'delayed', {
+        value: []
+    });
+
+
+    Object.defineProperty(URLRequestUtils, 'DATA_FORMAT_TEXT', {
+        value: 'text'
+    });
+
+    Object.defineProperty(URLRequestUtils, 'DATA_FORMAT_BINARY', {
+        value: 'binary'
+    });
+    Object.defineProperty(URLRequestUtils, 'DATA_FORMAT_VARIABLES', {
+        value: 'variables'
+    });
+
+    Object.defineProperty(URLRequestUtils, 'LOCAL_FILE_URL_SCHEME', {
+        value: 'local://'
+    });
+
+
+
+
+    function URLRequestUtils(defaultValue, taskDescription) {
+        /**
+         * A mapping of URL Strings to CustomXMLHttpRequest.
+         * This mapping is necessary for cached requests to return the active request.
+         */
+        Object.defineProperty(this, '_requestURLToLoader', {
+            value: {}
+        });
+
+        this._localFiles = {};
+        this._baseURL;
+
+    }
+
+    var p = URLRequestUtils.prototype;
+
+    /**
+     * This will set the base URL for use with relative URL requests.
+     */
+    p.setBaseURL = function (baseURL) {
+        // only set baseURL if there is a ':' before first '/'
+        if (baseURL.split('/')[0].indexOf(':') >= 0) {
+            // remove '?' and everything after
+            this._baseURL = baseURL.split('?')[0];
+        }
+    }
+
+
+    function addBaseURL(url) {
+        if (this._baseURL)
+            url = weavecore.URLUtil.getFullURL(this._baseURL, url);
+    }
+
+
+
+    p.getPromise = function (relevantContext, url, data, method, requestHeaders, dataFormat, allowMultipleEvents) {
+
+        allowMultipleEvents = allowMultipleEvents === undefined ? false : allowMultipleEvents;
+
+        var client;
+
+        if (url.indexOf(URLRequestUtils.LOCAL_FILE_URL_SCHEME) === 0) {
+            var fileName = url.substr(URLRequestUtils.LOCAL_FILE_URL_SCHEME.length);
+            // If it's a local file, we still need to create a promise.
+            // CustomURLLoader doesn't load if the last parameter to the constructor is false.
+            if (allowMultipleEvents)
+                client = this._requestURLToLoader[url];
+            if (!client) {
+                client = new weavecore.CustomClient(url, data, method, requestHeaders, dataFormat, false);
+                if (allowMultipleEvents)
+                    this._requestURLToLoader[url] = client;
+            }
+            client.promise.addRelevantContext(relevantContext);
+            if (this._localFiles.hasOwnProperty(fileName)) {
+                WeaveAPI.StageUtils.callLater(relevantContext, client.applyResult.bind(client), [this._localFiles[fileName]]);
+            } else {
+                fault = "Error: Missing local file: " + fileName;
+                WeaveAPI.StageUtils.callLater(relevantContext, client.applyFault.bind(client), [fault]);
+            }
+
+            return client.promise;
+
+        }
+
+        addBaseURL.call(this, url);
+
+        // attempt to load crossdomain.xml from same folder as file
+        //Security.loadPolicyFile(URLUtil.getFullURL(request.url, 'crossdomain.xml'));
+
+        try {
+            client = new weavecore.CustomClient(url, data, method, requestHeaders, dataFormat, true);
+        } catch (e) {
+            // When an error occurs, we need to run the asyncFaultHandler later
+            // and return a new URLLoader. CustomURLLoader doesn't load if the
+            // last parameter to the constructor is false.
+            client = new weavecore.CustomClient(url, data, method, requestHeaders, dataFormat, false);
+
+            WeaveAPI.StageUtils.callLater(relevantContext, client.applyFault.bind(client), [e]);
+        }
+
+        client.promise.addRelevantContext(relevantContext);
+
+        return client.promise;
+
+
+
+    }
+
+
+    weavecore.URLRequestUtils = URLRequestUtils;
+    WeaveAPI.URLRequestUtils = new URLRequestUtils();
+
+
+
+
+
+
+}());
+
+(function () {
+    /**
+     * Lookup for hosts that previously failed due to crossdomain.xml security error
+     */
+    Object.defineProperty(CustomClient, '_failedHosts', {
+        value: {} // host -> true
+    });
+
+    /**
+     * Maps a status code to a description.
+     */
+    Object.defineProperty(CustomClient, 'HTTP_STATUS_CODES', {
+        value: {
+            "100": "Continue",
+            "101": "Switching Protocol",
+            "200": "OK",
+            "201": "Created",
+            "202": "Accepted",
+            "203": "Non-Authoritative Information",
+            "204": "No Content",
+            "205": "Reset Content",
+            "206": "Partial Content",
+            "300": "Multiple Choice",
+            "301": "Moved Permanently",
+            "302": "Found",
+            "303": "See Other",
+            "304": "Not Modified",
+            "305": "Use Proxy",
+            "306": "unused",
+            "307": "Temporary Redirect",
+            "308": "Permanent Redirect",
+            "400": "Bad Request",
+            "401": "Unauthorized",
+            "402": "Payment Required",
+            "403": "Forbidden",
+            "404": "Not Found",
+            "405": "Method Not Allowed",
+            "406": "Not Acceptable",
+            "407": "Proxy Authentication Required",
+            "408": "Request Timeout",
+            "409": "Conflict",
+            "410": "Gone",
+            "411": "Length Required",
+            "412": "Precondition Failed",
+            "413": "Request Entity Too Large",
+            "414": "Request-URI Too Long",
+            "415": "Unsupported Media Type",
+            "416": "Requested Range Not Satisfiable",
+            "417": "Expectation Failed",
+            "500": "Internal Server Error",
+            "501": "Not Implemented",
+            "502": "Bad Gateway",
+            "503": "Service Unavailable",
+            "504": "Gateway Timeout",
+            "505": "HTTP Version Not Supported"
+        }
+    });
+
+    function CustomClient(url, data, method, requestHeaders, dataFormat, loadNow) {
+
+        method = method === null ? 'GET' : method;
+        this._label;
+        this._customPromise;
+        this._isClosed = false;
+        this._url = url;
+        this._method = method;
+        this._requestHeaders = requestHeaders;
+        this.data = data;
+
+        //XMLHttpRequest is a host object(DOM objects) so we cant extend using prototype
+        Object.defineProperty(this, 'client', {
+            value: new XMLHttpRequest()
+        })
+
+        //var ie9_XHR = window.XDomainRequest;
+        //var XHR = ie9_XHR || XMLHttpRequest;
+        //XHR.call(this);
+
+        this._resumeFunc = null;
+        this._resumeParam = null;
+
+
+        this._resolve;
+        this._reject;
+        this._customPromise = new weavecore.CustomPromise(this, function (_resolve, _reject) {
+            this._resolve = _resolve;
+            this._reject = _reject;
+        }.bind(this));
+        /**
+         * This is the promise that keeps track of repsonders.
+         */
+        Object.defineProperty(this, 'promise', {
+            get: function () {
+                return this._customPromise
+            }
+        });
+
+        /**
+         * list of function gets executed for promise then
+         */
+        Object.defineProperty(this, 'responders', {
+            value: []
+        });
+
+        /**
+         * This is the URLRequest that was passed to load().
+         */
+        Object.defineProperty(this, 'url', {
+            get: function () {
+                return this._url
+            }
+        });
+
+
+        /**
+         * Gets the open or closed status of the URLLoader.
+         */
+        Object.defineProperty(this, 'isClosed', {
+            get: function () {
+                return this._isClosed
+            }
+        });
+
+
+        if (loadNow) {
+            if (weavecore.URLRequestUtils.delayResults) {
+                label = url;
+                //to-do : change to binary data temporary solution JSON string
+                try {
+                    var stringData = JSON.stringify(data);
+                    label += ' ' + stringData.split('\n').join(' ');
+                } catch (e) {}
+                console.log('requested ' + label);
+                URLRequestUtils.delayed.push({
+                    "label": label,
+                    "resume": resume
+                });
+            }
+
+            /*if (CustomClient._failedHosts[getHost()]) {
+                // don't bother trying a URLLoader with the same host that previously failed due to a security error
+                ExternalDownloader.download(_urlRequest, dataFormat, _asyncToken);
+                return;
+            }*/
+
+            for (var name in requestHeaders)
+                this.client.setRequestHeader(name, requestHeaders[name], false);
+
+            this.client.responseType = "blob";
+
+            var done = false;
+            var customClient = this;
+            this.client.onload = function (event) {
+                Blob_to_b64(customClient.client.response, function (b64) {
+                    callback.call(customClient, customClient.client.status, b64);
+                    done = true;
+                });
+            };
+            this.client.onerror = function (event) {
+                if (!done)
+                    callback.call(customClient, customClient.client.status, null);
+                done = true;
+            };
+            this.client.onreadystatechange = function () {
+                if (customClient.client.readyState == 4 && customClient.client.status != 200) {
+                    setTimeout(
+                        function () {
+                            if (!done)
+                                callback.call(customClient, customClient.client.status, null);
+                            done = true;
+                        },
+                        1000
+                    );
+                }
+            };
+
+
+
+
+            if (weavecore.URLRequestUtils.debug)
+                console.log(this, 'request', url);
+
+            this.client.open(method, url, true);
+            var data = null;
+            if (method == "POST" && base64data) {
+                data = weave.b64_to_ArrayBuffer(base64data);
+                this.client.send(data);
+            } else {
+                this.client.send();
+            }
+
+
+        }
+
+        this.promise.internal.then(function (response) {
+            handleGetResult.call(this, response);
+        }.bind(this), function (response) {
+            handleGetError.call(response);
+        }.bind(this))
+    }
+
+    function decodeResponse(response) {
+        var dataView = new DataView(response);
+        // The TextDecoder interface is documented at http://encoding.spec.whatwg.org/#interface-textdecoder
+        var decoder = new TextDecoder('utf-8');
+        return decoder.decode(dataView);
+    }
+
+    function ab2str(buf) {
+        return String.fromCharCode.apply(null, new Uint16Array(buf));
+    }
+
+    function callback(status, base64data) {
+        var result;
+        if (base64data) {
+            var bytes = b64_to_ArrayBuffer(base64data);
+            result = decodeResponse(bytes);
+
+        }
+        if (status === 200) {
+            this._resolve(result);
+        } else {
+            var faultCode = null;
+            if (CustomClient.HTTP_STATUS_CODES[status])
+                faultCode = status + " " + CustomClient.HTTP_STATUS_CODES[status];
+            else if (status)
+                faultCode = "" + status;
+            else
+                faultCode = "Error";
+            this._reject(faultCode);
+        }
+    }
+
+    function b64_to_ArrayBuffer(base64data) {
+        var byteCharacters = atob(base64data);
+        var myArray = new ArrayBuffer(byteCharacters.length);
+        var longInt8View = new Uint8Array(myArray);
+        for (var i = 0; i < byteCharacters.length; i++)
+            longInt8View[i] = byteCharacters.charCodeAt(i);
+        return myArray;
+    };
+
+    function Blob_to_b64(blob, callback) {
+        var reader = new FileReader();
+        reader.onloadend = function (event) {
+            var dataurl = reader.result;
+            var base64data = dataurl.split(',').pop();
+            callback(base64data);
+        };
+        reader.onerror = function (event) {
+            callback(null);
+        };
+        reader.readAsDataURL(blob);
+    };
+
+
+
+    function loadLater() {
+        if (!this._isClosed) {
+            this.open(this._method, this.url, true);
+            this.send();
+        }
+
+    }
+
+    function getHost() {
+        var start = this.url.indexOf("/") + 2;
+        var length = this.url.indexOf("/", start);
+        var host = this.url.substr(0, length);
+        return host;
+    }
+
+    var p = CustomClient.prototype;
+
+    p.close = function () {
+        WeaveAPI.ProgressIndicator.removeTask(this._customPromise);
+        if (weavecore.URLRequestUtils.debug)
+            console.log(this, 'cancel', this._url);
+        this._isClosed = true;
+        try {
+            this.client.abort();
+        } catch (e) {
+
+        } // ignore close() errors
+    }
+
+    /**
+     * This provides a convenient way for adding result/fault handlers.
+     * @param responder
+     */
+    p.addResponder = function (responder) {
+        this.promise.responders.push(responder);
+    }
+
+    /**
+     * This provides a convenient way to remove a URLRequestToken as a responder.
+     * @param responder
+     */
+    p.removeResponder = function (responder) {
+        var responders = this.promise.responders;
+        var index = responders.indexOf(responder);
+        if (index >= 0) {
+            // URLRequestToken found -- remove it
+            responders.splice(index, 1);
+            /*// see if there are any more URLRequestTokens
+            for (var i = 0; i < responders.length; i++) {
+                if (obj.isCustomResponder)
+                    return;
+            }*/
+
+            // no more CustomAsyncResponders found, so cancel
+            this.close();
+        }
+    }
+
+
+    /**
+     * When URLRequestUtils.delayResults is set to true, this function will resume
+     * @return true
+     */
+    p.resume = function () {
+        if (this._resumeFunc === null) {
+            this._resumeFunc = resume; // this cancels the pending delay behavior
+        } else if (this._resumeFunc !== resume) {
+            this._resumeFunc(this._resumeParam);
+        }
+    }
+
+    function handleGetResult(response) {
+        if (weavecore.URLRequestUtils.debug)
+            console.log(this, 'complete', this.url);
+        if (weavecore.URLRequestUtils.delayResults && this._resumeFunc == null) {
+            this._resumeFunc = handleGetResult;
+            this._resumeParam = response;
+            return;
+        }
+
+        // broadcast result to responders
+        WeaveAPI.StageUtils.callLater(null, this.applyResult.bind(this), [response]);
+
+    }
+
+    /**
+     * This function gets called when a URLLoader generated by getURL() dispatches an IOErrorEvent.
+     * @param event The ErrorEvent from a URLLoader.
+     */
+    function handleGetError(fault) {
+        if (weavecore.URLRequestUtils.debug)
+            console.log(this, 'error', this.url);
+        if (weavecore.URLRequestUtils.delayResults && _resumeFunc == null) {
+            _resumeFunc = handleGetError;
+            _resumeParam = fault;
+            return;
+        }
+
+        // broadcast fault to responders
+
+        fault = fault ? fault : "Request cancelled";
+
+        applyFault(fault);
+        this._isClosed = true;
+    }
+
+    p.applyResult = function (data) {
+        if (this.data !== data)
+            this.data = data;
+        this.promise.applyResult(data);
+    }
+
+    p.applyFault = function (fault) {
+        this.promise.applyFault(fault);
+    }
+
+
+
+    weavecore.CustomClient = CustomClient;
+
+}());
+
+(function () {
+    function CustomPromise(client, executor) {
+        /*if (window.Promise) {
+            try {
+                window.Promise.call(this, executor);
+            } catch (e) {
+                console.error(e);
+            }
+
+        } else {
+            console.warn("Promise Object Prototype not Found");
+            return;
+        }*/
+
+        Object.defineProperty(this, 'internal', {
+            value: new Promise(executor)
+        });
+
+        this._client = client;
+        this._relevantContexts = [];
+
+        Object.defineProperty(this, 'responders', {
+            value: []
+        });
+
+        Object.defineProperty(this, 'client', {
+            get: function () {
+                return this._client
+            }
+        });
+
+        this.addResponder({
+            result: firstResponder.bind(this),
+            fault: firstResponder.bind(this),
+            token: null
+        });
+
+    }
+
+    var p = CustomPromise.prototype;
+
+    //responder {result:Function, fault:Function, token:Object}
+    p.addResponder = function (responder) {
+        this.responders.push(responder);
+    }
+
+    /**
+     * Adds a context in which this AsyncToken is relevant.
+     * If all contexts are disposed, this AsyncToken will not broadcast a ResultEvent or FaultEvent.
+     */
+    p.addRelevantContext = function (context) {
+        var desc = "URL request";
+        if (this.client)
+            desc += ": " + this.client.url;
+        WeaveAPI.ProgressIndicator.addTask(this, context, desc);
+        this._relevantContexts.push(context);
+    }
+
+    p.applyResult = function (response) {
+        for (var i = 0; i < this.responders.length; i++) {
+            this.responders[i].result(response, this.responders[i].token);
+        }
+
+    }
+
+    p.applyFault = function (response) {
+        for (var i = 0; i < this.responders.length; i++) {
+            this.responders[i].fault(response, this.responders[i].token);
+        }
+    }
+
+    function contextDisposed(context, i, a) {
+        return WeaveAPI.SessionManager.objectWasDisposed(context);
+    }
+
+    function firstResponder(response, token) {
+        WeaveAPI.ProgressIndicator.removeTask(this);
+        // if there are contexts and none are relevant, don't call responders
+        if (this._relevantContexts.length && this._relevantContexts.every(contextDisposed))
+            this._responders.length = 0;
+    }
+
+    weavecore.CustomPromise = CustomPromise;
 
 }());

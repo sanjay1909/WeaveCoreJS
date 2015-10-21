@@ -75,6 +75,8 @@
 
                 <li><a href="../modules/CreateJS.html">CreateJS</a></li>
 
+                <li><a href="../modules/WeaveAPI.html">WeaveAPI</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -201,9 +203,10 @@ if (typeof window === &#x27;undefined&#x27;) {
      * @param key2 The second dictionary key.
      */
     p.removeAllSecondary = function (key2) {
-        for (var key1 of this.dictionary.keys()) {
+        this.dictionary.forEach(function (value, key1) {
             this.dictionary.get(key1).delete(key2);
-        }
+
+        }, this.dictionary);
 
     };
 
@@ -221,7 +224,7 @@ if (typeof window === &#x27;undefined&#x27;) {
             d2.delete(key2);
         }
 
-        // if entries remain in d2, keep it
+
         for (var v2 of d2.values())
             return value;
 
@@ -233,7 +236,6 @@ if (typeof window === &#x27;undefined&#x27;) {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
-
     </pre>
 </div>
 

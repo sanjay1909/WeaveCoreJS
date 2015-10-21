@@ -1,22 +1,10 @@
-/*
-    Weave (Web-based Analysis and Visualization Environment)
-    Copyright (C) 2008-2011 University of Massachusetts Lowell
-    This file is a part of Weave.
-    Weave is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, Version 3,
-    as published by the Free Software Foundation.
-    Weave is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-    You should have received a copy of the GNU General Public License
-    along with Weave.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 // namespace
 
 if (!this.weavecore)
     this.weavecore = {};
+
+if (!this.WeaveAPI)
+    this.WeaveAPI = {};
 
 /**
  * This allows you to add callbacks that will be called when an event occurs on the stage.
@@ -107,6 +95,10 @@ if (!this.weavecore)
 
     weavecore.EventCallbackCollection = EventCallbackCollection;
 
+    StageUtils.debug_async_time = false;
+    StageUtils.debug_async_stack = false;
+    StageUtils.debug_delayTasks = false; // set this to true to delay async tasks
+    StageUtils.debug_callLater = false; // set this to true to delay async tasks
     //constructor
     function StageUtils() {
 
@@ -130,6 +122,12 @@ if (!this.weavecore)
             },
 
         });
+
+        Object.defineProperty(this, 'currentFrameElapsedTime', {
+            get: function () {
+                return getTimer() - this.eventManager.currentFrameStartTime;
+            }
+        });
         this._currentTaskStopTime = 0;
 
         /**
@@ -152,6 +150,8 @@ if (!this.weavecore)
         this.addEventCallback("tick", null, this._handleCallLater.bind(this));
         this.maxComputationTimePerFrame = 100;
         this.maxComputationTimePerFrame_noActivity = 250;
+
+        this._debugTaskTimes = new Map();
 
     }
 
@@ -185,8 +185,8 @@ if (!this.weavecore)
         this._priorityCallLaterQueues[this._nextCallLaterPriority].push(arguments);
         this._nextCallLaterPriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE;
 
-        //if (this.debug_async_stack)
-        //_stackTraceMap[arguments] = new Error("This is the stack trace from when callLater() was called.").getStackTrace();
+        if (StageUtils.debug_async_stack)
+            this._stackTraceMap.set(arguments, new Error("This is the stack trace from when callLater() was called.").getStackTrace());
     };
 
     suP._handleCallLater = function () {
@@ -262,7 +262,7 @@ if (!this.weavecore)
 
             // args: (relevantContext:Object, method:Function, parameters:Array, priority:uint)
             args = queue.shift();
-            stackTrace = this._stackTraceMap[args];
+            stackTrace = this._stackTraceMap.get(args);
 
             // don't call the function if the relevantContext was disposed.
             if (!WeaveAPI.SessionManager.objectWasDisposed(args[0])) {
@@ -343,12 +343,12 @@ if (!this.weavecore)
             countdown--;
 
             //				trace('p',_activePriority,pElapsed,'/',pAlloc);
-            _currentTaskStopTime = pStop; // make sure _iterateTask knows when to stop
+            this._currentTaskStopTime = pStop; // make sure _iterateTask knows when to stop
 
             // call the next function in the queue
             // args: (relevantContext:Object, method:Function, parameters:Array, priority:uint)
             args = queue.shift();
-            stackTrace = this._stackTraceMap[args]; // check this for debugging where the call came from
+            stackTrace = this._stackTraceMap.get(args); // check this for debugging where the call came from
 
             //				WeaveAPI.SessionManager.unassignBusyTask(args);
 
@@ -382,9 +382,130 @@ if (!this.weavecore)
         }
     };
 
+    suP.startTask = function (relevantContext, iterativeTask, priority, finalCallback, description) {
+
+        finalCallback = (finalCallback === undefined) ? null : finalCallback;
+        description = (description === undefined) ? null : description;
+
+        // do nothing if task already active
+        if (WeaveAPI.ProgressIndicator.hasTask(iterativeTask))
+            return;
+
+        if (StageUtils.debug_async_time) {
+            if (this._debugTaskTimes.get(iterativeTask))
+                console.log('interrupted', (new Date().getTime()) - this._debugTaskTimes.get(iterativeTask)[0], priority, this._debugTaskTimes.get(iterativeTask)[1], this._debugTaskTimes.delete(iterativeTask));
+            this._debugTaskTimes.set(iterativeTask, [(new Date().getTime()), weavecore.DebugUtils.getCompactStackTrace(new Error())]);
+        }
+
+        if (priority >= this._priorityCallLaterQueues.length) {
+            console.error("Invalid priority value: " + priority);
+            priority = WeaveAPI.TASK_PRIORITY_NORMAL;
+        }
+
+        if (StageUtils.debug_async_stack) {
+            this._stackTraceMap.set(iterativeTask, debugId(iterativeTask) + ' ' + weavecore.DebugUtils.getCompactStackTrace(new Error("Stack trace")));
+            this._taskStartTime.set(iterativeTask, (new Date().getTime()));
+            this._taskElapsedTime.set(iterativeTask, 0);
+        }
+        WeaveAPI.ProgressIndicator.addTask(iterativeTask, relevantContext, description);
+
+        var useTimeParameter = iterativeTask.length > 0;
+
+        // Set relevantContext as null for callLater because we always want _iterateTask to be called later.
+        // This makes sure that the task is removed when the actual context is disposed.
+        this._nextCallLaterPriority = priority;
+        this.callLater(null, _iterateTask.bind(this), [relevantContext, iterativeTask, priority, finalCallback, useTimeParameter]);
+        //_iterateTask(relevantContext, iterativeTask, priority, finalCallback);
 
 
-    weavecore.StageUtils = new StageUtils();
+    }
+
+    function getTimer() {
+        return new Date().getTime();
+    }
+
+    function _iterateTask(context, task, priority, finalCallback, useTimeParameter) {
+        // remove the task if the context was disposed
+        if (WeaveAPI.SessionManager.objectWasDisposed(context)) {
+            var arr = this._debugTaskTimes.get(task);
+            if (StageUtils.debug_async_time && arr)
+                console.log('disposed', (new Date().getTime()) - arr[0], priority, arr[1], this._debugTaskTimes.delete(task));
+            WeaveAPI.ProgressIndicator.removeTask(task);
+            return;
+        }
+
+        var debug_time = StageUtils.debug_async_stack ? (new Date().getTime()) : -1;
+        var stackTrace = StageUtils.debug_async_stack ? this._stackTraceMap.get(task) : null;
+
+        var progress = undefined;
+        // iterate on the task until _currentTaskStopTime is reached
+        var time;
+        while ((time = getTimer()) <= this._currentTaskStopTime) {
+            // perform the next iteration of the task
+            if (useTimeParameter)
+                progress = task(this._currentTaskStopTime);
+            else
+                progress = task();
+
+            if (progress === null || isNaN(progress) || progress < 0 || progress > 1) {
+                console.error("Received unexpected result from iterative task (" + progress + ").  Expecting a number between 0 and 1.  Task cancelled.");
+                if (StageUtils.debug_async_stack) {
+                    console.log(stackTrace);
+                    // this is incorrect behavior, but we can put a breakpoint here
+                    if (useTimeParameter)
+                        progress = task(this._currentTaskStopTime);
+                    else
+                        progress = task();
+                }
+                progress = 1;
+            }
+            if (StageUtils.debug_async_stack && this.currentFrameElapsedTime > 3000) {
+                console.log(getTimer() - time, stackTrace);
+                // this is incorrect behavior, but we can put a breakpoint here
+                if (useTimeParameter)
+                    progress = task(_currentTaskStopTime);
+                else
+                    progress = task();
+            }
+            if (progress === 1) {
+                var arr = this._debugTaskTimes.get(task);
+                if (StageUtils.debug_async_time && arr)
+                    trace('completed', getTimer() - arr[0], priority, arr[1], this._debugTaskTimes.delete(task));
+                // task is done, so remove the task
+                WeaveAPI.ProgressIndicator.removeTask(task);
+                // run final callback after task completes and is removed
+                if (finalCallback !== null)
+                    finalCallback();
+                return;
+            }
+
+            // If the time parameter is accepted, only call the task once in succession.
+            if (useTimeParameter)
+                break;
+
+            if (debug_delayTasks)
+                break;
+        }
+        if (false && StageUtils.debug_async_stack) {
+            var start = Number(this._taskStartTime.get(task));
+            var elapsed = Number(this._taskElapsedTime.get(task)) + (time - debug_time);
+            this._taskElapsedTime.set(task, elapsed);
+            console.log(elapsed, '/', (time - start), '=', weavecore.StandardLib.roundSignificant(elapsed / (time - start), 2), stackTrace);
+        }
+
+        // max computation time reached without finishing the task, so update the progress indicator and continue the task later
+        if (progress !== undefined)
+            WeaveAPI.ProgressIndicator.updateTask(task, progress);
+
+        // Set relevantContext as null for callLater because we always want _iterateTask to be called later.
+        // This makes sure that the task is removed when the actual context is disposed.
+        this._nextCallLaterPriority = priority;
+        this.callLater(null, _iterateTask.bind(this), arguments);
+    }
+
+
+    weavecore.StageUtils = StageUtils;
+    WeaveAPI.StageUtils = new StageUtils();
 
 
     function EventManager() {

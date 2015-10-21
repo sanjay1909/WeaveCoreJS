@@ -18,14 +18,22 @@ module.exports = function (grunt) {
                     'src/primitive/WeaveTreeItem.js',
                     'src/primitive/Dictionary2D.js',
 
+                    'src/utils/URLUtil.js',
+
+                    'src/utils/DebugUtils.js',
+                    'src/api/debugId.js',
+
                     'src/core/LinkableVariable.js',
                     'src/core/LinkableNumber.js',
                     'src/core/LinkableBoolean.js',
                     'src/core/LinkableString.js',
                     'src/core/ChildListCallbackInterface.js',
+                    'src/core/ProgressIndicator.js',
                     'src/core/LinkableWatcher.js',
                     'src/core/LinkableHashMap.js',
                     'src/core/LinkablePromise.js',
+                    'src/core/LinkableFile.js',
+
 
                     'src/data/keysetCallbackInterface',
 
@@ -35,6 +43,8 @@ module.exports = function (grunt) {
                     'src/core/StageUtils.js',
                     'src/core/ExternalSessionStateInterface',
                     'src/core/SessionStateLog.js',
+
+                    'src/utils/URLRequestUtils.js'
                ],
                 dest: 'weavecore.js',
             }

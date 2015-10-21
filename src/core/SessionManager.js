@@ -844,6 +844,139 @@ if (typeof window === 'undefined') {
         return propertyNames;
     };
 
+
+    function disposeBusyTaskPointers(disposedObject) {
+        this._d2dOwnerTask.removeAllPrimary(disposedObject);
+        this._d2dTaskOwner.removeAllSecondary(disposedObject);
+    }
+
+    /**
+     * Returns a mapping from owner debugId to an Array of debugIds for its busy tasks.
+     */
+    p.debugBusyObjects = function () {
+        var result = {};
+        this._d2dOwnerTask.dictionary.forEach(function (value, owner) {
+            var tasks = [];
+            var taskDictionary = this._d2dOwnerTask.dictionary.get(owner);
+            taskDictionary.forEach(function (value, task) {
+                tasks.push(WeaveAPI.debugId(task));
+            }, taskDictionary);
+            result[WeaveAPI.debugId(owner)] = tasks;
+
+        }, this._d2dOwnerTask.dictionary);
+
+        return result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    p.assignBusyTask = function (taskToken, busyObject) {
+        if (this.debugBusyTasks)
+            this._dTaskStackTrace.set(taskToken, new Error("Stack trace when task was last assigned").getStackTrace());
+
+        // stop if already assigned
+        var test = this._d2dTaskOwner.dictionary.get(taskToken);
+        if (test && test.get(busyObject))
+            return;
+
+        if (taskToken instanceof weavecore.CustomPromise && !WeaveAPI.ProgressIndicator.hasTask(taskToken))
+            taskToken.addResponder({
+                result: unassignAsyncToken.bind(this),
+                fault: unassignAsyncToken.bind(this),
+                token: taskToken
+            });
+
+        this._d2dOwnerTask.set(busyObject, taskToken, true);
+        this._d2dTaskOwner.set(taskToken, busyObject, true);
+    }
+
+
+
+    function unassignAsyncToken(resposne, token) {
+        this.unassignBusyTask(token);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    p.unassignBusyTask = function (taskToken) {
+        if (WeaveAPI.ProgressIndicator.hasTask(taskToken)) {
+            WeaveAPI.ProgressIndicator.removeTask(taskToken);
+            return;
+        }
+
+        var dOwner = this._d2dTaskOwner.dictionary.get(taskToken);
+        if (!dOwner)
+            return;
+
+        this._d2dTaskOwner.dictionary.delete(taskToken);
+
+
+        nextOwner: for (var owner of dOwner.keys()) {
+            var dTask = this._d2dOwnerTask.dictionary.get(owner);
+            dTask.delete(taskToken);
+
+            // if there are other tasks, continue to next owner
+            for (var task of dTask.keys())
+                continue nextOwner;
+
+            // when there are no more tasks, check later to see if callbacks trigger
+            this._dUnbusyTriggerCounts.set(owner, WeaveAPI.SessionManager.getCallbackCollection(owner).triggerCounter);
+            // immediate priority because we want to trigger as soon as possible
+            WeaveAPI.StageUtils.startTask(null, unbusyTrigger.bind(this), WeaveAPI.TASK_PRIORITY_IMMEDIATE);
+
+            if (this.debugBusyTasks) {
+                var stackTrace = new Error("Stack trace when last task was unassigned").getStackTrace();
+                this._dUnbusyStackTraces.set(owner, {
+                    assigned: _dTaskStackTrace[taskToken],
+                    unassigned: stackTrace,
+                    token: taskToken
+                });
+            }
+        }
+    }
+
+    /**
+     * Called the frame after an owner's last busy task is unassigned.
+     * Triggers callbacks if they have not been triggered since then.
+     */
+    function unbusyTrigger(stopTime) {
+        var owner;
+        do {
+            if (new Date().getTime() > stopTime)
+                return 0;
+
+            owner = null;
+            for (var owner of this._dUnbusyTriggerCounts.keys()) {
+                var triggerCount = this._dUnbusyTriggerCounts.get(owner);
+                this._dUnbusyTriggerCounts.delete(owner); // affects next for loop iteration - mitigated by outer loop
+
+                var cc = WeaveAPI.SessionManager.getCallbackCollection(owner);
+                if (cc instanceof weavecore.CallbackCollection ? cc.wasDisposed : this.objectWasDisposed(owner))
+                    continue; // already disposed
+
+                if (cc.triggerCounter !== triggerCount)
+                    continue; // already triggered
+
+                if (this.linkableObjectIsBusy(owner))
+                    continue; // busy again
+
+                if (this.debugBusyTasks) {
+                    var stackTraces = this._dUnbusyStackTraces.get(owner);
+                    console.log('Triggering callbacks because they have not triggered since owner has becoming unbusy:', WeaveAPI.debugId(owner));
+                    console.log(stackTraces.assigned);
+                    console.log(stackTraces.unassigned);
+                }
+
+                cc.triggerCallbacks();
+            }
+        } while (owner);
+
+        return 1;
+    }
+
+
     p.linkableObjectIsBusy = function (linkableObject) {
         var busy = false;
 
@@ -952,8 +1085,8 @@ if (typeof window === 'undefined') {
         if (object !== null && object !== undefined && !this._disposedObjectsMap.get(object)) {
             this._disposedObjectsMap.set(object, true);
 
-            // TODO: clean up pointers to busy tasks
-            //disposeBusyTaskPointers(object as ILinkableObject);
+            //  clean up pointers to busy tasks
+            disposeBusyTaskPointers.call(this, object);
 
             try {
                 // if the object implements IDisposableObject, call its dispose() function now

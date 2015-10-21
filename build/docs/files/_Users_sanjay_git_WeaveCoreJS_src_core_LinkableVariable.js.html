@@ -75,6 +75,8 @@
 
                 <li><a href="../modules/CreateJS.html">CreateJS</a></li>
 
+                <li><a href="../modules/WeaveAPI.html">WeaveAPI</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -236,7 +238,7 @@ if (typeof window === &#x27;undefined&#x27;) {
             // If callbacks were triggered, make sure callbacks are triggered again one frame later when
             // it is possible for other classes to have a pointer to this object and retrieve the value.
             if (defaultValueTriggersCallbacks &amp;&amp; this._triggerCounter &gt; weavecore.CallbackCollection.DEFAULT_TRIGGER_COUNT)
-                weavecore.StageUtils.callLater(this, _defaultValueTrigger.bind(this));
+                WeaveAPI.StageUtils.callLater(this, _defaultValueTrigger.bind(this));
         }
 
 
@@ -380,7 +382,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.LinkableVariable = LinkableVariable;
 
 }());
-
     </pre>
 </div>
 
