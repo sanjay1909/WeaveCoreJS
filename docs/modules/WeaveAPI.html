@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>/Users/sanjay/git/WeaveCoreJS/src/core/ILinkableCompositeObject.js - weavecore</title>
+    <title>WeaveAPI - weavecore</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -114,95 +114,37 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1 class="file-heading">File: /Users/sanjay/git/WeaveCoreJS/src/core/ILinkableCompositeObject.js</h1>
-
-<div class="file">
-    <pre class="code prettyprint linenums">
-if (typeof window === &#x27;undefined&#x27;) {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-/**
- * This is an interface to a composite object with dynamic state, meaning child objects can be dynamically added or removed.
- * The session state for this type of object is defined as an Array of DynamicState objects.
- * DynamicState objects are defined as having exactly three properties: objectName, className, and sessionState.
- * @see DynamicState
- *
- * @author adufilie
- * @author sanjay1909
- */
-(function () {
-
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @public
-     * @property NS
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ILinkableCompositeObject, &#x27;NS&#x27;, {
-        value: &#x27;weavecore&#x27;
-    });
-
-    /**
-     * temporary solution to save the className for this class/prototype
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ILinkableCompositeObject, &#x27;CLASS_NAME&#x27;, {
-        value: &#x27;ILinkableCompositeObject&#x27;
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ILinkableCompositeObject, &#x27;SESSIONABLE&#x27;, {
-        value: true
-    });
-
-
-    function ILinkableCompositeObject() {
-
-    }
+                        <h1>WeaveAPI Module</h1>
+<div class="box clearfix meta">
 
 
 
-    ILinkableCompositeObject.prototype = new weavecore.ILinkableObject();
-    ILinkableCompositeObject.prototype.constructor = ILinkableCompositeObject;
 
-    // Prototypes
-    var p = ILinkableCompositeObject.prototype;
 
-    /**
-     * This gets the session state of this composite object.
-     * @return An Array of DynamicState objects which compose the session state for this object.
-     * @see weave.api.core.DynamicState
-     */
-    p.getSessionState = function () {};
+        <div class="foundat">
+            Defined in: <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_api_debugId.js.html#l1"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;api&#x2F;debugId.js:1</code></a>
+        </div>
 
-    /**
-     * This sets the session state of this composite object.
-     * @param newState An Array of child name Strings or DynamicState objects containing the new values and types for child ILinkableObjects.
-     * @param removeMissingDynamicObjects If true, this will remove any child objects that do not appear in the session state.
-     *     As a special case, a null session state will result in no change regardless of the removeMissingDynamicObjects value.
-     * @see weave.api.core.DynamicState
-     */
-    p.setSessionState = function (newState, removeMissingDynamicObjects) {};
 
-    weavecore.ILinkableCompositeObject = ILinkableCompositeObject;
 
-}());
+</div>
 
-    </pre>
+
+
+<div class="box intro">
+
+</div>
+
+
+
+<div class="yui3-g">
+    <div class="yui3-u-1-2">
+
+    </div>
+
+    <div class="yui3-u-1-2">
+
+    </div>
 </div>
 
                     </div>

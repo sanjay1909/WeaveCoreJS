@@ -75,6 +75,8 @@
 
                 <li><a href="../modules/CreateJS.html">CreateJS</a></li>
 
+                <li><a href="../modules/WeaveAPI.html">WeaveAPI</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -735,7 +737,7 @@ if (typeof window === &#x27;undefined&#x27;) {
 
 
         if (!GroupedCallbackEntry._initialized) {
-            weavecore.StageUtils.addEventCallback(&quot;tick&quot;, null, GroupedCallbackEntry._handleGroupedCallbacks.bind(this));
+            WeaveAPI.StageUtils.addEventCallback(&quot;tick&quot;, null, GroupedCallbackEntry._handleGroupedCallbacks.bind(this));
             GroupedCallbackEntry._initialized = true;
         }
     }
@@ -944,7 +946,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());
-
     </pre>
 </div>
 

@@ -75,6 +75,8 @@
 
                 <li><a href="../modules/CreateJS.html">CreateJS</a></li>
 
+                <li><a href="../modules/WeaveAPI.html">WeaveAPI</a></li>
+
                 <li><a href="../modules/weavecore.html">weavecore</a></li>
 
             </ul>
@@ -322,7 +324,7 @@ if (typeof window === &#x27;undefined&#x27;) {
         if (!immediately &amp;&amp; getTimer() &lt; this._saveTime) {
             // console.log(&quot;save difference is Paused&quot;);
             // we have to wait until the next frame to save the diff because grouped callbacks haven&#x27;t finished.
-            weavecore.StageUtils.callLater(this, this._saveDiff.bind(this));
+            WeaveAPI.StageUtils.callLater(this, this._saveDiff.bind(this));
             return;
         }
 
@@ -589,7 +591,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.SessionStateLog = SessionStateLog;
 
 }());
-
     </pre>
 </div>
 
