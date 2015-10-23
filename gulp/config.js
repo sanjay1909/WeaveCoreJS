@@ -23,6 +23,7 @@ var buildOrder = [
                     utils + '/URLUtil.js',
                     utils + '/URLRequestUtils.js',
                     utils + '/DebugUtils.js',
+                    utils + '/AsyncSort.js',
                     api + '/debugId.js',
 
                     core + '/LinkableVariable.js',

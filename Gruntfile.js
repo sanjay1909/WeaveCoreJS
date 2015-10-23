@@ -8,6 +8,7 @@ module.exports = function (grunt) {
             // 2. Configuration for concatinating files goes here.
             dist: {
                 src: [
+
                     'src/createjs/events/*.js', // All JS in the libs folder
                     'src/createjs/Ticker.js',
                     'src/compiler/*.js', // This specific file
@@ -44,7 +45,8 @@ module.exports = function (grunt) {
                     'src/core/ExternalSessionStateInterface',
                     'src/core/SessionStateLog.js',
 
-                    'src/utils/URLRequestUtils.js'
+                    'src/utils/URLRequestUtils.js',
+                    'src/utils/AsyncSort.js'
                ],
                 dest: 'weavecore.js',
             }

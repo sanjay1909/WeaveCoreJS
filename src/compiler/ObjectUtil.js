@@ -1,18 +1,3 @@
-/*
-    Weave (Web-based Analysis and Visualization Environment)
-    Copyright (C) 2008-2011 University of Massachusetts Lowell
-    This file is a part of Weave.
-    Weave is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, Version 3,
-    as published by the Free Software Foundation.
-    Weave is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-    You should have received a copy of the GNU General Public License
-    along with Weave.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
@@ -147,6 +132,154 @@ if (typeof window === 'undefined') {
 
         return 0;
     };
+
+    ObjectUtil.byteArrayCompare = function (a, b) {
+        var result = 0;
+
+        if (a === b)
+            return result;
+
+        if (a.length !== b.length) {
+            if (a.length < b.length)
+                result = -1;
+            else
+                result = 1;
+        } else {
+            for (var i = 0; i < a.length; i++) {
+                result = ObjectUtil.numericCompare(a[i], b[i]);
+                if (result != 0) {
+                    i = a.length;
+                }
+            }
+        }
+        return result;
+    }
+
+
+
+    ObjectUtil.compare = function (a, b, depth) {
+        depth = (depth === undefined) ? -1 : depth;
+        return ObjectUtil.internalCompare(a, b, 0, depth, new Map())
+
+    }
+
+    ObjectUtil.internalCompare = function (a, b, currentDepth, desiredDepth, refs) {
+        if (a === null && b === null)
+            return 0;
+
+        if (a === null)
+            return 1;
+
+        if (b === null)
+            return -1;
+
+
+
+        var typeOfA = typeof (a);
+        var typeOfB = typeof (b);
+
+        var result = 0;
+
+        if (typeOfA === typeOfB) {
+            switch (typeOfA) {
+            case "boolean":
+                {
+                    result = ObjectUtil.numericCompare(Number(a), Number(b));
+                    break;
+                }
+
+            case "number":
+                {
+                    result = ObjectUtil.numericCompare(a, b);
+                    break;
+                }
+
+            case "string":
+                {
+                    result = ObjectUtil.stringCompare(a, b);
+                    break;
+                }
+
+            case "object":
+                {
+                    var newDepth = desiredDepth > 0 ? desiredDepth - 1 : desiredDepth;
+
+                    // refs help us avoid circular reference infinite recursion.
+                    var aRef = ObjectUtil._getRef(a, refs);
+                    var bRef = ObjectUtil._getRef(b, refs);
+
+                    if (aRef === bRef)
+                        return 0;
+                    // the cool thing about our dictionary is that if
+                    // we've seen objects and determined that they are inequal, then
+                    // we would've already exited out of this compare() call.  So the
+                    // only info in the dictionary are sets of equal items
+
+                    // let's first define them as equal
+                    // this stops an "infinite loop" problem where A.i = B and B.i = A
+                    // if we later find that an object (one of the subobjects) is in fact unequal,
+                    // then we will return false and quit out of everything.  These refs are thrown away
+                    // so it doesn't matter if it's correct.
+                    refs.set(bRef, aRef);
+
+                    if (desiredDepth != -1 && (currentDepth > desiredDepth)) {
+                        // once we try to go beyond the desired depth we should
+                        // toString() our way out
+                        result = ObjectUtil.stringCompare(a.toString(), b.toString());
+                    } else if ((a.constructor === Array) && (b.constructor === Array)) {
+                        result = ObjectUtil.arrayCompare(a, b, currentDepth, desiredDepth, refs);
+                    } else if ((a.constructor === Date) && (b.constructor === Date)) {
+                        result = ObjectUtil.dateCompare(a, b);
+                    } else if ((a.constructor === ArrayBuffer) && (b.constructor === ArrayBuffer)) {
+                        result = ObjectUtil.byteArrayCompare(a, b);
+                    } else if (a.constructor.name === b.constructor.name) {
+                        var aProps = Object.getOwnPropertyNames(a);
+                        // now that we know we have the same properties, let's compare the values
+                        var propName;
+                        var aProp;
+                        var bProp;
+                        for (var i = 0; i < aProps.length; i++) {
+                            propName = aProps[i];
+                            aProp = a[propName];
+                            bProp = b[propName];
+                            result = internalCompare(aProp, bProp, currentDepth + 1, newDepth, refs);
+                            if (result !== 0) {
+                                return result;
+                            }
+                        }
+                    } else {
+                        // We must be inequal, so return 1
+                        return 1;
+                    }
+                    break;
+                }
+            }
+        } else // be consistent with the order we return here
+        {
+            return ObjectUtil.stringCompare(typeOfA, typeOfB);
+        }
+        return result;
+
+    }
+
+
+    /**
+     * @private
+     * This is the "find" for our union-find algorithm when doing object searches.
+     * The dictionary keeps track of sets of equal objects
+     */
+    ObjectUtil._getRef = function (o, refs) {
+        var oRef = refs[o];
+        while (oRef && oRef !== refs.get(oRef)) {
+            oRef = refs.get(oRef);
+        }
+        if (!oRef)
+            oRef = o;
+        if (oRef !== refs[o])
+            refs.set(o, oRef);
+
+        return oRef
+    }
 
     weavecore.ObjectUtil = ObjectUtil;
 

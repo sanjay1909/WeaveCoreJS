@@ -604,9 +604,9 @@ if (typeof window === &#x27;undefined&#x27;) {
     function handleGetError(fault) {
         if (weavecore.URLRequestUtils.debug)
             console.log(this, &#x27;error&#x27;, this.url);
-        if (weavecore.URLRequestUtils.delayResults &amp;&amp; _resumeFunc == null) {
-            _resumeFunc = handleGetError;
-            _resumeParam = fault;
+        if (weavecore.URLRequestUtils.delayResults &amp;&amp; this._resumeFunc == null) {
+            this._resumeFunc = handleGetError;
+            this._resumeParam = fault;
             return;
         }
 
@@ -719,6 +719,7 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.CustomPromise = CustomPromise;
 
 }());
+
     </pre>
 </div>
 
