@@ -20,6 +20,7 @@ if (typeof window === 'undefined') {
     window.weavecore = window.weavecore || {};
 }
 
+
 /**
  * This provides a set of useful static functions.
  * All the functions defined in this class are pure functions,
@@ -124,6 +125,289 @@ if (typeof window === 'undefined') {
 
         return 0;
     };
+
+    /**
+     * This function will cast a value of any type to a Number,
+     * interpreting the empty string ("") and null as NaN.
+     * @param value A value to cast to a Number.
+     * @return The value cast to a Number, or NaN if the casting failed.
+     */
+    StandardLib.asNumber(value) {
+        if (value === null)
+            return NaN; // return NaN because Number(null) == 0
+
+        if (value.constructor === Number || value instanceof Date)
+            return value;
+
+        try {
+            value = String(value);
+            if (value === '')
+                return NaN; // return NaN because Number('') == 0
+            return Number(value);
+        } catch (e) {}
+
+        return NaN;
+    }
+
+    /**
+     * This function attempts to derive a boolean value from different types of objects.
+     * @param value An object to parse as a Boolean.
+     */
+    StandardLib.asBoolean = function (value) {
+        if (value.constructor === Boolean)
+            return value;
+        if (value.constructor === String)
+            return weavecore.ObjectUtil.stringCompare(value, "true", true) === 0;
+        if (isNaN(value))
+            return false;
+        if (value.constructor === Number)
+            return value != 0;
+        return value;
+    }
+
+    /**
+     * Converts a value to a non-null String
+     * @param value A value to cast to a String.
+     * @return The value cast to a String.
+     */
+    StandardLib.asString = function (value) {
+        if (value === null)
+            return '';
+        try {
+            return value;
+        } catch (e) {}
+        return '';
+    }
+
+
+    /**
+     * Tests if a value is anything other than undefined, null, or NaN.
+     */
+    StandardLib.isDefined = function (value) {
+        return value !== undefined && value !== null && !(value.constructor === Number && isNaN(value));
+    }
+
+    /**
+     * Tests if a value is undefined, null, or NaN.
+     */
+    StandardLib.isUndefined = function (value) {
+        return value === undefined || value === null || (value.constructor === Number && isNaN(value));
+    }
+
+
+    /**
+     * This function will use a default NumberFormatter object to format a Number to a String.
+     * @param number The number to format.
+     * @param precision A precision value to pass to the default NumberFormatter.
+     * @return The result of format(number) using the specified precision value.
+     * @see mx.formatters.NumberFormatter#format
+     */
+    StandardLib.formatNumber = function (number, precision) {
+            precision = (precision === undefined) ? NaN : precision;
+            if (isFinite(precision)) {
+                precision = parseInt(precision);
+            } else {
+                number = StandardLib.roundSignificant(number);
+                if (Math.abs(number) < 1)
+                    return String(number); // this fixes the bug where "0.1" gets converted to ".1" (we don't want the "0" to be lost)
+                precision = -1;
+            }
+
+            return Number(StandardLib._numberFormatter.format(number).toPrecision(precision));
+        }
+        /**
+         * This is the default NumberFormatter to use inside the formatNumber() function.
+         */
+    StandardLib._numberFormatter = new Intl.NumberFormat();
+
+    /**
+     * This rounds a Number to a given number of significant digits.
+     * @param value A value to round.
+     * @param significantDigits The desired number of significant digits in the result.
+     * @return The number, rounded to the specified number of significant digits.
+     */
+    StandardLib.roundSignificant = function (value, significantDigits) {
+        significantDigits = (significantDigits === undefined) ? 14 : significantDigits;
+        // it doesn't make sense to round infinity or NaN
+        if (!isFinite(value))
+            return value;
+
+        var sign = (value < 0) ? -1 : 1;
+        var absValue = Math.abs(value);
+        var pow10;
+
+        // if absValue is less than 1, all digits after the decimal point are significant
+        if (absValue < 1) {
+            pow10 = Math.pow(10, significantDigits);
+            //trace("absValue<1: Math.round(",absValue,"*",pow10,")",Math.round(absValue * pow10));
+            return sign * Math.round(absValue * pow10) / pow10;
+        }
+
+        var log10 = Math.ceil(Math.log(absValue) / Math.LN10);
+
+        // Both these calculations are equivalent mathematically, but if we use
+        // the wrong one we get bad rounding results like "123.456000000001".
+        if (log10 < significantDigits) {
+            // find the power of 10 that you need to MULTIPLY absValue by
+            // so Math.round() will round off the digits we don't want
+            pow10 = Math.pow(10, significantDigits - log10);
+            return sign * Math.round(absValue * pow10) / pow10;
+        } else {
+            // find the power of 10 that you need to DIVIDE absValue by
+            // so Math.round() will round off the digits we don't want
+            pow10 = Math.pow(10, log10 - significantDigits);
+            //trace("log10>significantDigits: Math.round(",absValue,"/",pow10,")",Math.round(absValue / pow10));
+            return sign * Math.round(absValue / pow10) * pow10;
+        }
+    }
+
+    /**
+     * This uses AsyncSort.sortImmediately() to sort an Array (or Vector) in place.
+     * @param array An Array (or Vector) to sort.
+     * @param compare A function that accepts two items and returns -1, 0, or 1.
+     * @see weave.utils.AsyncSort#sortImmediately()
+     * @see Array#sort()
+     */
+    StandardLib.sort = function (array, compare) {
+        compare = (compare === undefined) ? null : compare;
+        weavecore.AsyncSort.sortImmediately(array, compare);
+    }
+
+    Object.defineProperty(StandardLib, '_sortBuffer', {
+        value: []
+    });
+
+    function numericSort(a, b, sortDirection) {
+        return a - b;
+    }
+
+    function nonASCIISort(a, b, sortDirection) {
+        return a.localeCompare(b);
+    }
+
+    function dateSort(date1, date2, sortDirection) {
+        // This is a comparison function that will result in dates being sorted in
+        // ASCENDING order.
+        if (date1 > date2) return 1;
+        if (date1 < date2) return -1;
+        return 0;
+    };
+
+
+
+
+
+    /**
+     * Sorts an Array (or Vector) of items in place using properties, lookup tables, or replacer functions.
+     * @param array An Array (or Vector) to sort.
+     * @param params Specifies how to get values used to sort items in the array.
+     *               This can either be an Array of params or a single param, each of which can be one of the following:<br>
+     *               Array or Vector: values are looked up based on index (Such an Array must be nested in a params array rather than given alone as a single param)<br>
+     *               Object or Dictionary: values are looked up using items in the array as keys<br>
+     *               Property name: values are taken from items in the array using a property name<br>
+     *               Replacer function: array items are passed through this function to get values<br>
+     * @param sortDirections Specifies sort direction(s) (1 or -1) corresponding to the params.
+     * @param inPlace Set this to true to modify the original Array (or Vector) in place or false to return a new, sorted copy.
+     * @param returnSortedIndexArray Set this to true to return a new Array of sorted indices.
+     * @return Either the original Array (or Vector) or a new one.
+     *
+     */
+    StandardLib.sortOn = function (array, params, sortDirections, inPlace, returnSortedIndexArray) {
+        inPlace = (inPlace === undefined) ? true : inPlace;
+        returnSortedIndexArray = (returnSortedIndexArray === undefined) ? false : returnSortedIndexArray;
+
+        if (array.length === 0)
+            return inPlace ? array : [];
+
+        var values;
+        var param;
+        var sortDirection;
+        var i;
+
+        // expand _sortBuffer as necessary
+        for (i = StandardLib._sortBuffer.length; i < array.length; i++)
+            StandardLib._sortBuffer[i] = [];
+
+        // If there is only one param, wrap it in an array.
+        // Array.sortOn() is preferred over Array.sort() in this case
+        // since an undefined value will crash Array.sort(Array.NUMERIC).
+        if (params === array || !(params.constructor === Array)) {
+            params = [params];
+            if (sortDirections)
+                sortDirections = [sortDirections];
+        }
+
+        var fields = new Array();
+        fields.length = params.length;
+        var fieldOptions = new Array();
+        fieldOptions.length = params.length;
+        for (var p = 0; p < params.length; p++) {
+            param = params[p];
+            sortDirection = sortDirections && sortDirections[p] < 0 ? Array.DESCENDING : 0;
+
+            i = array.length;
+            if (param.constructor === Array)
+                while (i--)
+                    StandardLib._sortBuffer[i][p] = param[i];
+            else if (param.constructor === Function)
+                while (i--)
+                    StandardLib._sortBuffer[i][p] = param(array[i]);
+            else if (typeof param === 'object')
+                while (i--)
+                    StandardLib._sortBuffer[i][p] = param[array[i]];
+            else
+                while (i--)
+                    StandardLib._sortBuffer[i][p] = array[i][param];
+
+            fields[p] = p;
+            fieldOptions[p] = Array.RETURNINDEXEDARRAY | StandardLib.guessSortMode(_sortBuffer[0][p]) | sortDirection;
+        }
+
+        values = _sortBuffer.slice(0, array.length);
+        values = values.sortOn(fields, fieldOptions);
+
+        if (returnSortedIndexArray)
+            return values;
+
+        var array2 = new Array();
+        array2.length = array.length
+        i = array.length;
+        while (i--)
+            array2[i] = array[values[i]];
+
+        if (!inPlace)
+            return array2;
+
+        i = array.length;
+        while (i--)
+            array[i] = array2[i];
+        return array;
+    }
+
+    /**
+     * Guesses the appropriate Array.sort() mode based on the first non-undefined item property from an Array.
+     * @return Either Array.NUMERIC or 0.
+     */
+    StandardLib.guessSortMode(array, itemProp) {
+        for (var i = 0; i < array.length; i++) {
+            var item = array[i];
+            var value = item[itemProp];
+            if (value !== undefined)
+                return value.constructor === Number || value.constructor === Date ? Array.NUMERIC : 0;
+        }
+        return 0;
+    }
+
+    //testRoundSignificant();
+    StandardLib.testRoundSignificant = function () {
+        for (var pow = -5; pow <= 5; pow++) {
+            var n = 1234.5678 * Math.pow(10, pow);
+            for (var d = 0; d <= 9; d++)
+                console.log('roundSignificant(', n, ',', d, ') =', StandardLib.roundSignificant(n, d));
+        }
+    }
+
+
 
     weavecore.StandardLib = StandardLib;
 }());
