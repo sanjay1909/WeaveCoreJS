@@ -2,6 +2,7 @@ var dest = "./build";
 var outputDocsFolder = dest + "/docs"
 var src = './src';
 var core = src + '/core';
+var compiler = src + '/compiler';
 var primitive = src + '/primitive';
 var api = src + '/api';
 var utils = src + '/utils';
@@ -9,9 +10,14 @@ var pkg = require('../package');
 
 //used both for Source reference and Order reference
 var buildOrder = [
+                    utils + '/ArraySortOn.js',
                     src + '/createjs/events/*.js', // All JS in the libs folder
                     src + '/createjs/Ticker.js',
-                    src + '/compiler/*.js', // This specific file
+
+                    compiler + '/StandardLib.js',
+                    compiler + '/ObjectUtil.js',
+                    compiler + '/Compiler.js',
+
                     core + '/DynamicState.js',
                     core + '/ILinkableObject.js',
                     core + '/ILinkableCompositeObject.js',

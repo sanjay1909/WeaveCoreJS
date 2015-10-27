@@ -18,8 +18,12 @@ Array.NUMERIC = 16;
 
     var sort_fn = function (item_a, item_b, fields, options) {
         return (function sort_by(fields, options) {
-            var ret, a, b,
-                opts = options[0],
+            var ret, a, b, sub_fields,
+                opts = options[0];
+
+            if (fields[0].constructor === Number)
+                sub_fields = [fields[0]];
+            else
                 sub_fields = fields[0].match(/[^.]+/g);
 
             (function get_values(s_fields, s_a, s_b) {
@@ -36,7 +40,7 @@ Array.NUMERIC = 16;
             })(sub_fields, item_a, item_b);
 
             if (opts & Array.NUMERIC) {
-                ret = (a.toFloat() - b.toFloat());
+                ret = (Number(a) - Number(b));
             } else {
                 if (opts & Array.CASEINSENSITIVE) {
                     a = a.toLowerCase();
@@ -71,9 +75,17 @@ Array.NUMERIC = 16;
             return sort_fn(item_a, item_b, fields, options);
         };
 
-        if (options[0] & Array.RETURNINDEXEDARRAY)
-            return this.slice().sort(curry_sort);
-        else
+        if (options[0] & Array.RETURNINDEXEDARRAY) {
+            var tmp = [].concat(this);
+            tmp.sort(curry_sort);
+            var result = [];
+            var l = this.length;
+            for (var i = 0; i < l; i++) {
+                var index = tmp.indexOf(this[i]);
+                result.push(index);
+            }
+            return result;
+        } else
             return this.sort(curry_sort);
     }
 

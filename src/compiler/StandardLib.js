@@ -132,8 +132,8 @@ if (typeof window === 'undefined') {
      * @param value A value to cast to a Number.
      * @return The value cast to a Number, or NaN if the casting failed.
      */
-    StandardLib.asNumber(value) {
-        if (value === null)
+    StandardLib.asNumber = function (value) {
+        if (value === null || value === undefined)
             return NaN; // return NaN because Number(null) == 0
 
         if (value.constructor === Number || value instanceof Date)
@@ -171,7 +171,7 @@ if (typeof window === 'undefined') {
      * @return The value cast to a String.
      */
     StandardLib.asString = function (value) {
-        if (value === null)
+        if (value === null || value === undefined)
             return '';
         try {
             return value;
@@ -194,6 +194,30 @@ if (typeof window === 'undefined') {
         return value === undefined || value === null || (value.constructor === Number && isNaN(value));
     }
 
+    /**
+     * Pads a string on the left.
+     */
+    StandardLib.lpad = function (str, length, padString) {
+        padString = (padString === undefined) ? ' ' : padString;
+        if (str.length >= length)
+            return str;
+        while (str.length + padString.length < length)
+            padString += padString;
+        return padString.substr(0, length - str.length) + str;
+    }
+
+    /**
+     * Pads a string on the right.
+     */
+    StandardLib.rpad = function (str, length, padString) {
+        padString = (padString === undefined) ? ' ' : padString;
+        if (str.length >= length)
+            return str;
+        while (str.length + padString.length < length)
+            padString += padString;
+        return str + padString.substr(0, length - str.length);
+    }
+
 
     /**
      * This function will use a default NumberFormatter object to format a Number to a String.
@@ -213,7 +237,8 @@ if (typeof window === 'undefined') {
                 precision = -1;
             }
 
-            return Number(StandardLib._numberFormatter.format(number).toPrecision(precision));
+            //StandardLib._numberFormatter.format(number)
+            return number.toPrecision(precision);
         }
         /**
          * This is the default NumberFormatter to use inside the formatNumber() function.
@@ -360,10 +385,10 @@ if (typeof window === 'undefined') {
                     StandardLib._sortBuffer[i][p] = array[i][param];
 
             fields[p] = p;
-            fieldOptions[p] = Array.RETURNINDEXEDARRAY | StandardLib.guessSortMode(_sortBuffer[0][p]) | sortDirection;
+            fieldOptions[p] = Array.RETURNINDEXEDARRAY | StandardLib.guessSortMode(StandardLib._sortBuffer, p) | sortDirection;
         }
 
-        values = _sortBuffer.slice(0, array.length);
+        values = StandardLib._sortBuffer.slice(0, array.length);
         values = values.sortOn(fields, fieldOptions);
 
         if (returnSortedIndexArray)
@@ -388,9 +413,10 @@ if (typeof window === 'undefined') {
      * Guesses the appropriate Array.sort() mode based on the first non-undefined item property from an Array.
      * @return Either Array.NUMERIC or 0.
      */
-    StandardLib.guessSortMode(array, itemProp) {
-        for (var i = 0; i < array.length; i++) {
-            var item = array[i];
+    StandardLib.guessSortMode = function (array, itemProp) {
+        var props = Object.keys(array);
+        for (var i = 0; i < props.length; i++) {
+            var item = array[props[i]];
             var value = item[itemProp];
             if (value !== undefined)
                 return value.constructor === Number || value.constructor === Date ? Array.NUMERIC : 0;
