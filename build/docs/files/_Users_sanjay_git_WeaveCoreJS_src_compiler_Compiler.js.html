@@ -121,9 +121,17 @@
 // namespace
 if (typeof window === &#x27;undefined&#x27;) {
     this.weavecore = this.weavecore || {};
+    this.trace = function (msg) {
+        console.log(msg);
+    }
 } else {
     window.weavecore = window.weavecore || {};
+    window.trace = function (msg) {
+        console.log(msg);
+    }
 }
+
+
 
 
 /**
@@ -135,10 +143,7 @@ if (typeof window === &#x27;undefined&#x27;) {
 (function () {
     &quot;use strict&quot;;
 
-    //constructor
-    function Compiler() {
-        throw &quot;Compiler cannot be instantiated.&quot;;
-    }
+
     Object.defineProperty(Compiler, &#x27;ENCODE_LOOKUP&#x27;, {
         value: {
             &#x27;\b&#x27;: &#x27;b&#x27;,
@@ -161,6 +166,343 @@ if (typeof window === &#x27;undefined&#x27;) {
 
 
     /**
+     * Add keys to this dictionary for class alias names or deprecated library replacements using dot notation (&quot;.&quot;) rather than &quot;::&quot; package notation.
+     */
+    Object.defineProperty(Compiler, &#x27;classAliases&#x27;, {
+        value: {}
+    });
+
+
+
+    Object.defineProperty(Compiler, &#x27;OPERATOR_ESCAPE&#x27;, {
+        value: &#x27;\\&#x27;
+    });
+
+    Object.defineProperty(Compiler, &#x27;FUNCTION&#x27;, {
+        value: &#x27;function&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;FUNCTION_PARAM_NAMES&#x27;, {
+        value: &#x27;names&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;FUNCTION_PARAM_VALUES&#x27;, {
+        value: &#x27;values&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;FUNCTION_CODE&#x27;, {
+        value: &#x27;code&#x27;
+    });
+
+
+
+    //private constants
+
+    /**
+     * (statement name) -&gt; (true if requires parentheses)
+     */
+    Compiler.statements = null;
+
+    Compiler.OPERATOR_NEW = &#x27;new&#x27;;
+
+    /**
+     * This is a String containing all the characters that are treated .
+     */
+    Object.defineProperty(Compiler, &#x27;WHITESPACE&#x27;, {
+        value: &#x27;\r\n \t\f&#x27;
+    });
+
+
+
+    /**
+     * This is the prefix used for the function notation of infix operators.
+     * For example, the function notation for ( x + y ) is ( \+(x,y) ).
+     */
+    Object.defineProperty(Compiler, &#x27;OPERATOR_ESCAPE&#x27;, {
+        value: &#x27;\\&#x27;
+    });
+
+
+    Object.defineProperty(Compiler, &#x27;INDEX_METHOD&#x27;, {
+        value: -1
+    });
+    Object.defineProperty(Compiler, &#x27;INDEX_CONDITION&#x27;, {
+        value: 0
+    });
+    Object.defineProperty(Compiler, &#x27;INDEX_TRUE&#x27;, {
+        value: 1
+    });
+    Object.defineProperty(Compiler, &#x27;INDEX_FALSE&#x27;, {
+        value: 2
+    });
+
+    Object.defineProperty(Compiler, &#x27;INDEX_FOR_LIST&#x27;, {
+        value: 0
+    });
+    Object.defineProperty(Compiler, &#x27;INDEX_FOR_ITEM&#x27;, {
+        value: 1
+    });
+
+
+    Object.defineProperty(Compiler, &#x27;ST_IF&#x27;, {
+        value: &#x27;if&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_ELSE&#x27;, {
+        value: &#x27;else&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_FOR&#x27;, {
+        value: &#x27;for&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_EACH&#x27;, {
+        value: &#x27;each&#x27;
+    });
+
+    Object.defineProperty(Compiler, &#x27;ST_DO&#x27;, {
+        value: &#x27;do&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_WHILE&#x27;, {
+        value: &#x27;while&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_CASE&#x27;, {
+        value: &#x27;case&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_DEFAULT&#x27;, {
+        value: &#x27;default&#x27;
+    });
+
+
+    Object.defineProperty(Compiler, &#x27;ST_TRY&#x27;, {
+        value: &#x27;try&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_CATCH&#x27;, {
+        value: &#x27;catch&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_FINALLY&#x27;, {
+        value: &#x27;finally&#x27;
+    });
+
+    Object.defineProperty(Compiler, &#x27;ST_BREAK&#x27;, {
+        value: &#x27;break&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_CONTINUE&#x27;, {
+        value: &#x27;continue&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_VAR&#x27;, {
+        value: &#x27;var&#x27;
+    });
+
+    Object.defineProperty(Compiler, &#x27;ST_RETURN&#x27;, {
+        value: &#x27;return&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_THROW&#x27;, {
+        value: &#x27;throw&#x27;
+    });
+    Object.defineProperty(Compiler, &#x27;ST_IMPORT&#x27;, {
+        value: &#x27;import&#x27;
+    });
+
+
+    /**
+     * Used during compiling only.
+     */
+    Object.defineProperty(Compiler, &#x27;_jumpStatements&#x27;, {
+        value: [Compiler.ST_BREAK, Compiler.ST_CONTINUE, Compiler.ST_RETURN, Compiler.ST_THROW]
+    });
+
+
+    /**
+     * Only used during evaluation and decompiling.
+     */
+    Object.defineProperty(Compiler, &#x27;ST_FOR_DO&#x27;, {
+        value: &#x27;for do&#x27;
+    });
+
+
+    /**
+     * Only used during evaluation and decompiling.
+     */
+    Object.defineProperty(Compiler, &#x27;ST_FOR_IN&#x27;, {
+        value: &#x27;for in&#x27;
+    });
+
+
+    /**
+     * Used  single token for simplicity.
+     */
+    Object.defineProperty(Compiler, &#x27;ST_FOR_EACH&#x27;, {
+        value: &#x27;for each&#x27;
+    });
+
+
+    /**
+     * must be enclosed in () with expressions separated by ;
+     * Used in conjunction with _validStatementPatterns.
+     */
+    Object.defineProperty(Compiler, &#x27;PN_PARAMS&#x27;, {
+        value: &#x27;PARAMS&#x27;
+    });
+
+
+    /**
+     * MUST be a {} code block.
+     * Used in conjunction with _validStatementPatterns.
+     */
+    Object.defineProperty(Compiler, &#x27;PN_BLOCK&#x27;, {
+        value: &#x27;BLOCK&#x27;
+    });
+
+
+    /**
+     * may contain either a single statement or a {} code block.
+     * Used in conjunction with _validStatementPatterns.
+     */
+    Object.defineProperty(Compiler, &#x27;PN_STMT&#x27;, {
+        value: &#x27;STMT&#x27;
+    });
+
+
+    /**
+     * may only contain one expression, optionally enclosed in (), no statements.
+     * Used in conjunction with _validStatementPatterns.
+     */
+    Object.defineProperty(Compiler, &#x27;PN_EXPR&#x27;, {
+        value: &#x27;EXPR&#x27;
+    });
+
+
+    /**
+     * variable names and/or assignments separated by commas
+     * Used in conjunction with _validStatementPatterns.
+     */
+    Object.defineProperty(Compiler, &#x27;PN_VARS&#x27;, {
+        value: &#x27;VARS&#x27;
+    });
+
+
+
+    /**
+     * This is used to match number tokens.
+     */
+    Object.defineProperty(Compiler, &#x27;numberRegex&#x27;, {
+        value: new RegExp(/^(0x[0-9A-Fa-f]+|[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)/)
+    });
+
+    Object.defineProperty(Compiler, &#x27;unicodeRegex&#x27;, {
+        value: new RegExp(/^(\{[0-9A-Fa-f]+\}|[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f])/)
+    });
+
+    Object.defineProperty(Compiler, &#x27;_statementsWithoutParams&#x27;, {
+        value: [
+			Compiler.ST_ELSE, Compiler.ST_DO, Compiler.ST_BREAK, Compiler.ST_CONTINUE, Compiler.ST_CASE, Compiler.ST_DEFAULT,
+			Compiler.ST_TRY, Compiler.ST_FINALLY, Compiler.ST_RETURN, Compiler.ST_THROW, Compiler.ST_VAR, Compiler.ST_IMPORT
+		]
+    });
+
+    Object.defineProperty(Compiler, &#x27;_statementsWithParams&#x27;, {
+        value: [
+			Compiler.ST_IF, Compiler.ST_FOR, Compiler.ST_EACH, Compiler.ST_FOR_EACH, Compiler.ST_WHILE, Compiler.ST_SWITCH, Compiler.ST_CATCH
+		]
+    });
+
+    Compiler._staticInstance = null;
+
+
+    //constructor
+    function Compiler(includeDefaultLibraries) {
+        //private
+        Object.defineProperty(this, &#x27;JUMP_LOOKUP&#x27;, {
+            value: new Map() // Function -&gt; true
+        });
+        Object.defineProperty(this, &#x27;LOOP_LOOKUP&#x27;, {
+            value: new Map() // Function -&gt; true
+        });
+        Object.defineProperty(this, &#x27;BRANCH_LOOKUP&#x27;, {
+            value: new Map() // // Function -&gt; Boolean, for short-circuiting
+        });
+        Object.defineProperty(this, &#x27;ASSIGN_OP_LOOKUP&#x27;, {
+            value: new Map() // Function -&gt; true
+        });
+        Object.defineProperty(this, &#x27;PURE_OP_LOOKUP&#x27;, {
+            value: new Map() // Function -&gt; true
+        });
+        Object.defineProperty(this, &#x27;MAX_OPERATOR_LENGTH&#x27;, {
+            value: 4
+        });
+
+
+        /**
+         * This is a list of objects and/or classes containing functions and constants supported by the compiler.
+         */
+        Object.defineProperty(this, &#x27;libraries&#x27;, {
+            value: []
+        });
+
+
+        /**
+         * This object maps the name of a predefined constant to its value.
+         */
+
+        this.constants = null;
+        /**
+         * This object maps the name of a global symbol to its value.
+         */
+
+        this.globals = null;
+        /**
+         * This object maps an operator like &quot;*&quot; to a Function or a valie of true if there is no function.
+         */
+
+        this.operators = null;
+        /**
+         * A pure operator is one that always gives the same result when invoked with the same parameters.
+         * This object maps a pure operator like &quot;+&quot; to its corresponding function.
+         */
+
+        this.pureOperators = null;
+        /**
+         * This object maps an assignment operator like &quot;=&quot; to its corresponding function.
+         * This object is used  quick lookup to see if an operator is an assignment operator.
+         */
+
+        this.assignmentOperators = null;
+        /**
+         * This is a two-dimensional Array of operator symbols arranged in the order they should be evaluated.
+         * Each nested Array is a group of operators that should be evaluated in the same pass.
+         */
+
+        this.orderedOperators = null;
+        /**
+         * This is an Array of all the unary operator symbols.
+         */
+
+        this.unaryOperatorSymbols = null;
+        /**
+         * Set this to true to enable trace statements for debugging.
+         */
+        this.debug = false;
+
+        initialize.call(this);
+        if (includeDefaultLibraries)
+            includeLibraries(Math, weavecore.StandardLib);
+        //includeLibraries(Math, StringUtil, weavecore.StandardLib, Dictionary);
+    }
+
+    /**
+     * Attempts to compile an expression as a constant, then returns the constant value.
+     * @param constantExpression
+     * @return The value of the expression.
+     * @throws Error if the expression cannot be evaluated as a constant.
+     */
+    Compiler.parseConstant = function (constantExpression) {
+        if (!Compiler._staticInstance)
+            Compiler._staticInstance = new Compiler(false);
+        var compiled = Compiler._staticInstance.finalize(Compiler._staticInstance.compileTokens(Compiler._staticInstance.getTokens(constantExpression), false), true);
+        if (compiled instanceof weavecore.CompiledConstant) {
+            return (compiled).value;
+        } else {
+            throw new Error(&quot;Expression does not evaluate to a constant&quot;);
+        }
+    }
+
+
+    /**
      * This function surrounds a String with quotes and escapes special characters using ActionScript string literal format.
      * @param string A String that may contain special characters.
      * @param useDoubleQuotes If this is true, double-quote will be used.  If false, single-quote will be used.
@@ -180,12 +522,32 @@ if (typeof window === &#x27;undefined&#x27;) {
         return quote + result.join(&#x27;&#x27;) + quote;
     }
 
+    Compiler.isClass = function (object) {
+        return object.prototype &amp;&amp; object.name &amp;&amp; object.name.length &gt; 0 &amp;&amp; object.prototype.constructor.name === object.name;
+    }
 
+    /**
+     * Casts an object to a specified type.
+     * If given an unclassed Object, the properties will be copied over to a new instance of the type.
+     * @param object An object to cast.
+     * @param type The desired type.
+     * @return An instance of the desired type.
+     * @throws Error If unable to cast the object to the desired type.
+     */
+    Compiler.cast = function (object, type) {
+        if (object instanceof type || object === null || object.constructor.name !== &#x27;Object&#x27;)
+            return type(object);
+        var newObj = new type();
+        for (var key in object)
+            if (newObj.hasOwnProperty(key))
+                newObj[key] = object[key];
+        return newObj;
+    }
 
     /**
      * Generates a deterministic JSON-like representation of an object, meaning object keys appear in sorted order.
      * @param value The object to stringify.
-     * @param replacer A function like function(key:String, value:*):*
+     * @param replacer A function like function(key, value)
      * @param indent Either a Number or a String to specify indentation of nested values
      * @param json_values_only If this is set to true, only JSON-compatible values will be used (NaN/Infinity/undefined -&gt; null)
      */
@@ -230,19 +592,2574 @@ if (typeof window === &#x27;undefined&#x27;) {
             weavecore.StandardLib.sort(output);
         }
         /*else {
-               for each(var list: Array in DescribeType.getInfo(value, DescribeType.ACCESSOR_FLAGS | DescribeType.VARIABLE_FLAGS)[&#x27;traits&#x27;])
+               for each(var list in DescribeType.getInfo(value, DescribeType.ACCESSOR_FLAGS | DescribeType.VARIABLE_FLAGS)[&#x27;traits&#x27;])
                for each(item in list)
                if (item.access != &#x27;writeonly&#x27; &amp;&amp; !item.uri) // ignore properties with namespaces
-                   output.push(encodeString(item.name) + &quot;: &quot; + _stringify(item.name, value[item.name], replacer, lineBreakIndent, indent, json_values_only));
+                   output.push(Compiler.encodeString(item.name) + &quot;: &quot; + _stringify(item.name, value[item.name], replacer, lineBreakIndent, indent, json_values_only));
                // sort keys
                StandardLib.sort(output);
            }*/
 
-        if (output.length == 0)
+        if (output.length === 0)
             return valueIsArrayOrVector ? &quot;[]&quot; : &quot;{}&quot;;
 
         return (valueIsArrayOrVector ? &quot;[&quot; : &quot;{&quot;) + lineBreakIndent + output.join(indent ? &#x27;,&#x27; + lineBreakIndent : &#x27;, &#x27;) + lineBreak + (valueIsArrayOrVector ? &quot;]&quot; : &quot;}&quot;);
     }
+
+    /**
+     * First checks deprecatedClassReplacements, then getDefinitionByName().
+     * @param name The name used to look up a definition.
+     * @return The corresponding object.
+     * @throws Error If there is no definition corresponding to the name.
+     */
+    Compiler.getDefinition = function (name) {
+        // return cached definition if present
+        var def = Compiler.classAliases[name];
+        if (def)
+            return def;
+
+        /*var altName = name; // altName possibly uses colon notation
+
+
+        def = classAliases[name];
+        if (def)
+        {
+        	classAliases[altName] = def;
+        	return def;
+        }
+
+        // if it&#x27;s not a fully qualified name, check the default packages
+        var domain:ApplicationDomain = ApplicationDomain.currentDomain;
+        for (var i = -1; i &lt; defaultPackages.length; i++)
+        {
+        	var qname = i &lt; 0 ? name : (defaultPackages[i] + &quot;::&quot; + name);
+        	if (domain.hasDefinition(qname))
+        	{
+        		// cache definition for next time
+        		def = domain.getDefinition(qname);
+        		classAliases[name] = def;
+        		classAliases[altName] = def;
+        		return def;
+        	}
+        }
+
+        // this will throw a meaningful error if there is no definition
+        return domain.getDefinition(name);*/
+    }
+
+    var p = Compiler.prototype;
+
+
+    /**
+     * This function will include additional libraries to be supported by the compiler when compiling functions.
+     * @param classesOrObjects An Array of Class definitions or objects containing functions to be supported by the compiler.
+     */
+    p.includeLibraries = function () {
+        var classesOrObjects = Array.prototype.slice.call(this, arguments);
+        for (var i = 0; i &lt; classesOrObjects.length; i++) {
+            var library = classesOrObjects[i];
+            // only add this library to the list if it is not already added.
+            if (library != null &amp;&amp; this.libraries.indexOf(library) &lt; 0) {
+                var className = null;
+                if (library.constructor === String) {
+                    className = library;
+                    library = Compiler.getDefinition.call(this, className);
+                    if (this.libraries.indexOf(library) &gt;= 0)
+                        continue;
+                } else if (Compiler.isClass(library)) {
+                    className = library.constructor.name;
+                }
+                if (className) {
+                    // save the class name as a symbol
+                    //className = className.substr(Math.max(className.lastIndexOf(&#x27;.&#x27;), className.lastIndexOf(&#x27;:&#x27;)) + 1);
+                    this.globals[className] = library;
+                }
+                /*if (library is Function) // special case for global function like flash.utils.getDefinitionByName
+                	continue;*/
+
+                this.libraries.push(library);
+            }
+        }
+
+    }
+
+    /**
+     * This function compiles an expression into a Function that evaluates using variables from a symbolTable.
+     * @param expression An expression to compile.
+     * @param symbolTable This is a lookup table containing custom variables and functions that can be used in the expression. Multiple lookup tables can be specified in an Array. The values in the lookup tables may be changed outside the function after compiling.
+     * @param errorHandler A function that takes an Error and optionally returns true if execution should continue, behaving  the current instruction returned undefined.
+     * @param useThisScope If this is set to true, properties of &#x27;this&#x27; can be accessed  they were local variables.
+     * @param paramNames This specifies local variable names to be associated with the arguments passed in  to the compiled function.
+     * @param paramDefaults This specifies default values corresponding to the parameter names.  This must be the same length  paramNames array.
+     * @return A Function generated from the expression String.
+     * @throws Error If the expression is invalid.
+     */
+    p.compileToFunction = function (expression, symbolTable, errorHandler, useThisScope, paramNames, paramDefaults) {
+        errorHandler = (errorHandler === undefined) ? null : errorHandler;
+        useThisScope = (useThisScope === undefined) ? false : useThisScope;
+        paramNames = (paramNames === undefined) ? null : paramNames;
+        paramDefaults = (paramDefaults === undefined) ? null : paramDefaults;
+
+        var tokens = getTokens.call(this, expression);
+        //trace(&quot;source:&quot;, expression, &quot;tokens:&quot; + tokens.join(&#x27; &#x27;));
+        var compiledObject = finalize.call(this, compileTokens.call(this, tokens, true));
+        return this.compileObjectToFunction(compiledObject, symbolTable, errorHandler, useThisScope, paramNames, paramDefaults);
+    }
+
+    function getTokens(expression) {
+        var tokens = [];
+        if (!expression)
+            return tokens;
+        var n = expression.length;
+        // get a flat list of tokens
+        var i = 0;
+        while (i &lt; n) {
+            var token = getToken.call(this, expression, i);
+            var substr = token.substr(0, 2);
+            // skip whitespace and comments
+            if (substr != &#x27;//&#x27; &amp;&amp; substr != &#x27;/*&#x27; &amp;&amp; Compiler.WHITESPACE.indexOf(token.charAt(0)) === -1)
+                tokens.push(token);
+            i += token.length;
+        }
+        return tokens;
+    }
+
+    /**
+     * This function is for internal use only.
+     * @param expression An expression to parse.
+     * @param index The starting index of the token.
+     * @return The token beginning at the specified index.
+     * @throws Error If a block comment or quoted String is not terminated properly.
+     */
+    function getToken(expression, index) {
+        var endIndex;
+        var n = expression.length;
+        var c = expression.charAt(index);
+
+        // handle comments
+        if (c === &#x27;/&#x27;) {
+            var c2 = expression.charAt(index + 1);
+
+            if (c2 === &#x27;/&#x27;) // line comment
+                return expression.substr(index).split(&#x27;\r&#x27;)[0].split(&#x27;\n&#x27;)[0];
+
+            if (c2 === &#x27;*&#x27;) /* block comment */ {
+                var endBlockComment = expression.indexOf(&quot;*/&quot;, index + 2);
+                if (endBlockComment &lt; 0)
+                    throw new Error(&#x27;Missing end sequence of block comment (&quot;*/&quot;): &#x27; + expression.substr(index));
+                return expression.substring(index, endBlockComment + 2);
+            }
+        }
+
+        // handle quoted string
+        if (c === &#x27;&quot;&#x27; || c === &quot;&#x27;&quot; || c === &#x27;&#x60;&#x27;) {
+            var quote = c;
+            // index points to the opening quote
+            // make endIndex point to the matching end quote
+            for (c = null, endIndex = index + 1; endIndex &lt; n; endIndex++) {
+                c = expression.charAt(endIndex);
+                // stop when matching quote found, unless there are two together for an escape sequence
+                if (c === quote) {
+                    if (endIndex &lt; n - 1 &amp;&amp; expression.charAt(endIndex + 1) === quote) {
+                        // skip second quote
+                        endIndex++;
+                    } else {
+                        // return the quoted string, including the quotes
+                        return expression.substring(index, endIndex + 1);
+                    }
+                } else if (c === &#x27;\\&#x27;) // handle escape sequences
+                {
+                    endIndex++; // skip the next character
+                }
+            }
+            // invalid quoted string
+            throw new Error(&quot;Missing matching end quote: &quot; + expression.substr(index));
+        }
+
+        // handle numbers
+        var foundNumber = Compiler.numberRegex.exec(expression.substr(index));
+        if (foundNumber)
+            return foundNumber[0];
+
+        // handle operators (find the longest matching operator)
+        // this function assumes operators h been initialized
+        if (this.operators.hasOwnProperty(c)) // only handle operator if it begins with operator character (doesn&#x27;t include as,in,instanceof,is)
+            for (var opLength = this.MAX_OPERATOR_LENGTH; opLength &gt; 0; opLength--)
+            if (this.operators.hasOwnProperty(c = expression.substr(index, opLength)))
+                return c;
+
+            // handle whitespace (find the longest matching sequence)
+        endIndex = index;
+        while (endIndex &lt; n &amp;&amp; Compiler.WHITESPACE.indexOf(expression.charAt(endIndex)) &gt;= 0)
+            endIndex++;
+        if (index &lt; endIndex)
+            return expression.substring(index, endIndex);
+
+        // handle everything else (go until a special character is found)
+        for (endIndex = index + 1; endIndex &lt; n; endIndex++) {
+            c = expression.charAt(endIndex);
+            // whitespace terminates a token
+            if (Compiler.WHITESPACE.indexOf(c) &gt;= 0)
+                break;
+            // operator terminates a token
+            if (this.operators.hasOwnProperty(c))
+                break;
+        }
+        return expression.substring(index, endIndex);
+    }
+
+    /**
+     * This function will recursively compile a set of tokens into a compiled object representing a function that takes no parameters and returns a value.
+     * Example set of input tokens:  pow ( - ( - 2 + 1 ) ** - 4 , 3 ) - ( 4 + - 1 )
+     * @param tokens An Array of tokens for an expression.  This array will be modified in place.
+     * @param allowSemicolons Set to true to allow multiple statements and empty expressions.
+     * @return A CompiledConstant or CompiledFunctionCall generated from the tokens.
+     * @throws Error If the tokens do not describe a valid expression.
+     */
+    function compileTokens(tokens, allowSemicolons) {
+        // there are no more parentheses, so the remaining tokens are operators, constants, and variable names.
+        if (this.debug)
+            console.log(&quot;compiling tokens&quot;, tokens.join(&#x27; &#x27;));
+
+        var i;
+        var token;
+        var str;
+        var call;
+
+        // first step: compile quoted Strings and Numbers
+        for (i = 0; i &lt; tokens.length; i++) {
+            str = (tokens[i].constructor === String) ? tokens[i] : null;
+
+            if (!str)
+                continue;
+
+            // if the token starts with a quote, treat it  String
+            if (str.charAt(0) === &#x27;&quot;&#x27; || str.charAt(0) === &quot;&#x27;&quot; || str.charAt(0) === &#x27;&#x60;&#x27;) {
+                tokens[i] = compileStringLiteral.call(this, str);
+            } else {
+                // attempt to evaluate the token  Number
+                try {
+                    var number = Number(str);
+                    if (!isNaN(number))
+                        tokens[i] = new weavecore.CompiledConstant(str, number);
+                } catch (e) {}
+            }
+        }
+
+
+        // next step: compile escaped operators
+        for (i = 0; i &lt; tokens.length - 1; i++) {
+            token = tokens[i];
+            if (token === Compiler.OPERATOR_ESCAPE &amp;&amp; this.operators[tokens[i + 1]].constructor === Function) {
+                token = tokens[i + 1];
+                tokens.splice(i, 2, new weavecore.CompiledConstant(Compiler.OPERATOR_ESCAPE + token, this.operators[token]));
+            }
+        }
+
+        // next step: combine &#x27;for each&#x27; into a single token
+        for (i = tokens.length; i &gt; 0; i--)
+            if (tokens[i] === Compiler.ST_EACH &amp;&amp; tokens[i - 1] === Compiler.ST_FOR)
+                tokens.splice(i - 1, 2, Compiler.ST_FOR_EACH);
+        if (tokens[0] === Compiler.ST_EACH)
+            throw new Error(&quot;Invalid statement &#x27;each&#x27;&quot;);
+
+        // next step: compile unary &#x27;#&#x27; operators (except those immediately followed by other operators)
+        if (this.operators.hasOwnProperty(&#x27;#&#x27;))
+            compileUnaryOperators.call(this, tokens, [&#x27;#&#x27;]);
+
+        // next step: handle operators &quot;..[]{}()&quot;
+        compileBracketsAndProperties.call(this, tokens);
+
+        // next step: handle stray operators &quot;..[](){}&quot;
+        for (i = 0; i &lt; tokens.length; i++)
+            if (tokens[i].constructor === String &amp;&amp; &#x27;..[](){}&#x27;.indexOf(tokens[i]) &gt;= 0)
+                throw new Error(&quot;Misplaced &#x27;&quot; + tokens[i] + &quot;&#x27;&quot; + _betweenTwoTokens.call(this, tokens[i - 1], tokens[i + 1]));
+
+            // next step: compile constants and variable names
+        for (i = 0; i &lt; tokens.length; i++) {
+            token = (tokens[i].constructor === String) ? tokens[i] : null;
+            // skip tokens that have already been compiled and skip operator tokens
+            if (token === null || this.operators.hasOwnProperty(token))
+                continue;
+            // evaluate constants
+            if (this.constants.hasOwnProperty(token)) {
+                tokens[i] = new weavecore.CompiledConstant(token, this.constants[token]);
+                continue;
+            }
+            // treat everything else  variable name.
+            // make a copy of the variable name that is safe for the wrapper function to use
+            // compile the token  call to variableGetter.
+            tokens[i] = compileVariable.call(this, token);
+        }
+
+        // next step: compile new operator used  unary operator (missing parentheses)
+        compileUnaryOperators.call(this, tokens, [Compiler.OPERATOR_NEW]);
+
+        // next step: compile unary &#x27;#&#x27; operators
+        if (this.operators.hasOwnProperty(&#x27;#&#x27;))
+            compileUnaryOperators.call(this, tokens, [&#x27;#&#x27;]);
+
+        compilePostfixOperators(tokens, [&#x27;--&#x27;, &#x27;++&#x27;]);
+
+        // next step: compile infix &#x27;**&#x27; operators
+        compileInfixOperators.call(this, tokens, [&#x27;**&#x27;]);
+
+        // next step: compile unary operators
+        compileUnaryOperators.call(this, tokens, this.unaryOperatorSymbols);
+
+        // next step: compile remaining infix operators in order
+        for (i = 0; i &lt; this.orderedOperators.length; i++)
+            compileInfixOperators.call(this, tokens, this.orderedOperators[i]);
+
+        // next step: compile conditional branches
+        conditionals: while (true) {
+                // true branch includes everything between the last &#x27;?&#x27; and the next &#x27;:&#x27;
+                var left = tokens.lastIndexOf(&#x27;?&#x27;);
+                var right = tokens.indexOf(&#x27;:&#x27;, left);
+
+                var terminators = [&#x27;,&#x27;, &#x27;;&#x27;];
+                for (var index in terminators) {
+                    var terminator = terminators[index];
+                    var terminatorIndex = tokens.indexOf(terminator, left);
+                    if (terminatorIndex &gt;= 0 &amp;&amp; terminatorIndex &lt; right)
+                        throw new Error(&quot;Expecting colon before &#x27;&quot; + terminator + &quot;&#x27;&quot;);
+                    if (terminatorIndex === right + 1)
+                        break conditionals; // missing expression
+                }
+
+                // stop if operator missing or any section h tokens
+                if (right &lt; 0 || left &lt; 1 || left + 1 === right || right + 1 === tokens.length)
+                    break;
+
+                // false branch includes everything after &#x27;:&#x27; and up until the next ?:,;
+                var end = right + 2;
+                while (end &lt; tokens.length) {
+                    token = tokens[end];
+                    if (token &amp;&amp; &#x27;?:,;&#x27;.indexOf(token) &gt;= 0)
+                        break;
+                    end++;
+                }
+                if (this.debug)
+                    console.log(&quot;compiling conditional branch:&quot;, tokens.slice(left - 1, right + 2).join(&#x27; &#x27;));
+
+                // condition includes only the token to the left of the &#x27;?&#x27;
+                var condition = compileTokens.call(this, tokens.slice(left - 1, left), false);
+                var trueBranch = compileTokens.call(this, tokens.slice(left + 1, right), false);
+                var falseBranch = compileTokens.call(this, tokens.slice(right + 1, end), false);
+                tokens.splice(left - 1, end - left + 1, compileOperator.call(this, &#x27;?:&#x27;, [condition, trueBranch, falseBranch]));
+            }
+            // stop if any branch operators remain
+        if (Math.max(tokens.indexOf(&#x27;?&#x27;)) &gt;= 0)
+            throw new Error(&#x27;Invalid conditional branch&#x27;);
+
+        // next step: inline functions (headers only), right to left
+        i = tokens.length;
+        while (i--) {
+            if (tokens[i] === Compiler.FUNCTION)
+                tokens.splice(i, 2, compileFunctionHeader.call(this, Compiler.FUNCTION, tokens[i + 1]));
+            if (tokens[i] === &#x27;=&gt;&#x27;)
+                tokens.splice(i - 1, 2, compileFunctionHeader.call(this, &#x27;=&gt;&#x27;, tokens[i - 1]));
+        }
+
+        // next step: function applications
+        for (i = 0; i &lt; tokens.length; i++) {
+            call = (tokens[i] &amp;&amp; tokens[i] instanceof weavecore.CompiledFunctionCall) ? tokens[i] : null;
+            if (call &amp;&amp; call.evaluatedMethod === this.operators[&#x27;,&#x27;] &amp;&amp; tokens[i - 1] instanceof weavecore.ICompiledObject &amp;&amp; !isFunctionHeader.call(this, tokens[i - 1]))
+                tokens.splice(i - 1, 2, new weavecore.CompiledFunctionCall(tokens[i - 1], call.compiledParams));
+        }
+
+        // next step: variable assignment and inline function definitions, right to left
+        while (true) {
+            i = tokens.length;
+            while (i--) {
+                if (isFunctionHeader.call(this, tokens[i]))
+                    tokens.splice(i, 2, compileFunctionDefinition(tokens[i], tokens[i + 1]));
+                else if (this.assignmentOperators.hasOwnProperty(tokens[i]))
+                    break;
+            }
+            if (i &lt; 0)
+                break;
+            if (i === 0 || i + 1 === tokens.length)
+                throw new Error(&quot;Misplaced &#x27;&quot; + tokens[i] + &quot;&#x27;&quot;);
+            tokens.splice(i - 1, 3, compileVariableAssignment.call(this, tokens[i - 1], tokens[i], tokens[i + 1]));
+        }
+
+        //next step literal property declarations: [variable, &quot;:&quot;, expr]
+        for (i = 0; i &lt; tokens.length; i++) {
+            if (tokens[i + 1] === &#x27;:&#x27; &amp;&amp; tokens[i + 2] instanceof weavecore.ICompiledObject) {
+                var constant = (tokens[i] &amp;&amp; tokens[i] instanceof weavecore.CompiledConstant) ? tokens[i] : null;
+                if (constant &amp;&amp; !(constant.value.constructor === String) &amp;&amp; this.constants.hasOwnProperty(constant.name) &amp;&amp; isValidSymbolName(constant.name))
+                    constant = new weavecore.CompiledConstant(constant.name, constant.name);
+
+                call = (tokens[i] &amp;&amp; tokens[i] instanceof weavecore.CompiledFunctionCall) ? tokens[i] : null;
+                if (isVariableLookup(call))
+                    constant = (call.compiledMethod &amp;&amp; call.compiledMethod instanceof weavecore.CompiledConstant) ? call.compiledMethod : null;
+
+                if (constant &amp;&amp; constant.value instanceof String)
+                    tokens.splice(i, 3, compileOperator.call(this, &quot;:&quot;, [constant, tokens[i + 2]]));
+            }
+        }
+        // stop if any &quot;:&quot; remain
+        if (tokens.indexOf(&#x27;:&#x27;) &gt;= 0)
+            throw new Error(&#x27;Misplaced &quot;:&quot;&#x27;);
+
+        // next step: commas
+        compileInfixOperators.call(this, tokens, [&#x27;,&#x27;]);
+
+        // next step: handle statements
+        if (allowSemicolons) {
+            // remove leading &#x27;;&#x27;
+            while (tokens[0] === &#x27;;&#x27;)
+                tokens.shift();
+            // convert EXPR; to {EXPR}
+            for (i = 1; i &lt; tokens.length; i++) {
+                if (tokens[i] === &#x27;;&#x27;) {
+                    call = (tokens[i - 1] &amp;&amp; tokens[i - 1] instanceof weavecore.CompiledFunctionCall) ? tokens[i - 1] : null;
+
+                    if (Compiler._jumpStatements.indexOf(tokens[i - 1]) &gt;= 0 || (call &amp;&amp; call.evaluatedMethod === this.operators[&#x27;(&#x27;])) {
+                        // support for &quot;return;&quot; and &quot;while (cond);&quot;
+                        tokens[i] = compileOperator.call(this, &#x27;;&#x27;, []);
+                    } else if (tokens[i - 1] instanceof weavecore.CompiledConstant || (call &amp;&amp; call.evaluatedMethod != this.operators[&#x27;;&#x27;])) {
+                        // support for &quot;while (cond) expr;&quot;
+                        tokens.splice(i - 1, 2, compileOperator.call(this, &#x27;;&#x27;, [tokens[i - 1]]));
+                    }
+                }
+            }
+
+            // if there are any remaining &#x27;;&#x27;, compile separate statements
+            if (tokens.indexOf(&#x27;;&#x27;) &gt;= 0)
+                return compileOperator.call(this, &#x27;;&#x27;, compileArray(tokens, &#x27;;&#x27;));
+
+            // there are no more &#x27;;&#x27;
+            assertValidStatementParams(tokens);
+            for (i = 0; i &lt; tokens.length; i++)
+                compileStatement.call(this, tokens, i);
+
+            // group multiple statements in {}
+            if (tokens.length &gt; 1)
+                return compileOperator.call(this, &#x27;;&#x27;, tokens);
+        } else if (tokens.indexOf(&#x27;;&#x27;) &gt;= 0)
+            throw new Error(&quot;Misplaced &#x27;;&#x27;&quot;);
+
+        // last step: verify there is only one token left
+        if (tokens.length === 1)
+            return tokens[0];
+
+        if (tokens.length &gt; 1)
+            throw new Error(&quot;Missing operator&quot; + _betweenTwoTokens.call(this, tokens[0], tokens[1]));
+
+        if (allowSemicolons)
+            return compileOperator.call(this, &#x27;;&#x27;, tokens);
+
+        throw new Error(&quot;Empty expression&quot;);
+    }
+
+
+    /**
+     * This function is for internal use only.  It assumes the string it receives is valid.
+     * @param encodedString A quoted String with special characters escaped using ActionScript string literal format.
+     * @return The compiled string.
+     */
+    function compileStringLiteral(encodedString) {
+        // remove quotes
+        var quote = encodedString.charAt(0);
+        var input = encodedString.substr(1, encodedString.length - 2);
+        input = input.split(quote + quote).join(quote); // handle doubled quote escape sequences
+        var output = &quot;&quot;;
+        var searchIndex = 0;
+        var compiledObjects = [];
+        while (true) {
+            var escapeIndex = input.indexOf(&quot;\\&quot;, searchIndex);
+            if (escapeIndex &lt; 0)
+                escapeIndex = input.length;
+            // only support expressions inside { } if the string literal is surrounded by the &#x27;&#x60;&#x27; quote symbol.
+            var bracketIndex = quote === &#x27;&#x60;&#x27; ? input.indexOf(&quot;{&quot;, searchIndex) : -1;
+            if (bracketIndex &lt; 0)
+                bracketIndex = input.length;
+
+            if (bracketIndex === escapeIndex) // handle end of string
+            {
+                output += input.substring(searchIndex);
+                input = Compiler.encodeString(output, quote); // use original quote symbol
+
+                var compiledString = new weavecore.CompiledConstant(input, output);
+
+                if (compiledObjects.length === 0)
+                    return compiledString;
+
+                compiledObjects.unshift(compiledString);
+                return new weavecore.CompiledFunctionCall(new weavecore.CompiledConstant(&#x27;substitute&#x27;, weavecore.StandardLib.substitute), compiledObjects);
+            } else if (escapeIndex &lt; bracketIndex) // handle &#x27;\&#x27;
+            {
+                // append everything before the escaped character
+                output += input.substring(searchIndex, escapeIndex);
+
+                // look up escaped character
+                var c = input.charAt(escapeIndex + 1);
+                c = Compiler.DECODE_LOOKUP[c] || c;
+
+                if (&#x27;0123&#x27;.indexOf(c) &gt;= 0) {
+                    // \000 .. \377        a byte specified in octal
+                    var oct = input.substr(escapeIndex + 1, 3);
+                    c = String.fromCharCode(parseInt(oct, 8));
+                    searchIndex = escapeIndex + 4; // skip over escape sequence
+                } else if (c === &#x27;x&#x27;) {
+                    // \x00 .. \xFF        a byte specified in hexadecimal
+                    var hex = input.substr(escapeIndex + 2, 2);
+                    c = String.fromCharCode(parseInt(hex, 16));
+                    searchIndex = escapeIndex + 4; // skip over escape sequence
+                } else if (c === &#x27;u&#x27;) {
+                    var unicodeDigits;
+                    var unicodeValue;
+                    var foundUnicode = Compiler.unicodeRegex.exec(input.substr(escapeIndex + 2, maxUnicodeEscapeChars))
+                    if (foundUnicode) {
+                        unicodeDigits = foundUnicode[0];
+                        if (unicodeDigits.charAt(0) === &#x27;{&#x27;) // \u{10FFFF}
+                            unicodeValue = parseInt(unicodeDigits.substr(1, unicodeDigits.length - 2), 16);
+                        else // \u0000 .. \uFFFF    a 16-bit Unicode character specified in hexadecimal
+                            unicodeValue = parseInt(unicodeDigits, 16);
+                    }
+                    if (!foundUnicode || unicodeValue &gt; maxUnicodeEscapeValue)
+                        throw new Error(&quot;Malformed Unicode character escape sequence: &quot; + input);
+                    c = weavecore.StandardLib.ucs2encode(unicodeValue);
+                    searchIndex = escapeIndex + 2 + unicodeDigits.length; // skip over escape sequence
+                } else {
+                    searchIndex = escapeIndex + 2; // skip over escape sequence
+                }
+
+                // append the escaped character
+                output += c;
+            } else if (bracketIndex &lt; escapeIndex) // handle &#x27;{&#x27;
+            {
+                // handle { } brackets for inline code
+                var tokens = [];
+                var token = null;
+                var depth = 1;
+                escapeIndex = bracketIndex + 1;
+                while (escapeIndex &lt; input.length) {
+                    token = getToken.call(this, input, escapeIndex);
+                    if (token === &#x27;{&#x27;)
+                        depth++;
+                    if (token === &#x27;}&#x27;)
+                        depth--;
+                    if (depth === 0)
+                        break;
+                    if (Compiler.WHITESPACE.indexOf(token.charAt(0)) === -1)
+                        tokens.push(token);
+                    escapeIndex += token.length;
+                }
+                if (escapeIndex === input.length)
+                    throw new Error(&quot;Missing &#x27;}&#x27; in string literal inline code: &quot; + input);
+
+                // now bracketIndex points to &#x27;{&#x27; and escapeIndex points to matching &#x27;}&#x27;
+                //replace code between brackets with an int like {0} so the resulting string can be passed to StandardLib.substitute() with compiledObject  next parameter
+                output += input.substring(searchIndex, bracketIndex) + &#x27;{&#x27; + compiledObjects.length + &#x27;}&#x27;;
+                searchIndex = escapeIndex + 1;
+                compiledObjects.push(compileTokens.call(this, tokens, true));
+            }
+        }
+        throw new Error(&quot;unreachable&quot;);
+    }
+
+    /**
+     * This function is for internal use only.
+     * This will compile unary operators of the given type from right to left.
+     * @param compiledTokens An Array of compiled tokens for an expression.  No &#x27;(&#x27; &#x27;)&#x27; or &#x27;,&#x27; tokens should appear in this Array except when compiling &#x27;#&#x27; operator.
+     * @param operatorSymbols An Array containing all the infix operator symbols to compile.
+     */
+    function compileUnaryOperators(compiledTokens, operatorSymbols) {
+        var call;
+        var index = compiledTokens.length;
+        while (index--) // right to left
+        {
+
+            var token = (compiledTokens[index].constructor === String) ? compiledTokens[index] : null;
+
+            // skip tokens that are not listed unary operators
+            if (operatorSymbols.indexOf(token) &lt; 0)
+                continue;
+
+            var nextToken = compiledTokens[index + 1];
+
+            if (token === &#x27;#&#x27;) {
+                // do not compile unary &#x27;#&#x27; if immediately followed by an uncompiled operator
+                if (operators.hasOwnProperty(nextToken))
+                    continue;
+
+                if (nextToken !== undefined)
+                    nextToken = compileTokens.call(this, [nextToken], false);
+            }
+
+            // fail when next token is not a compiled object, unless we&#x27;re compiling &#x27;#&#x27;
+            if ((nextToken === undefined &amp;&amp; token !== &#x27;#&#x27;) || nextToken.constructor === String)
+                throw new Error(&quot;Misplaced unary operator &#x27;&quot; + token + &quot;&#x27;&quot;);
+
+            // skip infix operator
+            if (index &gt; 0 &amp;&amp; compiledTokens[index - 1] instanceof weavecore.ICompiledObject) {
+                call = (compiledTokens[index - 1] &amp;&amp; compiledTokens[index - 1] instanceof weavecore.CompiledFunctionCall) ? compiledTokens[index - 1] : null;
+                if (!call || call.evaluatedMethod !== this.operators[&#x27;;&#x27;])
+                    continue;
+            }
+
+            // compile unary operator
+            if (this.debug)
+                console.log(&quot;compile unary operator&quot;, compiledTokens.slice(index, index + 2).join(&#x27; &#x27;));
+
+            if (this.assignmentOperators.hasOwnProperty(token)) // unary assignment operators
+            {
+
+                call = (nextToken &amp;&amp; nextToken instanceof weavecore.CompiledFunctionCall) ? nextToken : null;
+                if (call &amp;&amp; !call.compiledParams) // variable lookup
+                {
+                    compiledTokens.splice(index, 2, compileOperator.call(this, token, [call.compiledMethod, newUndefinedConstant()]));
+                } else if (call &amp;&amp; call.evaluatedMethod === this.operators[&#x27;.&#x27;]) {
+                    // switch &#x27;.&#x27; to the unary assignment operator
+                    call.compiledParams.push(newUndefinedConstant());
+                    compiledTokens.splice(index, 2, compileOperator.call(this, token, call.compiledParams));
+                } else {
+                    throw new Error(&quot;Invalid operand for unary operator &quot; + token);
+                }
+            } else {
+                compiledTokens.splice(index, 2, compileOperator.call(this, token, nextToken === undefined ? [] : [nextToken]));
+            }
+        }
+    }
+
+    function newTrueConstant() {
+        return new weavecore.CompiledConstant(&#x27;true&#x27;, true);
+    }
+
+    function newUndefinedConstant() {
+        return new weavecore.CompiledConstant(&#x27;undefined&#x27;, undefined);
+    }
+
+    function compileOperator(operatorName, compiledParams) {
+        operatorName = Compiler.OPERATOR_ESCAPE + operatorName;
+        var op = new weavecore.CompiledFunctionCall(new weavecore.CompiledConstant(operatorName, this.constants[operatorName]), compiledParams);
+        //op.originalTokens = originalTokensForDecompiling;
+        return op;
+    }
+
+    /**
+     *
+     * @param leftBracket
+     * @param rightBracket
+     * @param tokens
+     */
+    function compileBracketsAndProperties(tokens) {
+        var token;
+        var compiledToken;
+        var compiledParams;
+        var open;
+        var close;
+        var leftBracket;
+        var rightBracket;
+        while (true) {
+            // find first closing bracket or &#x27;.&#x27; or &#x27;..&#x27;
+            for (close = 0; close &lt; tokens.length; close++)
+                if (&#x27;..])}&#x27;.indexOf(tokens[close]) &gt;= 0)
+                    break;
+            if (close === tokens.length || close === 0)
+                break; // possible error, or no operator found
+
+            // use matching brackets
+            rightBracket = tokens[close];
+            if (rightBracket === &#x27;..&#x27;)
+                leftBracket = &#x27;..&#x27;;
+            else
+                leftBracket = &#x27;.[({&#x27;.charAt(&#x27;.])}&#x27;.indexOf(rightBracket));
+
+            // work backwards to the preceeding, matching opening bracket or stop if &#x27;.&#x27;
+            for (open = close; open &gt;= 0; open--)
+                if (tokens[open] === leftBracket)
+                    break;
+            if (open &lt; 0 || open + 1 === tokens.length)
+                break; // possible error, or no operator found
+
+            // unless it&#x27;s an operator, compile the token to the left
+            token = open &gt; 0 ? tokens[open - 1] : null;
+            compiledToken = (token &amp;&amp; token instanceof weavecore.ICompiledObject) ? token : null;
+            if (open &gt; 0 &amp;&amp; !compiledToken &amp;&amp; !this.operators.hasOwnProperty(token)) {
+                // The function token hasn&#x27;t been compiled yet.
+                if (this.constants.hasOwnProperty(token))
+                    compiledToken = new weavecore.CompiledConstant(token, this.constants[token]);
+                else {
+                    var tok = (token &amp;&amp; token.constructor === String) ? token : null;
+                    var compiledToken = compileVariable.call(this, tok);
+                    compiledToken = (compiledToken &amp;&amp; compiledToken instanceof weavecore.ICompiledObject) ? compiledToken : null;
+
+                }
+
+            }
+
+            // handle access and descendants operators
+            if (&#x27;..&#x27;.indexOf(tokens[open]) === 0) {
+                var propertyToken = tokens[open + 1];
+
+                if (!compiledToken || !propertyToken || this.operators.hasOwnProperty(propertyToken))
+                    throw new Error(&quot;Misplaced &#x27;&quot; + tokens[open] + &quot;&#x27; &quot; + _betweenTwoTokens.call(this, token, tokens[open + 1]));
+
+                // the token on the right is a variable name, but we will store it  String because it&#x27;s a property lookup
+                compiledParams = [compiledToken, new weavecore.CompiledConstant(Compiler.encodeString(propertyToken), propertyToken)];
+                tokens.splice(open - 1, 3, compileOperator.call(this, tokens[open], compiledParams));
+                continue;
+            }
+
+            // cut out tokens between brackets
+            var subArray = tokens.splice(open + 1, close - open - 1);
+
+            if (this.debug)
+                console.log(&quot;compiling tokens&quot;, leftBracket, subArray.join(&#x27; &#x27;), rightBracket);
+
+            if (leftBracket === &#x27;{&#x27;) {
+                var block = compileTokens.call(this, subArray, true);
+                var blockCall = (block &amp;&amp; block instanceof weavecore.CompiledFunctionCall) ? block : null;
+                if (blockCall) {
+                    var blockItems = null;
+                    if (blockCall.evaluatedMethod === this.operators[&#x27;;&#x27;] &amp;&amp; blockCall.compiledParams.length === 0)
+                        blockItems = [];
+                    if (blockCall.evaluatedMethod === this.operators[&#x27;,&#x27;])
+                        blockItems = blockCall.compiledParams;
+                    if (blockCall.evaluatedMethod === this.operators[&#x27;:&#x27;])
+                        blockItems = [blockCall];
+                    if (blockItems &amp;&amp; (blockItems.length === 0 || weavecore.StandardLib.getArrayType(blockItems) === weavecore.CompiledFunctionCall)) {
+                        var params = [];
+                        for (var index in blockItems) {
+                            var item = blockItems[index]
+                            if (item.evaluatedMethod !== this.operators[&#x27;:&#x27;]) {
+                                params = null;
+                                break;
+                            }
+                            params.push(item.compiledParams[0], item.compiledParams[1]);
+                        }
+                        if (params !== null) {
+                            tokens.splice(open, 2, compileOperator.call(this, &#x27;{&#x27;, params));
+                            continue;
+                        }
+                    }
+                }
+                // It&#x27;s ok if it creates an extra {} wrapper because finalize() will take care of that.
+                // It&#x27;s important to remember that the brackets existed for statement processing.
+                tokens.splice(open, 2, compileOperator.call(this, &#x27;;&#x27;, [block]));
+                continue;
+            }
+
+            var separator = &#x27;,&#x27;;
+            if (leftBracket === &#x27;(&#x27; &amp;&amp; Compiler.statements.hasOwnProperty(token) &amp;&amp; Compiler.statements[token])
+                separator = &#x27;;&#x27;; // statement parameters are separated by &#x27;;&#x27;
+            compiledParams = compileArray.call(this, subArray, separator);
+
+            if (leftBracket === &#x27;[&#x27;) // this is either an array or a property access
+            {
+                if (compiledToken) {
+                    // property access
+                    if (compiledParams.length === 0)
+                        throw new Error(&quot;Missing parameter for bracket operator: &quot; + this.decompileObject.call(this, compiledToken) + &quot;[]&quot;);
+                    // the token on the left becomes the first parameter of the access operator
+                    compiledParams.unshift(compiledToken);
+                    // replace the token to the left and the brackets with the operator call
+                    tokens.splice(open - 1, 3, compileOperator.call(this, &#x27;.&#x27;, compiledParams));
+                } else {
+                    // array initialization -- replace &#x27;[&#x27; and &#x27;]&#x27; tokens
+                    tokens.splice(open, 2, compileOperator.call(this, &#x27;[&#x27;, compiledParams));
+                }
+                continue;
+            }
+
+            compiledToken = (compiledToken &amp;&amp; compiledToken.constructor === weavecore.CompiledFunctionCall) ? compiledToken : null;
+            var compiledCall = compiledToken;
+            // if there is a compiled token to the left, this is a function call (unless the token is a function header or is a call to operator &#x27;;&#x27;)
+            if (leftBracket === &#x27;(&#x27; &amp;&amp; compiledToken &amp;&amp; !isFunctionHeader.call(this, compiledToken) &amp;&amp; !(compiledCall &amp;&amp; compiledCall.evaluatedMethod === this.operators[&#x27;;&#x27;])) {
+                if (open &gt;= 2) {
+                    var prevToken = tokens[open - 2];
+                    if (prevToken === Compiler.OPERATOR_NEW) {
+                        compiledParams.unshift(compiledToken);
+                        tokens.splice(open - 2, 4, compileOperator.call(this, Compiler.OPERATOR_NEW, compiledParams));
+                        continue;
+                    }
+                }
+                if (this.debug)
+                    console.log(&quot;compiling function call&quot;, this.decompileObject.call(this, compiledToken));
+
+                // the token to the left is the method
+                // replace the function token, &#x27;(&#x27;, and &#x27;)&#x27; tokens with a compiled function call
+                tokens.splice(open - 1, 3, new weavecore.CompiledFunctionCall(compiledToken, compiledParams));
+                continue;
+            }
+
+            // &#x27;{&#x27; or &#x27;(&#x27; group that does not correspond to a function call
+
+            if (leftBracket === &#x27;(&#x27; &amp;&amp; compiledParams.length === 0 &amp;&amp; (token !== Compiler.FUNCTION &amp;&amp; tokens[open + 2] != &#x27;=&gt;&#x27;))
+                throw new Error(&quot;Missing expression inside parentheses&quot;);
+
+            if (leftBracket === &#x27;(&#x27; &amp;&amp; Compiler.statements.hasOwnProperty(token) &amp;&amp; Compiler.statements[token])
+                separator = &#x27;(&#x27;; // statement params
+            tokens.splice(open, 2, compileOperator.call(this, separator, compiledParams));
+
+            if (token === Compiler.FUNCTION &amp;&amp; leftBracket === &#x27;(&#x27;)
+                tokens.splice(open - 1, 2, compileFunctionHeader.call(this, Compiler.FUNCTION, tokens[open]));
+        }
+    }
+
+    /**
+     * Used for generating a portion of an error message like &quot; between token1 and token2&quot;
+     */
+    function _betweenTwoTokens(token1, token2) {
+        if (token1 instanceof weavecore.ICompiledObject)
+            token1 = this.decompileObject(token1);
+        if (token2 instanceof weavecore.ICompiledObject)
+            token2 = this.decompileObject(token2);
+        if (token1 &amp;&amp; token2)
+            return &#x27; between &#x27; + token1 + &#x27; and &#x27; + token2;
+        if (token1)
+            return &#x27; after &#x27; + token1;
+        if (token2)
+            return &#x27; before &#x27; + token2;
+        return &#x27;&#x27;;
+    }
+
+
+    /**
+     * This function will compile an expression into a compiled object representing a function that takes no parameters and returns a value.
+     * This function is useful for inspecting the structure of the compiled function and decompiling individual parts.
+     * @param expression An expression to parse.
+     * @return A CompiledConstant or CompiledFunctionCall generated from the tokens.
+     * @throws Error If the expression is invalid.
+     */
+    p.compileToObject = function (expression) {
+        return finalize.call(this, compileTokens.call(this, getTokens.call(this, expression), true));
+    }
+
+    /**
+     * Call this to move all var declarations at the beginning of the code and perform optimizations on the compiled objects.
+     * @param compiledObject An ICompiledObject to finalize.
+     * @param forceInlineObjectConstants If true, forces the evaluation of inline objects to constants.
+     * @return A finialized/optimized version of compiledObject.
+     */
+    function finalize(compiledObject, forceInlineObjectConstants) {
+        forceInlineObjectConstants = (forceInlineObjectConstants === undefined) ? false : forceInlineObjectConstants;
+        var varLookup = {};
+
+        var final = _finalize.call(this, compiledObject, forceInlineObjectConstants, varLookup);
+        if (!final)
+            return compiledObject;
+
+        compiledObject = final;
+
+        var names = [];
+        for (var name in varLookup)
+            names.push(name);
+
+        if (names.length &gt; 0) {
+            // there is at least one var declaration, so we need to include it at the beginning.
+            var varDeclarations = compileOperator.call(this, Compiler.ST_VAR, [new weavecore.CompiledConstant(null, names)]);
+            var call = (compiledObject &amp;&amp; compiledObject instanceof weavecore.CompiledFunctionCall) ? compiledObject : null;
+            if (call &amp;&amp; call.evaluatedMethod === this.operators[&#x27;;&#x27;]) {
+                call.compiledParams.unshift(varDeclarations);
+                call.evaluateConstants();
+            } else
+                compiledObject = compileOperator.call(this, &#x27;;&#x27;, [varDeclarations, compiledObject]);
+        }
+        return compiledObject;
+    }
+    /**
+     * @private helper function
+     */
+    function _finalize(compiledObject, forceInlineObjectConstants, varLookup) {
+        if (compiledObject instanceof weavecore.CompiledConstant)
+            return compiledObject;
+
+        var i;
+        var call = (compiledObject &amp;&amp; compiledObject instanceof weavecore.CompiledFunctionCall) ? compiledObject : null;
+
+        // function headers should not appear alone
+        if (isFunctionHeader.call(this, call))
+            compileFunctionDefinition.call(this, call, null); // this will throw an appropriate error
+
+        call.compiledMethod = _finalize.call(this, call.compiledMethod, forceInlineObjectConstants, varLookup);
+        if (!call.compiledMethod)
+            throw new Error(&quot;Misplaced variable declaration&quot;);
+        var params = call.compiledParams;
+        if (params) {
+            for (i = 0; i &lt; params.length; i++) {
+                params[i] = _finalize.call(this, params[i], forceInlineObjectConstants, varLookup);
+                if (params[i] === null) // variable declaration eliminated?
+                    params.splice(i--, 1);
+            }
+        }
+        call.evaluateConstants();
+
+        var method = call.evaluatedMethod;
+
+        if (method === this.operators[&#x27;:&#x27;])
+            throw new Error(&quot;Invalid object literal syntax&quot;);
+
+        // remove var declarations from their current locations
+        if (method === this.operators[Compiler.ST_VAR]) {
+            call.evaluatedParams[0].forEach(function (name) {
+                varLookup[name] = true;
+            });
+            return null;
+        }
+
+        if (method === this.operators[&#x27;;&#x27;] || method === this.operators[&#x27;,&#x27;] || method === this.operators[&#x27;(&#x27;]) {
+            if (params.length === 0) {
+                if (this.debug)
+                    console.log(&#x27;optimized empty expression to undefined constant:&#x27;, this.decompileObject(compiledObject));
+                return newUndefinedConstant();
+            }
+            if (params.length === 1) {
+                if (this.debug)
+                    console.log(&#x27;optimized unnecessary wrapper function call:&#x27;, this.decompileObject(compiledObject));
+                return _finalize.call(this, params[0], forceInlineObjectConstants, varLookup);
+            }
+
+            // flatten nested grouping operators
+            i = params.length;
+            while (i--) {
+                var nestedCall = (params[i] &amp;&amp; params[i] instanceof weavecore.CompiledFunctionCall) ? params[i] : null;
+                if (!nestedCall)
+                    continue;
+                var nestedMethod = nestedCall.evaluatedMethod;
+                if (nestedMethod === this.operators[&#x27;;&#x27;] || nestedMethod === this.operators[&#x27;,&#x27;] || nestedMethod === this.operators[&#x27;(&#x27;]) {
+                    if (this.debug)
+                        console.log(&#x27;flattened nested grouped expressions:&#x27;, this.decompileObject(nestedCall));
+                    nestedCall.compiledParams.unshift(i, 1);
+                    params.splice(nestedCall.compiledParams);
+                }
+            }
+            call.evaluateConstants();
+        }
+
+        if ((method === this.operators[Compiler.ST_IF] || method === this.operators[&#x27;?:&#x27;]) &amp;&amp; params[Compiler.INDEX_CONDITION] instanceof weavecore.CompiledConstant) {
+            if (this.debug)
+                console.log(&#x27;optimized short-circuited ?: operator:&#x27;, this.decompileObject(compiledObject));
+
+            var index = call.evaluatedParams[Compiler.INDEX_CONDITION] ? Compiler.INDEX_TRUE : Compiler.INDEX_FALSE;
+            return index &lt; params.length ? params[index] : newUndefinedConstant();
+        }
+
+        if (method === this.operators[&#x27;&amp;&amp;&#x27;] &amp;&amp; params.length === 2 &amp;&amp; params[Compiler.INDEX_CONDITION] instanceof weavecore.CompiledConstant &amp;&amp; !call.evaluatedParams[Compiler.INDEX_CONDITION]) {
+            if (this.debug)
+                console.log(&#x27;optimized short-circuited &amp;&amp; operator:&#x27;, this.decompileObject(compiledObject));
+            return params[Compiler.INDEX_CONDITION];
+        }
+
+        if (method === this.operators[&#x27;||&#x27;] &amp;&amp; params.length === 2 &amp;&amp; params[Compiler.INDEX_CONDITION] instanceof weavecore.CompiledConstant &amp;&amp; call.evaluatedParams[Compiler.INDEX_CONDITION]) {
+            if (this.debug)
+                console.log(&#x27;optimized short-circuited || operator:&#x27;, this.decompileObject(compiledObject));
+            return params[Compiler.INDEX_CONDITION];
+        }
+
+        if (this.PURE_OP_LOOKUP[method] || (forceInlineObjectConstants &amp;&amp; (method === this.operators[&#x27;{&#x27;] || method === this.operators[&#x27;[&#x27;]))) {
+            // if all parameters are constants, just evaluate the pure operator as a constant.
+            for (i = 0; i &lt; params.length; i++) {
+                var param = params[i];
+                if (!(param instanceof weavecore.CompiledConstant))
+                    return call; // cannot be optimized
+            }
+
+            if (this.debug)
+                console.log(&#x27;optimized pure operator call to constant:&#x27;, this.decompileObject(compiledObject));
+            return new weavecore.CompiledConstant(this.decompileObject(call), (method).apply(null, call.evaluatedParams));
+        }
+
+        return call;
+    }
+
+
+    /**
+     * This function is for internal use only.
+     * @param compiledObject Either a CompiledConstant or a CompiledFunctionCall.
+     * @param symbolTable This is a lookup table containing custom variables and functions that can be used in the expression. Multiple lookup tables can be specified in an Array. The values in the lookup tables may be changed outside the function after compiling.
+     * @param errorHandler A function that takes an Error and optionally returns true if execution should continue, behaving as if the current instruction returned undefined.  This may be set to null, which will cause the Error to be thrown.
+     * @param useThisScope If this is set to true, properties of &#x27;this&#x27; can be accessed as if they were local variables.
+     * @param paramNames This specifies local variable names to be associated with the arguments passed in as parameters to the compiled function.
+     * @param paramDefaults This specifies default values corresponding to the parameter names.  This must be the same length as the paramNames array.
+     * @param flattenFunctionDefinition If set to true and the compiledObject represents a function definition, that function definition will be evaluated and returned.
+     * @param bindThis If non-null, the &lt;code&gt;this&lt;/code&gt; symbol will be bound to the given value. Otherwise, it will be dynamically determined by how the function is called.
+     * @return A Function that takes any number of parameters and returns the result of evaluating the ICompiledObject.
+     */
+    p.compileObjectToFunction = function (compiledObject, symbolTable, errorHandler, useThisScope, paramNames, paramDefaults, flattenFunctionDefinition, bindThis) {
+        paramNames = (paramNames === undefined) ? null : paramNames;
+        paramDefaults = (paramDefaults === undefined) ? null : paramDefaults;
+        flattenFunctionDefinition = (flattenFunctionDefinition === undefined) ? null : flattenFunctionDefinition;
+        bindThis = (bindThis === undefined) ? null : bindThis;
+
+        if (compiledObject === null)
+            return null;
+        if (paramNames) {
+            if (!paramDefaults) {
+                paramDefaults = [];
+                paramDefaults.length = paramNames.length
+            } else if (paramNames.length != paramDefaults.length)
+                throw new Error(&quot;paramNames and paramDefaults Arrays must have same length&quot;);
+        }
+
+        if (symbolTable === null)
+            symbolTable = {};
+
+        if (compiledObject instanceof weavecore.CompiledConstant) {
+            // create a new variable for the value to avoid the overhead of
+            // accessing a member variable of the CompiledConstant object.
+            const value = (compiledObject).value;
+            return function () {
+                return value;
+            };
+        }
+
+        // create the variables that will be used inside the wrapper function
+
+        const builtInSymbolTable = {};
+        builtInSymbolTable[&#x27;eval&#x27;] = undefined;
+        builtInSymbolTable[&#x27;this&#x27;] = bindThis;
+
+        // set up Array of symbol tables in the correct scope order: built-in, local, params, this, global
+        const allSymbolTables = [builtInSymbolTable]; // buit-in first
+        const LOCAL_SYMBOL_TABLE_INDEX = allSymbolTables.push(null) - 1; // placeholder
+
+        // add custom symbol table(s)
+        if (symbolTable.constructor === Array) {
+            symbolTable.forEach(function (_symbolTable) {
+                allSymbolTables.push(_symbolTable);
+            })
+        } else {
+            allSymbolTables.push(symbolTable);
+        }
+
+        // push placeholder for &#x27;this&#x27; symbol table
+        const THIS_SYMBOL_TABLE_INDEX = allSymbolTables.push(null) - 1;
+
+        // add libraries in reverse order so the last one will be checked first
+        var i = this.libraries.length;
+        while (i--)
+            allSymbolTables.push(this.libraries[i]);
+        // check this.globals last
+        allSymbolTables.push(this.globals);
+
+        // this flag is set to useThisScope when the compiledObject is a function definition
+        var cascadeThisScope = false;
+
+        // Each recursive call must use a clone of the CompiledFunctionCall,
+        // so we keep track of recursion depth and re-use copies of the CompiledFunctionCall.
+        var recursion = 0;
+        var recursiveCalls = [compiledObject];
+
+        // this function avoids unnecessary function call overhead by keeping its own call stack rather than using recursion.
+        var wrapperFunction = function () {
+            const stack = []; // used as a queue of function calls
+            const localSymbolTable = {};
+            var call;
+            var subCall;
+            var compiledParams;
+            var method;
+            var result;
+            var symbolName;
+            var i;
+            var propertyHost;
+            var propertyName;
+
+            if (bindThis === null)
+                builtInSymbolTable[&#x27;this&#x27;] = this;
+            builtInSymbolTable[&#x27;arguments&#x27;] = arguments;
+
+            allSymbolTables[LOCAL_SYMBOL_TABLE_INDEX] = localSymbolTable;
+            if (useThisScope)
+                allSymbolTables[THIS_SYMBOL_TABLE_INDEX] = builtInSymbolTable[&#x27;this&#x27;];
+
+            // make function parameters available under the specified parameter names
+            if (paramNames)
+                for (i = 0; i &lt; paramNames.length; i++) {
+                    var parName = (paramNames[i].constructor === String) ? paramNames[i] : null;
+                    localSymbolTable[parName] = i &lt; (arguments.length ? arguments[i] : paramDefaults[i]);
+                }
+
+            // initialize top-level function and push it onto the stack
+            call = (recursiveCalls[recursion] &amp;&amp; recursiveCalls[recursion] instanceof weavecore.CompiledFunctionCall) ? recursiveCalls[recursion] : null;
+            if (!call)
+                recursiveCalls[recursion] = call = (compiledObject).clone();
+            recursion++;
+
+            call.evalIndex = Compiler.INDEX_METHOD;
+            stack.length = 1;
+            stack[0] = call;
+            stackLoop: while (true) {
+                // evaluate the CompiledFunctionCall on top of the stack
+                call = (stack[stack.length - 1] &amp;&amp; stack[stack.length - 1] instanceof weavecore.CompiledFunctionCall) ? stack[stack.length - 1] : null;
+
+                // if we got here because of a break, advance evalIndex
+                if (method === this.operators[Compiler.ST_BREAK])
+                    call.evalIndex++;
+
+                method = call.evaluatedMethod;
+                compiledParams = call.compiledParams;
+
+                if (compiledParams) {
+                    if (this.LOOP_LOOKUP.get(method) &amp;&amp; call.evalIndex === Compiler.INDEX_METHOD) {
+                        if (method === this.operators[Compiler.ST_DO] || method === this.operators[Compiler.ST_FOR_DO]) {
+                            // skip first evaluation of loop condition
+                            call.evaluatedParams[Compiler.INDEX_CONDITION] = true;
+                            call.evalIndex = Compiler.INDEX_TRUE;
+                        }
+                    }
+
+                    // check which parameters should be evaluated
+                    for (; call.evalIndex &lt; compiledParams.length; call.evalIndex++) {
+                        //trace(StringLib.lpad(&#x27;&#x27;, stack.length, &#x27;\t&#x27;) + &quot;[&quot; + call.evalIndex + &quot;] &quot; + compiledParams[call.evalIndex].name);
+
+                        // handle branching and short-circuiting
+                        // skip evaluation of true or false branch depending on condition and branch operator
+                        if (this.BRANCH_LOOKUP.get(method) !== undefined &amp;&amp; call.evalIndex &gt; Compiler.INDEX_CONDITION)
+                            if (this.BRANCH_LOOKUP.get(method) === (call.evalIndex != (call.evaluatedParams[Compiler.INDEX_CONDITION] ? Compiler.INDEX_TRUE : Compiler.INDEX_FALSE)))
+                                continue;
+
+                        if (call.evalIndex === Compiler.INDEX_METHOD)
+                            subCall = (call.compiledMethod &amp;&amp; call.compiledMethod instanceof weavecore.CompiledFunctionCall) ? call.compiledMethod : null;
+                        else
+                            subCall = (compiledParams[call.evalIndex] &amp;&amp; compiledParams[call.evalIndex] instanceof weavecore.CompiledFunctionCall) ? compiledParams[call.evalIndex] : null;
+
+                        if (subCall != null) {
+                            // special case for for-in and for-each
+                            // implemented as &quot;for (each|in)(\in(list), item=undefined, stmt)
+                            if (this.LOOP_LOOKUP.get(method) &amp;&amp; call.evalIndex === Compiler.INDEX_FOR_ITEM &amp;&amp; (method === this.operators[Compiler.ST_FOR_IN] || method === this.operators[Compiler.ST_FOR_EACH])) {
+                                if ((call.evaluatedParams[Compiler.INDEX_FOR_LIST]).length &gt; 0) {
+                                    // next item
+                                    result = (call.evaluatedParams[Compiler.INDEX_FOR_LIST]).shift(); // property name
+                                    if (method === this.operators[Compiler.ST_FOR_EACH]) {
+                                        // get property value from property name
+                                        var _in = (call.compiledParams[Compiler.INDEX_FOR_LIST] &amp;&amp; call.compiledParams[Compiler.INDEX_FOR_LIST] instanceof weavecore.CompiledFunctionCall) ? call.compiledParams[Compiler.INDEX_FOR_LIST] : null;
+                                        result = _in.evaluatedParams[0][result]; // property value
+                                    }
+                                    // set item value
+                                    subCall.evaluatedParams[subCall.evaluatedParams.length - 1] = result;
+                                } else {
+                                    // break out of loop
+                                    method = this.operators[Compiler.ST_BREAK];
+                                    break;
+                                }
+                            }
+
+                            // initialize subCall and push onto stack
+                            subCall.evalIndex = Compiler.INDEX_METHOD;
+                            stack.push(subCall);
+                            continue stackLoop;
+                        }
+                    }
+                }
+                // no parameters need to be evaluated, so make the function call now
+                try {
+                    // reset _propertyHost and _propertyName prior to method apply in case we are calling operator &#x27;.&#x27;
+                    propertyHost = this._propertyHost = null;
+                    propertyName = this._propertyName = null;
+
+                    if (!compiledParams) // no compiled params means it&#x27;s a variable lookup
+                    {
+                        // call.compiledMethod is a constant and call.evaluatedMethod is the method name
+                        method = (method &amp;&amp; method.constructor === String) ? method : null;
+                        symbolName = method;
+                        // find the variable
+                        for (i = 0; i &lt; allSymbolTables.length; i++) // max i after loop will be length
+                        {
+                            if (allSymbolTables[i] &amp;&amp; allSymbolTables[i].hasOwnProperty(symbolName)) {
+                                /*if (i === THIS_SYMBOL_TABLE_INDEX || allSymbolTables[i] is Proxy) {
+                                    propertyHost = allSymbolTables[i];
+                                    propertyName = symbolName;
+                                }*/
+                                result = allSymbolTables[i][symbolName];
+                                break;
+                            }
+                        }
+
+                        if (i === allSymbolTables.length)
+                            result = Compiler.getDefinition.call(this, symbolName);
+                    } else if (this.JUMP_LOOKUP.get(method)) {
+                        if (method === this.operators[Compiler.ST_RETURN]) {
+                            recursion--;
+                            return compiledParams.length ? call.evaluatedParams[0] : undefined;
+                        } else if (method === this.operators[Compiler.ST_CONTINUE]) {
+                            while (true) {
+                                stack.pop();
+                                if (stack.length === 0) {
+                                    recursion--;
+                                    return result; // executing continue at top level of script
+                                }
+
+                                call = (stack[stack.length - 1] &amp;&amp; stack[stack.length - 1] instanceof weavecore.CompiledFunctionCall) ? stack[stack.length - 1] : null;
+                                method = call.evaluatedMethod;
+                                if (this.LOOP_LOOKUP.get(method) &amp;&amp; this.LOOP_LOOKUP.get(method) !== Compiler.ST_BREAK)
+                                    break; // loop will be handled below.
+                            }
+                        } else if (method === this.operators[Compiler.ST_BREAK]) {
+                            while (stack.length &gt; 1) {
+                                var popedCall = stack.pop();
+                                call = (popedCall &amp;&amp; popedCall instanceof weavecore.CompiledFunctionCall) ? popedCall : null;
+                                method = call.evaluatedMethod;
+                                if (this.LOOP_LOOKUP.get(method) &amp;&amp; this.LOOP_LOOKUP.get(method) != Compiler.ST_CONTINUE) {
+                                    method = this.operators[Compiler.ST_BREAK];
+                                    continue stackLoop;
+                                }
+                            }
+                            recursion--;
+                            return result; // executing break at top level
+                        } else if (method === this.operators[Compiler.ST_THROW]) {
+                            //TODO - find try/catch/finally
+                            throw call.evaluatedParams[0];
+                        }
+                    } else if (this.ASSIGN_OP_LOOKUP.get(method) &amp;&amp; compiledParams.length === 2) // two params means local assignment
+                    {
+                        // local assignment
+                        symbolName = call.evaluatedParams[0];
+                        if (builtInSymbolTable.hasOwnProperty(symbolName))
+                            throw new Error(&quot;Cannot assign built-in symbol: &quot; + symbolName);
+
+                        // find the most local symbol table that has the variable
+                        for (i = LOCAL_SYMBOL_TABLE_INDEX; i &lt;= THIS_SYMBOL_TABLE_INDEX; i++)
+                            if (allSymbolTables[i] &amp;&amp; allSymbolTables[i].hasOwnProperty(symbolName))
+                                break;
+                            // if no symbol table has the variable, create a new local variable
+                        if (i &gt; THIS_SYMBOL_TABLE_INDEX)
+                            i = LOCAL_SYMBOL_TABLE_INDEX;
+
+                        // assignment operator expects parameters like (host, ...chain, value)
+                        result = method(allSymbolTables[i], symbolName, call.evaluatedParams[1]);
+                    } else if (method === this.operators[Compiler.ST_IMPORT]) {
+                        call.evaluatedParams.forEach(function (result) {
+                            result = (result.constructor === String) ? result : null;
+                            symbolName = result;
+                            if (symbolName)
+                                result = Compiler.getDefinition.call(this, result);
+                            else if (!Compiler.isClass(result))
+                                throw new Error(&quot;Unable to import non-Class: &quot; + this.decompileObject(call));
+
+                            if (!symbolName)
+                                symbolName = result.constructor.appName;
+
+                            symbolName = symbolName.substr(Math.max(symbolName.lastIndexOf(&#x27;.&#x27;), symbolName.lastIndexOf(&#x27;:&#x27;)) + 1);
+                            allSymbolTables[LOCAL_SYMBOL_TABLE_INDEX][symbolName] = result;
+                        }.bind(this));
+                    } else if (method &amp;&amp; Compiler.isClass(method)) {
+                        // type casting
+                        if (method === Array) // special case for Array
+                        {
+                            result = call.evaluatedParams.concat();
+                        } else if (call.evaluatedParams.length != 1) {
+                            // special case for Object(&#x27;prop1&#x27;, value1, ...)
+                            if (method === Object) {
+                                var params = call.evaluatedParams;
+                                result = {};
+                                for (i = 0; i &lt; params.length - 1; i += 2)
+                                    result[params[i]] = params[i + 1];
+                            } else
+                                throw new Error(&quot;Incorrect number of arguments for type casting.  Expected 1.&quot;);
+                        }
+                        // special case for Class(&#x27;some.qualified.ClassName&#x27;)
+                        else if (Compiler.isClass(method) &amp;&amp; call.evaluatedParams[0].constructor === String) {
+                            result = Compiler.getDefinition.call(this, call.evaluatedParams[0]);
+                        } else // all other single-parameter type casting operations
+                        {
+                            result = cast(call.evaluatedParams[0], method);
+                        }
+                    } else if (method === this.operators[Compiler.ST_VAR]) // variable initialization
+                    {
+                        call.evaluatedParams[0].forEach(function (result) {
+                            if (!localSymbolTable.hasOwnProperty(result))
+                                localSymbolTable[result] = undefined;
+                        })
+                        result = undefined;
+                    } else if (method === this.operators[Compiler.FUNCTION] || method === this.operators[&#x27;=&gt;&#x27;]) // inline function definition
+                    {
+                        var _symbolTables = [localSymbolTable].concat(symbolTable); // works whether symbolTable is an Array or Object
+                        if (useThisScope)
+                            _symbolTables.push(builtInSymbolTable[&#x27;this&#x27;]);
+
+                        var funcParams = call.evaluatedParams[0];
+                        result = this.compileObjectToFunction.call(this,
+                            funcParams[Compiler.FUNCTION_CODE],
+                            _symbolTables,
+                            errorHandler,
+                            cascadeThisScope,
+                            funcParams[Compiler.FUNCTION_PARAM_NAMES],
+                            funcParams[Compiler.FUNCTION_PARAM_VALUES],
+                            false,
+                            method === this.operators[&#x27;=&gt;&#x27;] || (cascadeThisScope &amp;&amp; bindThis !== null) ? builtInSymbolTable[&#x27;this&#x27;] : null
+                        );
+                    }
+                    /*else if (call.evaluatedHost is Proxy)
+                    {
+                    	// use Proxy.callProperty
+                    	var proxyParams = call.evaluatedParams.concat();
+                    	proxyParams.unshift(call.evaluatedMethodName);
+                    	result = (call.evaluatedHost as Proxy).callProperty.apply(call.evaluatedHost, proxyParams);
+                    }*/
+                    else {
+                        // normal function call
+                        result = method.apply(call.evaluatedHost, call.evaluatedParams);
+                        // in case this is operator &#x27;.&#x27;, save these values
+                        propertyHost = this._propertyHost;
+                        propertyName = this._propertyName;
+                        // then reset them so they do not get re-used by mistake
+                        this._propertyHost = null;
+                        this._propertyName = null;
+                    }
+                } catch (e) {
+                    recursion--;
+
+                    var decompiled = this.decompileObject(call);
+                    var err = e;
+                    if (err) {
+                        //to-do
+                        //fixErrorMessage(err);
+                        err.message = decompiled + &#x27;\n&#x27; + err.message;
+                        // console.log(err);
+                    } else
+                        console.log(decompiled);
+
+                    if (errorHandler === null)
+                        throw e;
+
+                    if (errorHandler(e))
+                        result = undefined; // ignore and continue
+                    else
+                        return undefined; // halt
+                }
+
+                // handle while and for loops
+                if (this.LOOP_LOOKUP.get(method)) {
+                    if (method === this.operators[Compiler.ST_FOR_IN] || method === this.operators[Compiler.ST_FOR_EACH]) {
+                        // skip evaluation of list to avoid infinite loop
+                        call.evalIndex = Compiler.INDEX_FOR_ITEM;
+                        continue;
+                    } else if (result) {
+                        // skip evaluation of method to avoid infinite &#x27;do&#x27; loop
+                        call.evalIndex = Compiler.INDEX_METHOD + 1;
+                        continue;
+                    }
+                }
+
+                // remove this call from the stack
+                stack.pop();
+                // if there is no parent function call, return the result
+                if (stack.length === 0) {
+                    recursion--;
+                    return result;
+                }
+                // otherwise, store the result in the evaluatedParams array of the parent call
+                call = (stack[stack.length - 1] &amp;&amp; stack[stack.length - 1] instanceof weavecore.CompiledFunctionCall) ? stack[stack.length - 1] : null;
+                if (call.evalIndex === Compiler.INDEX_METHOD) {
+                    call.evaluatedHost = propertyHost;
+                    call.evaluatedMethodName = propertyName;
+                    call.evaluatedMethod = result;
+                } else
+                    call.evaluatedParams[call.evalIndex] = result;
+                // advance the evalIndex so the next parameter will be evaluated.
+                call.evalIndex++;
+            }
+            throw new Error(&quot;unreachable&quot;);
+        };
+
+        // if the compiled object is a function definition, return that function definition instead of the wrapper.
+        if (flattenFunctionDefinition &amp;&amp; this.compiledObjectIsFunctionDefinition.call(this, compiledObject)) {
+            cascadeThisScope = useThisScope;
+            return wrapperFunction.call(this);
+        }
+
+        return wrapperFunction.bind(this);
+    }
+
+    /**
+     * This will check if the compiled object is a function definition.
+     * @param compiledObject A compiled object returned by compileToObject().
+     * @return true if the compiledObject is a function definition.
+     */
+    p.compiledObjectIsFunctionDefinition = function (compiledObject) {
+        var cfc = compiledObject;
+        return cfc &amp;&amp; (cfc.evaluatedMethod === this.operators[Compiler.FUNCTION] || cfc.evaluatedMethod === this.operators[&#x27;=&gt;&#x27;]);
+    }
+
+
+
+    /**
+     * @param compiledObject A CompiledFunctionCall or CompiledConstant to decompile into an expression String.
+     * @return The expression String generated from the compiledObject.
+     */
+    p.decompileObject = function (compiledObject) {
+        // special case for constants
+        if (compiledObject instanceof weavecore.CompiledConstant)
+            return (compiledObject).name;
+
+        var i;
+        var call = (compiledObject &amp;&amp; compiledObject instanceof weavecore.CompiledFunctionCall) ? compiledObject : null;
+
+        // if originalTokens is specified, decompile those instead.
+        if (call.originalTokens) {
+            var tokens = call.originalTokens.concat();
+            for (i = 0; i &lt; tokens.length; i++)
+                if (tokens[i] instanceof weavecore.ICompiledObject)
+                    tokens[i] = this.decompileObject(tokens[i]);
+            return tokens.join(&#x27; &#x27;);
+        }
+
+        // special case for variable lookup
+        if (isVariableLookup.call(this, call))
+            return this.decompileObject(call.compiledMethod);
+
+        var cMethod = (call.compiledMethod &amp;&amp; call.compiledMethod instanceof weavecore.CompiledConstant) ? call.compiledMethod : null;
+        var cParams = call.compiledParams;
+
+        // decompile each param
+        var params = [];
+        for (i = 0; i &lt; cParams.length; i++)
+            params[i] = this.decompileObject(cParams[i]);
+
+        var op;
+        if (cMethod) {
+            op = cMethod.name;
+            if (op.substr(0, Compiler.OPERATOR_ESCAPE.length) === Compiler.OPERATOR_ESCAPE)
+                op = op.substr(Compiler.OPERATOR_ESCAPE.length);
+        }
+        if (cMethod &amp;&amp; this.constants[cMethod.name] === cMethod.value &amp;&amp; this.operators[op] === cMethod.value) {
+            var n = cParams.length;
+            var isAssignFuncAvailable = this.ASSIGN_OP_LOOKUP.get(cMethod.value);
+            if (n &gt; 0 &amp;&amp; (isAssignFuncAvailable || op === &#x27;.&#x27; || op === &#x27;..&#x27;)) {
+                var result = params[0];
+                for (i = 1; i &lt; n; i++) {
+                    // assignment op h parameter -hand-side value
+                    if (i === n - 1 &amp;&amp; op !== &#x27;.&#x27; &amp;&amp; op !== &#x27;..&#x27;)
+                        break;
+                    // if the evaluated param compiles  variable, use the &#x27;.&#x27; syntax
+                    var constant = (cParams[i] &amp;&amp; cParams[i] instanceof weavecore.CompiledConstant) ? cParams[i] : null;
+                    var variable = null;
+                    try {
+                        var comObj = compileToObject(constant.value);
+                        variable = (comObj &amp;&amp; comObj instanceof weavecore.CompiledFunctionCall) ? comObj : null;
+                        if (!isVariableLookup(variable))
+                            variable = null;
+                    } catch (e) {}
+
+                    if (op === &#x27;..&#x27;)
+                        result += &#x27;.descendants(&#x27; + params[i] + &#x27;)&#x27;;
+                    else if (variable)
+                        result += &#x27;.&#x27; + variable.evaluatedMethod;
+                    else
+                        result += &#x27;[&#x27; + params[i] + &#x27;]&#x27;;
+                }
+                if (op === &#x27;.&#x27; || op === &#x27;..&#x27;)
+                    return result;
+                if (op === &#x27;#++&#x27; || op === &#x27;#--&#x27;)
+                    return result + op.substr(1);
+                if (op === &#x27;++&#x27; || op === &#x27;--&#x27;)
+                    return op + result;
+                if (op === &#x27;delete&#x27;)
+                    return op + &#x27; &#x27; + result;
+
+                return weavecore.StandardLib.substitute(&quot;({0} {1} {2})&quot;, result, op, params[n - 1]); // example: &quot;(a.b = c)&quot;
+            }
+
+            // variable number of params
+            if (op === &#x27;[&#x27;)
+                return &#x27;[&#x27; + params.join(&#x27;, &#x27;) + &#x27;]&#x27;;
+
+            if (op === &#x27;;&#x27;)
+                return &#x27;{&#x27; + params.join(&#x27;; &#x27;) + &#x27;}&#x27;;
+
+            if (op === &#x27;,&#x27; &amp;&amp; n &gt; 0) // zero params not allowed for this syntax
+                return &#x27;(&#x27; + params.join(&#x27;, &#x27;) + &#x27;)&#x27;;
+
+            if (op === &#x27;(&#x27; &amp;&amp; n &gt; 0) // zero params not allowed for this syntax
+                return &#x27;(&#x27; + params.join(&#x27;; &#x27;) + &#x27;)&#x27;;
+
+            if (op === &#x27;{&#x27;) {
+                var str = &#x27;&#x27;;
+                for (i = 0; i &lt; params.length - 1; i += 2) {
+                    if (str)
+                        str += &#x27;, &#x27;;
+                    str += params[i] + &#x27;: &#x27; + params[i + 1];
+                }
+                return &#x27;{&#x27; + str + &#x27;}&#x27;;
+            }
+
+            if (this.PURE_OP_LOOKUP.get(cMethod.value) || op === &#x27;in&#x27;) {
+                if (n === 1) // unary op
+                {
+                    var param = params[0];
+                    var c = op.charAt(0);
+                    if (this.operators.hasOwnProperty(c) &amp;&amp; c !== param.charAt(0))
+                        return op + param;
+                    // need a space between operators with identical characters
+                    return op + &#x27; &#x27; + param;
+                }
+
+                if (n === 2) // infix op
+                    return weavecore.StandardLib.substitute(&quot;({0} {1} {2})&quot;, params[0], op, params[1]);
+
+                if (n === 3 &amp;&amp; op === &#x27;?:&#x27;) // ternary op
+                    return weavecore.StandardLib.substitute(&quot;({0} ? {1} : {2})&quot;, params);
+            }
+
+            if (op === Compiler.ST_VAR) {
+                var comCon = (cParams[0] &amp;&amp; cParams[0] instanceof weavecore.CompiledConstant) ? cParams[0] : null
+                return Compiler.ST_VAR + &#x27; &#x27; + (comCon.value).join(&#x27;, &#x27;);
+            }
+
+            if (op === Compiler.ST_IMPORT)
+                return Compiler.ST_IMPORT + &#x27; &#x27; + params.join(&#x27;, &#x27;);
+        }
+
+        // normal function syntax
+        return this.decompileObject(call.compiledMethod) + &#x27;(&#x27; + params.join(&#x27;, &#x27;) + &#x27;)&#x27;;
+    }
+
+    /**
+     * Tests if a token is a variable lookup.
+     */
+    function isVariableLookup(token) {
+        var cfc = (token &amp;&amp; token instanceof weavecore.CompiledFunctionCall) ? token : null;
+        return cfc &amp;&amp; !cfc.compiledParams;
+    }
+
+    function isFunctionHeader(token) {
+        var cfc = (token &amp;&amp; token instanceof weavecore.CompiledFunctionCall) ? token : null;
+        return cfc &amp;&amp; (cfc.evaluatedMethod === this.operators[Compiler.FUNCTION] || cfc.evaluatedMethod === this.operators[&#x27;=&gt;&#x27;]) &amp;&amp; cfc.evaluatedParams[0][Compiler.FUNCTION_CODE] === undefined;
+    }
+
+    /**
+     * This function is for internal use only.
+     * This function is necessary because variableName needs to be a new Flash variable each time a wrapper function is created.
+     * @param variableName The name of the variable to get when the resulting wrapper function is evaluated.
+     * @param A CompiledFunctionCall for getting the variable.
+     * @return If the variable name is valid, returns an ICompiledObject.  If not valid, the same variableName String is returned.
+     */
+    function compileVariable(variableName) {
+        // do not treat statement keywords  names
+        if (Compiler.statements.hasOwnProperty(variableName) || this.operators.hasOwnProperty(variableName))
+            return variableName;
+        return new weavecore.CompiledFunctionCall(new weavecore.CompiledConstant(variableName, variableName), null); // params are null  special case
+    }
+
+    function compilePostfixOperators(compiledTokens, operatorSymbols) {
+        for (var i = 1; i &lt; compiledTokens.length; i++) {
+            var op = compiledTokens[i];
+            if (operatorSymbols.indexOf(op) &lt; 0)
+                continue;
+
+            var call = (compiledTokens[i - 1] &amp;&amp; compiledTokens[i - 1] instanceof weavecore.CompiledFunctionCall) ? compiledTokens[i - 1] : null;
+            if (!call)
+                continue;
+
+            if (!call.compiledParams) // variable lookup
+            {
+                // 2 parameters for assignment/postfix operator means local variable assignment
+                // last parameter is ignored but required for postfix operator
+                compiledTokens.splice(--i, 2, compileOperator.call(this, &#x27;#&#x27; + op, [call.compiledMethod, newUndefinedConstant()]));
+                continue;
+            } else if (call.evaluatedMethod === this.operators[&#x27;.&#x27;]) {
+                // switch to the postfix operator
+                // last parameter is ignored but required for postfix operator
+                call.compiledParams.push(newUndefinedConstant());
+                compiledTokens.splice(--i, 2, compileOperator.call(this, &#x27;#&#x27; + op, call.compiledParams));
+                continue;
+            }
+        }
+    }
+
+    /**
+     * This function is for internal use only.
+     * This will compile infix operators of the given type from left to right.
+     * @param compiledTokens An Array of compiled tokens for an expression.  No &#x27;(&#x27; &#x27;)&#x27; or &#x27;,&#x27; tokens should appear in this Array.
+     * @param operatorSymbols An Array containing all the infix operator symbols to compile.
+     */
+    function compileInfixOperators(compiledTokens, operatorSymbols) {
+        var index = 0;
+        while (index &lt; compiledTokens.length) {
+            // skip tokens that are not in the list of infix operators
+            if (operatorSymbols.indexOf(compiledTokens[index]) &lt; 0) {
+                index++;
+                continue;
+            }
+
+            // special case code for infix operators (&#x27;**&#x27;) that are evaluated prior to unary operators
+            var right = index + 1;
+            // find the next ICompiledObject
+            while (right &lt; compiledTokens.length &amp;&amp; compiledTokens[right].constructor === String)
+                right++;
+            // if there were String tokens, we need to compile unary operators on the right-hand-side
+            if (right &gt; index + 1) {
+                // extract the right-hand-side, compile unary operators, and then insert the result to the right of the infix operator
+                var rhs = compiledTokens.splice(index + 1, right - index);
+                compileUnaryOperators.call(this, rhs, this.unaryOperatorSymbols);
+                if (rhs.length !== 1)
+                    throw new Error(&quot;Unable to parse second parameter of infix operator &#x27;&quot; + compiledTokens[index] + &quot;&#x27;&quot;);
+                compiledTokens.splice(index + 1, 0, rhs[0]);
+            }
+
+            // stop if infix operator does not have compiled objects on either side
+            if (index === 0 || index + 1 === compiledTokens.length || compiledTokens[index - 1].constructor === String || compiledTokens[index + 1].constructor === String)
+                throw new Error(&quot;Misplaced infix operator &#x27;&quot; + compiledTokens[index] + &quot;&#x27;&quot;);
+
+            // replace the tokens for this infix operator call with the compiled operator call
+            if (this.debug)
+                console.log(&quot;compile infix operator&quot;, compiledTokens.slice(index - 1, index + 2).join(&#x27; &#x27;));
+
+            // special case for comma - simplify multiple comm one operator &#x27;,&#x27; call
+            var call = (compiledTokens[index - 1] &amp;&amp; compiledTokens[index - 1] instanceof weavecore.CompiledFunctionCall) ? compiledTokens[index - 1] : null;
+            if (compiledTokens[index] === &#x27;,&#x27; &amp;&amp; call &amp;&amp; call.evaluatedMethod === this.operators[&#x27;,&#x27;]) {
+                // append next parameter to existing &#x27;,&#x27; operator call
+                call.compiledParams.push(compiledTokens[index + 1]);
+                call.evaluateConstants(); // must be called after modifying compiledParams
+                compiledTokens.splice(index, 2); // remove the comma and the next token
+            } else {
+                // replace three tokens &quot;lhs op rhs&quot; with one CompiledFunctionCall &quot;\op(lhs,rhs)&quot;
+                compiledTokens.splice(index - 1, 3, compileOperator.call(this, compiledTokens[index], [compiledTokens[index - 1], compiledTokens[index + 1]]));
+            }
+        }
+    }
+
+
+    /**
+     * This function will compile a list of expressions separated by &#x27;,&#x27; or &#x27;;&#x27; tokens.
+     * @param tokens
+     * @return
+     */
+    function compileArray(tokens, separator) {
+        // avoid compiling an empty set of tokens
+        if (tokens.length === 0)
+            return [];
+
+        var compiledObjects = [];
+        while (true) {
+            var index = tokens.indexOf(separator);
+            if (index &gt;= 0) {
+                // compile the tokens before the comma  parameter
+                if (index === 0 &amp;&amp; separator === &#x27;,&#x27;)
+                    throw new Error(&quot;Expecting expression before comma&quot;);
+                compiledObjects.push(compileTokens.call(this, tokens.splice(0, index), separator === &#x27;;&#x27;));
+                tokens.shift(); // remove comma
+            } else {
+                if (tokens.length === 0 &amp;&amp; separator === &#x27;,&#x27;)
+                    throw new Error(&quot;Expecting expression after comma&quot;);
+                // compile remaining group of tokens  parameter
+                compiledObjects.push(compileTokens.call(this, tokens, separator === &#x27;;&#x27;));
+                break;
+            }
+        }
+        return compiledObjects;
+    }
+
+
+    function compileFunctionDefinition(functionHeader, body) {
+        if (!body)
+            throwInvalidSyntax.call(this, (functionHeader.compiledMethod).name.substr(Compiler.OPERATOR_ESCAPE.length));
+        var cc = functionHeader.compiledParams[0];
+        if (cc.value[Compiler.FUNCTION_CODE] != null)
+            throw new Error(&quot;Unexpected error: attempting to overwrite function body&quot;);
+        cc.value[Compiler.FUNCTION_CODE] = finalize.call(this, body);
+        functionHeader.evaluateConstants();
+        functionHeader.originalTokens.push(body);
+        return functionHeader;
+    }
+
+    function compileVariableAssignment(variableToken, assignmentOperator, valueToken) {
+        var lhs = (variableToken &amp;&amp; variableToken instanceof weavecore.CompiledFunctionCall) ? variableToken : null;
+        var rhs = (valueToken &amp;&amp; valueToken instanceof weavecore.ICompiledObject) ? valueToken : null;
+
+        if (!rhs)
+            throw new Error(&quot;Invalid right-hand-side of &#x27;&quot; + assignmentOperator + &quot;&#x27;: &quot; + (valueToken || this.decompileObject(valueToken)));
+
+        // lhs should either be a variable lookup or a call to operator &#x27;.&#x27;
+        if (lhs &amp;&amp; !lhs.compiledParams) // lhs is a variable lookup
+        {
+            return compileOperator.call(this, assignmentOperator, [lhs.compiledMethod, rhs]);
+        } else if (lhs &amp;&amp; lhs.evaluatedMethod === this.operators[&#x27;.&#x27;]) {
+            // switch to the assignment operator
+            lhs.compiledParams.push(rhs);
+            return compileOperator.call(this, assignmentOperator, lhs.compiledParams);
+        } else
+            throw new Error(&quot;Invalid left-hand-side of &#x27;&quot; + assignmentOperator + &quot;&#x27;: &quot; + (variableToken || this.decompileObject(variableToken)));
+    }
+
+
+
+    function assertValidStatementParams(tokens) {
+        for (var index = 0; index &lt; tokens.length; index++) {
+            var statement = (tokens[index].constructor === String) ? tokens[index] : null;
+            if (Compiler.statements[statement]) // requires parameters?
+            {
+                // statement parameters must be wrapped in operator &#x27;;&#x27; call
+                var params = tokens[index + 1];
+                if (!params || params.evaluatedMethod != this.operators[&#x27;(&#x27;])
+                    throwInvalidSyntax(statement);
+
+                var cpl = params.compiledParams.length;
+
+                // &#x27;for&#x27; can have 3 statement params
+                if (statement === Compiler.ST_FOR &amp;&amp; cpl === 3)
+                    continue;
+
+                // all other statements must have only one param
+                if (cpl !== 1)
+                    throwInvalidSyntax.call(this, statement);
+
+                if (statement === Compiler.ST_FOR || statement === Compiler.ST_FOR_EACH) {
+                    // if &#x27;for&#x27; or &#x27;for each&#x27; has only one param, it must be the &#x27;in&#x27; operator
+                    var call = (params.compiledParams[0] &amp;&amp; params.compiledParams[0] instanceof weavecore.CompiledFunctionCall) ? params.compiledParams[0] : null; // the first statement param
+                    if (!call || call.evaluatedMethod !== this.operators[&#x27;in&#x27;] || call.compiledParams.length !== 2)
+                        throwInvalidSyntax(statement);
+
+                    // check the first parameter of the &#x27;in&#x27; operator
+                    call = (call.compiledParams[0] &amp;&amp; call.compiledParams[0] instanceof weavecore.CompiledFunctionCall) ? call.compiledParams[0] : null;
+
+                    if (call &amp;&amp; call.evaluatedMethod === this.operators[&#x27;,&#x27;] &amp;&amp; call.compiledParams.length === 2) {
+                        var _var = call.compiledParams[0];
+                        if (!_var || _var.evaluatedMethod !== this.operators[Compiler.ST_VAR])
+                            throwInvalidSyntax(statement);
+                        call = (call.compiledParams[1] &amp;&amp; call.compiledParams[1] instanceof weavecore.CompiledFunctionCall) ? call.compiledParams[1] : null; // should be the variable
+                    }
+
+                    // the &#x27;in&#x27; operator must have a variable or property reference  first parameter
+                    if (!call || !(call.compiledParams === null || call.evaluatedMethod === this.operators[&#x27;.&#x27;])) // not a variable and not a property
+                        throwInvalidSyntax(statement);
+                }
+
+            }
+        }
+    }
+
+    function throwInvalidSyntax(statement) {
+        throw new Error(&quot;Invalid &#x27;&quot; + statement + &quot;&#x27; syntax&quot;);
+    }
+
+    function tokenIsStatement(token) {
+        var call = (token &amp;&amp; token instanceof weavecore.CompiledFunctionCall) ? token : null;
+        if (!call)
+            return Compiler.statements.hasOwnProperty(token);
+
+        var method = call.evaluatedMethod;
+        return (this.JUMP_LOOKUP.get(method) || this.LOOP_LOOKUP.get(method))
+    }
+
+    /**
+     * This function assumes that every token except statements have already been compiled.
+     * @param tokens
+     * @param startIndex The index of the first token to compile
+     */
+    function compileStatement(tokens, startIndex) {
+        var stmt = (tokens[startIndex].constructor === String) ? tokens[startIndex] : null;
+        var call;
+
+        // stop if tokens does not start with a statement
+        if (!Compiler.statements.hasOwnProperty(stmt)) {
+            // complain about missing &#x27;;&#x27; after non-statement except for last token
+            if (startIndex &lt; tokens.length - 1) {
+                call = (tokens[startIndex] &amp;&amp; tokens[startIndex] instanceof weavecore.CompiledFunctionCall) ? tokens[startIndex] : null;
+                if (!call || (call.evaluatedMethod != this.operators[&#x27;;&#x27;] &amp;&amp; !tokenIsStatement.call(this, call))) {
+                    if (stmt)
+                        throw new Error(&quot;Unexpected &quot; + stmt);
+                    var next = tokens[startIndex + 1];
+                    if (next instanceof weavecore.ICompiledObject)
+                        next = this.decompileObject(next);
+                    throw new Error(&quot;Missing &#x27;;&#x27; before &quot; + next);
+                }
+            }
+            return;
+        }
+
+        var varNames;
+
+        // find a matching statement pattern
+        nextPattern: for (var index = 0; index &lt; _validStatementPatterns.length; index++) {
+            var pattern = _validStatementPatterns[index]
+            for (var iPattern = 0; iPattern &lt; pattern.length; iPattern++) {
+                if (startIndex + iPattern &gt;= tokens.length)
+                    continue nextPattern;
+
+                var type = pattern[iPattern];
+                var token = tokens[startIndex + iPattern];
+                call = (token &amp;&amp; token instanceof weavecore.CompiledFunctionCall) ? token : null;
+
+                if (Compiler.statements.hasOwnProperty(type) &amp;&amp; token != type)
+                    continue nextPattern;
+
+                if (type === Compiler.PN_PARAMS)
+                    continue; // params have already been verified
+
+                // if we get past a statement and its params, if compiling something fails we don&#x27;t need to check any more patterns
+
+                if (type === Compiler.PN_EXPR) // non-statement
+                {
+                    if (tokenIsStatement.call(this, token))
+                        throw new Error(&#x27;Unexpected &#x27; + token);
+                    if (call &amp;&amp; call.evaluatedMethod === this.operators[&#x27;;&#x27;] &amp;&amp; call.compiledParams.length &gt; 1)
+                        throwInvalidSyntax(stmt);
+                }
+
+                if (type === Compiler.PN_STMT) {
+                    compileStatement.call(this, tokens, startIndex + iPattern);
+                }
+
+                if (type === Compiler.PN_BLOCK) {
+                    if (!call || call.evaluatedMethod != this.operators[&#x27;;&#x27;])
+                        throwInvalidSyntax(stmt);
+                }
+
+                if (type === Compiler.PN_VARS) {
+                    // must be function call
+                    if (tokenIsStatement.call(this, token) || !call)
+                        throwInvalidSyntax(stmt);
+
+                    // must be local variable/assignment or list of local variables/assignments
+
+                    // special case for &quot;y, x = 3;&quot; which at this point is stored as {y, x = 3}
+                    if (call.evaluatedMethod === this.operators[&#x27;;&#x27;]) {
+                        if (!(call.evaluatedParams.length === 1 &amp;&amp; call.compiledParams[0] instanceof weavecore.CompiledFunctionCall))
+                            throwInvalidSyntax(stmt);
+                        // remove the operator &#x27;;&#x27; wrapper
+                        tokens[startIndex + iPattern] = token = call = call.compiledParams[0];
+                    }
+
+                    // if there is only a single variable, wrap it in an operator &#x27;,&#x27; call
+                    if (isVariableLookup(call) || call.evaluatedMethod === this.operators[&#x27;=&#x27;])
+                        tokens[startIndex + iPattern] = token = call = compileOperator.call(this, &#x27;,&#x27;, [call]);
+
+                    // special case for &quot;for (var x in y) { }&quot;
+                    if (call.evaluatedMethod === this.operators[&#x27;in&#x27;] &amp;&amp; call.compiledParams.length === 2) {
+                        // check the variable
+                        call = (call.compiledParams[0] &amp;&amp; call.compiledParams[0] instanceof weavecore.CompiledFunctionCall) ? call.compiledParams[0] : null;
+                        if (!isVariableLookup(call))
+                            throwInvalidSyntax(stmt);
+                        // save single variable name
+                        varNames = [call.evaluatedMethod];
+                        continue;
+                    }
+
+                    if (call.evaluatedMethod != this.operators[&#x27;,&#x27;] || call.compiledParams.length === 0)
+                        throwInvalidSyntax(stmt);
+
+                    varNames = [];
+                    for (var iParam = 0; iParam &lt; call.compiledParams.length; iParam++) {
+                        var variable = (call.compiledParams[iParam] &amp;&amp; call.compiledParams[iParam] instanceof weavecore.CompiledFunctionCall) ? call.compiledParams[iParam] : null;
+                        if (!variable)
+                            throwInvalidSyntax.call(this, stmt);
+
+                        if (isVariableLookup(variable)) // local initialization
+                        {
+                            // variable initialization only -- remove from &#x27;,&#x27; params
+                            call.compiledParams.splice(iParam--, 1);
+                            varNames.push(variable.evaluatedMethod);
+                        } else if (variable.evaluatedMethod === this.operators[&#x27;=&#x27;] &amp;&amp; variable.compiledParams.length === 2) // local assignment
+                        {
+                            varNames.push(variable.evaluatedParams[0]);
+                        } else
+                            throwInvalidSyntax.call(this, stmt);
+                    }
+                    call.evaluateConstants();
+                }
+            }
+
+            // found matching pattern
+            var originalTokens = tokens.slice(startIndex, startIndex + pattern.length);
+            var params = tokens.splice(startIndex + 1, pattern.length - 1);
+
+            if (stmt === ST_VAR) {
+                token = compileOperator.call(this, Compiler.ST_VAR, [new weavecore.CompiledConstant(null, varNames)]);
+                call = params[0];
+                if (call.evaluatedMethod === this.operators[&#x27;in&#x27;]) {
+                    call.compiledParams[0] = compileOperator.call(this, &#x27;,&#x27;, [token, call.compiledParams[0]]);
+                    call.evaluateConstants();
+                    token = call;
+                } else if (call.compiledParams.length &gt; 0) {
+                    call.compiledParams.unshift(token);
+                    call.evaluateConstants();
+                    token = call;
+                }
+                originalTokens = null; // avoid infinite decompile recursion
+                tokens[startIndex] = token;
+            } else if (stmt === ST_IMPORT) {
+                originalTokens = null;
+                call = (params[0] &amp;&amp; params[0] instanceof weavecore.CompiledFunctionCall) ? params[0] : null;
+                // support multiple imports separated by commas
+                if (call &amp;&amp; call.evaluatedMethod === this.operators[&#x27;;&#x27;] &amp;&amp; call.compiledParams.length === 1)
+                    params[0] = call.compiledParams[0];
+                if (call &amp;&amp; call.evaluatedMethod === this.operators[&#x27;,&#x27;])
+                    params = call.compiledParams;
+
+                for (var i = 0; i &lt; params.length; i++) {
+                    var _lib = (params[i] &amp;&amp; params[i] instanceof weavecore.CompiledConstant) ? params[i] : null;
+                    if (_lib &amp;&amp; _lib.value.constructor === String) {
+                        try {
+                            var def = Compiler.getDefinition(_lib.value);
+                            if (Compiler.isClass(def))
+                                _lib.value = def;
+                        } catch (e) {
+                            /*e.message = &#x27;import &#x27; + decompileObject(_lib) + &#x27;\n&#x27; + e.message;
+                            throw e;*/
+                            // ignore compile-time error, hoping it will work at run-time
+                        }
+                    }
+                }
+                tokens[startIndex] = compileOperator.call(this, Compiler.ST_IMPORT, params);
+            } else if (stmt === Compiler.ST_IF) // if (cond) {stmt} else {stmt}
+            {
+                // implemented as &quot;cond ? true_stmt : false_stmt&quot;
+                params.splice(2, 1); // works whether or not else is present
+                tokens[startIndex] = compileOperator.call(this, Compiler.ST_IF, params);
+            } else if (stmt === Compiler.ST_DO) // do {stmt} while (cond);
+            {
+                // implemented as &quot;while (cond &amp;&amp; (stmt, true))&quot; with first evaluation of &#x27;cond&#x27; skipped
+                params = [params[2], compileOperator.call(this, &#x27;,&#x27;, [params[0], newTrueConstant.call(this)])];
+                tokens[startIndex] = compileOperator.call(this, Compiler.ST_DO, params);
+            } else if (stmt === Compiler.ST_WHILE) // while (cond) {stmt}
+            {
+                // implemented as &quot;while (cond &amp;&amp; (stmt, true));&quot;
+                params[1] = compileOperator.call(this, &#x27;,&#x27;, [params[1], newTrueConstant.call(this)]);
+                tokens[startIndex] = compileOperator.call(this, Compiler.ST_WHILE, params);
+            } else if (stmt === Compiler.ST_FOR || stmt === Compiler.ST_FOR_EACH) // for (params) {stmt}
+            {
+                var forParams = params[0]; // statement params wrapper
+                if (forParams.compiledParams.length === 3) // for (init; cond; inc) {stmt}
+                {
+                    // implemented as &quot;(init, cond) &amp;&amp; while((inc, cond) &amp;&amp; (stmt, true))&quot; with first evaluation of &quot;(inc, cond)&quot; skipped
+
+                    var _init = forParams.compiledParams[0];
+                    var _cond = forParams.compiledParams[1];
+                    var _inc = forParams.compiledParams[2];
+
+                    var _init_cond = compileOperator.call(this, &#x27;,&#x27;, [_init, _cond]);
+                    var _inc_cond = compileOperator.call(this, &#x27;,&#x27;, [_inc, _cond]);
+                    var _stmt_true = compileOperator.call(this, &#x27;,&#x27;, [params[1], newTrueConstant.call(this)]);
+                    var _forDo = compileOperator.call(this, Compiler.ST_FOR_DO, [Compiler._inc_cond, _stmt_true]);
+
+                    tokens[startIndex] = compileOperator.call(this, Compiler.ST_FOR, [_init_cond, _forDo]);
+                } else // for [each] (item in list) {stmt}
+                {
+                    // differentiate from &#x27;for&#x27; with 3 statement params
+                    if (stmt === Compiler.ST_FOR)
+                        stmt = Compiler.ST_FOR_IN;
+
+                    // implemented as &quot;for (each|in)(\in(list), item=undefined, stmt)
+                    var _in = forParams.compiledParams[0];
+                    var _item;
+                    var _var = (_in.compiledParams[0] &amp;&amp; _in.compiledParams[0] instanceof weavecore.CompiledFunctionCall) ? _in.compiledParams[0] : null;
+                    if (_var.evaluatedMethod === this.operators[&#x27;,&#x27;] &amp;&amp; _var.compiledParams.length === 2) // represented as (var x, x)
+                    {
+                        _var.compiledParams[1] = compileVariableAssignment.call(this, _var.compiledParams[1], &#x27;=&#x27;, newUndefinedConstant());
+                    } else {
+                        _var = compileVariableAssignment.call(this, _in.compiledParams[0], &#x27;=&#x27;, newUndefinedConstant());
+                    }
+                    var _list = compileOperator.call(this, &#x27;in&#x27;, [_in.compiledParams[1]]);
+                    tokens[startIndex] = compileOperator.call(this, stmt, [_list, _var, params[1]]);
+                }
+            } else if (Compiler._jumpStatements.indexOf(stmt) &gt;= 0) {
+                tokens[startIndex] = compileOperator.call(this, stmt, params);
+            } else {
+                throw new Error(stmt + &quot; not supported&quot;);
+            }
+
+            // save original token list for correct decompiling
+            (tokens[startIndex]).originalTokens = originalTokens;
+
+            return;
+        }
+
+        // no matching pattern found
+        throwInvalidSyntax(stmt);
+    }
+
+
+    function compileFunctionHeader(functionOperator, paramsToken) {
+        if (functionOperator !== Compiler.FUNCTION &amp;&amp; functionOperator !== &#x27;=&gt;&#x27;)
+            throw new Error(&quot;compileFunctionHeader called with unsupported operator: &quot; + functionOperator);
+
+        // when compiling a function operator, only the argument list should be provided
+        var args = (paramsToken &amp;&amp; paramsToken instanceof weavecore.CompiledFunctionCall) ? paramsToken : null;
+        if (!args)
+            throwInvalidSyntax.call(this, functionOperator);
+
+        // if there is only a single variable name, wrap it in an operator &#x27;,&#x27; call
+        if (!args.compiledParams)
+            args = compileOperator(&#x27;,&#x27;, [args]);
+
+        if (args.evaluatedMethod !== operators[&#x27;,&#x27;])
+            throwInvalidSyntax.call(this, functionOperator);
+
+        // verify that each parameter inside operator &#x27;,&#x27; is a variable name or a local assignment to a constant.
+        var variableNames = [];
+        var variableValues = [];
+        args.compiledParams.forEach(function (token) {
+            var variable = (token &amp;&amp; token instanceof weavecore.CompiledFunctionCall) ? token : null;
+            if (!variable)
+                throwInvalidSyntax.call(this, functionOperator);
+
+            if (!variable.compiledParams) {
+                // local variable
+                variableNames.push(variable.evaluatedMethod);
+                variableValues.push(undefined);
+            } else if (variable.evaluatedMethod === operators[&#x27;=&#x27;] &amp;&amp; variable.compiledParams.length === 2 &amp;&amp; variable.compiledParams[1] instanceof weavecore.CompiledConstant) {
+                // local variable assignment
+                variableNames.push(variable.evaluatedParams[0]);
+                variableValues.push(variable.evaluatedParams[1]);
+            } else
+                throwInvalidSyntax.call(this, functionOperator);
+        })
+        var functionParams = {};
+        functionParams[Compiler.FUNCTION_PARAM_NAMES] = variableNames;
+        functionParams[Compiler.FUNCTION_PARAM_VALUES] = variableValues;
+
+        var op = compileOperator.call(this, functionOperator, [new weavecore.CompiledConstant(null, functionParams)]);
+        op.originalTokens = functionOperator === Compiler.FUNCTION ? [Compiler.FUNCTION, paramsToken] : [paramsToken, &#x27;=&gt;&#x27;];
+        return op;
+    }
+
+
+    /**
+     * This function will initialize the operators and constants.
+     */
+    function initialize() {
+
+
+        if (!Compiler.statements) {
+            Compiler.statements = {};
+            var stmt;
+            Compiler._statementsWithParams.forEach(function (stmt) {
+                Compiler.statements[stmt] = true;
+            })
+            Compiler._statementsWithoutParams.forEach(function (stmt) {
+                Compiler.statements[stmt] = false;
+            })
+        }
+        this.constants = {};
+        this.globals = {};
+        this.operators = {};
+        this.pureOperators = {};
+        this.assignmentOperators = {};
+
+        // constant, built-in symbols
+        [null, true, false, undefined, NaN, Infinity].forEach(function (_const) {
+            this.constants[String(_const)] = _const;
+        }.bind(this));
+
+
+        // global classes
+        [Array, Boolean, Date, Error, Function, Number, Object, String].forEach(function (_class) {
+            this.globals[_class.name] = _class;
+        }.bind(this));
+
+        &#x27;decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,escape,isFinite,isNaN,isPrototypeOf,parseFloat,parseInt,trace,unescape&#x27;.split(&#x27;,&#x27;).forEach(function (_funcName) {
+            this.globals[_funcName] = _funcName.name;
+        }.bind(this));
+
+
+
+
+        /** this.operators **/
+        // first, make sure all special characters are defined as operators whether or not they have functions associated with them
+        var specialChars = &quot;&#x60;~!#%^&amp;*()-+=[{]}\\|;:&#x27;\&quot;,&lt;.&gt;/?&quot;;
+        for (var i = 0; i &lt; specialChars.length; i++)
+            this.operators[specialChars.charAt(i)] = true;
+
+        // now define the functions
+
+        // impure operators
+        this.operators[&quot;[&quot;] = function () {
+            return Array.prototype.slice.call(arguments);
+        }; // array creation
+        this.operators[&quot;{&quot;] = function () // object creation
+            {
+                var args = Array.prototype.slice.call(arguments)
+                var o = {};
+                var end = args.length - 1;
+                for (var i = 0; i &lt; end; i += 2)
+                    o[args[i]] = args[i + 1];
+                return o;
+            }
+        this.operators[Compiler.OPERATOR_NEW] = function (classOrQName) {
+            var params = Array.prototype.slice.call(arguments);
+            classOrQName = params.shift();
+            var classDef = classOrQName;
+            if (!classDef &amp;&amp; classOrQName)
+                classDef = Compiler.getDefinition(String(classOrQName));
+            switch (params.length) {
+            case 0:
+                return new classDef();
+            case 1:
+                return new classDef(params[0]);
+            case 2:
+                return new classDef(params[0], params[1]);
+            case 3:
+                return new classDef(params[0], params[1], params[2]);
+            case 4:
+                return new classDef(params[0], params[1], params[2], params[3]);
+            case 5:
+                return new classDef(params[0], params[1], params[2], params[3], params[4]);
+            case 6:
+                return new classDef(params[0], params[1], params[2], params[3], params[4], params[5]);
+            case 7:
+                return new classDef(params[0], params[1], params[2], params[3], params[4], params[5], params[6]);
+            case 8:
+                return new classDef(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
+            case 9:
+                return new classDef(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8]);
+            case 10:
+                return new classDef(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7], params[8], params[9]);
+            default:
+                throw new Error(&quot;Too many constructor parameters (maximum 10)&quot;);
+            }
+        };
+        this.operators[Compiler.FUNCTION] = function () {};
+        this.operators[&#x27;=&gt;&#x27;] = function () {};
+        this.operators[&#x27;:&#x27;] = function (key, value) {
+            this[key] = value;
+        };
+        // property access should not be optimized to constants
+        this.operators[&quot;.&quot;] = function (object) {
+            var chain = Array.prototype.slice.call(arguments);
+            object = chain.shift();
+            var iHost = chain.length - 2;
+            _propertyHost = object;
+            _propertyName = chain[iHost + 1];
+            for (var i = 0; i &lt; chain.length; i++) {
+                if (i === iHost)
+                    _propertyHost = object;
+                object = object[chain[i]];
+            }
+            return object;
+        };
+        this.operators[&quot;..&quot;] = function (object, propertyName) {
+            /*if (object is XML_Class)
+            	return (object as XML_Class).descendants(propertyName);
+            if (object is Proxy)
+            	return (object as Proxy).getDescendants(propertyName);
+            return object.flash_proxy::getDescendants(propertyName);*/
+        };
+        this.operators[&#x27;in&#x27;] = function () {
+            // dual purpose for infix operator and for..in loop initialization
+            var args = Array.prototype.slice.call(arguments);
+            if (args.length === 2)
+                return args[0] in args[1];
+
+            var a = [];
+            for (var k in args[0])
+                a.push(k);
+            return a;
+        };
+        this.operators[Compiler.ST_VAR] = function () {};
+        this.operators[Compiler.ST_IMPORT] = function () {};
+        // loop statements
+        this.operators[Compiler.ST_DO] = function (x, y) {
+            return x &amp;&amp; y;
+        };
+        this.operators[Compiler.ST_WHILE] = function (x, y) {
+            return x &amp;&amp; y;
+        };
+        this.operators[Compiler.ST_FOR] = function (x, y) {
+            return x &amp;&amp; y;
+        };
+        this.operators[Compiler.ST_FOR_DO] = function (x, y) {
+            return x &amp;&amp; y;
+        };
+        this.operators[Compiler.ST_FOR_IN] = function () {};
+        this.operators[Compiler.ST_FOR_EACH] = function () {};
+        // jump statements
+        this.operators[Compiler.ST_BREAK] = function () {};
+        this.operators[Compiler.ST_CONTINUE] = function () {};
+        this.operators[Compiler.ST_RETURN] = function () {};
+        this.operators[Compiler.ST_THROW] = function (e) {
+            throw e;
+        };
+
+        // &#x27;if&#x27; statement can be considered a pure operator
+        this.pureOperators[Compiler.ST_IF] = function (c, t, f) {
+            return c ? t : f;
+        };
+        // math
+        this.pureOperators[&quot;**&quot;] = Math.pow;
+        this.pureOperators[&quot;*&quot;] = function (x, y) {
+            return x * y;
+        };
+        this.pureOperators[&quot;/&quot;] = function (x, y) {
+            return x / y;
+        };
+        this.pureOperators[&quot;%&quot;] = function (x, y) {
+            return x % y;
+        };
+        this.pureOperators[&quot;+&quot;] = function () {
+            // this works as a unary or infix operator
+            var args = Array.prototype.slice.call(arguments);
+            switch (args.length) {
+            case 1:
+                return +args[0];
+            case 2:
+                return args[0] + args[1];
+            }
+        };
+        this.pureOperators[&quot;-&quot;] = function () {
+            var args = Array.prototype.slice.call(arguments);
+            // this works as a unary or infix operator
+            switch (args.length) {
+            case 1:
+                return -args[0];
+            case 2:
+                return args[0] - args[1];
+            }
+        };
+        // bitwise
+        this.pureOperators[&quot;~&quot;] = function (x) {
+            return ~x;
+        };
+        this.pureOperators[&quot;&amp;&quot;] = function (x, y) {
+            return x &amp; y;
+        };
+        this.pureOperators[&quot;|&quot;] = function (x, y) {
+            return x | y;
+        };
+        this.pureOperators[&quot;^&quot;] = function (x, y) {
+            return x ^ y;
+        };
+        this.pureOperators[&quot;&lt;&lt;&quot;] = function (x, y) {
+            return x &lt;&lt; y;
+        };
+        this.pureOperators[&quot;&gt;&gt;&quot;] = function (x, y) {
+            return x &gt;&gt; y;
+        };
+        this.pureOperators[&quot;&gt;&gt;&gt;&quot;] = function (x, y) {
+            return x &gt;&gt;&gt; y;
+        };
+        // comparison
+        this.pureOperators[&quot;&lt;&quot;] = function (x, y) {
+            return x &lt; y;
+        };
+        this.pureOperators[&quot;&lt;=&quot;] = function (x, y) {
+            return x &lt;= y;
+        };
+        this.pureOperators[&quot;&gt;&quot;] = function (x, y) {
+            return x &gt; y;
+        };
+        this.pureOperators[&quot;&gt;=&quot;] = function (x, y) {
+            return x &gt;= y;
+        };
+        this.pureOperators[&quot;==&quot;] = function (x, y) {
+            return x === y;
+        };
+        this.pureOperators[&quot;===&quot;] = function (x, y) {
+            return x === y;
+        };
+        this.pureOperators[&quot;!=&quot;] = function (x, y) {
+            return x != y;
+        };
+        this.pureOperators[&quot;!==&quot;] = function (x, y) {
+            return x !== y;
+        };
+        // logic
+        this.pureOperators[&quot;!&quot;] = function (x) {
+            return !x;
+        };
+        this.pureOperators[&quot;&amp;&amp;&quot;] = function (x, y) {
+            return x &amp;&amp; y;
+        };
+        this.pureOperators[&quot;||&quot;] = function (x, y) {
+            return x || y;
+        };
+        // branching
+        this.pureOperators[&quot;?:&quot;] = function (c, t, f) {
+            return c ? t : f;
+        };
+        // multiple commands - equivalent functionality but must be remembered as different operators
+        this.pureOperators[&#x27;,&#x27;] = function () {
+            var args = Array.prototype.slice.call(arguments);
+            return args[args.length - 1];
+        };
+        this.pureOperators[&#x27;;&#x27;] = function () {
+            var args = Array.prototype.slice.call(arguments);
+            return args[args.length - 1];
+        };
+        this.pureOperators[&#x27;(&#x27;] = function () {
+            var args = Array.prototype.slice.call(arguments);
+            return args[args.length - 1];
+        };
+        // operators with alphabetic names
+        this.pureOperators[&#x27;void&#x27;] = function () {};
+        this.pureOperators[&#x27;typeof&#x27;] = function (value) {
+            return typeof (value);
+        };
+        //this.pureOperators[&#x27;as&#x27;] = function(a, b) { return a as b; };
+        //this.pureOperators[&#x27;is&#x27;] =
+        this.pureOperators[&#x27;instanceof&#x27;] = function (a, classOrQName) {
+            var classDef = classOrQName;
+            if (!classDef &amp;&amp; classOrQName)
+                classDef = Compiler.getDefinition(String(classOrQName));
+            return a instanceof classDef;
+        };
+        // assignment operators -- first arg is host object, last arg is new value, remaining args are a chain of property names
+        this.assignmentOperators[&#x27;=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] = a[i + 1];
+        };
+        this.assignmentOperators[&#x27;+=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] += a[i + 1];
+        };
+        this.assignmentOperators[&#x27;-=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] -= a[i + 1];
+        };
+        this.assignmentOperators[&#x27;*=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] *= a[i + 1];
+        };
+        this.assignmentOperators[&#x27;/=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] /= a[i + 1];
+        };
+        this.assignmentOperators[&#x27;%=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] %= a[i + 1];
+        };
+        this.assignmentOperators[&#x27;&lt;&lt;=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] &lt;&lt;= a[i + 1];
+        };
+        this.assignmentOperators[&#x27;&gt;&gt;=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] &gt;&gt;= a[i + 1];
+        };
+        this.assignmentOperators[&#x27;&gt;&gt;&gt;=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] &gt;&gt;&gt;= a[i + 1];
+        };
+        this.assignmentOperators[&#x27;&amp;&amp;=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            o[a[i]] = o[a[i]] &amp;&amp; a[i + 1];
+            return o[a[i]];
+        };
+        this.assignmentOperators[&#x27;||=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            o[a[i]] = o[a[i]] || a[i + 1];
+            return o[a[i]];
+        };
+        this.assignmentOperators[&#x27;&amp;=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] &amp;= a[i + 1];
+        };
+        this.assignmentOperators[&#x27;|=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] |= a[i + 1];
+        };
+        this.assignmentOperators[&#x27;^=&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]] ^= a[i + 1];
+        };
+        // special cases: delete, -- and ++ unary operators ignore last parameter
+        this.assignmentOperators[&#x27;--&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return --o[a[i]];
+        };
+        this.assignmentOperators[&#x27;++&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return ++o[a[i]];
+        };
+        this.assignmentOperators[&#x27;#--&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]]--;
+        };
+        this.assignmentOperators[&#x27;#++&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return o[a[i]]++;
+        };
+        this.assignmentOperators[&#x27;delete&#x27;] = function (o) {
+            var a = Array.prototype.slice.call(arguments);
+            o = a.shift();
+            for (var i = 0; i &lt; a.length - 2; i++) o = o[a[i]];
+            return delete o[a[i]];
+        };
+
+        // evaluate operators in the same order as ActionScript
+        this.orderedOperators = [
+				[&#x27;*&#x27;, &#x27;/&#x27;, &#x27;%&#x27;],
+				[&#x27;+&#x27;, &#x27;-&#x27;],
+				[&#x27;&lt;&lt;&#x27;, &#x27;&gt;&gt;&#x27;, &#x27;&gt;&gt;&gt;&#x27;],
+				[&#x27;&lt;&#x27;, &#x27;&lt;=&#x27;, &#x27;&gt;&#x27;, &#x27;&gt;=&#x27;, &#x27;in&#x27;, &#x27;instanceof&#x27;],
+				[&#x27;==&#x27;, &#x27;!=&#x27;, &#x27;===&#x27;, &#x27;!==&#x27;],
+				[&#x27;&amp;&#x27;],
+				[&#x27;^&#x27;],
+				[&#x27;|&#x27;],
+				[&#x27;&amp;&amp;&#x27;],
+				[&#x27;||&#x27;]
+			];
+        // unary operators
+        this.unaryOperatorSymbols = [&#x27;++&#x27;, &#x27;--&#x27;, &#x27;+&#x27;, &#x27;-&#x27;, &#x27;~&#x27;, &#x27;!&#x27;, &#x27;delete&#x27;, &#x27;typeof&#x27;]; // &#x27;#&#x27; not listed because it has special evaluation order
+
+        var op;
+
+
+        // copy over pure and assignment operators
+        for (var op in this.pureOperators) {
+            this.operators[op] = this.pureOperators[op];
+        }
+        for (var op in this.assignmentOperators) {
+            this.operators[op] = this.assignmentOperators[op];
+        }
+
+        for (var op in this.operators) {
+            if (this.operators[op].constructor === Function)
+                this.constants[Compiler.OPERATOR_ESCAPE + op] = this.operators[op];
+        }
+
+
+        // fill reverse-lookup dictionaries
+        this.BRANCH_LOOKUP.set(this.operators[Compiler.ST_IF], true);
+        this.BRANCH_LOOKUP.set(this.operators[Compiler.ST_DO], true);
+        this.BRANCH_LOOKUP.set(this.operators[Compiler.ST_WHILE], true);
+        this.BRANCH_LOOKUP.set(this.operators[Compiler.ST_FOR], true);
+        this.BRANCH_LOOKUP.set(this.operators[Compiler.ST_FOR_DO], true);
+        this.BRANCH_LOOKUP.set(this.operators[&#x27;?:&#x27;], true);
+        this.BRANCH_LOOKUP.set(this.operators[&#x27;&amp;&amp;&#x27;], true);
+        this.BRANCH_LOOKUP.set(this.operators[&#x27;||&#x27;], false);
+
+        this.LOOP_LOOKUP.set(this.operators[Compiler.ST_DO], true);
+        this.LOOP_LOOKUP.set(this.operators[Compiler.ST_WHILE], true);
+        this.LOOP_LOOKUP.set(this.operators[Compiler.ST_FOR], Compiler.ST_BREAK); // break target only
+        this.LOOP_LOOKUP.set(this.operators[Compiler.ST_FOR_DO], Compiler.ST_CONTINUE); // continue target only
+        this.LOOP_LOOKUP.set(this.operators[Compiler.ST_FOR_IN], true);
+        this.LOOP_LOOKUP.set(this.operators[Compiler.ST_FOR_EACH], true);
+
+        this.JUMP_LOOKUP.set(this.operators[Compiler.ST_BREAK], true);
+        this.JUMP_LOOKUP.set(this.operators[Compiler.ST_CONTINUE], true);
+        this.JUMP_LOOKUP.set(this.operators[Compiler.ST_RETURN], true);
+        this.JUMP_LOOKUP.set(this.operators[Compiler.ST_THROW], true);
+
+
+        var key;
+        for (key in this.pureOperators) {
+            var func = this.pureOperators[key];
+            this.PURE_OP_LOOKUP.set(func, true);
+        }
+
+        for (key in this.assignmentOperators) {
+            var func = this.assignmentOperators[key];
+            this.ASSIGN_OP_LOOKUP.set(func, true);
+        }
+
+    }
+
+
+    //-----------------------------------------------------------------
+    // Class(&#x27;weave.compiler.Compiler&#x27;).test()
+    Compiler.test = function (eqIndex) {
+        eqIndex = eqIndex === undefined ? 0 : eqIndex;
+        var compiler = new weavecore.Compiler();
+        var testEqs = [
+				&quot;(a = 1, 0) ? (a = 2, a + 1) : (4, a + 100), a&quot;,
+				&quot;1 + &#x27;\&quot;abc &#x27; + \&quot;&#x27;x\\\&quot;y\\\\\\&#x27;z\&quot;&quot;,
+				&#x27;0 ? trace(&quot;?: BUG&quot;) : -v&#x27;,
+				&#x27;1 ? ~-~-v : trace(&quot;?: BUG&quot;)&#x27;,
+				&#x27;!true &amp;&amp; trace(&quot;&amp;&amp; BUG&quot;)&#x27;,
+				&#x27;true || trace(&quot;|| BUG&quot;)&#x27;,
+				//&#x27;round(.5 - random() &lt; 0 ? &quot;1.6&quot; : &quot;1.4&quot;)&#x27;,
+				&#x27;(- x * 3) / get(&quot;v&quot;) + -2 + pow(5,3) +\\**(6,3)&#x27;,
+				&#x27;\\+ ( - ( - 2 + 1 ) ** - 4 , - 3 ) - ( - 4 + - 1 * - 7 )&#x27;,
+				&#x27;-v- - -3+v2&#x27;,
+				&#x27;(x + v) / \\+ ( - ( 2 + 1 ) ** 4 , 3 ) - ( 4 + 1 )&#x27;,
+				&#x27;3&#x27;,
+				&#x27;-3&#x27;,
+				&#x27;v&#x27;,
+				&#x27;-v&#x27;,
+				//&#x27;roundSignificant(random(),3)&#x27;,
+				&#x27;rpad(&quot;hello&quot;, 4+(v+2)*2, &quot;._,&quot;)&#x27;,
+				&#x27;lpad(&quot;hello&quot;, 4+(v+2)*2, &quot;._,&quot;)&#x27;,
+				&#x27;&quot;hello world&quot;.substr(v*2, 5)&#x27;,
+				&#x27;asString(random()).length&#x27;,
+				&#x27;&quot;(0x&quot; + numberToBase(0xFF00FF,16).toUpperCase() + &quot;) &quot; + lpad(numberToBase(v*20, 2, 4), 9) + &quot;, base10: &quot; + rpad(numberToBase(sign(v) * (v+10),10,3), 6) + &quot;, base16: &quot; + numberToBase(v+10,16)&#x27;, &#x27;if (false) { trace(3) } else trace(4)&#x27;,
+				&#x27;do {} while (random());&#x27;,
+				&#x27;if (random()) while (random()); if (random()) 1&#x27;,
+				&quot;x = 10; while (x--) trace(&#x27;x =&#x27;,x);&quot;,
+				&quot;for (y = 0; y &lt; 10; y++) trace(&#x27;y =&#x27;,y);&quot;,
+				&quot;x = 0; do { trace(&#x27;do&#x27;,x++); } while (trace(&#x27;cond&#x27;), x &lt; 10);&quot;,
+				//_do_continue_test,
+				&quot;for (trace(&#x27;y =&#x27;,0), y = 0; trace(y,&#x27;&lt;&#x27;,10), y &lt; 10; trace(&#x27;y++&#x27;), y++) { trace(&#x27;loop y =&#x27;,y); }&quot;,
+				&quot;for (i = 0; i &lt; 10; i++) if (i === 5) return ; else trace(i);&quot;,
+				&quot;if (true) return ; else trace(&#x27;test&#x27;); trace(&#x27;BUG&#x27;);&quot;,
+				&quot;for (i = 0; i &lt; 10; i++) { if (i === 3) continue; trace(i); if (i === 5) break; } trace(&#x27;done&#x27;);&quot;,
+				&quot;i = 0; do { if (i === 3) continue; trace(i); if (i === 5) break; } while (i &gt;= 0 &amp;&amp; ++i &lt; 10) trace(&#x27;done&#x27;);&quot;,
+				&quot;i = -1; while (++i &lt; 10) { if (i === 3) continue; trace(i); if (i === 5) break; } trace(&#x27;done&#x27;);&quot;,
+				&quot;a = []; o = Object(&#x27;a&#x27;,1,&#x27;b&#x27;,2,&#x27;c&#x27;,3,&#x27;d&#x27;,4,&#x27;e&#x27;,5); for (k in o) { a.push(&#x60;{k} = {o[k]}&#x60;); o[&#x27;?&#x27;+k]=k+&#x27;!&#x27;; delete o[k]; } for each (p in o) a.push(p); return [a,o];&quot;,
+				&quot;y = 4; x = 3; var x = 4, y; [x, y]&quot;,
+				&quot;&#x60;abc { function(x,y) { return x+y; } } xyz&#x60;&quot;,
+				&quot;var obj = Object(&#x27;f&#x27;, function() { return this === obj; }); var ff = obj.f; [obj.f(), (obj.f)(), ff()]&quot;,
+				&quot;x = &#x27;x&#x27;; function(){ x = 3; return x; }() === x&quot;
+			];
+        var eqs = [testEqs[eqIndex]];
+        var values = [-2, -1, -0.5, 0, 0.5, 1, 2];
+        var vars = {};
+        vars[&#x27;v&#x27;] = 123;
+        vars[&#x27;v2&#x27;] = 222;
+        vars[&#x27;x&#x27;] = 10;
+        vars[&#x27;get&#x27;] = function (name) {
+            //console.log(&quot;get variable&quot;, name, &quot;=&quot;, vars[name]);
+            return vars[name];
+        };
+
+        compiler.debug = true;
+        eqs.forEach(function (eq) {
+            console.log(&quot;expression: &quot; + eq);
+
+            var tokens = getTokens.call(compiler, eq);
+            console.log(&quot;    tokens:&quot;, tokens.join(&#x27; &#x27;));
+            var decompiled = compiler.decompileObject(compileTokens.call(compiler, tokens, true));
+            console.log(&quot;decompiled:&quot;, decompiled);
+
+            var tokens2 = getTokens.call(compiler, decompiled);
+            console.log(&quot;   tokens2:&quot;, tokens2.join(&#x27; &#x27;));
+            var recompiled = compiler.decompileObject(compileTokens.call(compiler, tokens2, true));
+            console.log(&quot;recompiled:&quot;, recompiled);
+
+            var tokens3 = getTokens.call(compiler, recompiled);
+            var decompiled2 = compiler.decompileObject(compileTokens.call(compiler, tokens3, true));
+            console.log(&quot;decompiled(2):&quot;, decompiled2);
+
+            var f = compiler.compileToFunction(eq, vars);
+            values.forEach(function (value) {
+                vars[&#x27;v&#x27;] = value;
+                console.log(&quot;f(v=&quot; + value + &quot;)\t= &quot; + f.call(compiler, value));
+            });
+        });
+    }
+
+
 
 
     weavecore.Compiler = Compiler;

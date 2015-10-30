@@ -433,6 +433,47 @@ if (typeof window === 'undefined') {
         }
     }
 
+    /**
+     * @see https://github.com/bestiejs/punycode.js
+     */
+    StandardLib.ucs2encode = function (value) {
+        var output = '';
+        if (value > 0xFFFF) {
+            value -= 0x10000;
+            output += String.fromCharCode(value >>> 10 & 0x3FF | 0xD800);
+            value = 0xDC00 | value & 0x3FF;
+        }
+        return output + String.fromCharCode(value);
+    }
+
+    StandardLib.argRef = new RegExp("^(0|[1-9][0-9]*)\}");
+
+    /**
+     * Substitutes "{n}" tokens within the specified string with the respective arguments passed in.
+     * Same syntax as StringUtil.substitute() without the side-effects of using String.replace() with a regex.
+     * @see String#replace()
+     * @see mx.utils.StringUtil#substitute()
+     */
+    StandardLib.substitute = function (format) {
+        var args = Array.prototype.slice.call(arguments);
+        format = args.shift();
+        if (args.length === 1 && args[0])
+            args = args[0];
+
+        var split = format.split('{')
+        var output = split[0];
+        for (var i = 1; i < split.length; i++) {
+            var str = split[i];
+            if (StandardLib.argRef.test(str)) {
+                var j = str.indexOf("}");
+                output += args[str.substring(0, j)];
+                output += str.substring(j + 1);
+            } else
+                output += "{" + str;
+        }
+        return output;
+    }
+
 
 
     weavecore.StandardLib = StandardLib;

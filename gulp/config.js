@@ -16,6 +16,9 @@ var buildOrder = [
 
                     compiler + '/StandardLib.js',
                     compiler + '/ObjectUtil.js',
+                    compiler + '/ICompiledObject.js',
+                    compiler + '/CompiledConstant.js',
+                    compiler + '/CompiledFunctionCall.js',
                     compiler + '/Compiler.js',
 
                     core + '/DynamicState.js',
