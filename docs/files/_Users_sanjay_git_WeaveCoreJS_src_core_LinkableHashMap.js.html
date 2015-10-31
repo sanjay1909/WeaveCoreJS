@@ -768,8 +768,16 @@ if (typeof window === &#x27;undefined&#x27;) {
     };
 
     weavecore.LinkableHashMap = LinkableHashMap;
-}());
 
+    // namespace
+    if (typeof window === &#x27;undefined&#x27;) {
+        this.WeaveAPI = this.WeaveAPI || {};
+        this.WeaveAPI.globalHashMap = new LinkableHashMap();
+    } else {
+        window.WeaveAPI = window.WeaveAPI || {};
+        window.WeaveAPI.globalHashMap = new LinkableHashMap();
+    }
+}());
     </pre>
 </div>
 
