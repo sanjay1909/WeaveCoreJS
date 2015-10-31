@@ -20,14 +20,15 @@ module.exports = function (grunt) {
                     'src/core/DynamicState.js',
                     'src/core/ILinkableObject.js',
                     'src/core/CallbackCollection.js',
-                    'src/core/SessionManager.js',
                     'src/primitive/WeaveTreeItem.js',
                     'src/primitive/Dictionary2D.js',
+                    'src/core/SessionManager.js',
 
                     'src/utils/URLUtil.js',
 
                     'src/utils/DebugUtils.js',
                     'src/api/debugId.js',
+                    'src/api/detectLinkableObjectChange.js',
 
                     'src/core/LinkableVariable.js',
                     'src/core/LinkableNumber.js',

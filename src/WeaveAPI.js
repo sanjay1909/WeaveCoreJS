@@ -27,5 +27,5 @@ Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_LOW', {
 });
 
 
-WeaveAPI.SessionManager = new weavecore.SessionManager();
+//WeaveAPI.SessionManager = new weavecore.SessionManager();
 WeaveAPI.globalHashMap = new weavecore.LinkableHashMap();

@@ -25,15 +25,16 @@ var buildOrder = [
                     core + '/ILinkableObject.js',
                     core + '/ILinkableCompositeObject.js',
                     core + '/CallbackCollection.js',
-                    core + '/SessionManager.js',
                     primitive + '/WeaveTreeItem.js',
                     primitive + '/Dictionary2D.js',
+                    core + '/SessionManager.js',
 
                     utils + '/URLUtil.js',
                     utils + '/URLRequestUtils.js',
                     utils + '/DebugUtils.js',
                     utils + '/AsyncSort.js',
                     api + '/debugId.js',
+                    api + '/detectLinkableObjectChange.js',
 
                     core + '/LinkableVariable.js',
                     core + '/LinkableNumber.js',

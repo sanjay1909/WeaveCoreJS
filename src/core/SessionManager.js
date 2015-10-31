@@ -1405,4 +1405,13 @@ if (typeof window === 'undefined') {
 
     weavecore.SessionManager = SessionManager;
 
+    // namespace
+    if (typeof window === 'undefined') {
+        this.WeaveAPI = this.WeaveAPI || {};
+        this.WeaveAPI.SessionManager = new SessionManager();
+    } else {
+        window.WeaveAPI = window.WeaveAPI || {};
+        window.WeaveAPI.SessionManager = new SessionManager();
+    }
+
 }());

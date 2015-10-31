@@ -6349,6 +6349,469 @@ if (typeof window === 'undefined') {
 
 }());
 
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+/**
+ * Facilitates the creation of dynamic trees.
+ */
+(function () {
+
+
+    WeaveTreeItem.createItems = function (WeaveTreeItem_implementation, items) {
+        var n = 0;
+        while (n !== items.length) {
+            n = items.length;
+            items = [].concat.apply(null, items);
+        }
+
+        return items.map(WeaveTreeItem._mapItems, WeaveTreeItem_implementation).filter(WeaveTreeItem._filterItemsRemoveNullsAndUndefined);
+
+    }
+
+    WeaveTreeItem._mapItems = function (item, i, a) {
+        if (item.constructor === Function) // to identify its a class object
+            return new item();
+        if (item.constructor === String || ((item !== null || item !== undefined) && item.constructor === Object)) {
+            var ItemClass = this || WeaveTreeItem;
+            return new ItemClass(item);
+        }
+        return item;
+
+    }
+
+    WeaveTreeItem._filterItemsRemoveNullsAndUndefined = function (item, i, a) {
+
+        return item !== null && item !== undefined;
+
+    }
+
+    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
+
+    /**
+     * Constructs a new WeaveTreeItem.
+     * @param params An Object containing property values to set on the WeaveTreeItem.
+     *               If params is a String, both <code>label</code> and <code>data</code> will be set to that String.
+     */
+
+    function WeaveTreeItem(params) {
+        //set default values
+        if (params === undefined) params = null;
+        /**
+         * Set this to change the constructor used for initializing child items.
+         * This variable is intentionally uninitialized to avoid overwriting the value set by an extending class in its constructor.
+         */
+        this.childItemClass; // IMPORTANT - no initial value
+        this._recursion = {}; // recursionName -> Boolean
+        this._label = "";
+        this._children = null;
+        this._dependency = null;
+        /**
+         * Cached values that get invalidated when the source triggers callbacks.
+         */
+        this._cache = {};
+
+        /**
+         * Cached values of getCallbackCollection(source).triggerCounter.
+         */
+        this._counter = {};
+
+
+        //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
+
+        /**
+         * This can be set to either a String or a Function.
+         * This property is checked by Flex's default data descriptor.
+         * If this property is not set, the <code>data</code> property will be used as the label.
+         */
+        Object.defineProperty(this, 'label', {
+            get: function () {
+                const id = 'label';
+                if (this.isCached(id))
+                    return this._cache[id];
+
+                var str = this.getString(this._label, id);
+                if (!str && this.data !== null && this.data !== undefined)
+                    str = String(this.data);
+                return this.cache(id, str);
+            },
+            set: function (value) {
+                this._counter['label'] = undefined;
+                this._label = value;
+            }
+        });
+
+
+
+
+        Object.defineProperty(this, 'children', {
+            /**
+             * Gets a filtered copy of the child menu items.
+             * When this property is accessed, refresh() will be called except if refresh() is already being called.
+             * This property is checked by Flex's default data descriptor.
+             */
+            get: function () {
+                const id = 'children';
+
+                var items;
+                if (this.isCached(id))
+                    items = this._cache[id];
+                else
+                    items = this.getObject(this._children, id);
+                if (items) {
+                    // overwrite original array to support filling it asynchronously
+                    var iOut = 0;
+                    for (var i = 0; i < items.length; i++) {
+                        var item = WeaveTreeItem._mapItems.call(this.childItemClass, items[i], i, items);
+                        if (item != null)
+                            items[iOut++] = item;
+                    }
+                }
+
+                return this.cache(id, items);
+            },
+            /**
+             * This can be set to either an Array or a Function that returns an Array.
+             * The function can be like function():void or function(item:WeaveTreeItem):void.
+             * The Array can contain either WeaveTreeItems or Objects, each of which will be passed to the WeaveTreeItem constructor.
+             */
+            set: function (value) {
+                this._counter['children'] = undefined;
+                this._children = value;
+            }
+        });
+
+
+        /**
+         * A pointer to the ILinkableObject that created this node.
+         * This is used to determine when to invalidate cached values.
+         */
+        Object.defineProperty(this, 'dependency', {
+            get: function () {
+                if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency)) {
+                    this.dependency = null;
+                }
+                return this._dependency;
+            },
+            set: function (value) {
+                if (this._dependency != value)
+                    this._counter = {};
+                this._dependency = value;
+            }
+        });
+
+        /**
+         * This can be any data associated with this tree item.
+         */
+        this.data = null;
+
+        if (typeof (params) === 'string') {
+            this.label = params;
+            this.data = params;
+        } else
+            for (var key in params)
+                this[key] = params[key];
+    }
+
+
+
+
+
+
+    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
+    var p = WeaveTreeItem.prototype;
+    /**
+     * Computes a Boolean value from various structures
+     * @param param Either a Boolean, and Object like {not: param}, a Function, an ILinkableVariable, or an Array of those objects.
+     * @param recursionName A name used to keep track of recursion.
+     * @return A Boolean value derived from the param, or the param itself if called recursively.
+     */
+    p.getBoolean = function (param, recursionName) {
+        if (!this._recursion[recursionName]) {
+            try {
+                this._recursion[recursionName] = true;
+
+                if (this.isSimpleObject(param, 'not'))
+                    param = !this.getBoolean(param['not'], "not_" + recursionName);
+                if (this.isSimpleObject(param, 'or'))
+                    param = this.getBoolean(param['or'], "or_" + recursionName);
+                if (typeof (param) === "function")
+                    param = this.evalFunction(param);
+                if (param instanceof weavecore.LinkableVariable)
+                    param = param.getSessionState();
+                if (param instanceof Array) {
+                    var breakValue = recursionName.indexOf("or_") === 0;
+                    for (var param in param) {
+                        param = this.getBoolean(param, "item_" + recursionName);
+                        if (param ? breakValue : !breakValue)
+                            break;
+                    }
+                }
+                param = param ? true : false;
+            } finally {
+                this._recursion[recursionName] = false;
+            }
+        }
+        return param;
+    };
+
+    /**
+     * Checks if an object has a single specified property.
+     */
+    p.isSimpleObject = function (object, singlePropertyName) {
+
+
+        var found = false;
+        for (var key in object) {
+            if (found)
+                return false; // two or more properties
+
+            if (key !== singlePropertyName)
+                return false; // not the desired property
+
+            found = true; // found the desired property
+        }
+        return found;
+    };
+
+    /**
+     * Gets a String value from a String or Function.
+     * @param param Either a String or a Function.
+     * @param recursionName A name used to keep track of recursion.
+     * @return A String value derived from the param, or the param itself if called recursively.
+     */
+    p.getString = function (param, recursionName) {
+        if (!this._recursion[recursionName]) {
+            try {
+                this._recursion[recursionName] = true;
+
+                if (typeof (param) === "function")
+                    param = this.evalFunction(param);
+                else
+                    param = param || '';
+            } finally {
+                this._recursion[recursionName] = false;
+            }
+        }
+        return param;
+    };
+
+    /**
+     * Evaluates a function to get an Object or just returns the non-Function Object passed in.
+     * @param param Either an Object or a Function.
+     * @param recursionName A name used to keep track of recursion.
+     * @return An Object derived from the param, or the param itself if called recursively.
+     */
+    p.getObject = function (param, recursionName) {
+        if (!this._recursion[recursionName]) {
+            try {
+                this._recursion[recursionName] = true;
+
+                if (typeof (param) === "function")
+                    param = this.evalFunction.call(this, param);
+            } finally {
+                this._recursion[recursionName] = false;
+            }
+        }
+        return param;
+    };
+
+    /**
+     * First tries calling a function with no parameters.
+     * If an ArgumentError is thrown, the function will called again, passing this WeaveTreeItem as the first parameter.
+     */
+    p.evalFunction = function (func) {
+        try {
+            try {
+                // first try calling the function with no parameters
+                return func();
+            } catch (e) {
+                //To-Docreate Argument error object
+                // and on each function if the argument is required, and if not passed throw that Argument error object
+                console.log(e);
+                /*if (!(e is ArgumentError))
+				{
+					if (e is Error)
+						trace((e as Error).getStackTrace());
+					throw e;
+				}*/
+            }
+
+            // on ArgumentError, pass in this WeaveTreeItem as the first parameter
+            console.log('executing after ArgumentError');
+            return func(this);
+
+        } catch (e) {
+            console.error(e);
+        }
+
+    };
+
+    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
+
+    /**
+     * Checks if cached value is valid.
+     * Always returns false if the source property is not set.
+     * @param id A string identifying a property.
+     * @return true if the property value has been cached.
+     */
+    p.isCached = function (id) {
+        if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency))
+            source = null;
+        return this._dependency && this._counter[id] === WeaveAPI.SessionManager.getCallbackCollection(this._dependency).triggerCounter;
+    };
+
+    /**
+     * Retrieves or updates a cached value for a property.
+     * Does not cache the value if the source property is not set.
+     * @param id A string identifying a property.
+     * @param newValue Optional new value to cache for the property.
+     * @return The new or existing value for the property.
+     */
+    p.cache = function (id, newValue) {
+        if (arguments.length === 1)
+            return this._cache[id];
+
+        if (this._source && WeaveAPI.SessionManager.objectWasDisposed(this._source))
+            source = null;
+        if (this._source) {
+            this._counter[id] = WeaveAPI.SessionManager.getCallbackCollection(this._source).triggerCounter;
+            this._cache[id] = newValue;
+        }
+        return newValue;
+    };
+
+
+
+
+
+
+    weavecore.WeaveTreeItem = WeaveTreeItem;
+
+}());
+
+/*
+    Weave (Web-based Analysis and Visualization Environment)
+    Copyright (C) 2008-2011 University of Massachusetts Lowell
+
+    This file is a part of Weave.
+
+    Weave is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License, Version 3,
+    as published by the Free Software Foundation.
+
+    Weave is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Weave.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+/**
+ * This is a wrapper for a 2-dimensional Dictionary.
+ *
+ * @author adufilie
+ * @author sanjay1909
+ */
+
+(function () {
+    function Dictionary2D(defaultType) {
+        this.dictionary = new Map();
+        this.defaultType = defaultType;
+    }
+
+    var p = Dictionary2D.prototype;
+
+    /**
+     *
+     * @param key1 The first dictionary key.
+     * @param key2 The second dictionary key.
+     * @return The value in the dictionary.
+     */
+    p.get = function (key1, key2) {
+        var value;
+        var d2 = this.dictionary.get(key1);
+        if (d2)
+            value = d2.get(key2);
+        if (value === undefined && this.defaultType) {
+            value = new this.defaultType();
+            this.set(key1, key2, value);
+        }
+        return value;
+    };
+
+    /**
+     * This will add or replace an entry in the dictionary.
+     * @param key1 The first dictionary key.
+     * @param key2 The second dictionary key.
+     * @param value The value to put into the dictionary.
+     */
+    p.set = function (key1, key2, value) {
+        var d2 = this.dictionary.get(key1);
+        if (d2 === null || d2 === undefined)
+            d2 = new Map();
+        this.dictionary.set(key1, d2);
+        d2.set(key2, value);
+    };
+
+    /**
+     * This removes all values associated with the given primary key.
+     * @param key1 The first dictionary key.
+     */
+    p.removeAllPrimary = function (key1) {
+        this.dictionary.delete(key1);
+    };
+
+    /**
+     * This removes all values associated with the given secondary key.
+     * @param key2 The second dictionary key.
+     */
+    p.removeAllSecondary = function (key2) {
+        this.dictionary.forEach(function (value, key1) {
+            this.dictionary.get(key1).delete(key2);
+
+        }, this.dictionary);
+
+    };
+
+    /**
+     * This removes a value associated with the given primary and secondary keys.
+     * @param key1 The first dictionary key.
+     * @param key2 The second dictionary key.
+     * @return The value that was in the dictionary.
+     */
+    p.remove = function (key1, key2) {
+        var value;
+        var d2 = this.dictionary.get(key1);
+        if (d2) {
+            value = d2.get(key2);
+            d2.delete(key2);
+        }
+
+
+        for (var v2 of d2.values())
+            return value;
+
+        // otherwise, remove it
+        this.dictionary.delete(key1);
+
+        return value;
+    };
+
+    weavecore.Dictionary2D = Dictionary2D;
+}());
+
 /**
  * @module weavecore
  */
@@ -7756,471 +8219,16 @@ if (typeof window === 'undefined') {
 
     weavecore.SessionManager = SessionManager;
 
-}());
-
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-/**
- * Facilitates the creation of dynamic trees.
- */
-(function () {
-
-
-    WeaveTreeItem.createItems = function (WeaveTreeItem_implementation, items) {
-        var n = 0;
-        while (n !== items.length) {
-            n = items.length;
-            items = [].concat.apply(null, items);
-        }
-
-        return items.map(WeaveTreeItem._mapItems, WeaveTreeItem_implementation).filter(WeaveTreeItem._filterItemsRemoveNullsAndUndefined);
-
+    // namespace
+    if (typeof window === 'undefined') {
+        this.WeaveAPI = this.WeaveAPI || {};
+        this.WeaveAPI.SessionManager = new SessionManager();
+    } else {
+        window.WeaveAPI = window.WeaveAPI || {};
+        window.WeaveAPI.SessionManager = new SessionManager();
     }
-
-    WeaveTreeItem._mapItems = function (item, i, a) {
-        if (item.constructor === Function) // to identify its a class object
-            return new item();
-        if (item.constructor === String || ((item !== null || item !== undefined) && item.constructor === Object)) {
-            var ItemClass = this || WeaveTreeItem;
-            return new ItemClass(item);
-        }
-        return item;
-
-    }
-
-    WeaveTreeItem._filterItemsRemoveNullsAndUndefined = function (item, i, a) {
-
-        return item !== null && item !== undefined;
-
-    }
-
-    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
-
-    /**
-     * Constructs a new WeaveTreeItem.
-     * @param params An Object containing property values to set on the WeaveTreeItem.
-     *               If params is a String, both <code>label</code> and <code>data</code> will be set to that String.
-     */
-
-    function WeaveTreeItem(params) {
-        //set default values
-        if (params === undefined) params = null;
-        /**
-         * Set this to change the constructor used for initializing child items.
-         * This variable is intentionally uninitialized to avoid overwriting the value set by an extending class in its constructor.
-         */
-        this.childItemClass; // IMPORTANT - no initial value
-        this._recursion = {}; // recursionName -> Boolean
-        this._label = "";
-        this._children = null;
-        this._dependency = null;
-        /**
-         * Cached values that get invalidated when the source triggers callbacks.
-         */
-        this._cache = {};
-
-        /**
-         * Cached values of getCallbackCollection(source).triggerCounter.
-         */
-        this._counter = {};
-
-
-        //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
-
-        /**
-         * This can be set to either a String or a Function.
-         * This property is checked by Flex's default data descriptor.
-         * If this property is not set, the <code>data</code> property will be used as the label.
-         */
-        Object.defineProperty(this, 'label', {
-            get: function () {
-                const id = 'label';
-                if (this.isCached(id))
-                    return this._cache[id];
-
-                var str = this.getString(this._label, id);
-                if (!str && this.data !== null && this.data !== undefined)
-                    str = String(this.data);
-                return this.cache(id, str);
-            },
-            set: function (value) {
-                this._counter['label'] = undefined;
-                this._label = value;
-            }
-        });
-
-
-
-
-        Object.defineProperty(this, 'children', {
-            /**
-             * Gets a filtered copy of the child menu items.
-             * When this property is accessed, refresh() will be called except if refresh() is already being called.
-             * This property is checked by Flex's default data descriptor.
-             */
-            get: function () {
-                const id = 'children';
-
-                var items;
-                if (this.isCached(id))
-                    items = this._cache[id];
-                else
-                    items = this.getObject(this._children, id);
-                if (items) {
-                    // overwrite original array to support filling it asynchronously
-                    var iOut = 0;
-                    for (var i = 0; i < items.length; i++) {
-                        var item = WeaveTreeItem._mapItems.call(this.childItemClass, items[i], i, items);
-                        if (item != null)
-                            items[iOut++] = item;
-                    }
-                }
-
-                return this.cache(id, items);
-            },
-            /**
-             * This can be set to either an Array or a Function that returns an Array.
-             * The function can be like function():void or function(item:WeaveTreeItem):void.
-             * The Array can contain either WeaveTreeItems or Objects, each of which will be passed to the WeaveTreeItem constructor.
-             */
-            set: function (value) {
-                this._counter['children'] = undefined;
-                this._children = value;
-            }
-        });
-
-
-        /**
-         * A pointer to the ILinkableObject that created this node.
-         * This is used to determine when to invalidate cached values.
-         */
-        Object.defineProperty(this, 'dependency', {
-            get: function () {
-                if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency)) {
-                    this.dependency = null;
-                }
-                return this._dependency;
-            },
-            set: function (value) {
-                if (this._dependency != value)
-                    this._counter = {};
-                this._dependency = value;
-            }
-        });
-
-        /**
-         * This can be any data associated with this tree item.
-         */
-        this.data = null;
-
-        if (typeof (params) === 'string') {
-            this.label = params;
-            this.data = params;
-        } else
-            for (var key in params)
-                this[key] = params[key];
-    }
-
-
-
-
-
-
-    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
-    var p = WeaveTreeItem.prototype;
-    /**
-     * Computes a Boolean value from various structures
-     * @param param Either a Boolean, and Object like {not: param}, a Function, an ILinkableVariable, or an Array of those objects.
-     * @param recursionName A name used to keep track of recursion.
-     * @return A Boolean value derived from the param, or the param itself if called recursively.
-     */
-    p.getBoolean = function (param, recursionName) {
-        if (!this._recursion[recursionName]) {
-            try {
-                this._recursion[recursionName] = true;
-
-                if (this.isSimpleObject(param, 'not'))
-                    param = !this.getBoolean(param['not'], "not_" + recursionName);
-                if (this.isSimpleObject(param, 'or'))
-                    param = this.getBoolean(param['or'], "or_" + recursionName);
-                if (typeof (param) === "function")
-                    param = this.evalFunction(param);
-                if (param instanceof weavecore.LinkableVariable)
-                    param = param.getSessionState();
-                if (param instanceof Array) {
-                    var breakValue = recursionName.indexOf("or_") === 0;
-                    for (var param in param) {
-                        param = this.getBoolean(param, "item_" + recursionName);
-                        if (param ? breakValue : !breakValue)
-                            break;
-                    }
-                }
-                param = param ? true : false;
-            } finally {
-                this._recursion[recursionName] = false;
-            }
-        }
-        return param;
-    };
-
-    /**
-     * Checks if an object has a single specified property.
-     */
-    p.isSimpleObject = function (object, singlePropertyName) {
-
-
-        var found = false;
-        for (var key in object) {
-            if (found)
-                return false; // two or more properties
-
-            if (key !== singlePropertyName)
-                return false; // not the desired property
-
-            found = true; // found the desired property
-        }
-        return found;
-    };
-
-    /**
-     * Gets a String value from a String or Function.
-     * @param param Either a String or a Function.
-     * @param recursionName A name used to keep track of recursion.
-     * @return A String value derived from the param, or the param itself if called recursively.
-     */
-    p.getString = function (param, recursionName) {
-        if (!this._recursion[recursionName]) {
-            try {
-                this._recursion[recursionName] = true;
-
-                if (typeof (param) === "function")
-                    param = this.evalFunction(param);
-                else
-                    param = param || '';
-            } finally {
-                this._recursion[recursionName] = false;
-            }
-        }
-        return param;
-    };
-
-    /**
-     * Evaluates a function to get an Object or just returns the non-Function Object passed in.
-     * @param param Either an Object or a Function.
-     * @param recursionName A name used to keep track of recursion.
-     * @return An Object derived from the param, or the param itself if called recursively.
-     */
-    p.getObject = function (param, recursionName) {
-        if (!this._recursion[recursionName]) {
-            try {
-                this._recursion[recursionName] = true;
-
-                if (typeof (param) === "function")
-                    param = this.evalFunction.call(this, param);
-            } finally {
-                this._recursion[recursionName] = false;
-            }
-        }
-        return param;
-    };
-
-    /**
-     * First tries calling a function with no parameters.
-     * If an ArgumentError is thrown, the function will called again, passing this WeaveTreeItem as the first parameter.
-     */
-    p.evalFunction = function (func) {
-        try {
-            try {
-                // first try calling the function with no parameters
-                return func();
-            } catch (e) {
-                //To-Docreate Argument error object
-                // and on each function if the argument is required, and if not passed throw that Argument error object
-                console.log(e);
-                /*if (!(e is ArgumentError))
-				{
-					if (e is Error)
-						trace((e as Error).getStackTrace());
-					throw e;
-				}*/
-            }
-
-            // on ArgumentError, pass in this WeaveTreeItem as the first parameter
-            console.log('executing after ArgumentError');
-            return func(this);
-
-        } catch (e) {
-            console.error(e);
-        }
-
-    };
-
-    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
-
-    /**
-     * Checks if cached value is valid.
-     * Always returns false if the source property is not set.
-     * @param id A string identifying a property.
-     * @return true if the property value has been cached.
-     */
-    p.isCached = function (id) {
-        if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency))
-            source = null;
-        return this._dependency && this._counter[id] === WeaveAPI.SessionManager.getCallbackCollection(this._dependency).triggerCounter;
-    };
-
-    /**
-     * Retrieves or updates a cached value for a property.
-     * Does not cache the value if the source property is not set.
-     * @param id A string identifying a property.
-     * @param newValue Optional new value to cache for the property.
-     * @return The new or existing value for the property.
-     */
-    p.cache = function (id, newValue) {
-        if (arguments.length === 1)
-            return this._cache[id];
-
-        if (this._source && WeaveAPI.SessionManager.objectWasDisposed(this._source))
-            source = null;
-        if (this._source) {
-            this._counter[id] = WeaveAPI.SessionManager.getCallbackCollection(this._source).triggerCounter;
-            this._cache[id] = newValue;
-        }
-        return newValue;
-    };
-
-
-
-
-
-
-    weavecore.WeaveTreeItem = WeaveTreeItem;
 
 }());
-
-/*
-    Weave (Web-based Analysis and Visualization Environment)
-    Copyright (C) 2008-2011 University of Massachusetts Lowell
-
-    This file is a part of Weave.
-
-    Weave is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, Version 3,
-    as published by the Free Software Foundation.
-
-    Weave is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Weave.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-/**
- * This is a wrapper for a 2-dimensional Dictionary.
- *
- * @author adufilie
- * @author sanjay1909
- */
-
-(function () {
-    function Dictionary2D(defaultType) {
-        this.dictionary = new Map();
-        this.defaultType = defaultType;
-    }
-
-    var p = Dictionary2D.prototype;
-
-    /**
-     *
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @return The value in the dictionary.
-     */
-    p.get = function (key1, key2) {
-        var value;
-        var d2 = this.dictionary.get(key1);
-        if (d2)
-            value = d2.get(key2);
-        if (value === undefined && this.defaultType) {
-            value = new this.defaultType();
-            this.set(key1, key2, value);
-        }
-        return value;
-    };
-
-    /**
-     * This will add or replace an entry in the dictionary.
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @param value The value to put into the dictionary.
-     */
-    p.set = function (key1, key2, value) {
-        var d2 = this.dictionary.get(key1);
-        if (d2 === null || d2 === undefined)
-            d2 = new Map();
-        this.dictionary.set(key1, d2);
-        d2.set(key2, value);
-    };
-
-    /**
-     * This removes all values associated with the given primary key.
-     * @param key1 The first dictionary key.
-     */
-    p.removeAllPrimary = function (key1) {
-        this.dictionary.delete(key1);
-    };
-
-    /**
-     * This removes all values associated with the given secondary key.
-     * @param key2 The second dictionary key.
-     */
-    p.removeAllSecondary = function (key2) {
-        this.dictionary.forEach(function (value, key1) {
-            this.dictionary.get(key1).delete(key2);
-
-        }, this.dictionary);
-
-    };
-
-    /**
-     * This removes a value associated with the given primary and secondary keys.
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @return The value that was in the dictionary.
-     */
-    p.remove = function (key1, key2) {
-        var value;
-        var d2 = this.dictionary.get(key1);
-        if (d2) {
-            value = d2.get(key2);
-            d2.delete(key2);
-        }
-
-
-        for (var v2 of d2.values())
-            return value;
-
-        // otherwise, remove it
-        this.dictionary.delete(key1);
-
-        return value;
-    };
-
-    weavecore.Dictionary2D = Dictionary2D;
-}());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -8341,6 +8349,77 @@ WeaveAPI.debugID = function (object) {
     return WeaveAPI.DebugUtils.debugId(object);
 }
 
+/**
+ * @module WeaveAPI
+ */
+
+//namesapce
+if (typeof window === 'undefined') {
+    this.WeaveAPI = this.WeaveAPI || {};
+} else {
+    window.WeaveAPI = window.WeaveAPI || {};
+}
+
+
+
+
+(function () {
+    function Internal() {
+
+    }
+
+    /**
+     * This is a two-dimensional dictionary, where _triggerCounterMap[linkableObject][observer]
+     * equals the previous triggerCounter value from linkableObject observed by the observer.
+     */
+    Object.defineProperty(Internal, '_triggerCounterMap', {
+        value: new Map()
+    });
+
+    /**
+     * This function is used to detect if callbacks of a linkable object were triggered since the last time detectLinkableObjectChange
+     * was called with the same parameters, likely by the observer.  Note that once this function returns true, subsequent calls will
+     * return false until the callbacks are triggered again, unless clearChangedNow is set to false.  It may be a good idea to specify
+     * a private object as the observer so no other code can call detectLinkableObjectChange with the same observer and linkableObject
+     * parameters.
+     * @param observer The object that is observing the change.
+     * @param linkableObject The object that is being observed.
+     * @param clearChangedNow If this is true, the trigger counter will be reset to the current value now so that this function will
+     *        return false if called again with the same parameters before the next time the linkable object triggers its callbacks.
+     * @return A value of true if the callbacks for the linkableObject have triggered since the last time this function was called
+     *         with the same observer and linkableObject parameters.
+     */
+    Internal.detectLinkableObjectChange = function (observer, linkableObject, clearChangedNow) {
+        clearChangedNow = (clearChangedNow === undefined) ? true : clearChangedNow;
+        if (!Internal._triggerCounterMap[linkableObject])
+            Internal._triggerCounterMap[linkableObject] = new Map();
+
+        var previousCount = Internal._triggerCounterMap[linkableObject][observer]; // untyped to handle undefined value
+        var newCount = WeaveAPI.SessionManager.getCallbackCollection(linkableObject).triggerCounter;
+        if (previousCount !== newCount) // !== avoids casting to handle the case (0 !== undefined)
+        {
+            if (clearChangedNow)
+                Internal._triggerCounterMap[linkableObject][observer] = newCount;
+            return true;
+        }
+        return false;
+    }
+
+    window.WeaveAPI.Internal = Internal;
+}());
+
+WeaveAPI.detectLinkableObjectChange = function () {
+    var args = Array.prototype.slice.call(arguments);
+    var observer = args.shift();
+    var linkableObjects = args;
+    var changeDetected = false;
+    // it's important not to short-circuit like a boolean OR (||) because we need to clear the 'changed' flag on each object.
+    linkableObjects.forEach(function (linkableObject) {
+        if (linkableObject && WeaveAPI.Internal.detectLinkableObjectChange(observer, linkableObject, true)) // clear 'changed' flag
+            changeDetected = true;
+    })
+    return changeDetected;
+}
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -10650,9 +10729,8 @@ Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_LOW', {
 });
 
 
-WeaveAPI.SessionManager = new weavecore.SessionManager();
+//WeaveAPI.SessionManager = new weavecore.SessionManager();
 WeaveAPI.globalHashMap = new weavecore.LinkableHashMap();
-
 /**
  * @module weavecore
  */
