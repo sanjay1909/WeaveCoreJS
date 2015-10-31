@@ -648,4 +648,13 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableHashMap = LinkableHashMap;
+
+    // namespace
+    if (typeof window === 'undefined') {
+        this.WeaveAPI = this.WeaveAPI || {};
+        this.WeaveAPI.globalHashMap = new LinkableHashMap();
+    } else {
+        window.WeaveAPI = window.WeaveAPI || {};
+        window.WeaveAPI.globalHashMap = new LinkableHashMap();
+    }
 }());

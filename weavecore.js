@@ -1955,6 +1955,470 @@ if (typeof window === 'undefined') {
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+/**
+ * This provides a set of useful static functions for Object Comparison.
+ * All Static functions are Ported from  Apache Flex mx.utils.ObjectUtil - ActionScript Code
+ * @author sanjay1909
+ */
+(function () {
+    "use strict";
+
+    //constructor
+    function ObjectUtil() {
+        throw "ObjectUtil cannot be instantiated.";
+    }
+
+    /**
+     *  Compares two numeric values.
+     *  @param a First number.
+     *  @param b Second number.
+     *  @return 0 is both numbers are NaN.
+     *  1 if only <code>a</code> is a NaN.
+     *  -1 if only <code>b</code> is a NaN.
+     *  -1 if <code>a</code> is less than <code>b</code>.
+     *  1 if <code>a</code> is greater than <code>b</code>.
+     */
+    ObjectUtil.numericCompare = function (a, b) {
+        if (isNaN(a) && isNaN(b))
+            return 0;
+
+        if (isNaN(a))
+            return 1;
+
+        if (isNaN(b))
+            return -1;
+
+        if (a < b)
+            return -1;
+
+        if (a > b)
+            return 1;
+
+        return 0;
+    };
+
+    /**
+     *  Compares two String values.
+     *  @param a First String value.
+     *  @param b Second String value.
+     *  @param caseInsensitive Specifies to perform a case insensitive compare,
+     *  <code>true</code>, or not, <code>false</code>.
+     *
+     *  @return 0 is both Strings are null.
+     *  1 if only <code>a</code> is null.
+     *  -1 if only <code>b</code> is null.
+     *  -1 if <code>a</code> precedes <code>b</code>.
+     *  1 if <code>b</code> precedes <code>a</code>.
+     */
+    ObjectUtil.stringCompare = function (a, b, caseInsensitive) {
+        if ((a === null || a === undefined) && (b === null || b === undefined))
+            return 0;
+
+        if (a === null || a === undefined)
+            return 1;
+
+        if (b === null || b === undefined)
+            return -1;
+
+        // Convert to lowercase if we are case insensitive.
+        if (caseInsensitive) {
+            a = a.toLocaleLowerCase();
+            b = b.toLocaleLowerCase();
+        }
+
+        var result = a.localeCompare(b);
+
+        if (result < -1)
+            result = -1;
+        else if (result > 1)
+            result = 1;
+
+        return result;
+    };
+
+    /**
+     *  Compares the two Date objects and returns an integer value
+     *  indicating if the first Date object is before, equal to,
+     *  or after the second item.
+     *  @param a Date object.
+     *  @param b Date object.
+     *  @return 0 if <code>a</code> and <code>b</code> are equal
+     *  (or both are <code>null</code>);
+     *  -1 if <code>a</code> is before <code>b</code>
+     *  (or <code>b</code> is <code>null</code>);
+     *  1 if <code>a</code> is after <code>b</code>
+     *  (or <code>a</code> is <code>null</code>);
+     *  0 is both dates getTime's are NaN;
+     *  1 if only <code>a</code> getTime is a NaN;
+     *  -1 if only <code>b</code> getTime is a NaN.
+     */
+    ObjectUtil.dateCompare = function (a, b) {
+        if ((a === null || a === undefined) && (b === null || b === undefined))
+            return 0;
+
+        if (a === null || undefined)
+            return 1;
+
+        if (b === null || undefined)
+            return -1;
+
+        var na = a.getTime();
+        var nb = b.getTime();
+
+        if (na < nb)
+            return -1;
+
+        if (na > nb)
+            return 1;
+
+        if (isNaN(na) && isNaN(nb))
+            return 0;
+
+        if (isNaN(na))
+            return 1;
+
+        if (isNaN(nb))
+            return -1;
+
+        return 0;
+    };
+
+    ObjectUtil.byteArrayCompare = function (a, b) {
+        var result = 0;
+
+        if (a === b)
+            return result;
+
+        if (a.length !== b.length) {
+            if (a.length < b.length)
+                result = -1;
+            else
+                result = 1;
+        } else {
+            for (var i = 0; i < a.length; i++) {
+                result = ObjectUtil.numericCompare(a[i], b[i]);
+                if (result != 0) {
+                    i = a.length;
+                }
+            }
+        }
+        return result;
+    }
+
+
+
+    ObjectUtil.compare = function (a, b, depth) {
+        depth = (depth === undefined) ? -1 : depth;
+        return ObjectUtil.internalCompare(a, b, 0, depth, new Map())
+
+    }
+
+    ObjectUtil.internalCompare = function (a, b, currentDepth, desiredDepth, refs) {
+        if (a === null && b === null)
+            return 0;
+
+        if (a === null)
+            return 1;
+
+        if (b === null)
+            return -1;
+
+
+
+        var typeOfA = typeof (a);
+        var typeOfB = typeof (b);
+
+        var result = 0;
+
+        if (typeOfA === typeOfB) {
+            switch (typeOfA) {
+            case "boolean":
+                {
+                    result = ObjectUtil.numericCompare(Number(a), Number(b));
+                    break;
+                }
+
+            case "number":
+                {
+                    result = ObjectUtil.numericCompare(a, b);
+                    break;
+                }
+
+            case "string":
+                {
+                    result = ObjectUtil.stringCompare(a, b);
+                    break;
+                }
+
+            case "object":
+                {
+                    var newDepth = desiredDepth > 0 ? desiredDepth - 1 : desiredDepth;
+
+                    // refs help us avoid circular reference infinite recursion.
+                    var aRef = ObjectUtil._getRef(a, refs);
+                    var bRef = ObjectUtil._getRef(b, refs);
+
+                    if (aRef === bRef)
+                        return 0;
+                    // the cool thing about our dictionary is that if
+                    // we've seen objects and determined that they are inequal, then
+                    // we would've already exited out of this compare() call.  So the
+                    // only info in the dictionary are sets of equal items
+
+                    // let's first define them as equal
+                    // this stops an "infinite loop" problem where A.i = B and B.i = A
+                    // if we later find that an object (one of the subobjects) is in fact unequal,
+                    // then we will return false and quit out of everything.  These refs are thrown away
+                    // so it doesn't matter if it's correct.
+                    refs.set(bRef, aRef);
+
+                    if (desiredDepth != -1 && (currentDepth > desiredDepth)) {
+                        // once we try to go beyond the desired depth we should
+                        // toString() our way out
+                        result = ObjectUtil.stringCompare(a.toString(), b.toString());
+                    } else if ((a.constructor === Array) && (b.constructor === Array)) {
+                        result = ObjectUtil.arrayCompare(a, b, currentDepth, desiredDepth, refs);
+                    } else if ((a.constructor === Date) && (b.constructor === Date)) {
+                        result = ObjectUtil.dateCompare(a, b);
+                    } else if ((a.constructor === ArrayBuffer) && (b.constructor === ArrayBuffer)) {
+                        result = ObjectUtil.byteArrayCompare(a, b);
+                    } else if (a.constructor.name === b.constructor.name) {
+                        var aProps = Object.getOwnPropertyNames(a);
+                        // now that we know we have the same properties, let's compare the values
+                        var propName;
+                        var aProp;
+                        var bProp;
+                        for (var i = 0; i < aProps.length; i++) {
+                            propName = aProps[i];
+                            aProp = a[propName];
+                            bProp = b[propName];
+                            result = internalCompare(aProp, bProp, currentDepth + 1, newDepth, refs);
+                            if (result !== 0) {
+                                return result;
+                            }
+                        }
+                    } else {
+                        // We must be inequal, so return 1
+                        return 1;
+                    }
+                    break;
+                }
+            }
+        } else // be consistent with the order we return here
+        {
+            return ObjectUtil.stringCompare(typeOfA, typeOfB);
+        }
+        return result;
+
+    }
+
+
+    /**
+     * @private
+     * This is the "find" for our union-find algorithm when doing object searches.
+     * The dictionary keeps track of sets of equal objects
+     */
+    ObjectUtil._getRef = function (o, refs) {
+        var oRef = refs[o];
+        while (oRef && oRef !== refs.get(oRef)) {
+            oRef = refs.get(oRef);
+        }
+        if (!oRef)
+            oRef = o;
+        if (oRef !== refs[o])
+            refs.set(o, oRef);
+
+        return oRef
+    }
+
+    weavecore.ObjectUtil = ObjectUtil;
+
+}());
+
+/**
+ * @module weavecore
+ */
+
+//namesapce
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+(function () {
+
+    // constructor:
+    /**
+     * This is an empty interface used to identify a compiled object type.
+     *
+     * @author adufilie
+     * @author sanjay1909
+     */
+    function ICompiledObject() {
+
+    }
+
+    weavecore.ICompiledObject = ICompiledObject;
+
+}());
+
+// namespace
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+(function () {
+    /**
+     * This serves as a wrapper for a constant value to remember that it was compiled.
+     * This is used in the Compiler class to avoid parsing tokens multiple times.
+     * To avoid function call overhead, no public functions are defined in this class.
+     *
+     * @author adufilie
+     * @author sanjay1909
+     */
+    function CompiledConstant(name, value) {
+
+        this.name = name;
+        this.value = value;
+
+    }
+
+    CompiledConstant.prototype = new weavecore.ICompiledObject();
+    CompiledConstant.prototype.constructor = CompiledConstant;
+
+    weavecore.CompiledConstant = CompiledConstant;
+
+}());
+
+// namespace
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+(function () {
+    /**
+     * This serves as a structure for storing the information required to make a function call.
+     * This is used in the Compiler class to avoid parsing tokens multiple times.
+     * To avoid function call overhead, no public functions are not defined in this class.
+     *
+     * @author adufilie
+     * @author sanjay1909
+     */
+    function CompiledFunctionCall(compiledMethod, compiledParams) {
+        /**
+         * This is a compiled object that evaluates to a method.
+         */
+        this.compiledMethod = compiledMethod;
+        /**
+         * This is an Array of CompiledObjects that must be evaluated before calling the method.
+         */
+        this.compiledParams = compiledParams;
+
+
+
+        if (!compiledMethod)
+            throw new Error("compiledMethod cannot be null");
+
+        if (compiledParams) {
+            compiledParams.forEach(function (param) {
+                if (param === null)
+                    throw new Error("compiledParams cannot contain nulls");
+            });
+        }
+
+
+
+
+        /**
+         * This is used to keep track of which compiled parameter is currently being evaluated.
+         */
+        this.evalIndex;
+        /**
+         * When the function is called as a property of an object, this will store a pointer to the object
+         * so that it can be used as the 'this' parameter in Function.apply().
+         */
+        this.evaluatedHost;
+        /**
+         * When the function is called as a property of an object, this will store the property name in case the host is a Proxy object.
+         */
+        this.evaluatedMethodName;
+        /**
+         * This is used to store the result of evaluating the compiledMethod before evaluating the parameters.
+         */
+        this.evaluatedMethod;
+        /**
+         * This is an Array of constants to use as parameters to the method.
+         * This Array is used to store the results of evaluating the compiledParams Array before calling the method.
+         */
+        this.evaluatedParams;
+        /**
+         * An optional set of original tokens to use in place of this CompiledFunctionCall when decompiling.
+         */
+        this.originalTokens;
+
+        this.evaluateConstants();
+    }
+
+    CompiledFunctionCall._clone = function (obj, i, a) {
+        i = (i === undefined) ? -1 : i;
+        a = (a === undefined) ? null : a;
+        var cfc = obj;
+        if (cfc)
+            return new weavecore.CompiledFunctionCall(CompiledFunctionCall._clone(cfc.compiledMethod), cfc.compiledParams && cfc.compiledParams.map(_clone));
+        return obj;
+    }
+
+    CompiledFunctionCall.prototype = new weavecore.ICompiledObject();
+    CompiledFunctionCall.prototype.constructor = CompiledFunctionCall;
+
+    var p = CompiledFunctionCall.prototype;
+
+    p.evaluateConstants = function () {
+        // if name is constant, evaluate it once now
+        if (this.compiledMethod instanceof weavecore.CompiledConstant)
+            this.evaluatedMethod = (this.compiledMethod).value;
+        else
+            this.evaluatedMethod = null;
+
+        if (this.compiledParams) {
+            if (!this.evaluatedParams) {
+                this.evaluatedParams = [];
+                this.evaluatedParams.length = this.compiledParams.length;
+            } else
+                this.evaluatedParams.length = this.compiledParams.length;
+
+            // move constant values from the compiledParams array to the evaluatedParams array.
+            for (var i = 0; i < this.compiledParams.length; i++)
+                if (this.compiledParams[i] instanceof weavecore.CompiledConstant)
+                    this.evaluatedParams[i] = (this.compiledParams[i]).value;
+        } else {
+            this.evaluatedParams = null;
+        }
+    }
+
+    /**
+     * Makes a deep copy of this and any nested CompiledFunctionCall objects suitable for recursive function execution.
+     */
+    p.clone = function () {
+        return CompiledFunctionCall._clone(this);
+    }
+
+    weavecore.CompiledFunctionCall = CompiledFunctionCall;
+
+}());
+
+// namespace
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
     this.trace = function (msg) {
         console.log(msg);
     }
@@ -4999,293 +5463,37 @@ if (typeof window === 'undefined') {
     weavecore.Compiler = Compiler;
 }());
 
-// namespace
+createjs.Ticker.setFPS(50);
+//createjs.Ticker.
+
+// constructor:
+
 if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
+    this.WeaveAPI = this.WeaveAPI || {};
 } else {
-    window.weavecore = window.weavecore || {};
+    window.WeaveAPI = window.WeaveAPI || {};
 }
 
-/**
- * This provides a set of useful static functions for Object Comparison.
- * All Static functions are Ported from  Apache Flex mx.utils.ObjectUtil - ActionScript Code
- * @author sanjay1909
- */
-(function () {
-    "use strict";
 
-    //constructor
-    function ObjectUtil() {
-        throw "ObjectUtil cannot be instantiated.";
-    }
+Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_IMMEDIATE', {
+    value: 0
+});
 
-    /**
-     *  Compares two numeric values.
-     *  @param a First number.
-     *  @param b Second number.
-     *  @return 0 is both numbers are NaN.
-     *  1 if only <code>a</code> is a NaN.
-     *  -1 if only <code>b</code> is a NaN.
-     *  -1 if <code>a</code> is less than <code>b</code>.
-     *  1 if <code>a</code> is greater than <code>b</code>.
-     */
-    ObjectUtil.numericCompare = function (a, b) {
-        if (isNaN(a) && isNaN(b))
-            return 0;
+Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_HIGH', {
+    value: 1
+});
 
-        if (isNaN(a))
-            return 1;
+Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_NORMAL', {
+    value: 2
+});
 
-        if (isNaN(b))
-            return -1;
-
-        if (a < b)
-            return -1;
-
-        if (a > b)
-            return 1;
-
-        return 0;
-    };
-
-    /**
-     *  Compares two String values.
-     *  @param a First String value.
-     *  @param b Second String value.
-     *  @param caseInsensitive Specifies to perform a case insensitive compare,
-     *  <code>true</code>, or not, <code>false</code>.
-     *
-     *  @return 0 is both Strings are null.
-     *  1 if only <code>a</code> is null.
-     *  -1 if only <code>b</code> is null.
-     *  -1 if <code>a</code> precedes <code>b</code>.
-     *  1 if <code>b</code> precedes <code>a</code>.
-     */
-    ObjectUtil.stringCompare = function (a, b, caseInsensitive) {
-        if ((a === null || a === undefined) && (b === null || b === undefined))
-            return 0;
-
-        if (a === null || a === undefined)
-            return 1;
-
-        if (b === null || b === undefined)
-            return -1;
-
-        // Convert to lowercase if we are case insensitive.
-        if (caseInsensitive) {
-            a = a.toLocaleLowerCase();
-            b = b.toLocaleLowerCase();
-        }
-
-        var result = a.localeCompare(b);
-
-        if (result < -1)
-            result = -1;
-        else if (result > 1)
-            result = 1;
-
-        return result;
-    };
-
-    /**
-     *  Compares the two Date objects and returns an integer value
-     *  indicating if the first Date object is before, equal to,
-     *  or after the second item.
-     *  @param a Date object.
-     *  @param b Date object.
-     *  @return 0 if <code>a</code> and <code>b</code> are equal
-     *  (or both are <code>null</code>);
-     *  -1 if <code>a</code> is before <code>b</code>
-     *  (or <code>b</code> is <code>null</code>);
-     *  1 if <code>a</code> is after <code>b</code>
-     *  (or <code>a</code> is <code>null</code>);
-     *  0 is both dates getTime's are NaN;
-     *  1 if only <code>a</code> getTime is a NaN;
-     *  -1 if only <code>b</code> getTime is a NaN.
-     */
-    ObjectUtil.dateCompare = function (a, b) {
-        if ((a === null || a === undefined) && (b === null || b === undefined))
-            return 0;
-
-        if (a === null || undefined)
-            return 1;
-
-        if (b === null || undefined)
-            return -1;
-
-        var na = a.getTime();
-        var nb = b.getTime();
-
-        if (na < nb)
-            return -1;
-
-        if (na > nb)
-            return 1;
-
-        if (isNaN(na) && isNaN(nb))
-            return 0;
-
-        if (isNaN(na))
-            return 1;
-
-        if (isNaN(nb))
-            return -1;
-
-        return 0;
-    };
-
-    ObjectUtil.byteArrayCompare = function (a, b) {
-        var result = 0;
-
-        if (a === b)
-            return result;
-
-        if (a.length !== b.length) {
-            if (a.length < b.length)
-                result = -1;
-            else
-                result = 1;
-        } else {
-            for (var i = 0; i < a.length; i++) {
-                result = ObjectUtil.numericCompare(a[i], b[i]);
-                if (result != 0) {
-                    i = a.length;
-                }
-            }
-        }
-        return result;
-    }
+Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_LOW', {
+    value: 3
+});
 
 
-
-    ObjectUtil.compare = function (a, b, depth) {
-        depth = (depth === undefined) ? -1 : depth;
-        return ObjectUtil.internalCompare(a, b, 0, depth, new Map())
-
-    }
-
-    ObjectUtil.internalCompare = function (a, b, currentDepth, desiredDepth, refs) {
-        if (a === null && b === null)
-            return 0;
-
-        if (a === null)
-            return 1;
-
-        if (b === null)
-            return -1;
-
-
-
-        var typeOfA = typeof (a);
-        var typeOfB = typeof (b);
-
-        var result = 0;
-
-        if (typeOfA === typeOfB) {
-            switch (typeOfA) {
-            case "boolean":
-                {
-                    result = ObjectUtil.numericCompare(Number(a), Number(b));
-                    break;
-                }
-
-            case "number":
-                {
-                    result = ObjectUtil.numericCompare(a, b);
-                    break;
-                }
-
-            case "string":
-                {
-                    result = ObjectUtil.stringCompare(a, b);
-                    break;
-                }
-
-            case "object":
-                {
-                    var newDepth = desiredDepth > 0 ? desiredDepth - 1 : desiredDepth;
-
-                    // refs help us avoid circular reference infinite recursion.
-                    var aRef = ObjectUtil._getRef(a, refs);
-                    var bRef = ObjectUtil._getRef(b, refs);
-
-                    if (aRef === bRef)
-                        return 0;
-                    // the cool thing about our dictionary is that if
-                    // we've seen objects and determined that they are inequal, then
-                    // we would've already exited out of this compare() call.  So the
-                    // only info in the dictionary are sets of equal items
-
-                    // let's first define them as equal
-                    // this stops an "infinite loop" problem where A.i = B and B.i = A
-                    // if we later find that an object (one of the subobjects) is in fact unequal,
-                    // then we will return false and quit out of everything.  These refs are thrown away
-                    // so it doesn't matter if it's correct.
-                    refs.set(bRef, aRef);
-
-                    if (desiredDepth != -1 && (currentDepth > desiredDepth)) {
-                        // once we try to go beyond the desired depth we should
-                        // toString() our way out
-                        result = ObjectUtil.stringCompare(a.toString(), b.toString());
-                    } else if ((a.constructor === Array) && (b.constructor === Array)) {
-                        result = ObjectUtil.arrayCompare(a, b, currentDepth, desiredDepth, refs);
-                    } else if ((a.constructor === Date) && (b.constructor === Date)) {
-                        result = ObjectUtil.dateCompare(a, b);
-                    } else if ((a.constructor === ArrayBuffer) && (b.constructor === ArrayBuffer)) {
-                        result = ObjectUtil.byteArrayCompare(a, b);
-                    } else if (a.constructor.name === b.constructor.name) {
-                        var aProps = Object.getOwnPropertyNames(a);
-                        // now that we know we have the same properties, let's compare the values
-                        var propName;
-                        var aProp;
-                        var bProp;
-                        for (var i = 0; i < aProps.length; i++) {
-                            propName = aProps[i];
-                            aProp = a[propName];
-                            bProp = b[propName];
-                            result = internalCompare(aProp, bProp, currentDepth + 1, newDepth, refs);
-                            if (result !== 0) {
-                                return result;
-                            }
-                        }
-                    } else {
-                        // We must be inequal, so return 1
-                        return 1;
-                    }
-                    break;
-                }
-            }
-        } else // be consistent with the order we return here
-        {
-            return ObjectUtil.stringCompare(typeOfA, typeOfB);
-        }
-        return result;
-
-    }
-
-
-    /**
-     * @private
-     * This is the "find" for our union-find algorithm when doing object searches.
-     * The dictionary keeps track of sets of equal objects
-     */
-    ObjectUtil._getRef = function (o, refs) {
-        var oRef = refs[o];
-        while (oRef && oRef !== refs.get(oRef)) {
-            oRef = refs.get(oRef);
-        }
-        if (!oRef)
-            oRef = o;
-        if (oRef !== refs[o])
-            refs.set(o, oRef);
-
-        return oRef
-    }
-
-    weavecore.ObjectUtil = ObjectUtil;
-
-}());
-
+//WeaveAPI.SessionManager = new weavecore.SessionManager();
+//WeaveAPI.globalHashMap = new weavecore.LinkableHashMap();
 /**
  * @module weavecore
  */
@@ -8290,6 +8498,608 @@ if (typeof window === 'undefined') {
     window.weavecore = window.weavecore || {};
 }
 
+
+(function () {
+
+    URLRequestUtils.debug = false;
+    URLRequestUtils.delayResults = false; // when true, delays result/fault handling and fills the 'delayed' Array.
+
+    // array of objects with properties:  label:String, resume:Function
+    Object.defineProperty(URLRequestUtils, 'delayed', {
+        value: []
+    });
+
+
+    Object.defineProperty(URLRequestUtils, 'DATA_FORMAT_TEXT', {
+        value: 'text'
+    });
+
+    Object.defineProperty(URLRequestUtils, 'DATA_FORMAT_BINARY', {
+        value: 'binary'
+    });
+    Object.defineProperty(URLRequestUtils, 'DATA_FORMAT_VARIABLES', {
+        value: 'variables'
+    });
+
+    Object.defineProperty(URLRequestUtils, 'LOCAL_FILE_URL_SCHEME', {
+        value: 'local://'
+    });
+
+
+
+
+    function URLRequestUtils(defaultValue, taskDescription) {
+        /**
+         * A mapping of URL Strings to CustomXMLHttpRequest.
+         * This mapping is necessary for cached requests to return the active request.
+         */
+        Object.defineProperty(this, '_requestURLToLoader', {
+            value: {}
+        });
+
+        this._localFiles = {};
+        this._baseURL;
+
+    }
+
+    var p = URLRequestUtils.prototype;
+
+    /**
+     * This will set the base URL for use with relative URL requests.
+     */
+    p.setBaseURL = function (baseURL) {
+        // only set baseURL if there is a ':' before first '/'
+        if (baseURL.split('/')[0].indexOf(':') >= 0) {
+            // remove '?' and everything after
+            this._baseURL = baseURL.split('?')[0];
+        }
+    }
+
+
+    function addBaseURL(url) {
+        if (this._baseURL)
+            url = weavecore.URLUtil.getFullURL(this._baseURL, url);
+    }
+
+
+
+    p.getPromise = function (relevantContext, url, data, method, requestHeaders, dataFormat, allowMultipleEvents) {
+
+        allowMultipleEvents = allowMultipleEvents === undefined ? false : allowMultipleEvents;
+
+        var client;
+
+        if (url.indexOf(URLRequestUtils.LOCAL_FILE_URL_SCHEME) === 0) {
+            var fileName = url.substr(URLRequestUtils.LOCAL_FILE_URL_SCHEME.length);
+            // If it's a local file, we still need to create a promise.
+            // CustomURLLoader doesn't load if the last parameter to the constructor is false.
+            if (allowMultipleEvents)
+                client = this._requestURLToLoader[url];
+            if (!client) {
+                client = new weavecore.CustomClient(url, data, method, requestHeaders, dataFormat, false);
+                if (allowMultipleEvents)
+                    this._requestURLToLoader[url] = client;
+            }
+            client.promise.addRelevantContext(relevantContext);
+            if (this._localFiles.hasOwnProperty(fileName)) {
+                WeaveAPI.StageUtils.callLater(relevantContext, client.applyResult.bind(client), [this._localFiles[fileName]]);
+            } else {
+                fault = "Error: Missing local file: " + fileName;
+                WeaveAPI.StageUtils.callLater(relevantContext, client.applyFault.bind(client), [fault]);
+            }
+
+            return client.promise;
+
+        }
+
+        addBaseURL.call(this, url);
+
+        // attempt to load crossdomain.xml from same folder as file
+        //Security.loadPolicyFile(URLUtil.getFullURL(request.url, 'crossdomain.xml'));
+
+        try {
+            client = new weavecore.CustomClient(url, data, method, requestHeaders, dataFormat, true);
+        } catch (e) {
+            // When an error occurs, we need to run the asyncFaultHandler later
+            // and return a new URLLoader. CustomURLLoader doesn't load if the
+            // last parameter to the constructor is false.
+            client = new weavecore.CustomClient(url, data, method, requestHeaders, dataFormat, false);
+
+            WeaveAPI.StageUtils.callLater(relevantContext, client.applyFault.bind(client), [e]);
+        }
+
+        client.promise.addRelevantContext(relevantContext);
+
+        return client.promise;
+
+
+
+    }
+
+
+    weavecore.URLRequestUtils = URLRequestUtils;
+    WeaveAPI.URLRequestUtils = new URLRequestUtils();
+
+
+
+
+
+
+}());
+
+(function () {
+    /**
+     * Lookup for hosts that previously failed due to crossdomain.xml security error
+     */
+    Object.defineProperty(CustomClient, '_failedHosts', {
+        value: {} // host -> true
+    });
+
+    /**
+     * Maps a status code to a description.
+     */
+    Object.defineProperty(CustomClient, 'HTTP_STATUS_CODES', {
+        value: {
+            "100": "Continue",
+            "101": "Switching Protocol",
+            "200": "OK",
+            "201": "Created",
+            "202": "Accepted",
+            "203": "Non-Authoritative Information",
+            "204": "No Content",
+            "205": "Reset Content",
+            "206": "Partial Content",
+            "300": "Multiple Choice",
+            "301": "Moved Permanently",
+            "302": "Found",
+            "303": "See Other",
+            "304": "Not Modified",
+            "305": "Use Proxy",
+            "306": "unused",
+            "307": "Temporary Redirect",
+            "308": "Permanent Redirect",
+            "400": "Bad Request",
+            "401": "Unauthorized",
+            "402": "Payment Required",
+            "403": "Forbidden",
+            "404": "Not Found",
+            "405": "Method Not Allowed",
+            "406": "Not Acceptable",
+            "407": "Proxy Authentication Required",
+            "408": "Request Timeout",
+            "409": "Conflict",
+            "410": "Gone",
+            "411": "Length Required",
+            "412": "Precondition Failed",
+            "413": "Request Entity Too Large",
+            "414": "Request-URI Too Long",
+            "415": "Unsupported Media Type",
+            "416": "Requested Range Not Satisfiable",
+            "417": "Expectation Failed",
+            "500": "Internal Server Error",
+            "501": "Not Implemented",
+            "502": "Bad Gateway",
+            "503": "Service Unavailable",
+            "504": "Gateway Timeout",
+            "505": "HTTP Version Not Supported"
+        }
+    });
+
+    function CustomClient(url, data, method, requestHeaders, dataFormat, loadNow) {
+
+        method = method === null ? 'GET' : method;
+        this._label;
+        this._customPromise;
+        this._isClosed = false;
+        this._url = url;
+        this._method = method;
+        this._requestHeaders = requestHeaders;
+        this.data = data;
+
+        //XMLHttpRequest is a host object(DOM objects) so we cant extend using prototype
+        Object.defineProperty(this, 'client', {
+            value: new XMLHttpRequest()
+        })
+
+        //var ie9_XHR = window.XDomainRequest;
+        //var XHR = ie9_XHR || XMLHttpRequest;
+        //XHR.call(this);
+
+        this._resumeFunc = null;
+        this._resumeParam = null;
+
+
+        this._resolve;
+        this._reject;
+        this._customPromise = new weavecore.CustomPromise(this, function (_resolve, _reject) {
+            this._resolve = _resolve;
+            this._reject = _reject;
+        }.bind(this));
+        /**
+         * This is the promise that keeps track of repsonders.
+         */
+        Object.defineProperty(this, 'promise', {
+            get: function () {
+                return this._customPromise
+            }
+        });
+
+        /**
+         * list of function gets executed for promise then
+         */
+        Object.defineProperty(this, 'responders', {
+            value: []
+        });
+
+        /**
+         * This is the URLRequest that was passed to load().
+         */
+        Object.defineProperty(this, 'url', {
+            get: function () {
+                return this._url
+            }
+        });
+
+
+        /**
+         * Gets the open or closed status of the URLLoader.
+         */
+        Object.defineProperty(this, 'isClosed', {
+            get: function () {
+                return this._isClosed
+            }
+        });
+
+
+        if (loadNow) {
+            if (weavecore.URLRequestUtils.delayResults) {
+                label = url;
+                //to-do : change to binary data temporary solution JSON string
+                try {
+                    var stringData = JSON.stringify(data);
+                    label += ' ' + stringData.split('\n').join(' ');
+                } catch (e) {}
+                console.log('requested ' + label);
+                URLRequestUtils.delayed.push({
+                    "label": label,
+                    "resume": resume
+                });
+            }
+
+            /*if (CustomClient._failedHosts[getHost()]) {
+                // don't bother trying a URLLoader with the same host that previously failed due to a security error
+                ExternalDownloader.download(_urlRequest, dataFormat, _asyncToken);
+                return;
+            }*/
+
+            for (var name in requestHeaders)
+                this.client.setRequestHeader(name, requestHeaders[name], false);
+
+            this.client.responseType = "blob";
+
+            var done = false;
+            var customClient = this;
+            this.client.onload = function (event) {
+                Blob_to_b64(customClient.client.response, function (b64) {
+                    callback.call(customClient, customClient.client.status, b64);
+                    done = true;
+                });
+            };
+            this.client.onerror = function (event) {
+                if (!done)
+                    callback.call(customClient, customClient.client.status, null);
+                done = true;
+            };
+            this.client.onreadystatechange = function () {
+                if (customClient.client.readyState == 4 && customClient.client.status != 200) {
+                    setTimeout(
+                        function () {
+                            if (!done)
+                                callback.call(customClient, customClient.client.status, null);
+                            done = true;
+                        },
+                        1000
+                    );
+                }
+            };
+
+
+
+
+            if (weavecore.URLRequestUtils.debug)
+                console.log(this, 'request', url);
+
+            this.client.open(method, url, true);
+            var data = null;
+            if (method == "POST" && base64data) {
+                data = weave.b64_to_ArrayBuffer(base64data);
+                this.client.send(data);
+            } else {
+                this.client.send();
+            }
+
+
+        }
+
+        this.promise.internal.then(function (response) {
+            handleGetResult.call(this, response);
+        }.bind(this), function (response) {
+            handleGetError.call(response);
+        }.bind(this))
+    }
+
+    function decodeResponse(response) {
+        var dataView = new DataView(response);
+        // The TextDecoder interface is documented at http://encoding.spec.whatwg.org/#interface-textdecoder
+        var decoder = new TextDecoder('utf-8');
+        return decoder.decode(dataView);
+    }
+
+    function ab2str(buf) {
+        return String.fromCharCode.apply(null, new Uint16Array(buf));
+    }
+
+    function callback(status, base64data) {
+        var result;
+        if (base64data) {
+            var bytes = b64_to_ArrayBuffer(base64data);
+            result = decodeResponse(bytes);
+
+        }
+        if (status === 200) {
+            this._resolve(result);
+        } else {
+            var faultCode = null;
+            if (CustomClient.HTTP_STATUS_CODES[status])
+                faultCode = status + " " + CustomClient.HTTP_STATUS_CODES[status];
+            else if (status)
+                faultCode = "" + status;
+            else
+                faultCode = "Error";
+            this._reject(faultCode);
+        }
+    }
+
+    function b64_to_ArrayBuffer(base64data) {
+        var byteCharacters = atob(base64data);
+        var myArray = new ArrayBuffer(byteCharacters.length);
+        var longInt8View = new Uint8Array(myArray);
+        for (var i = 0; i < byteCharacters.length; i++)
+            longInt8View[i] = byteCharacters.charCodeAt(i);
+        return myArray;
+    };
+
+    function Blob_to_b64(blob, callback) {
+        var reader = new FileReader();
+        reader.onloadend = function (event) {
+            var dataurl = reader.result;
+            var base64data = dataurl.split(',').pop();
+            callback(base64data);
+        };
+        reader.onerror = function (event) {
+            callback(null);
+        };
+        reader.readAsDataURL(blob);
+    };
+
+
+
+    function loadLater() {
+        if (!this._isClosed) {
+            this.open(this._method, this.url, true);
+            this.send();
+        }
+
+    }
+
+    function getHost() {
+        var start = this.url.indexOf("/") + 2;
+        var length = this.url.indexOf("/", start);
+        var host = this.url.substr(0, length);
+        return host;
+    }
+
+    var p = CustomClient.prototype;
+
+    p.close = function () {
+        WeaveAPI.ProgressIndicator.removeTask(this._customPromise);
+        if (weavecore.URLRequestUtils.debug)
+            console.log(this, 'cancel', this._url);
+        this._isClosed = true;
+        try {
+            this.client.abort();
+        } catch (e) {
+
+        } // ignore close() errors
+    }
+
+    /**
+     * This provides a convenient way for adding result/fault handlers.
+     * @param responder
+     */
+    p.addResponder = function (responder) {
+        this.promise.responders.push(responder);
+    }
+
+    /**
+     * This provides a convenient way to remove a URLRequestToken as a responder.
+     * @param responder
+     */
+    p.removeResponder = function (responder) {
+        var responders = this.promise.responders;
+        var index = responders.indexOf(responder);
+        if (index >= 0) {
+            // URLRequestToken found -- remove it
+            responders.splice(index, 1);
+            /*// see if there are any more URLRequestTokens
+            for (var i = 0; i < responders.length; i++) {
+                if (obj.isCustomResponder)
+                    return;
+            }*/
+
+            // no more CustomAsyncResponders found, so cancel
+            this.close();
+        }
+    }
+
+
+    /**
+     * When URLRequestUtils.delayResults is set to true, this function will resume
+     * @return true
+     */
+    p.resume = function () {
+        if (this._resumeFunc === null) {
+            this._resumeFunc = resume; // this cancels the pending delay behavior
+        } else if (this._resumeFunc !== resume) {
+            this._resumeFunc(this._resumeParam);
+        }
+    }
+
+    function handleGetResult(response) {
+        if (weavecore.URLRequestUtils.debug)
+            console.log(this, 'complete', this.url);
+        if (weavecore.URLRequestUtils.delayResults && this._resumeFunc == null) {
+            this._resumeFunc = handleGetResult;
+            this._resumeParam = response;
+            return;
+        }
+
+        // broadcast result to responders
+        WeaveAPI.StageUtils.callLater(null, this.applyResult.bind(this), [response]);
+
+    }
+
+    /**
+     * This function gets called when a URLLoader generated by getURL() dispatches an IOErrorEvent.
+     * @param event The ErrorEvent from a URLLoader.
+     */
+    function handleGetError(fault) {
+        if (weavecore.URLRequestUtils.debug)
+            console.log(this, 'error', this.url);
+        if (weavecore.URLRequestUtils.delayResults && this._resumeFunc == null) {
+            this._resumeFunc = handleGetError;
+            this._resumeParam = fault;
+            return;
+        }
+
+        // broadcast fault to responders
+
+        fault = fault ? fault : "Request cancelled";
+
+        applyFault(fault);
+        this._isClosed = true;
+    }
+
+    p.applyResult = function (data) {
+        if (this.data !== data)
+            this.data = data;
+        this.promise.applyResult(data);
+    }
+
+    p.applyFault = function (fault) {
+        this.promise.applyFault(fault);
+    }
+
+
+
+    weavecore.CustomClient = CustomClient;
+
+}());
+
+(function () {
+    function CustomPromise(client, executor) {
+        /*if (window.Promise) {
+            try {
+                window.Promise.call(this, executor);
+            } catch (e) {
+                console.error(e);
+            }
+
+        } else {
+            console.warn("Promise Object Prototype not Found");
+            return;
+        }*/
+
+        Object.defineProperty(this, 'internal', {
+            value: new Promise(executor)
+        });
+
+        this._client = client;
+        this._relevantContexts = [];
+
+        Object.defineProperty(this, 'responders', {
+            value: []
+        });
+
+        Object.defineProperty(this, 'client', {
+            get: function () {
+                return this._client
+            }
+        });
+
+        this.addResponder({
+            result: firstResponder.bind(this),
+            fault: firstResponder.bind(this),
+            token: null
+        });
+
+    }
+
+    var p = CustomPromise.prototype;
+
+    //responder {result:Function, fault:Function, token:Object}
+    p.addResponder = function (responder) {
+        this.responders.push(responder);
+    }
+
+    /**
+     * Adds a context in which this AsyncToken is relevant.
+     * If all contexts are disposed, this AsyncToken will not broadcast a ResultEvent or FaultEvent.
+     */
+    p.addRelevantContext = function (context) {
+        var desc = "URL request";
+        if (this.client)
+            desc += ": " + this.client.url;
+        WeaveAPI.ProgressIndicator.addTask(this, context, desc);
+        this._relevantContexts.push(context);
+    }
+
+    p.applyResult = function (response) {
+        for (var i = 0; i < this.responders.length; i++) {
+            this.responders[i].result(response, this.responders[i].token);
+        }
+
+    }
+
+    p.applyFault = function (response) {
+        for (var i = 0; i < this.responders.length; i++) {
+            this.responders[i].fault(response, this.responders[i].token);
+        }
+    }
+
+    function contextDisposed(context, i, a) {
+        return WeaveAPI.SessionManager.objectWasDisposed(context);
+    }
+
+    function firstResponder(response, token) {
+        WeaveAPI.ProgressIndicator.removeTask(this);
+        // if there are contexts and none are relevant, don't call responders
+        if (this._relevantContexts.length && this._relevantContexts.every(contextDisposed))
+            this._responders.length = 0;
+    }
+
+    weavecore.CustomPromise = CustomPromise;
+
+}());
+
+if (typeof window === 'undefined') {
+    this.WeaveAPI = this.WeaveAPI || {};
+    this.weavecore = this.weavecore || {};
+} else {
+    window.WeaveAPI = window.WeaveAPI || {};
+    window.weavecore = window.weavecore || {};
+}
+
 (function () {
 
     function DebugUtils() {
@@ -8332,6 +9142,520 @@ if (typeof window === 'undefined') {
     WeaveAPI.DebugUtils = new DebugUtils();
 
 }());
+
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+
+
+
+/**
+ * Asynchronous merge sort.
+ *
+ * @author adufilie
+ * @author sanjay1909
+ */
+(function () {
+
+    /**
+     * temporary solution to save the namespace for this class/prototype
+     * @public
+     * @property NS
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(AsyncSort, 'NS', {
+        value: 'weavecore'
+    });
+
+    /**
+     * temporary solution to save the className for this class/prototype
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(AsyncSort, 'CLASS_NAME', {
+        value: 'AsyncSort'
+    });
+
+    /**
+     * TO-DO:temporary solution for checking class in sessionable
+     * @static
+     * @public
+     * @property SESSIONABLE
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(AsyncSort, 'SESSIONABLE', {
+        value: true
+    });
+
+
+    Object.defineProperty(AsyncSort, 'ARRAY_NUMERIC', {
+        value: 16
+    });
+
+    Object.defineProperty(AsyncSort, 'ARRAY_CASESENSITIVE', {
+        value: 1
+    });
+
+    AsyncSort.debug = false;
+    AsyncSort._immediateSorter;
+    AsyncSort.sortImmediately = function (array, compareFunction) {
+        compareFunction = (compareFunction === undefined) ? null : compareFunction;
+        if (!AsyncSort._immediateSorter) {
+            AsyncSort._immediateSorter = new weavecore.AsyncSort();
+            AsyncSort._immediateSorter._immediately = true;
+        }
+
+        // temporarily set AsyncSort._immediateSorter to null in case sortImmediately is called recursively.
+        var sorter = AsyncSort._immediateSorter;
+        AsyncSort._immediateSorter = null;
+
+        sorter.beginSort(array, compareFunction);
+
+        AsyncSort._immediateSorter = sorter;
+
+    }
+
+    /**
+     * This function is a wrapper for ObjectUtil.stringCompare(a, b, true) (case-insensitive String compare).
+     */
+    AsyncSort.compareCaseInsensitive = function (a, b) {
+        return weavecore.ObjectUtil.stringCompare(a, b, true);
+
+    }
+
+    /**
+     * Compares two primitive values.
+     * This function is faster than ObjectUtil.compare(), but does not do deep object compare.
+     */
+    AsyncSort.primitiveCompare = function (a, b) {
+        if (a === b)
+            return 0;
+        if (a === null || a === undefined)
+            return 1;
+        if (b === null || b === undefined)
+            return -1;
+        var typeA = typeof (a);
+        var typeB = typeof (b);
+        if (typeA !== typeB)
+            return weavecore.ObjectUtil.stringCompare(typeA, typeB);
+        if (typeA === 'boolean')
+            return weavecore.ObjectUtil.numericCompare(Number(a), Number(b));
+        if (typeA === 'number')
+            return weavecore.ObjectUtil.numericCompare(a, b);
+        if (typeA === 'string')
+            return weavecore.ObjectUtil.stringCompare(a, b);
+        if (a instanceof Date && b instanceof Date)
+            return weavecore.ObjectUtil.dateCompare(a, b);
+        return 1; // not equal
+    }
+
+
+    function AsyncSort() {
+
+        this._original; // original array
+        this._source; // contains sub-arrays currently being merged
+        this._destination; // buffer to store merged sub-arrays
+        this._compare; // compares two array items
+        this._length; // length of original array
+        this._subArraySize; // size of sub-array
+        this._middle; // end of left and start of right sub-array
+        this._end; // end of right sub-array
+        this._iLeft; // left sub-array source index
+        this._iRight; // right sub-array source index
+        this._iMerged; // merged destination index
+        this._elapsed; // keeps track of elapsed time inside iterate()
+        this._immediately = false; // set in sortImmediately(), checked in beginSort()
+
+        Object.defineProperty(this, 'result', {
+            get: function () {
+                return this._source ? null : this._original;
+            }
+        });
+
+    }
+
+
+
+    AsyncSort.prototype = new weavecore.ILinkableObject();
+    AsyncSort.prototype.constructor = AsyncSort;
+
+    // Prototypes
+    var p = AsyncSort.prototype;
+
+    /**
+     * This will begin an asynchronous sorting operation on the specified Array (or Vector).
+     * Only one sort operation can be carried out at a time.
+     * Callbacks will be triggered when the sorting operation completes.
+     * The given Array (or Vector) will be modified in-place.
+     * @param arrayToSort The Array (or Vector) to sort.
+     * @param compareFunction A function that compares two items and returns -1, 0, or 1.
+     * @see mx.utils.ObjectUtil#compare()
+     */
+    p.beginSort = function (arrayToSort, compareFunction) {
+        compareFunction = (compareFunction === undefined) ? null : compareFunction;
+        // initialize
+        this._compare = compareFunction;
+        this._original = arrayToSort || [];
+        this._source = this._original;
+        this._length = this._original.length;
+
+        // make a buffer of the same type and length
+        var Type = this._source.constructor;
+        this._destination = new Type();
+        this._destination.length = this._length;
+
+        this._subArraySize = 1;
+        this._iLeft = 0;
+        this._iRight = 0;
+        this._middle = 0;
+        this._end = 0;
+        this._elapsed = 0;
+
+        if (this._immediately) {
+            iterate.call(this, Number.MAX_VALUE);
+            done.call(this);
+        } else {
+            // high priority because many things cannot continue without sorting results or must be recalculated when sorting finishes
+            WeaveAPI.StageUtils.startTask(this, iterate.bind(this), WeaveAPI.TASK_PRIORITY_HIGH, done.bind(this), ("Sorting {0} items" + this._original.length));
+        }
+    }
+
+    /**
+     * Aborts the current async sort operation.
+     */
+
+    p.abort = function () {
+        this._compare = null;
+        this._source = this._original = this._destination = null;
+        this._length = this._subArraySize = this._iLeft = this._iRight = this._middle = this._end = this._elapsed = 0;
+    }
+
+    function iterate(stopTime) {
+        /*if (this._compare === weavecore.ObjectUtil.numericCompare) {
+            this._original.sort(AsyncSort.ARRAY_NUMERIC);
+            return 1;
+        }
+
+        if (this._compare === AsyncSort.compareCaseInsensitive) {
+            this._original.sort(AsyncSort.ARRAY_CASESENSITIVE);
+            return 1;
+        }*/
+
+        if (this._compare === null || this._compare === undefined) {
+            if (this._original.length) {
+                if (this._original[0].constructor === Number)
+                    this._original.sort(numericSort);
+                else if (this._original[0].constructor === String)
+                    this._original.sort(nonASCIISort);
+                else if (this._original[0] instanceof Date)
+                    this._original.sort(dateSort);
+            }
+
+
+            return 1;
+        }
+
+        var time = getTimer();
+
+        while (getTimer() < stopTime) {
+            if (this._iLeft < this._middle) // if there are still more items in the left sub-array
+            {
+                // copy smallest value to merge destination
+                if (this._iRight < this._end && this._compare(this._source[this._iRight], this._source[this._iLeft]) < 0)
+                    this._destination[this._iMerged++] = this._source[this._iRight++];
+                else
+                    this._destination[this._iMerged++] = this._source[this._iLeft++];
+            } else if (this._iRight < this._end) // if there are still more items in the right sub-array
+            {
+                this._destination[this._iMerged++] = this._source[this._iRight++];
+            } else if (this._end < this._length) // if there are still more pairs of sub-arrays to merge
+            {
+                // begin merging the next pair of sub-arrays
+                var start = this._end;
+                this._middle = Math.min(start + this._subArraySize, this._length);
+                this._end = Math.min(this._middle + this._subArraySize, this._length);
+                this._iLeft = start;
+                this._iRight = this._middle;
+                this._iMerged = start;
+            } else // done merging all pairs of sub-arrays
+            {
+                // use the merged destination as the next source
+                var merged = this._destination;
+                this._destination = this._source;
+                this._source = merged;
+
+                // start merging sub-arrays of twice the previous size
+                this._end = 0;
+                this._subArraySize *= 2;
+
+                // stop if the sub-array includes the entire array
+                if (this._subArraySize >= this._length)
+                    break;
+            }
+        }
+
+        this._elapsed += getTimer() - time;
+
+        // if one sub-array includes the entire array, we're done
+        if (this._subArraySize >= this._length)
+            return 1; // done
+
+        //TODO: improve progress calculation
+        return this._subArraySize / this._length; // not exactly accurate, but returns a number < 1
+    }
+
+    function getTimer() {
+        return new Date().getTime();
+    }
+
+
+
+    function done() {
+        // source array is completely sorted
+        if (this._source !== this._original) // if source isn't the this._original
+        {
+            // copy the sorted values to the original
+            var i = this._length;
+            while (i--)
+                this._original[i] = this._source[i];
+        }
+
+        // clean up so the "get result()" function knows we're done
+        this._source = null;
+        this._destination = null;
+
+        if (AsyncSort.debug && this._elapsed > 0)
+            console.log(this, this.result.length, 'in', this._elapsed / 1000, 'seconds');
+
+        if (!this._immediately)
+            WeaveAPI.SessionManager.getCallbackCollection(this).triggerCallbacks();
+    }
+
+    function numericSort(a, b) {
+        return a - b;
+    }
+
+    function nonASCIISort(a, b) {
+        return a.localeCompare(b);
+    }
+
+    function dateSort(date1, date2) {
+        // This is a comparison function that will result in dates being sorted in
+        // ASCENDING order.
+        if (date1 > date2) return 1;
+        if (date1 < date2) return -1;
+        return 0;
+    };
+
+    /*************
+     ** Testing **
+     *************/
+
+    /*
+    	Built-in sort is slower when using a compare function because it uses more comparisons.
+    	Array.sort 50 numbers; 0.002 seconds; 487 comparisons
+    	Merge Sort 50 numbers; 0.001 seconds; 208 comparisons
+    	Array.sort 3000 numbers; 0.304 seconds; 87367 comparisons
+    	Merge Sort 3000 numbers; 0.111 seconds; 25608 comparisons
+    	Array.sort 6000 numbers; 0.809 seconds; 226130 comparisons
+    	Merge Sort 6000 numbers; 0.275 seconds; 55387 comparisons
+    	Array.sort 12000 numbers; 1.969 seconds; 554380 comparisons
+    	Merge Sort 12000 numbers; 0.514 seconds; 119555 comparisons
+    	Array.sort 25000 numbers; 9.498 seconds; 2635394 comparisons
+    	Merge Sort 25000 numbers; 1.234 seconds; 274965 comparisons
+    	Array.sort 50000 numbers; 37.285 seconds; 10238787 comparisons
+    	Merge Sort 50000 numbers; 2.603 seconds; 585089 comparisons
+    */
+    /*
+    	Built-in sort is faster when no compare function is given.
+    	Array.sort 50 numbers; 0 seconds
+    	Merge Sort 50 numbers; 0.001 seconds
+    	Array.sort 3000 numbers; 0.003 seconds
+    	Merge Sort 3000 numbers; 0.056 seconds
+    	Array.sort 6000 numbers; 0.006 seconds
+    	Merge Sort 6000 numbers; 0.123 seconds
+    	Array.sort 12000 numbers; 0.012 seconds
+    	Merge Sort 12000 numbers; 0.261 seconds
+    	Array.sort 25000 numbers; 0.026 seconds
+    	Merge Sort 25000 numbers; 0.599 seconds
+    	Array.sort 50000 numbers; 0.058 seconds
+    	Merge Sort 50000 numbers; 1.284 seconds
+    */
+    AsyncSort._testArrays;
+    //AsyncSort._testArraysSortOn;
+    AsyncSort._testType = -1;
+    AsyncSort._initTestArrays = function (testType) {
+        if (testType !== AsyncSort._testType) {
+            AsyncSort._testType = testType;
+            AsyncSort._testArrays = [];
+            //AsyncSort._testArraysSortOn = [];
+            var dummyArray = [0, 1, 2, 3, 4, 5, 50, 3000, 6000, 12000, 25000, 50000];
+            dummyArray.forEach(function (n) {
+                var array = [];
+                // var arraySortOn = [];
+                for (var i = 0; i < n; i++) {
+                    var value;
+                    if (testType === 0) // random integers
+                        value = parseInt(Math.random() * 100);
+                    else if (testType === 1) // random integers and NaNs
+                        value = Math.random() < .5 ? NaN : parseInt(Math.random() * 100);
+                    else if (testType === 2) // random strings
+                        value = 'a' + Math.random();
+
+                    array.push(value);
+                    /*arraySortOn.push({
+                        'value': value
+                    });*/
+                }
+                AsyncSort._testArrays.push(array);
+                // AsyncSort._testArraysSortOn.push(arraySortOn);
+            });
+        }
+        var desc = ['uint', 'uint and NaN', 'string'][testType];
+        console.log("testType =", testType, '(' + desc + ')');
+    }
+    AsyncSort.test = function (compare, testType) {
+            testType = (testType === undefined) ? 0 : testType;
+            AsyncSort._initTestArrays(testType);
+            AsyncSort._debugCompareFunction = compare;
+            AsyncSort._testArrays.forEach(function (_array) {
+                var array1 = _array.concat();
+                var array2 = _array.concat();
+
+                var start = getTimer();
+                AsyncSort._debugCompareCount = 0;
+                if (compare === null || compare === undefined) {
+                    if (array1[0]) {
+                        if (array1[0].constructor === Number) array1.sort(numericSort);
+                        if (array1[0].constructor === String) array1.sort(nonASCIISort);
+                        if (array1[0].constructor === Date) array1.sort(dateSort);
+                    } else {
+                        array1.sort();
+                    }
+
+
+                }
+
+                /*else if (compare instanceof Function)
+                    array1.sort(AsyncSort._debugCompareCounter);*/
+                else
+                    array1.sort(compare);
+                console.log('Array.sort', array1.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
+
+                start = getTimer();
+                AsyncSort._debugCompareCount = 0;
+                AsyncSort.sortImmediately(array2, compare instanceof Function ? AsyncSort._debugCompareCounter : null);
+                //trace('Merge Sort', n, 'numbers;', AsyncSort._immediateSorter.elapsed / 1000, 'seconds;',AsyncSort._debugCompareCount,'comparisons');
+                console.log('Merge Sort', array2.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
+
+                if (array2.length === 1 && weavecore.ObjectUtil.compare(array1[0], array2[0]) !== 0)
+                    throw new Error("sort failed on array length 1");
+
+                AsyncSort._verifyNumbersSorted(array2);
+            });
+
+        }
+        /*AsyncSort.testSortOn = function (compare, testType) {
+            testType = (testType === undefined) ? 0 : testType;
+            AsyncSort._initTestArrays(testType);
+            AsyncSort._debugCompareFunction = new weavecore.SortOn('value', compare || AsyncSort.primitiveCompare).compare;
+            AsyncSort._testArraysSortOn.forEach(function (_array) {
+                var array1 = _array.concat();
+                var array2 = _array.concat();
+                var array3 = _array.concat();
+                var array4 = _array.concat();
+
+                var start = getTimer();
+                AsyncSort._debugCompareCount = 0;
+                if (compare === null)
+                    array1.sortOn('value', 0);
+                else if (compare instanceof Function)
+                    array1.sortOn('value', AsyncSort._debugCompareCounter);
+                else
+                    array1.sortOn('value', compare);
+                console.log('Array.sortOn', array1.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
+
+                start = getTimer();
+                AsyncSort._debugCompareCount = 0;
+                var plucked = new Array();
+                plucked.length = _array.length;
+                var i = _array.length;
+
+                while (i--)
+                    plucked[i] = _array[i]['value'];
+                if (compare === null)
+                    plucked.sort(0);
+                else if (compare instanceof Function)
+                    plucked.sort(AsyncSort._debugCompareCounter);
+                else
+                    plucked.sort(compare);
+                console.log('Pluck & sort', plucked.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
+
+                start = getTimer();
+                AsyncSort._debugCompareCount = 0;
+                weavecore.StandardLib.sortOn(array3, 'value');
+                console.log('StdLib sortOn', array3.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
+
+                start = getTimer();
+                AsyncSort._debugCompareCount = 0;
+                StandardLib.sortOn(array4, ['value']);
+                console.log('StdLib sortOn[]', array4.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
+
+                start = getTimer();
+                AsyncSort._debugCompareCount = 0;
+                AsyncSort.sortImmediately(array2, AsyncSort._debugCompareCounter);
+                //trace('Merge Sort', n, 'numbers;', AsyncSort._immediateSorter.elapsed / 1000, 'seconds;',AsyncSort._debugCompareCount,'comparisons');
+                console.log('Merge SortOn', array2.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
+
+                if (array2.length == 1 && weavecore.ObjectUtil.compare(array1[0], array2[0]) != 0)
+                    throw new Error("sort failed on array length 1");
+
+                AsyncSort._verifyNumbersSorted(array2);
+            })
+
+        }*/
+
+    AsyncSort._verifyNumbersSorted = function (array) {
+        for (var i = 1; i < array.length; i++) {
+            if (weavecore.ObjectUtil.numericCompare(array[i - 1], array[i]) > 0) {
+                throw new Error("ASSERTION FAIL " + array[i - 1] + ' > ' + array[i]);
+            }
+        }
+    }
+
+    AsyncSort._debugCompareCount = 0;
+    AsyncSort._debugCompareFunction = null;
+    AsyncSort._debugCompareCounter = function (a, b) {
+        AsyncSort._debugCompareCount++;
+        return AsyncSort._debugCompareFunction(a, b);
+    }
+
+
+
+    weavecore.AsyncSort = AsyncSort;
+
+}());
+
+(function () {
+    function SortOn(prop, compare) {
+        this._prop = prop;
+        this._compare = compare;
+    }
+
+    var p = SortOn.prototype;
+    p.compare = function (a, b) {
+        return this._compare(a[this._prop], b[this._prop]);
+    }
+
+    weavecore.SortOn = SortOn;
+}())
 
 /**
  * @module WeaveAPI
@@ -8420,6 +9744,7 @@ WeaveAPI.detectLinkableObjectChange = function () {
     })
     return changeDetected;
 }
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -10348,8 +11673,16 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableHashMap = LinkableHashMap;
-}());
 
+    // namespace
+    if (typeof window === 'undefined') {
+        this.WeaveAPI = this.WeaveAPI || {};
+        this.WeaveAPI.globalHashMap = new LinkableHashMap();
+    } else {
+        window.WeaveAPI = window.WeaveAPI || {};
+        window.WeaveAPI.globalHashMap = new LinkableHashMap();
+    }
+}());
 /**
  * @module weavecore
  */
@@ -10700,37 +12033,6 @@ if (typeof window === 'undefined') {
 
 }());
 
-createjs.Ticker.setFPS(50);
-//createjs.Ticker.
-
-// constructor:
-
-if (typeof window === 'undefined') {
-    this.WeaveAPI = this.WeaveAPI || {};
-} else {
-    window.WeaveAPI = window.WeaveAPI || {};
-}
-
-
-Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_IMMEDIATE', {
-    value: 0
-});
-
-Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_HIGH', {
-    value: 1
-});
-
-Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_NORMAL', {
-    value: 2
-});
-
-Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_LOW', {
-    value: 3
-});
-
-
-//WeaveAPI.SessionManager = new weavecore.SessionManager();
-WeaveAPI.globalHashMap = new weavecore.LinkableHashMap();
 /**
  * @module weavecore
  */
@@ -12162,1119 +13464,3 @@ if (typeof window === 'undefined') {
     weavecore.SessionStateLog = SessionStateLog;
 
 }());
-
-if (typeof window === 'undefined') {
-    this.WeaveAPI = this.WeaveAPI || {};
-    this.weavecore = this.weavecore || {};
-} else {
-    window.WeaveAPI = window.WeaveAPI || {};
-    window.weavecore = window.weavecore || {};
-}
-
-
-(function () {
-
-    URLRequestUtils.debug = false;
-    URLRequestUtils.delayResults = false; // when true, delays result/fault handling and fills the 'delayed' Array.
-
-    // array of objects with properties:  label:String, resume:Function
-    Object.defineProperty(URLRequestUtils, 'delayed', {
-        value: []
-    });
-
-
-    Object.defineProperty(URLRequestUtils, 'DATA_FORMAT_TEXT', {
-        value: 'text'
-    });
-
-    Object.defineProperty(URLRequestUtils, 'DATA_FORMAT_BINARY', {
-        value: 'binary'
-    });
-    Object.defineProperty(URLRequestUtils, 'DATA_FORMAT_VARIABLES', {
-        value: 'variables'
-    });
-
-    Object.defineProperty(URLRequestUtils, 'LOCAL_FILE_URL_SCHEME', {
-        value: 'local://'
-    });
-
-
-
-
-    function URLRequestUtils(defaultValue, taskDescription) {
-        /**
-         * A mapping of URL Strings to CustomXMLHttpRequest.
-         * This mapping is necessary for cached requests to return the active request.
-         */
-        Object.defineProperty(this, '_requestURLToLoader', {
-            value: {}
-        });
-
-        this._localFiles = {};
-        this._baseURL;
-
-    }
-
-    var p = URLRequestUtils.prototype;
-
-    /**
-     * This will set the base URL for use with relative URL requests.
-     */
-    p.setBaseURL = function (baseURL) {
-        // only set baseURL if there is a ':' before first '/'
-        if (baseURL.split('/')[0].indexOf(':') >= 0) {
-            // remove '?' and everything after
-            this._baseURL = baseURL.split('?')[0];
-        }
-    }
-
-
-    function addBaseURL(url) {
-        if (this._baseURL)
-            url = weavecore.URLUtil.getFullURL(this._baseURL, url);
-    }
-
-
-
-    p.getPromise = function (relevantContext, url, data, method, requestHeaders, dataFormat, allowMultipleEvents) {
-
-        allowMultipleEvents = allowMultipleEvents === undefined ? false : allowMultipleEvents;
-
-        var client;
-
-        if (url.indexOf(URLRequestUtils.LOCAL_FILE_URL_SCHEME) === 0) {
-            var fileName = url.substr(URLRequestUtils.LOCAL_FILE_URL_SCHEME.length);
-            // If it's a local file, we still need to create a promise.
-            // CustomURLLoader doesn't load if the last parameter to the constructor is false.
-            if (allowMultipleEvents)
-                client = this._requestURLToLoader[url];
-            if (!client) {
-                client = new weavecore.CustomClient(url, data, method, requestHeaders, dataFormat, false);
-                if (allowMultipleEvents)
-                    this._requestURLToLoader[url] = client;
-            }
-            client.promise.addRelevantContext(relevantContext);
-            if (this._localFiles.hasOwnProperty(fileName)) {
-                WeaveAPI.StageUtils.callLater(relevantContext, client.applyResult.bind(client), [this._localFiles[fileName]]);
-            } else {
-                fault = "Error: Missing local file: " + fileName;
-                WeaveAPI.StageUtils.callLater(relevantContext, client.applyFault.bind(client), [fault]);
-            }
-
-            return client.promise;
-
-        }
-
-        addBaseURL.call(this, url);
-
-        // attempt to load crossdomain.xml from same folder as file
-        //Security.loadPolicyFile(URLUtil.getFullURL(request.url, 'crossdomain.xml'));
-
-        try {
-            client = new weavecore.CustomClient(url, data, method, requestHeaders, dataFormat, true);
-        } catch (e) {
-            // When an error occurs, we need to run the asyncFaultHandler later
-            // and return a new URLLoader. CustomURLLoader doesn't load if the
-            // last parameter to the constructor is false.
-            client = new weavecore.CustomClient(url, data, method, requestHeaders, dataFormat, false);
-
-            WeaveAPI.StageUtils.callLater(relevantContext, client.applyFault.bind(client), [e]);
-        }
-
-        client.promise.addRelevantContext(relevantContext);
-
-        return client.promise;
-
-
-
-    }
-
-
-    weavecore.URLRequestUtils = URLRequestUtils;
-    WeaveAPI.URLRequestUtils = new URLRequestUtils();
-
-
-
-
-
-
-}());
-
-(function () {
-    /**
-     * Lookup for hosts that previously failed due to crossdomain.xml security error
-     */
-    Object.defineProperty(CustomClient, '_failedHosts', {
-        value: {} // host -> true
-    });
-
-    /**
-     * Maps a status code to a description.
-     */
-    Object.defineProperty(CustomClient, 'HTTP_STATUS_CODES', {
-        value: {
-            "100": "Continue",
-            "101": "Switching Protocol",
-            "200": "OK",
-            "201": "Created",
-            "202": "Accepted",
-            "203": "Non-Authoritative Information",
-            "204": "No Content",
-            "205": "Reset Content",
-            "206": "Partial Content",
-            "300": "Multiple Choice",
-            "301": "Moved Permanently",
-            "302": "Found",
-            "303": "See Other",
-            "304": "Not Modified",
-            "305": "Use Proxy",
-            "306": "unused",
-            "307": "Temporary Redirect",
-            "308": "Permanent Redirect",
-            "400": "Bad Request",
-            "401": "Unauthorized",
-            "402": "Payment Required",
-            "403": "Forbidden",
-            "404": "Not Found",
-            "405": "Method Not Allowed",
-            "406": "Not Acceptable",
-            "407": "Proxy Authentication Required",
-            "408": "Request Timeout",
-            "409": "Conflict",
-            "410": "Gone",
-            "411": "Length Required",
-            "412": "Precondition Failed",
-            "413": "Request Entity Too Large",
-            "414": "Request-URI Too Long",
-            "415": "Unsupported Media Type",
-            "416": "Requested Range Not Satisfiable",
-            "417": "Expectation Failed",
-            "500": "Internal Server Error",
-            "501": "Not Implemented",
-            "502": "Bad Gateway",
-            "503": "Service Unavailable",
-            "504": "Gateway Timeout",
-            "505": "HTTP Version Not Supported"
-        }
-    });
-
-    function CustomClient(url, data, method, requestHeaders, dataFormat, loadNow) {
-
-        method = method === null ? 'GET' : method;
-        this._label;
-        this._customPromise;
-        this._isClosed = false;
-        this._url = url;
-        this._method = method;
-        this._requestHeaders = requestHeaders;
-        this.data = data;
-
-        //XMLHttpRequest is a host object(DOM objects) so we cant extend using prototype
-        Object.defineProperty(this, 'client', {
-            value: new XMLHttpRequest()
-        })
-
-        //var ie9_XHR = window.XDomainRequest;
-        //var XHR = ie9_XHR || XMLHttpRequest;
-        //XHR.call(this);
-
-        this._resumeFunc = null;
-        this._resumeParam = null;
-
-
-        this._resolve;
-        this._reject;
-        this._customPromise = new weavecore.CustomPromise(this, function (_resolve, _reject) {
-            this._resolve = _resolve;
-            this._reject = _reject;
-        }.bind(this));
-        /**
-         * This is the promise that keeps track of repsonders.
-         */
-        Object.defineProperty(this, 'promise', {
-            get: function () {
-                return this._customPromise
-            }
-        });
-
-        /**
-         * list of function gets executed for promise then
-         */
-        Object.defineProperty(this, 'responders', {
-            value: []
-        });
-
-        /**
-         * This is the URLRequest that was passed to load().
-         */
-        Object.defineProperty(this, 'url', {
-            get: function () {
-                return this._url
-            }
-        });
-
-
-        /**
-         * Gets the open or closed status of the URLLoader.
-         */
-        Object.defineProperty(this, 'isClosed', {
-            get: function () {
-                return this._isClosed
-            }
-        });
-
-
-        if (loadNow) {
-            if (weavecore.URLRequestUtils.delayResults) {
-                label = url;
-                //to-do : change to binary data temporary solution JSON string
-                try {
-                    var stringData = JSON.stringify(data);
-                    label += ' ' + stringData.split('\n').join(' ');
-                } catch (e) {}
-                console.log('requested ' + label);
-                URLRequestUtils.delayed.push({
-                    "label": label,
-                    "resume": resume
-                });
-            }
-
-            /*if (CustomClient._failedHosts[getHost()]) {
-                // don't bother trying a URLLoader with the same host that previously failed due to a security error
-                ExternalDownloader.download(_urlRequest, dataFormat, _asyncToken);
-                return;
-            }*/
-
-            for (var name in requestHeaders)
-                this.client.setRequestHeader(name, requestHeaders[name], false);
-
-            this.client.responseType = "blob";
-
-            var done = false;
-            var customClient = this;
-            this.client.onload = function (event) {
-                Blob_to_b64(customClient.client.response, function (b64) {
-                    callback.call(customClient, customClient.client.status, b64);
-                    done = true;
-                });
-            };
-            this.client.onerror = function (event) {
-                if (!done)
-                    callback.call(customClient, customClient.client.status, null);
-                done = true;
-            };
-            this.client.onreadystatechange = function () {
-                if (customClient.client.readyState == 4 && customClient.client.status != 200) {
-                    setTimeout(
-                        function () {
-                            if (!done)
-                                callback.call(customClient, customClient.client.status, null);
-                            done = true;
-                        },
-                        1000
-                    );
-                }
-            };
-
-
-
-
-            if (weavecore.URLRequestUtils.debug)
-                console.log(this, 'request', url);
-
-            this.client.open(method, url, true);
-            var data = null;
-            if (method == "POST" && base64data) {
-                data = weave.b64_to_ArrayBuffer(base64data);
-                this.client.send(data);
-            } else {
-                this.client.send();
-            }
-
-
-        }
-
-        this.promise.internal.then(function (response) {
-            handleGetResult.call(this, response);
-        }.bind(this), function (response) {
-            handleGetError.call(response);
-        }.bind(this))
-    }
-
-    function decodeResponse(response) {
-        var dataView = new DataView(response);
-        // The TextDecoder interface is documented at http://encoding.spec.whatwg.org/#interface-textdecoder
-        var decoder = new TextDecoder('utf-8');
-        return decoder.decode(dataView);
-    }
-
-    function ab2str(buf) {
-        return String.fromCharCode.apply(null, new Uint16Array(buf));
-    }
-
-    function callback(status, base64data) {
-        var result;
-        if (base64data) {
-            var bytes = b64_to_ArrayBuffer(base64data);
-            result = decodeResponse(bytes);
-
-        }
-        if (status === 200) {
-            this._resolve(result);
-        } else {
-            var faultCode = null;
-            if (CustomClient.HTTP_STATUS_CODES[status])
-                faultCode = status + " " + CustomClient.HTTP_STATUS_CODES[status];
-            else if (status)
-                faultCode = "" + status;
-            else
-                faultCode = "Error";
-            this._reject(faultCode);
-        }
-    }
-
-    function b64_to_ArrayBuffer(base64data) {
-        var byteCharacters = atob(base64data);
-        var myArray = new ArrayBuffer(byteCharacters.length);
-        var longInt8View = new Uint8Array(myArray);
-        for (var i = 0; i < byteCharacters.length; i++)
-            longInt8View[i] = byteCharacters.charCodeAt(i);
-        return myArray;
-    };
-
-    function Blob_to_b64(blob, callback) {
-        var reader = new FileReader();
-        reader.onloadend = function (event) {
-            var dataurl = reader.result;
-            var base64data = dataurl.split(',').pop();
-            callback(base64data);
-        };
-        reader.onerror = function (event) {
-            callback(null);
-        };
-        reader.readAsDataURL(blob);
-    };
-
-
-
-    function loadLater() {
-        if (!this._isClosed) {
-            this.open(this._method, this.url, true);
-            this.send();
-        }
-
-    }
-
-    function getHost() {
-        var start = this.url.indexOf("/") + 2;
-        var length = this.url.indexOf("/", start);
-        var host = this.url.substr(0, length);
-        return host;
-    }
-
-    var p = CustomClient.prototype;
-
-    p.close = function () {
-        WeaveAPI.ProgressIndicator.removeTask(this._customPromise);
-        if (weavecore.URLRequestUtils.debug)
-            console.log(this, 'cancel', this._url);
-        this._isClosed = true;
-        try {
-            this.client.abort();
-        } catch (e) {
-
-        } // ignore close() errors
-    }
-
-    /**
-     * This provides a convenient way for adding result/fault handlers.
-     * @param responder
-     */
-    p.addResponder = function (responder) {
-        this.promise.responders.push(responder);
-    }
-
-    /**
-     * This provides a convenient way to remove a URLRequestToken as a responder.
-     * @param responder
-     */
-    p.removeResponder = function (responder) {
-        var responders = this.promise.responders;
-        var index = responders.indexOf(responder);
-        if (index >= 0) {
-            // URLRequestToken found -- remove it
-            responders.splice(index, 1);
-            /*// see if there are any more URLRequestTokens
-            for (var i = 0; i < responders.length; i++) {
-                if (obj.isCustomResponder)
-                    return;
-            }*/
-
-            // no more CustomAsyncResponders found, so cancel
-            this.close();
-        }
-    }
-
-
-    /**
-     * When URLRequestUtils.delayResults is set to true, this function will resume
-     * @return true
-     */
-    p.resume = function () {
-        if (this._resumeFunc === null) {
-            this._resumeFunc = resume; // this cancels the pending delay behavior
-        } else if (this._resumeFunc !== resume) {
-            this._resumeFunc(this._resumeParam);
-        }
-    }
-
-    function handleGetResult(response) {
-        if (weavecore.URLRequestUtils.debug)
-            console.log(this, 'complete', this.url);
-        if (weavecore.URLRequestUtils.delayResults && this._resumeFunc == null) {
-            this._resumeFunc = handleGetResult;
-            this._resumeParam = response;
-            return;
-        }
-
-        // broadcast result to responders
-        WeaveAPI.StageUtils.callLater(null, this.applyResult.bind(this), [response]);
-
-    }
-
-    /**
-     * This function gets called when a URLLoader generated by getURL() dispatches an IOErrorEvent.
-     * @param event The ErrorEvent from a URLLoader.
-     */
-    function handleGetError(fault) {
-        if (weavecore.URLRequestUtils.debug)
-            console.log(this, 'error', this.url);
-        if (weavecore.URLRequestUtils.delayResults && this._resumeFunc == null) {
-            this._resumeFunc = handleGetError;
-            this._resumeParam = fault;
-            return;
-        }
-
-        // broadcast fault to responders
-
-        fault = fault ? fault : "Request cancelled";
-
-        applyFault(fault);
-        this._isClosed = true;
-    }
-
-    p.applyResult = function (data) {
-        if (this.data !== data)
-            this.data = data;
-        this.promise.applyResult(data);
-    }
-
-    p.applyFault = function (fault) {
-        this.promise.applyFault(fault);
-    }
-
-
-
-    weavecore.CustomClient = CustomClient;
-
-}());
-
-(function () {
-    function CustomPromise(client, executor) {
-        /*if (window.Promise) {
-            try {
-                window.Promise.call(this, executor);
-            } catch (e) {
-                console.error(e);
-            }
-
-        } else {
-            console.warn("Promise Object Prototype not Found");
-            return;
-        }*/
-
-        Object.defineProperty(this, 'internal', {
-            value: new Promise(executor)
-        });
-
-        this._client = client;
-        this._relevantContexts = [];
-
-        Object.defineProperty(this, 'responders', {
-            value: []
-        });
-
-        Object.defineProperty(this, 'client', {
-            get: function () {
-                return this._client
-            }
-        });
-
-        this.addResponder({
-            result: firstResponder.bind(this),
-            fault: firstResponder.bind(this),
-            token: null
-        });
-
-    }
-
-    var p = CustomPromise.prototype;
-
-    //responder {result:Function, fault:Function, token:Object}
-    p.addResponder = function (responder) {
-        this.responders.push(responder);
-    }
-
-    /**
-     * Adds a context in which this AsyncToken is relevant.
-     * If all contexts are disposed, this AsyncToken will not broadcast a ResultEvent or FaultEvent.
-     */
-    p.addRelevantContext = function (context) {
-        var desc = "URL request";
-        if (this.client)
-            desc += ": " + this.client.url;
-        WeaveAPI.ProgressIndicator.addTask(this, context, desc);
-        this._relevantContexts.push(context);
-    }
-
-    p.applyResult = function (response) {
-        for (var i = 0; i < this.responders.length; i++) {
-            this.responders[i].result(response, this.responders[i].token);
-        }
-
-    }
-
-    p.applyFault = function (response) {
-        for (var i = 0; i < this.responders.length; i++) {
-            this.responders[i].fault(response, this.responders[i].token);
-        }
-    }
-
-    function contextDisposed(context, i, a) {
-        return WeaveAPI.SessionManager.objectWasDisposed(context);
-    }
-
-    function firstResponder(response, token) {
-        WeaveAPI.ProgressIndicator.removeTask(this);
-        // if there are contexts and none are relevant, don't call responders
-        if (this._relevantContexts.length && this._relevantContexts.every(contextDisposed))
-            this._responders.length = 0;
-    }
-
-    weavecore.CustomPromise = CustomPromise;
-
-}());
-
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-
-
-
-/**
- * Asynchronous merge sort.
- *
- * @author adufilie
- * @author sanjay1909
- */
-(function () {
-
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @public
-     * @property NS
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(AsyncSort, 'NS', {
-        value: 'weavecore'
-    });
-
-    /**
-     * temporary solution to save the className for this class/prototype
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(AsyncSort, 'CLASS_NAME', {
-        value: 'AsyncSort'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(AsyncSort, 'SESSIONABLE', {
-        value: true
-    });
-
-
-    Object.defineProperty(AsyncSort, 'ARRAY_NUMERIC', {
-        value: 16
-    });
-
-    Object.defineProperty(AsyncSort, 'ARRAY_CASESENSITIVE', {
-        value: 1
-    });
-
-    AsyncSort.debug = false;
-    AsyncSort._immediateSorter;
-    AsyncSort.sortImmediately = function (array, compareFunction) {
-        compareFunction = (compareFunction === undefined) ? null : compareFunction;
-        if (!AsyncSort._immediateSorter) {
-            AsyncSort._immediateSorter = new weavecore.AsyncSort();
-            AsyncSort._immediateSorter._immediately = true;
-        }
-
-        // temporarily set AsyncSort._immediateSorter to null in case sortImmediately is called recursively.
-        var sorter = AsyncSort._immediateSorter;
-        AsyncSort._immediateSorter = null;
-
-        sorter.beginSort(array, compareFunction);
-
-        AsyncSort._immediateSorter = sorter;
-
-    }
-
-    /**
-     * This function is a wrapper for ObjectUtil.stringCompare(a, b, true) (case-insensitive String compare).
-     */
-    AsyncSort.compareCaseInsensitive = function (a, b) {
-        return weavecore.ObjectUtil.stringCompare(a, b, true);
-
-    }
-
-    /**
-     * Compares two primitive values.
-     * This function is faster than ObjectUtil.compare(), but does not do deep object compare.
-     */
-    AsyncSort.primitiveCompare = function (a, b) {
-        if (a === b)
-            return 0;
-        if (a === null || a === undefined)
-            return 1;
-        if (b === null || b === undefined)
-            return -1;
-        var typeA = typeof (a);
-        var typeB = typeof (b);
-        if (typeA !== typeB)
-            return weavecore.ObjectUtil.stringCompare(typeA, typeB);
-        if (typeA === 'boolean')
-            return weavecore.ObjectUtil.numericCompare(Number(a), Number(b));
-        if (typeA === 'number')
-            return weavecore.ObjectUtil.numericCompare(a, b);
-        if (typeA === 'string')
-            return weavecore.ObjectUtil.stringCompare(a, b);
-        if (a instanceof Date && b instanceof Date)
-            return weavecore.ObjectUtil.dateCompare(a, b);
-        return 1; // not equal
-    }
-
-
-    function AsyncSort() {
-
-        this._original; // original array
-        this._source; // contains sub-arrays currently being merged
-        this._destination; // buffer to store merged sub-arrays
-        this._compare; // compares two array items
-        this._length; // length of original array
-        this._subArraySize; // size of sub-array
-        this._middle; // end of left and start of right sub-array
-        this._end; // end of right sub-array
-        this._iLeft; // left sub-array source index
-        this._iRight; // right sub-array source index
-        this._iMerged; // merged destination index
-        this._elapsed; // keeps track of elapsed time inside iterate()
-        this._immediately = false; // set in sortImmediately(), checked in beginSort()
-
-        Object.defineProperty(this, 'result', {
-            get: function () {
-                return this._source ? null : this._original;
-            }
-        });
-
-    }
-
-
-
-    AsyncSort.prototype = new weavecore.ILinkableObject();
-    AsyncSort.prototype.constructor = AsyncSort;
-
-    // Prototypes
-    var p = AsyncSort.prototype;
-
-    /**
-     * This will begin an asynchronous sorting operation on the specified Array (or Vector).
-     * Only one sort operation can be carried out at a time.
-     * Callbacks will be triggered when the sorting operation completes.
-     * The given Array (or Vector) will be modified in-place.
-     * @param arrayToSort The Array (or Vector) to sort.
-     * @param compareFunction A function that compares two items and returns -1, 0, or 1.
-     * @see mx.utils.ObjectUtil#compare()
-     */
-    p.beginSort = function (arrayToSort, compareFunction) {
-        compareFunction = (compareFunction === undefined) ? null : compareFunction;
-        // initialize
-        this._compare = compareFunction;
-        this._original = arrayToSort || [];
-        this._source = this._original;
-        this._length = this._original.length;
-
-        // make a buffer of the same type and length
-        var Type = this._source.constructor;
-        this._destination = new Type();
-        this._destination.length = this._length;
-
-        this._subArraySize = 1;
-        this._iLeft = 0;
-        this._iRight = 0;
-        this._middle = 0;
-        this._end = 0;
-        this._elapsed = 0;
-
-        if (this._immediately) {
-            iterate.call(this, Number.MAX_VALUE);
-            done.call(this);
-        } else {
-            // high priority because many things cannot continue without sorting results or must be recalculated when sorting finishes
-            WeaveAPI.StageUtils.startTask(this, iterate.bind(this), WeaveAPI.TASK_PRIORITY_HIGH, done.bind(this), ("Sorting {0} items" + this._original.length));
-        }
-    }
-
-    /**
-     * Aborts the current async sort operation.
-     */
-
-    p.abort = function () {
-        this._compare = null;
-        this._source = this._original = this._destination = null;
-        this._length = this._subArraySize = this._iLeft = this._iRight = this._middle = this._end = this._elapsed = 0;
-    }
-
-    function iterate(stopTime) {
-        /*if (this._compare === weavecore.ObjectUtil.numericCompare) {
-            this._original.sort(AsyncSort.ARRAY_NUMERIC);
-            return 1;
-        }
-
-        if (this._compare === AsyncSort.compareCaseInsensitive) {
-            this._original.sort(AsyncSort.ARRAY_CASESENSITIVE);
-            return 1;
-        }*/
-
-        if (this._compare === null || this._compare === undefined) {
-            if (this._original.length) {
-                if (this._original[0].constructor === Number)
-                    this._original.sort(numericSort);
-                else if (this._original[0].constructor === String)
-                    this._original.sort(nonASCIISort);
-                else if (this._original[0] instanceof Date)
-                    this._original.sort(dateSort);
-            }
-
-
-            return 1;
-        }
-
-        var time = getTimer();
-
-        while (getTimer() < stopTime) {
-            if (this._iLeft < this._middle) // if there are still more items in the left sub-array
-            {
-                // copy smallest value to merge destination
-                if (this._iRight < this._end && this._compare(this._source[this._iRight], this._source[this._iLeft]) < 0)
-                    this._destination[this._iMerged++] = this._source[this._iRight++];
-                else
-                    this._destination[this._iMerged++] = this._source[this._iLeft++];
-            } else if (this._iRight < this._end) // if there are still more items in the right sub-array
-            {
-                this._destination[this._iMerged++] = this._source[this._iRight++];
-            } else if (this._end < this._length) // if there are still more pairs of sub-arrays to merge
-            {
-                // begin merging the next pair of sub-arrays
-                var start = this._end;
-                this._middle = Math.min(start + this._subArraySize, this._length);
-                this._end = Math.min(this._middle + this._subArraySize, this._length);
-                this._iLeft = start;
-                this._iRight = this._middle;
-                this._iMerged = start;
-            } else // done merging all pairs of sub-arrays
-            {
-                // use the merged destination as the next source
-                var merged = this._destination;
-                this._destination = this._source;
-                this._source = merged;
-
-                // start merging sub-arrays of twice the previous size
-                this._end = 0;
-                this._subArraySize *= 2;
-
-                // stop if the sub-array includes the entire array
-                if (this._subArraySize >= this._length)
-                    break;
-            }
-        }
-
-        this._elapsed += getTimer() - time;
-
-        // if one sub-array includes the entire array, we're done
-        if (this._subArraySize >= this._length)
-            return 1; // done
-
-        //TODO: improve progress calculation
-        return this._subArraySize / this._length; // not exactly accurate, but returns a number < 1
-    }
-
-    function getTimer() {
-        return new Date().getTime();
-    }
-
-
-
-    function done() {
-        // source array is completely sorted
-        if (this._source !== this._original) // if source isn't the this._original
-        {
-            // copy the sorted values to the original
-            var i = this._length;
-            while (i--)
-                this._original[i] = this._source[i];
-        }
-
-        // clean up so the "get result()" function knows we're done
-        this._source = null;
-        this._destination = null;
-
-        if (AsyncSort.debug && this._elapsed > 0)
-            console.log(this, this.result.length, 'in', this._elapsed / 1000, 'seconds');
-
-        if (!this._immediately)
-            WeaveAPI.SessionManager.getCallbackCollection(this).triggerCallbacks();
-    }
-
-    function numericSort(a, b) {
-        return a - b;
-    }
-
-    function nonASCIISort(a, b) {
-        return a.localeCompare(b);
-    }
-
-    function dateSort(date1, date2) {
-        // This is a comparison function that will result in dates being sorted in
-        // ASCENDING order.
-        if (date1 > date2) return 1;
-        if (date1 < date2) return -1;
-        return 0;
-    };
-
-    /*************
-     ** Testing **
-     *************/
-
-    /*
-    	Built-in sort is slower when using a compare function because it uses more comparisons.
-    	Array.sort 50 numbers; 0.002 seconds; 487 comparisons
-    	Merge Sort 50 numbers; 0.001 seconds; 208 comparisons
-    	Array.sort 3000 numbers; 0.304 seconds; 87367 comparisons
-    	Merge Sort 3000 numbers; 0.111 seconds; 25608 comparisons
-    	Array.sort 6000 numbers; 0.809 seconds; 226130 comparisons
-    	Merge Sort 6000 numbers; 0.275 seconds; 55387 comparisons
-    	Array.sort 12000 numbers; 1.969 seconds; 554380 comparisons
-    	Merge Sort 12000 numbers; 0.514 seconds; 119555 comparisons
-    	Array.sort 25000 numbers; 9.498 seconds; 2635394 comparisons
-    	Merge Sort 25000 numbers; 1.234 seconds; 274965 comparisons
-    	Array.sort 50000 numbers; 37.285 seconds; 10238787 comparisons
-    	Merge Sort 50000 numbers; 2.603 seconds; 585089 comparisons
-    */
-    /*
-    	Built-in sort is faster when no compare function is given.
-    	Array.sort 50 numbers; 0 seconds
-    	Merge Sort 50 numbers; 0.001 seconds
-    	Array.sort 3000 numbers; 0.003 seconds
-    	Merge Sort 3000 numbers; 0.056 seconds
-    	Array.sort 6000 numbers; 0.006 seconds
-    	Merge Sort 6000 numbers; 0.123 seconds
-    	Array.sort 12000 numbers; 0.012 seconds
-    	Merge Sort 12000 numbers; 0.261 seconds
-    	Array.sort 25000 numbers; 0.026 seconds
-    	Merge Sort 25000 numbers; 0.599 seconds
-    	Array.sort 50000 numbers; 0.058 seconds
-    	Merge Sort 50000 numbers; 1.284 seconds
-    */
-    AsyncSort._testArrays;
-    //AsyncSort._testArraysSortOn;
-    AsyncSort._testType = -1;
-    AsyncSort._initTestArrays = function (testType) {
-        if (testType !== AsyncSort._testType) {
-            AsyncSort._testType = testType;
-            AsyncSort._testArrays = [];
-            //AsyncSort._testArraysSortOn = [];
-            var dummyArray = [0, 1, 2, 3, 4, 5, 50, 3000, 6000, 12000, 25000, 50000];
-            dummyArray.forEach(function (n) {
-                var array = [];
-                // var arraySortOn = [];
-                for (var i = 0; i < n; i++) {
-                    var value;
-                    if (testType === 0) // random integers
-                        value = parseInt(Math.random() * 100);
-                    else if (testType === 1) // random integers and NaNs
-                        value = Math.random() < .5 ? NaN : parseInt(Math.random() * 100);
-                    else if (testType === 2) // random strings
-                        value = 'a' + Math.random();
-
-                    array.push(value);
-                    /*arraySortOn.push({
-                        'value': value
-                    });*/
-                }
-                AsyncSort._testArrays.push(array);
-                // AsyncSort._testArraysSortOn.push(arraySortOn);
-            });
-        }
-        var desc = ['uint', 'uint and NaN', 'string'][testType];
-        console.log("testType =", testType, '(' + desc + ')');
-    }
-    AsyncSort.test = function (compare, testType) {
-            testType = (testType === undefined) ? 0 : testType;
-            AsyncSort._initTestArrays(testType);
-            AsyncSort._debugCompareFunction = compare;
-            AsyncSort._testArrays.forEach(function (_array) {
-                var array1 = _array.concat();
-                var array2 = _array.concat();
-
-                var start = getTimer();
-                AsyncSort._debugCompareCount = 0;
-                if (compare === null || compare === undefined) {
-                    if (array1[0]) {
-                        if (array1[0].constructor === Number) array1.sort(numericSort);
-                        if (array1[0].constructor === String) array1.sort(nonASCIISort);
-                        if (array1[0].constructor === Date) array1.sort(dateSort);
-                    } else {
-                        array1.sort();
-                    }
-
-
-                }
-
-                /*else if (compare instanceof Function)
-                    array1.sort(AsyncSort._debugCompareCounter);*/
-                else
-                    array1.sort(compare);
-                console.log('Array.sort', array1.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
-
-                start = getTimer();
-                AsyncSort._debugCompareCount = 0;
-                AsyncSort.sortImmediately(array2, compare instanceof Function ? AsyncSort._debugCompareCounter : null);
-                //trace('Merge Sort', n, 'numbers;', AsyncSort._immediateSorter.elapsed / 1000, 'seconds;',AsyncSort._debugCompareCount,'comparisons');
-                console.log('Merge Sort', array2.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
-
-                if (array2.length === 1 && weavecore.ObjectUtil.compare(array1[0], array2[0]) !== 0)
-                    throw new Error("sort failed on array length 1");
-
-                AsyncSort._verifyNumbersSorted(array2);
-            });
-
-        }
-        /*AsyncSort.testSortOn = function (compare, testType) {
-            testType = (testType === undefined) ? 0 : testType;
-            AsyncSort._initTestArrays(testType);
-            AsyncSort._debugCompareFunction = new weavecore.SortOn('value', compare || AsyncSort.primitiveCompare).compare;
-            AsyncSort._testArraysSortOn.forEach(function (_array) {
-                var array1 = _array.concat();
-                var array2 = _array.concat();
-                var array3 = _array.concat();
-                var array4 = _array.concat();
-
-                var start = getTimer();
-                AsyncSort._debugCompareCount = 0;
-                if (compare === null)
-                    array1.sortOn('value', 0);
-                else if (compare instanceof Function)
-                    array1.sortOn('value', AsyncSort._debugCompareCounter);
-                else
-                    array1.sortOn('value', compare);
-                console.log('Array.sortOn', array1.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
-
-                start = getTimer();
-                AsyncSort._debugCompareCount = 0;
-                var plucked = new Array();
-                plucked.length = _array.length;
-                var i = _array.length;
-
-                while (i--)
-                    plucked[i] = _array[i]['value'];
-                if (compare === null)
-                    plucked.sort(0);
-                else if (compare instanceof Function)
-                    plucked.sort(AsyncSort._debugCompareCounter);
-                else
-                    plucked.sort(compare);
-                console.log('Pluck & sort', plucked.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
-
-                start = getTimer();
-                AsyncSort._debugCompareCount = 0;
-                weavecore.StandardLib.sortOn(array3, 'value');
-                console.log('StdLib sortOn', array3.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
-
-                start = getTimer();
-                AsyncSort._debugCompareCount = 0;
-                StandardLib.sortOn(array4, ['value']);
-                console.log('StdLib sortOn[]', array4.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
-
-                start = getTimer();
-                AsyncSort._debugCompareCount = 0;
-                AsyncSort.sortImmediately(array2, AsyncSort._debugCompareCounter);
-                //trace('Merge Sort', n, 'numbers;', AsyncSort._immediateSorter.elapsed / 1000, 'seconds;',AsyncSort._debugCompareCount,'comparisons');
-                console.log('Merge SortOn', array2.length, 'numbers;', (getTimer() - start) / 1000, 'seconds;', AsyncSort._debugCompareCount ? (AsyncSort._debugCompareCount + ' comparisons') : '');
-
-                if (array2.length == 1 && weavecore.ObjectUtil.compare(array1[0], array2[0]) != 0)
-                    throw new Error("sort failed on array length 1");
-
-                AsyncSort._verifyNumbersSorted(array2);
-            })
-
-        }*/
-
-    AsyncSort._verifyNumbersSorted = function (array) {
-        for (var i = 1; i < array.length; i++) {
-            if (weavecore.ObjectUtil.numericCompare(array[i - 1], array[i]) > 0) {
-                throw new Error("ASSERTION FAIL " + array[i - 1] + ' > ' + array[i]);
-            }
-        }
-    }
-
-    AsyncSort._debugCompareCount = 0;
-    AsyncSort._debugCompareFunction = null;
-    AsyncSort._debugCompareCounter = function (a, b) {
-        AsyncSort._debugCompareCount++;
-        return AsyncSort._debugCompareFunction(a, b);
-    }
-
-
-
-    weavecore.AsyncSort = AsyncSort;
-
-}());
-
-(function () {
-    function SortOn(prop, compare) {
-        this._prop = prop;
-        this._compare = compare;
-    }
-
-    var p = SortOn.prototype;
-    p.compare = function (a, b) {
-        return this._compare(a[this._prop], b[this._prop]);
-    }
-
-    weavecore.SortOn = SortOn;
-}())

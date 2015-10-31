@@ -14,8 +14,13 @@ module.exports = function (grunt) {
                     'src/createjs/Ticker.js',
 
                     'src/compiler/StandardLib.js',
-                    'src/compiler/Compiler.js',
                     'src/compiler/ObjectUtil.js',
+                    'src/compiler/ICompiledObject.js',
+                    'src/compiler/CompiledConstant.js',
+                    'src/compiler/CompiledFunctionCall.js',
+                    'src/compiler/Compiler.js',
+
+                    'src/WeaveAPI.js',
 
                     'src/core/DynamicState.js',
                     'src/core/ILinkableObject.js',
@@ -25,8 +30,9 @@ module.exports = function (grunt) {
                     'src/core/SessionManager.js',
 
                     'src/utils/URLUtil.js',
-
+                   'src/utils/URLRequestUtils.js',
                     'src/utils/DebugUtils.js',
+                    'src/utils/AsyncSort.js',
                     'src/api/debugId.js',
                     'src/api/detectLinkableObjectChange.js',
 
@@ -41,10 +47,6 @@ module.exports = function (grunt) {
                     'src/core/LinkablePromise.js',
                     'src/core/LinkableFile.js',
 
-
-                    'src/data/keysetCallbackInterface',
-
-                    'src/WeaveAPI.js',
 
                     'src/core/LinkableDynamicObject.js',
                     'src/core/StageUtils.js',

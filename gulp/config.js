@@ -21,6 +21,8 @@ var buildOrder = [
                     compiler + '/CompiledFunctionCall.js',
                     compiler + '/Compiler.js',
 
+                    src + '/WeaveAPI.js',
+
                     core + '/DynamicState.js',
                     core + '/ILinkableObject.js',
                     core + '/ILinkableCompositeObject.js',
@@ -28,6 +30,7 @@ var buildOrder = [
                     primitive + '/WeaveTreeItem.js',
                     primitive + '/Dictionary2D.js',
                     core + '/SessionManager.js',
+
 
                     utils + '/URLUtil.js',
                     utils + '/URLRequestUtils.js',
@@ -47,9 +50,6 @@ var buildOrder = [
                     core + '/LinkablePromise.js',
                     core + '/LinkableFile.js',
 
-
-
-                    src + '/WeaveAPI.js',
 
 
                     core + '/LinkableDynamicObject.js',
