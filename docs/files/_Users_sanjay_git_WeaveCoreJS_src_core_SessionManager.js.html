@@ -1525,8 +1525,16 @@ if (typeof window === &#x27;undefined&#x27;) {
 
     weavecore.SessionManager = SessionManager;
 
-}());
+    // namespace
+    if (typeof window === &#x27;undefined&#x27;) {
+        this.WeaveAPI = this.WeaveAPI || {};
+        this.WeaveAPI.SessionManager = new SessionManager();
+    } else {
+        window.WeaveAPI = window.WeaveAPI || {};
+        window.WeaveAPI.SessionManager = new SessionManager();
+    }
 
+}());
     </pre>
 </div>
 
