@@ -157,7 +157,7 @@ if (typeof window === 'undefined') {
 
         if (this._result !== undefined || this._error !== undefined) {
             // callLater will not call the function if the context was disposed
-            WeaveAPI.StageUtils.callLater(this.relevantContext, callHandlers, [true]);
+            WeaveAPI.StageUtils.callLater(this.relevantContext, callHandlers.bind(this), [true]);
             setBusy.call(this, true);
         }
 
@@ -170,7 +170,7 @@ if (typeof window === 'undefined') {
             setBusy.call(this, true);
         }
         linkableObjects.forEach(function (dependency) {
-            WeaveAPI.SessionManager.getCallbackCollection(dependency).addGroupedCallback(this.relevantContext, callHandlers, true);
+            WeaveAPI.SessionManager.getCallbackCollection(dependency).addGroupedCallback(this.relevantContext, callHandlers.bind(this), true);
         });
         return this;
     }
