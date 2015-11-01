@@ -86,7 +86,7 @@ if (typeof window === 'undefined') {
         this.dictionary.forEach(function (value, key1) {
             this.dictionary.get(key1).delete(key2);
 
-        }, this.dictionary);
+        }.bind(this));
 
     };
 

@@ -7007,7 +7007,7 @@ if (typeof window === 'undefined') {
         this.dictionary.forEach(function (value, key1) {
             this.dictionary.get(key1).delete(key2);
 
-        }, this.dictionary);
+        }.bind(this));
 
     };
 
@@ -7037,7 +7037,6 @@ if (typeof window === 'undefined') {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
-
 /**
  * @module weavecore
  */
@@ -9956,6 +9955,7 @@ if (typeof window === 'undefined') {
     weavecore.AsyncResponder = AsyncResponder;
 
 }());
+
 /**
  * @module WeaveAPI
  */
