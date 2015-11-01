@@ -218,7 +218,7 @@ if (typeof window === 'undefined') {
     p.onResult = function (result) {
         this.wasCalled = true;
         try {
-            next.setResult(this.onFulfilled(result));
+            this.next.setResult(this.onFulfilled(result));
         } catch (e) {
             this.onError(e);
         }
@@ -227,9 +227,9 @@ if (typeof window === 'undefined') {
     p.onError = function (error) {
         this.wasCalled = true;
         try {
-            next.setError(this.onRejected(error));
+            this.next.setError(this.onRejected(error));
         } catch (e) {
-            next.setError(e);
+            this.next.setError(e);
         }
     }
 

@@ -194,6 +194,23 @@ if (typeof window === 'undefined') {
         return value === undefined || value === null || (value.constructor === Number && isNaN(value));
     }
 
+
+    /**
+     * Checks if all items in an Array are instances of a given type.
+     * @param a An Array of items to test
+     * @param type A type to check for
+     * @return true if each item in the Array is an object of the given type.
+     */
+    StandardLib.arrayIsType = function (arr, type) {
+        for (var i = 0; i < arr.length; i++) {
+            var item = arr[i];
+            if (!(item instanceof type || item.constructor === type))
+                return false;
+        }
+
+        return true;
+    }
+
     /**
      * Pads a string on the left.
      */

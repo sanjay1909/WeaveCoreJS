@@ -1667,6 +1667,23 @@ if (typeof window === 'undefined') {
         return value === undefined || value === null || (value.constructor === Number && isNaN(value));
     }
 
+
+    /**
+     * Checks if all items in an Array are instances of a given type.
+     * @param a An Array of items to test
+     * @param type A type to check for
+     * @return true if each item in the Array is an object of the given type.
+     */
+    StandardLib.arrayIsType = function (arr, type) {
+        for (var i = 0; i < arr.length; i++) {
+            var item = arr[i];
+            if (!(item instanceof type || item.constructor === type))
+                return false;
+        }
+
+        return true;
+    }
+
     /**
      * Pads a string on the left.
      */
@@ -1951,7 +1968,6 @@ if (typeof window === 'undefined') {
 
     weavecore.StandardLib = StandardLib;
 }());
-
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
@@ -9879,7 +9895,7 @@ if (typeof window === 'undefined') {
     p.onResult = function (result) {
         this.wasCalled = true;
         try {
-            next.setResult(this.onFulfilled(result));
+            this.next.setResult(this.onFulfilled(result));
         } catch (e) {
             this.onError(e);
         }
@@ -9888,9 +9904,9 @@ if (typeof window === 'undefined') {
     p.onError = function (error) {
         this.wasCalled = true;
         try {
-            next.setError(this.onRejected(error));
+            this.next.setError(this.onRejected(error));
         } catch (e) {
-            next.setError(e);
+            this.next.setError(e);
         }
     }
 
@@ -13048,7 +13064,7 @@ if (!this.WeaveAPI)
                 if (this._activePriority === this._priorityCallLaterQueues.length)
                     this._activePriority = minPriority;
                 pStart = now;
-                pAlloc = this._priorityAllocatedTimes[_activePriority];
+                pAlloc = this._priorityAllocatedTimes[this._activePriority];
                 if (this.eventManager.useDeactivatedFrameRate)
                     pAlloc = pAlloc * this._deactivatedMaxComputationTimePerFrame / this.maxComputationTimePerFrame;
                 else if (!this.eventManager.userActivity)
@@ -13273,7 +13289,6 @@ if (!this.WeaveAPI)
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {

@@ -325,7 +325,7 @@ if (!this.WeaveAPI)
                 if (this._activePriority === this._priorityCallLaterQueues.length)
                     this._activePriority = minPriority;
                 pStart = now;
-                pAlloc = this._priorityAllocatedTimes[_activePriority];
+                pAlloc = this._priorityAllocatedTimes[this._activePriority];
                 if (this.eventManager.useDeactivatedFrameRate)
                     pAlloc = pAlloc * this._deactivatedMaxComputationTimePerFrame / this.maxComputationTimePerFrame;
                 else if (!this.eventManager.userActivity)
