@@ -30,9 +30,11 @@ module.exports = function (grunt) {
                     'src/core/SessionManager.js',
 
                     'src/utils/URLUtil.js',
-                   'src/utils/URLRequestUtils.js',
+                    'src/utils/URLRequestUtils.js',
                     'src/utils/DebugUtils.js',
                     'src/utils/AsyncSort.js',
+                    'src/utils/WeavePromise.js',
+
                     'src/api/debugId.js',
                     'src/api/detectLinkableObjectChange.js',
 

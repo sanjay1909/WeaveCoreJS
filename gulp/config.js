@@ -36,6 +36,9 @@ var buildOrder = [
                     utils + '/URLRequestUtils.js',
                     utils + '/DebugUtils.js',
                     utils + '/AsyncSort.js',
+                    utils + '/WeavePromise.js',
+
+
                     api + '/debugId.js',
                     api + '/detectLinkableObjectChange.js',
 
