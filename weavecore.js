@@ -137,6 +137,7 @@ Array.NUMERIC = 16;
     }
 
 }());
+
 /*
  * Event
  * Visit http://createjs.com/ for documentation, updates and examples.
@@ -7082,9 +7083,13 @@ if (typeof window === 'undefined') {
  */
 
 (function () {
-    function Dictionary2D(defaultType) {
-        this.dictionary = new Map();
-        this.defaultType = defaultType;
+    function Dictionary2D(weakPrimaryKeys, weakSecondaryKeys, defaultType) {
+        weakPrimaryKeys = (weakPrimaryKeys === undefined) ? false : weakPrimaryKeys;
+        weakSecondaryKeys = (weakSecondaryKeys === undefined) ? false : weakSecondaryKeys;
+
+        this.dictionary = weakPrimaryKeys ? new WeakMap() : new Map();
+        this.defaultType = defaultType; // used for creating objects automatically via get()
+        this.weak2 = weakSecondaryKeys // used as a constructor parameter for nested Dictionaries
     }
 
     var p = Dictionary2D.prototype;
@@ -7116,7 +7121,7 @@ if (typeof window === 'undefined') {
     p.set = function (key1, key2, value) {
         var d2 = this.dictionary.get(key1);
         if (d2 === null || d2 === undefined)
-            d2 = new Map();
+            d2 = this.weak2 ? new WeakMap() : new Map();
         this.dictionary.set(key1, d2);
         d2.set(key2, value);
     };
@@ -7167,7 +7172,6 @@ if (typeof window === 'undefined') {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
-
 /**
  * @module weavecore
  */
@@ -8605,6 +8609,7 @@ if (typeof window === 'undefined') {
     }
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -9310,6 +9315,7 @@ if (typeof window === 'undefined') {
     WeaveAPI.DebugUtils = new DebugUtils();
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -12131,6 +12137,7 @@ if (typeof window === 'undefined') {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
+
 /**
  * @module weavecore
  */
