@@ -124,7 +124,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, '_objectToNameMap', {
-            value: new Map()
+            value: new WeakMap()
         });
 
         /**

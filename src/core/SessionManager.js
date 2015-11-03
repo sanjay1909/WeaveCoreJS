@@ -30,7 +30,7 @@ if (typeof window === 'undefined') {
          * This maps a child ILinkableObject to a Dictionary, which maps each of its registered parent ILinkableObjects to a value of true if the child should appear in the session state automatically or false if not.
          */
         Object.defineProperty(this, "_childToParentMap", {
-            value: new Map()
+            value: new WeakMap()
         });
 
         /**
@@ -41,7 +41,7 @@ if (typeof window === 'undefined') {
          * This maps a parent ILinkableObject to a Dictionary, which maps each of its registered child ILinkableObjects to a value of true if the child should appear in the session state automatically or false if not.
          */
         Object.defineProperty(this, "_parentToChildMap", {
-            value: new Map()
+            value: new WeakMap()
         });
 
         /**
@@ -52,7 +52,7 @@ if (typeof window === 'undefined') {
          * This maps a parent ILinkableObject to a Dictionary, which maps each child ILinkableObject it owns to a value of true.
          */
         Object.defineProperty(this, "_ownerToChildMap", {
-            value: new Map()
+            value: new WeakMap()
         });
 
         /**
@@ -63,12 +63,12 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_childToOwnerMap", {
-            value: new Map()
+            value: new WeakMap()
         });
 
         this.debug = false;
 
-        this.linkableObjectToCallbackCollectionMap = new Map();
+        this.linkableObjectToCallbackCollectionMap = new WeakMap();
         this.debugBusyTasks = false;
 
         /**
@@ -78,7 +78,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_disposedObjectsMap", {
-            value: new Map()
+            value: new WeakMap()
         });
 
         /**
@@ -109,7 +109,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_getSessionStateIgnoreList", {
-            value: new Map()
+            value: new WeakMap()
         });
 
 
@@ -130,7 +130,7 @@ if (typeof window === 'undefined') {
          * @type weavecore.Dictionary2D
          */
         Object.defineProperty(this, "_d2dOwnerTask", {
-            value: new weavecore.Dictionary2D()
+            value: new weavecore.Dictionary2D(true, false)
         });
 
         /**
@@ -140,7 +140,7 @@ if (typeof window === 'undefined') {
          * @type weavecore.Dictionary2D
          */
         Object.defineProperty(this, "_d2dTaskOwner", {
-            value: new weavecore.Dictionary2D()
+            value: new weavecore.Dictionary2D(false, true)
         });
 
         /**
@@ -151,7 +151,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_dBusyTraversal", {
-            value: new Map()
+            value: new WeakMap()
         });
 
         /**
@@ -172,7 +172,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_dUnbusyTriggerCounts", {
-            value: new Map()
+            value: new WeakMap()
         });
 
         /**
@@ -183,7 +183,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_dUnbusyStackTraces", {
-            value: new Map()
+            value: new WeakMap()
         });
 
         /**
@@ -285,8 +285,8 @@ if (typeof window === 'undefined') {
      */
     p.registerDisposableChild = function (disposableParent, disposableChild) {
         if (this._ownerToChildMap.get(disposableParent) === undefined) {
-            this._ownerToChildMap.set(disposableParent, new Map());
-            this._parentToChildMap.set(disposableParent, new Map());
+            this._ownerToChildMap.set(disposableParent, new WeakMap());
+            this._parentToChildMap.set(disposableParent, new WeakMap());
         }
         // if this child has no owner yet...
         if (this._childToOwnerMap.get(disposableChild) === undefined) {
@@ -294,7 +294,7 @@ if (typeof window === 'undefined') {
             this._childToOwnerMap.set(disposableChild, disposableParent);
             this._ownerToChildMap.get(disposableParent).set(disposableChild, true);
             // initialize the parent dictionary for this child
-            this._childToParentMap.set(disposableChild, new Map());
+            this._childToParentMap.set(disposableChild, new WeakMap());
         }
         return disposableChild;
     };
@@ -374,10 +374,30 @@ if (typeof window === 'undefined') {
      * See {{#crossLink "SessionManager/getLinkableOwner:method"}}{{/crossLink}}
      */
     p.getLinkableDescendants = function (root, filter) { //TODO: Port getLinkableDescendants
-        //return this._childToOwnerMap.get(child);
+        filter = (filter === undefined) ? null : filter;
+        var result = [];
+        if (root)
+            internalGetDescendants.call(this, result, root, filter, new WeakMap(), Number.MAX_VALUE);
+        // don't include root object
+        if (result.length > 0 && result[0] === root)
+            result.shift();
+        return result;
     };
-    //TODO: Port Busy task from As3
 
+
+    function internalGetDescendants(output, root, filter, ignoreList, depth) {
+        if (root === null || ignoreList.get(root) !== undefined)
+            return;
+        ignoreList.set(root, true);
+        if (filter === null || root instanceof filter)
+            output.push(root);
+        if (--depth <= 0)
+            return;
+
+        for (var object of this._parentToChildMap.get(root).keys()) {
+            internalGetDescendants.call(this, output, object, filter, ignoreList, depth);
+        }
+    }
 
     function _getPath(tree, descendant) {
         if (tree.data === descendant)
@@ -423,7 +443,7 @@ if (typeof window === 'undefined') {
     p.getObject = function (root, path) {
         var object = root;
         path.forEach(function (propertyName) {
-            if (object === null || this._disposedObjectsMap[object])
+            if (object === null || this._disposedObjectsMap.get(object))
                 return null;
             if (object instanceof weavecore.LinkableHashMap) {
                 if (propertyName.constructor === Number)
@@ -439,7 +459,7 @@ if (typeof window === 'undefined') {
                 object = object[propertyName];
             }
         }.bind(this));
-        return this._disposedObjectsMap[object] ? null : object;
+        return this._disposedObjectsMap.get(object) ? null : object;
     }
 
     /**
@@ -476,7 +496,7 @@ if (typeof window === 'undefined') {
         var names = [];
         var childObject;
         var subtree;
-        var ignoreList = new Map();
+        var ignoreList = new WeakMap();
         if (object instanceof weavecore.LinkableHashMap) {
             names = object.getNames();
             var childObjects = object.getObjects();

@@ -11,6 +11,7 @@ var pkg = require('../package');
 //used both for Source reference and Order reference
 var buildOrder = [
                     utils + '/ArraySortOn.js',
+                    utils + '/WeakReference.js',
                     src + '/createjs/events/*.js', // All JS in the libs folder
                     src + '/createjs/Ticker.js',
 

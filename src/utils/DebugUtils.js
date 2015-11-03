@@ -17,7 +17,7 @@ if (typeof window === 'undefined') {
      ****************************/
 
     DebugUtils._idToObjRef = new Map();
-    DebugUtils._objToId = new Map(); // weakKeys=true to avoid memory leak
+    DebugUtils._objToId = new WeakMap(); // weakKeys=true to avoid memory leak
     DebugUtils._nextId = 0;
 
     /**

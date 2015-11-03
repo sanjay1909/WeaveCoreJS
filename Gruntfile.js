@@ -9,6 +9,7 @@ module.exports = function (grunt) {
             dist: {
                 src: [
                     'src/utils/ArraySortOn.js',
+                    'src/utils/WeakReference.js',
 
                     'src/createjs/events/*.js', // All JS in the libs folder
                     'src/createjs/Ticker.js',

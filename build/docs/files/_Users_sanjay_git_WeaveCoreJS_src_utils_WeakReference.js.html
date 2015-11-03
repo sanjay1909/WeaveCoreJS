@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>/Users/sanjay/git/WeaveCoreJS/src/primitive/Dictionary2D.js - weavecore</title>
+    <title>/Users/sanjay/git/WeaveCoreJS/src/utils/WeakReference.js - weavecore</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -114,129 +114,56 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1 class="file-heading">File: /Users/sanjay/git/WeaveCoreJS/src/primitive/Dictionary2D.js</h1>
+                        <h1 class="file-heading">File: /Users/sanjay/git/WeaveCoreJS/src/utils/WeakReference.js</h1>
 
 <div class="file">
     <pre class="code prettyprint linenums">
-/*
-    Weave (Web-based Analysis and Visualization Environment)
-    Copyright (C) 2008-2011 University of Massachusetts Lowell
-
-    This file is a part of Weave.
-
-    Weave is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, Version 3,
-    as published by the Free Software Foundation.
-
-    Weave is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Weave.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
-*/
-
-if (typeof window === &#x27;undefined&#x27;) {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-/**
- * This is a wrapper for a 2-dimensional Dictionary.
- *
- * @author adufilie
- * @author sanjay1909
- */
-
 (function () {
-    function Dictionary2D(defaultType) {
-        this.dictionary = new Map();
-        this.defaultType = defaultType;
+
+    /**
+     * This class is a wrapper for a weak reference to an object.
+     * See the documentation for the Dictionary class for more info about weak references.
+     *
+     * @author adufilie
+     * @author sanjay1909
+     */
+    function WeakReference(value) {
+        value = (value === undefined) ? null : value;
+        /**
+         * The reference is stored as a key in this Dictionary, which uses the weakKeys option.
+         */
+        this.dictionary = new WeakMap();
+
+        /**
+         * A weak reference to an object.
+         */
+        Object.defineProperty(this, &#x27;value&#x27;, {
+            get: function () {
+                for (var key of this.dictionary.keys())
+                    return key;
+                return null;
+            },
+            set: function (newValue) {
+                for (var key of this.dictionary.keys()) {
+                    // do nothing if value didn&#x27;t change
+                    if (key === newValue)
+                        return;
+                    this.dictionary.delete(key);
+                }
+                if (newValue !== null) {
+
+                    if (newValue instanceof Function &amp;&amp; newValue.constructor.name !== &#x27;Function&#x27;)
+                        this.dictionary.set(newValue, newValue); // change to null when flash player bug is fixed
+                    else
+                        this.dictionary.set(newValue, null);
+                }
+            }
+
+        });
+
     }
 
-    var p = Dictionary2D.prototype;
-
-    /**
-     *
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @return The value in the dictionary.
-     */
-    p.get = function (key1, key2) {
-        var value;
-        var d2 = this.dictionary.get(key1);
-        if (d2)
-            value = d2.get(key2);
-        if (value === undefined &amp;&amp; this.defaultType) {
-            value = new this.defaultType();
-            this.set(key1, key2, value);
-        }
-        return value;
-    };
-
-    /**
-     * This will add or replace an entry in the dictionary.
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @param value The value to put into the dictionary.
-     */
-    p.set = function (key1, key2, value) {
-        var d2 = this.dictionary.get(key1);
-        if (d2 === null || d2 === undefined)
-            d2 = new Map();
-        this.dictionary.set(key1, d2);
-        d2.set(key2, value);
-    };
-
-    /**
-     * This removes all values associated with the given primary key.
-     * @param key1 The first dictionary key.
-     */
-    p.removeAllPrimary = function (key1) {
-        this.dictionary.delete(key1);
-    };
-
-    /**
-     * This removes all values associated with the given secondary key.
-     * @param key2 The second dictionary key.
-     */
-    p.removeAllSecondary = function (key2) {
-        this.dictionary.forEach(function (value, key1) {
-            this.dictionary.get(key1).delete(key2);
-
-        }.bind(this));
-
-    };
-
-    /**
-     * This removes a value associated with the given primary and secondary keys.
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @return The value that was in the dictionary.
-     */
-    p.remove = function (key1, key2) {
-        var value;
-        var d2 = this.dictionary.get(key1);
-        if (d2) {
-            value = d2.get(key2);
-            d2.delete(key2);
-        }
-
-
-        for (var v2 of d2.values())
-            return value;
-
-        // otherwise, remove it
-        this.dictionary.delete(key1);
-
-        return value;
-    };
-
-    weavecore.Dictionary2D = Dictionary2D;
 }());
-
     </pre>
 </div>
 
