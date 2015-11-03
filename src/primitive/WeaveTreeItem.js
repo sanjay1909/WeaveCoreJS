@@ -91,7 +91,7 @@ if (typeof window === 'undefined') {
                 this._counter['label'] = undefined;
                 this._label = value;
             },
-            configurable: true;
+            configurable: true
         });
 
 
