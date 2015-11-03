@@ -210,7 +210,8 @@ if (typeof window === &#x27;undefined&#x27;) {
             set: function (value) {
                 this._counter[&#x27;label&#x27;] = undefined;
                 this._label = value;
-            }
+            },
+            configurable: true;
         });
 
 
@@ -461,7 +462,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     weavecore.WeaveTreeItem = WeaveTreeItem;
 
 }());
-
     </pre>
 </div>
 

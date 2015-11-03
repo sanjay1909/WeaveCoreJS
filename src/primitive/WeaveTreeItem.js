@@ -90,7 +90,8 @@ if (typeof window === 'undefined') {
             set: function (value) {
                 this._counter['label'] = undefined;
                 this._label = value;
-            }
+            },
+            configurable: true;
         });
 
 

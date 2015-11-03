@@ -6798,7 +6798,8 @@ if (typeof window === 'undefined') {
             set: function (value) {
                 this._counter['label'] = undefined;
                 this._label = value;
-            }
+            },
+            configurable: true;
         });
 
 
@@ -7049,7 +7050,6 @@ if (typeof window === 'undefined') {
     weavecore.WeaveTreeItem = WeaveTreeItem;
 
 }());
-
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -7172,6 +7172,7 @@ if (typeof window === 'undefined') {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
+
 /**
  * @module weavecore
  */
