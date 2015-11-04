@@ -211,6 +211,9 @@ if (typeof window === &#x27;undefined&#x27;) {
 
         // override public
         Object.defineProperty(this, &#x27;targetPath&#x27;, {
+            get: function () {
+                return weavecore.LinkableWatcher.prototype.targetPath
+            },
 
             set: function (path) {
                 if (this._locked)
@@ -222,6 +225,9 @@ if (typeof window === &#x27;undefined&#x27;) {
 
         // override public
         Object.defineProperty(this, &#x27;target&#x27;, {
+            get: function () {
+                return weavecore.LinkableWatcher.prototype.target;
+            },
 
             set: function (newTarget) {
                 if (this._locked)
@@ -391,7 +397,7 @@ if (typeof window === &#x27;undefined&#x27;) {
                 var prevTarget = this.target;
                 // if className is not specified, make no change unless removeMissingDynamicObjects is true
                 if (className || removeMissingDynamicObjects)
-                    this._setLocalObjectType(className);
+                    setLocalObjectType.call(this, className);
                 //TODO:Remove hardcoded NameSpace
                 //var classDef = eval(&quot;weavecore.&quot; + className);
                 var classDef = window[className];
@@ -423,7 +429,7 @@ if (typeof window === &#x27;undefined&#x27;) {
     //private
     //to-do
     // replace weavecore with ns and figure out best way to deal this
-    p._setLocalObjectType = function (className) {
+    function setLocalObjectType(className) {
         // stop if locked
         if (this._locked)
             return;
@@ -458,7 +464,7 @@ if (typeof window === &#x27;undefined&#x27;) {
         // we nee dot get namespace of that object here too
         // temp solution store  Ns name in the object instance as String
         if (objectType)
-            this._setLocalObjectType(objectType.NS + &#x27;.&#x27; + objectType.CLASS_NAME);
+            setLocalObjectType.call(this, objectType.NS + &#x27;.&#x27; + objectType.CLASS_NAME);
         else
             this.target = null;
 
@@ -466,6 +472,9 @@ if (typeof window === &#x27;undefined&#x27;) {
             this._locked = true;
 
         this._cc.resumeCallbacks();
+
+        if (objectType)
+            return (this.target &amp;&amp; this.target instanceof objectType) ? this.target : null;
 
         return this.target;
     };
@@ -487,6 +496,9 @@ if (typeof window === &#x27;undefined&#x27;) {
 
             this._cc.resumeCallbacks();
         }
+
+        if (objectType)
+            return (this.target &amp;&amp; this.target instanceof objectType) ? this.target : null;
 
         return this.target;
     };
