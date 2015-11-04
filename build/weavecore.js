@@ -150,6 +150,7 @@ if (typeof window === 'undefined') {
     weavecore.WeakReference = WeakReference
 
 }());
+
 /*
  * Event
  * Visit http://createjs.com/ for documentation, updates and examples.
@@ -12699,6 +12700,23 @@ if (typeof window === 'undefined') {
 
         });
 
+        Object.defineProperty(this, 'triggerCounter', {
+            get: function () {
+                this._cc.triggerCounter;
+            }
+
+        });
+
+        Object.defineProperty(this, 'callbacksAreDelayed', {
+            get: function () {
+                this._cc.callbacksAreDelayed;
+            }
+
+        });
+
+
+
+
 
     }
 
@@ -12913,11 +12931,52 @@ if (typeof window === 'undefined') {
         weavecore.LinkableWatcher.prototype.dispose();
     };
 
+    ////////////////////////////////////////////////////////////////////////
+    // ICallbackCollection interface included for backwards compatibility
+    /** @inheritDoc */
+    p.addImmediateCallback = function (relevantContext, callback, runCallbackNow, alwaysCallLast) {
+        runCallbackNow = (runCallbackNow === undefined) ? false : runCallbackNow;
+        alwaysCallLast = (alwaysCallLast === undefined) ? false : alwaysCallLast;
+        this._cc.addImmediateCallback(relevantContext, callback, runCallbackNow, alwaysCallLast);
+    };
+
+    /** @inheritDoc */
+    p.addGroupedCallback = function (relevantContext, groupedCallback, triggerCallbackNow) {
+        triggerCallbackNow = (triggerCallbackNow === undefined) ? false : triggerCallbackNow;
+        this._cc.addGroupedCallback(relevantContext, groupedCallback, triggerCallbackNow);
+    };
+
+    /** @inheritDoc */
+    p.addDisposeCallback = function (relevantContext, callback) {
+        this._cc.addDisposeCallback(relevantContext, callback);
+    };
+
+    /** @inheritDoc */
+    p.removeCallback = function (callback) {
+        this._cc.removeCallback(callback);
+    };
+
+    /** @inheritDoc */
+    /** @inheritDoc */
+    p.triggerCallbacks = function () {
+        this._cc.triggerCallbacks();
+    };
+
+    /** @inheritDoc */
+    /** @inheritDoc */
+    p.delayCallbacks = function () {
+        this._cc.delayCallbacks();
+    };
+
+    /** @inheritDoc */
+    p.resumeCallbacks = function () {
+        this._cc.resumeCallbacks();
+    };
+
     weavecore.LinkableDynamicObject = LinkableDynamicObject;
 
 
 }());
-
 // namespace
 
 if (!this.weavecore)
