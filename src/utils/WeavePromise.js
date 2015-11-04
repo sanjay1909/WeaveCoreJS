@@ -171,7 +171,7 @@ if (typeof window === 'undefined') {
         }
         linkableObjects.forEach(function (dependency) {
             WeaveAPI.SessionManager.getCallbackCollection(dependency).addGroupedCallback(this.relevantContext, callHandlers.bind(this), true);
-        });
+        }.bind(this));
         return this;
     }
 

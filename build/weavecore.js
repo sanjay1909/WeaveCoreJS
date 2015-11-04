@@ -10018,7 +10018,7 @@ if (typeof window === 'undefined') {
         }
         linkableObjects.forEach(function (dependency) {
             WeaveAPI.SessionManager.getCallbackCollection(dependency).addGroupedCallback(this.relevantContext, callHandlers.bind(this), true);
-        });
+        }.bind(this));
         return this;
     }
 
@@ -10125,7 +10125,6 @@ if (typeof window === 'undefined') {
     weavecore.AsyncResponder = AsyncResponder;
 
 }());
-
 /**
  * @module WeaveAPI
  */
@@ -13532,6 +13531,7 @@ if (!this.WeaveAPI)
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
