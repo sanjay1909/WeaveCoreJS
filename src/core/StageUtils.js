@@ -268,7 +268,7 @@ if (!this.WeaveAPI)
             if (!WeaveAPI.SessionManager.objectWasDisposed(args[0])) {
                 args2 = args[2];
                 if (args2 !== null && args2 && args2.length > 0)
-                    args[1].apply(null, args2);
+                    args[1].apply(args2[0], args2); //args2[0] constians the original context
                 else
                     args[1].call();
             }
