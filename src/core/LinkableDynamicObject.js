@@ -91,6 +91,9 @@ if (typeof window === 'undefined') {
 
         // override public
         Object.defineProperty(this, 'targetPath', {
+            get: function () {
+                return weavecore.LinkableWatcher.prototype.targetPath
+            },
 
             set: function (path) {
                 if (this._locked)
@@ -102,6 +105,9 @@ if (typeof window === 'undefined') {
 
         // override public
         Object.defineProperty(this, 'target', {
+            get: function () {
+                return weavecore.LinkableWatcher.prototype.target;
+            },
 
             set: function (newTarget) {
                 if (this._locked)
@@ -271,7 +277,7 @@ if (typeof window === 'undefined') {
                 var prevTarget = this.target;
                 // if className is not specified, make no change unless removeMissingDynamicObjects is true
                 if (className || removeMissingDynamicObjects)
-                    this._setLocalObjectType(className);
+                    setLocalObjectType.call(this, className);
                 //TODO:Remove hardcoded NameSpace
                 //var classDef = eval("weavecore." + className);
                 var classDef = window[className];
@@ -303,7 +309,7 @@ if (typeof window === 'undefined') {
     //private
     //to-do
     // replace weavecore with ns and figure out best way to deal this
-    p._setLocalObjectType = function (className) {
+    function setLocalObjectType(className) {
         // stop if locked
         if (this._locked)
             return;
@@ -338,7 +344,7 @@ if (typeof window === 'undefined') {
         // we nee dot get namespace of that object here too
         // temp solution store  Ns name in the object instance as String
         if (objectType)
-            this._setLocalObjectType(objectType.NS + '.' + objectType.CLASS_NAME);
+            setLocalObjectType.call(this, objectType.NS + '.' + objectType.CLASS_NAME);
         else
             this.target = null;
 
@@ -346,6 +352,9 @@ if (typeof window === 'undefined') {
             this._locked = true;
 
         this._cc.resumeCallbacks();
+
+        if (objectType)
+            return (this.target && this.target instanceof objectType) ? this.target : null;
 
         return this.target;
     };
@@ -367,6 +376,9 @@ if (typeof window === 'undefined') {
 
             this._cc.resumeCallbacks();
         }
+
+        if (objectType)
+            return (this.target && this.target instanceof objectType) ? this.target : null;
 
         return this.target;
     };
