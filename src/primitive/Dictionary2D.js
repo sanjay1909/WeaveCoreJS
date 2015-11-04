@@ -35,7 +35,7 @@ if (typeof window === 'undefined') {
         weakPrimaryKeys = (weakPrimaryKeys === undefined) ? false : weakPrimaryKeys;
         weakSecondaryKeys = (weakSecondaryKeys === undefined) ? false : weakSecondaryKeys;
 
-        this.dictionary = weakPrimaryKeys ? new WeakMap() : new Map();
+        this.dictionary = weakPrimaryKeys ? new Map() : new Map();
         this.defaultType = defaultType; // used for creating objects automatically via get()
         this.weak2 = weakSecondaryKeys // used as a constructor parameter for nested Dictionaries
     }
@@ -69,7 +69,7 @@ if (typeof window === 'undefined') {
     p.set = function (key1, key2, value) {
         var d2 = this.dictionary.get(key1);
         if (d2 === null || d2 === undefined)
-            d2 = this.weak2 ? new WeakMap() : new Map();
+            d2 = this.weak2 ? new Map() : new Map();
         this.dictionary.set(key1, d2);
         d2.set(key2, value);
     };

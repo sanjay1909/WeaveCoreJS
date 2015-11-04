@@ -12,7 +12,7 @@
         /**
          * The reference is stored as a key in this Dictionary, which uses the weakKeys option.
          */
-        this.dictionary = new WeakMap();
+        this.dictionary = new Map();
 
         /**
          * A weak reference to an object.

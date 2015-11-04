@@ -112,13 +112,13 @@ if (!this.WeaveAPI)
                 value: []
             },
             _stackTraceMap: {
-                value: new WeakMap()
+                value: new Map()
             },
             _taskElapsedTime: {
-                value: new WeakMap()
+                value: new Map()
             },
             _taskStartTime: {
-                value: new WeakMap()
+                value: new Map()
             },
 
         });
@@ -151,7 +151,7 @@ if (!this.WeaveAPI)
         this.maxComputationTimePerFrame = 100;
         this.maxComputationTimePerFrame_noActivity = 250;
 
-        this._debugTaskTimes = new WeakMap();
+        this._debugTaskTimes = new Map();
 
     }
 

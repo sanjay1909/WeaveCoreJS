@@ -105,7 +105,7 @@ Array.NUMERIC = 16;
         /**
          * The reference is stored as a key in this Dictionary, which uses the weakKeys option.
          */
-        this.dictionary = new WeakMap();
+        this.dictionary = new Map();
 
         /**
          * A weak reference to an object.
@@ -137,7 +137,6 @@ Array.NUMERIC = 16;
     }
 
 }());
-
 /*
  * Event
  * Visit http://createjs.com/ for documentation, updates and examples.
@@ -6966,6 +6965,7 @@ if (typeof window === 'undefined') {
     weavecore.WeaveTreeItem = WeaveTreeItem;
 
 }());
+
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -7003,7 +7003,7 @@ if (typeof window === 'undefined') {
         weakPrimaryKeys = (weakPrimaryKeys === undefined) ? false : weakPrimaryKeys;
         weakSecondaryKeys = (weakSecondaryKeys === undefined) ? false : weakSecondaryKeys;
 
-        this.dictionary = weakPrimaryKeys ? new WeakMap() : new Map();
+        this.dictionary = weakPrimaryKeys ? new Map() : new Map();
         this.defaultType = defaultType; // used for creating objects automatically via get()
         this.weak2 = weakSecondaryKeys // used as a constructor parameter for nested Dictionaries
     }
@@ -7037,7 +7037,7 @@ if (typeof window === 'undefined') {
     p.set = function (key1, key2, value) {
         var d2 = this.dictionary.get(key1);
         if (d2 === null || d2 === undefined)
-            d2 = this.weak2 ? new WeakMap() : new Map();
+            d2 = this.weak2 ? new Map() : new Map();
         this.dictionary.set(key1, d2);
         d2.set(key2, value);
     };
@@ -7088,7 +7088,6 @@ if (typeof window === 'undefined') {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
-
 /**
  * @module weavecore
  */
@@ -7121,7 +7120,7 @@ if (typeof window === 'undefined') {
          * This maps a child ILinkableObject to a Dictionary, which maps each of its registered parent ILinkableObjects to a value of true if the child should appear in the session state automatically or false if not.
          */
         Object.defineProperty(this, "_childToParentMap", {
-            value: new WeakMap()
+            value: new Map()
         });
 
         /**
@@ -7132,7 +7131,7 @@ if (typeof window === 'undefined') {
          * This maps a parent ILinkableObject to a Dictionary, which maps each of its registered child ILinkableObjects to a value of true if the child should appear in the session state automatically or false if not.
          */
         Object.defineProperty(this, "_parentToChildMap", {
-            value: new WeakMap()
+            value: new Map()
         });
 
         /**
@@ -7143,7 +7142,7 @@ if (typeof window === 'undefined') {
          * This maps a parent ILinkableObject to a Dictionary, which maps each child ILinkableObject it owns to a value of true.
          */
         Object.defineProperty(this, "_ownerToChildMap", {
-            value: new WeakMap()
+            value: new Map()
         });
 
         /**
@@ -7154,12 +7153,12 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_childToOwnerMap", {
-            value: new WeakMap()
+            value: new Map()
         });
 
         this.debug = false;
 
-        this.linkableObjectToCallbackCollectionMap = new WeakMap();
+        this.linkableObjectToCallbackCollectionMap = new Map();
         this.debugBusyTasks = false;
 
         /**
@@ -7169,7 +7168,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_disposedObjectsMap", {
-            value: new WeakMap()
+            value: new Map()
         });
 
         /**
@@ -7200,7 +7199,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_getSessionStateIgnoreList", {
-            value: new WeakMap()
+            value: new Map()
         });
 
 
@@ -7242,7 +7241,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_dBusyTraversal", {
-            value: new WeakMap()
+            value: new Map()
         });
 
         /**
@@ -7263,7 +7262,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_dUnbusyTriggerCounts", {
-            value: new WeakMap()
+            value: new Map()
         });
 
         /**
@@ -7274,7 +7273,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, "_dUnbusyStackTraces", {
-            value: new WeakMap()
+            value: new Map()
         });
 
         /**
@@ -7376,8 +7375,8 @@ if (typeof window === 'undefined') {
      */
     p.registerDisposableChild = function (disposableParent, disposableChild) {
         if (this._ownerToChildMap.get(disposableParent) === undefined) {
-            this._ownerToChildMap.set(disposableParent, new WeakMap());
-            this._parentToChildMap.set(disposableParent, new WeakMap());
+            this._ownerToChildMap.set(disposableParent, new Map());
+            this._parentToChildMap.set(disposableParent, new Map());
         }
         // if this child has no owner yet...
         if (this._childToOwnerMap.get(disposableChild) === undefined) {
@@ -7385,7 +7384,7 @@ if (typeof window === 'undefined') {
             this._childToOwnerMap.set(disposableChild, disposableParent);
             this._ownerToChildMap.get(disposableParent).set(disposableChild, true);
             // initialize the parent dictionary for this child
-            this._childToParentMap.set(disposableChild, new WeakMap());
+            this._childToParentMap.set(disposableChild, new Map());
         }
         return disposableChild;
     };
@@ -7468,7 +7467,7 @@ if (typeof window === 'undefined') {
         filter = (filter === undefined) ? null : filter;
         var result = [];
         if (root)
-            internalGetDescendants.call(this, result, root, filter, new WeakMap(), Number.MAX_VALUE);
+            internalGetDescendants.call(this, result, root, filter, new Map(), Number.MAX_VALUE);
         // don't include root object
         if (result.length > 0 && result[0] === root)
             result.shift();
@@ -7587,7 +7586,7 @@ if (typeof window === 'undefined') {
         var names = [];
         var childObject;
         var subtree;
-        var ignoreList = new WeakMap();
+        var ignoreList = new Map();
         if (object instanceof weavecore.LinkableHashMap) {
             names = object.getNames();
             var childObjects = object.getObjects();
@@ -8526,7 +8525,6 @@ if (typeof window === 'undefined') {
     }
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -9201,7 +9199,7 @@ if (typeof window === 'undefined') {
      ****************************/
 
     DebugUtils._idToObjRef = new Map();
-    DebugUtils._objToId = new WeakMap(); // weakKeys=true to avoid memory leak
+    DebugUtils._objToId = new Map(); // weakKeys=true to avoid memory leak
     DebugUtils._nextId = 0;
 
     /**
@@ -9232,7 +9230,6 @@ if (typeof window === 'undefined') {
     WeaveAPI.DebugUtils = new DebugUtils();
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -11520,7 +11517,7 @@ if (typeof window === 'undefined') {
          * @type Map
          */
         Object.defineProperty(this, '_objectToNameMap', {
-            value: new WeakMap()
+            value: new Map()
         });
 
         /**
@@ -12054,7 +12051,6 @@ if (typeof window === 'undefined') {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
-
 /**
  * @module weavecore
  */
@@ -12924,13 +12920,13 @@ if (!this.WeaveAPI)
                 value: []
             },
             _stackTraceMap: {
-                value: new WeakMap()
+                value: new Map()
             },
             _taskElapsedTime: {
-                value: new WeakMap()
+                value: new Map()
             },
             _taskStartTime: {
-                value: new WeakMap()
+                value: new Map()
             },
 
         });
@@ -12963,7 +12959,7 @@ if (!this.WeaveAPI)
         this.maxComputationTimePerFrame = 100;
         this.maxComputationTimePerFrame_noActivity = 250;
 
-        this._debugTaskTimes = new WeakMap();
+        this._debugTaskTimes = new Map();
 
     }
 
@@ -13362,7 +13358,6 @@ if (!this.WeaveAPI)
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {

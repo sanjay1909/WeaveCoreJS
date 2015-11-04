@@ -244,7 +244,7 @@ if (typeof window === &#x27;undefined&#x27;) {
          * @type Map
          */
         Object.defineProperty(this, &#x27;_objectToNameMap&#x27;, {
-            value: new WeakMap()
+            value: new Map()
         });
 
         /**
@@ -778,7 +778,6 @@ if (typeof window === &#x27;undefined&#x27;) {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
-
     </pre>
 </div>
 
