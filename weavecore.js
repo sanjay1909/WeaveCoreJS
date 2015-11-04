@@ -12977,6 +12977,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 // namespace
 
 if (!this.weavecore)
