@@ -91,6 +91,12 @@ Array.NUMERIC = 16;
 
 })();
 
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
 (function () {
 
     /**
@@ -106,38 +112,43 @@ Array.NUMERIC = 16;
          * The reference is stored as a key in this Dictionary, which uses the weakKeys option.
          */
         this.dictionary = new Map();
+        //this._keyObj = {};
 
         /**
          * A weak reference to an object.
          */
         Object.defineProperty(this, 'value', {
             get: function () {
-                for (var key of this.dictionary.keys())
+                var keys = this.dictionary.keys();
+                for (var i = 0; i < keys.length; i++) {
+                    var key = keys[i]
                     return key;
+                }
+
                 return null;
             },
             set: function (newValue) {
-                for (var key of this.dictionary.keys()) {
-                    // do nothing if value didn't change
+                for (var i = 0; i < keys.length; i++) {
+                    var key = keys[i]
                     if (key === newValue)
                         return;
                     this.dictionary.delete(key);
                 }
-                if (newValue !== null) {
 
-                    if (newValue instanceof Function && newValue.constructor.name !== 'Function')
-                        this.dictionary.set(newValue, newValue); // change to null when flash player bug is fixed
-                    else
-                        this.dictionary.set(newValue, null);
+                if (newValue !== null) {
+                    this.dictionary.set(newValue, null);
                 }
             }
 
         });
 
+        this.value = value;
+
     }
 
-}());
+    weavecore.WeakReference = WeakReference
 
+}());
 /*
  * Event
  * Visit http://createjs.com/ for documentation, updates and examples.
@@ -12821,6 +12832,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 // namespace
 
 if (!this.weavecore)

@@ -118,6 +118,12 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
+if (typeof window === &#x27;undefined&#x27;) {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
 (function () {
 
     /**
@@ -133,38 +139,43 @@
          * The reference is stored as a key in this Dictionary, which uses the weakKeys option.
          */
         this.dictionary = new Map();
+        //this._keyObj = {};
 
         /**
          * A weak reference to an object.
          */
         Object.defineProperty(this, &#x27;value&#x27;, {
             get: function () {
-                for (var key of this.dictionary.keys())
+                var keys = this.dictionary.keys();
+                for (var i = 0; i &lt; keys.length; i++) {
+                    var key = keys[i]
                     return key;
+                }
+
                 return null;
             },
             set: function (newValue) {
-                for (var key of this.dictionary.keys()) {
-                    // do nothing if value didn&#x27;t change
+                for (var i = 0; i &lt; keys.length; i++) {
+                    var key = keys[i]
                     if (key === newValue)
                         return;
                     this.dictionary.delete(key);
                 }
-                if (newValue !== null) {
 
-                    if (newValue instanceof Function &amp;&amp; newValue.constructor.name !== &#x27;Function&#x27;)
-                        this.dictionary.set(newValue, newValue); // change to null when flash player bug is fixed
-                    else
-                        this.dictionary.set(newValue, null);
+                if (newValue !== null) {
+                    this.dictionary.set(newValue, null);
                 }
             }
 
         });
 
+        this.value = value;
+
     }
 
-}());
+    weavecore.WeakReference = WeakReference
 
+}());
     </pre>
 </div>
 
