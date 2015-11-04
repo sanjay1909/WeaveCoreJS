@@ -469,5 +469,6 @@ if (typeof window === 'undefined') {
         }
     };
     weavecore.SessionStateLog = SessionStateLog;
+    weavecore.ClassUtils.registerClass('weavecore.SessionStateLog', SessionStateLog);
 
 }());

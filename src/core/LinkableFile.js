@@ -108,5 +108,6 @@ if (typeof window === 'undefined') {
 
 
     weavecore.LinkableFile = LinkableFile;
+    weavecore.ClassUtils.registerClass('weavecore.LinkableFile', LinkableFile);
 
 }());

@@ -99,5 +99,6 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableNumber = LinkableNumber;
+    weavecore.ClassUtils.registerClass('weavecore.LinkableNumber', LinkableNumber);
 
 }());

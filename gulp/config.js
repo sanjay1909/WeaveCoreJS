@@ -10,6 +10,7 @@ var pkg = require('../package');
 
 //used both for Source reference and Order reference
 var buildOrder = [
+                    utils + '/ClassUtils.js',
                     utils + '/ArraySortOn.js',
                     utils + '/WeakReference.js',
                     src + '/createjs/events/*.js', // All JS in the libs folder
@@ -31,6 +32,7 @@ var buildOrder = [
                     primitive + '/WeaveTreeItem.js',
                     primitive + '/Dictionary2D.js',
                     core + '/SessionManager.js',
+                    core + '/ErrorManager.js',
 
 
                     utils + '/URLUtil.js',
@@ -59,7 +61,9 @@ var buildOrder = [
                     core + '/LinkableDynamicObject.js',
                     core + '/StageUtils.js',
                     core + '/ExternalSessionStateInterface',
-                    core + '/SessionStateLog.js'
+                    core + '/SessionStateLog.js',
+
+                    'src/WeavePath.js'
 
 
                ];

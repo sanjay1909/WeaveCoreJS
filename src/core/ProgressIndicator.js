@@ -217,6 +217,7 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.ProgressIndicator = ProgressIndicator;
+    weavecore.ClassUtils.registerClass('weavecore.ProgressIndicator', ProgressIndicator);
     WeaveAPI.ProgressIndicator = new ProgressIndicator();
 
 }());

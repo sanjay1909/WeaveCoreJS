@@ -69,6 +69,8 @@
 
                 <li><a href="../classes/Ticker.html">Ticker</a></li>
 
+                <li><a href="../classes/weave.WeavePath.html">weave.WeavePath</a></li>
+
             </ul>
 
             <ul id="api-modules" class="apis modules">
@@ -768,6 +770,7 @@ if (typeof window === &#x27;undefined&#x27;) {
     };
 
     weavecore.LinkableHashMap = LinkableHashMap;
+    weavecore.ClassUtils.registerClass(&#x27;weavecore.LinkableHashMap&#x27;, LinkableHashMap);
 
     // namespace
     if (typeof window === &#x27;undefined&#x27;) {
@@ -778,7 +781,6 @@ if (typeof window === &#x27;undefined&#x27;) {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
-
     </pre>
 </div>
 

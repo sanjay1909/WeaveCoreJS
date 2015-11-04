@@ -260,5 +260,6 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableVariable = LinkableVariable;
+    weavecore.ClassUtils.registerClass('weavecore.LinkableVariable', LinkableVariable);
 
 }());

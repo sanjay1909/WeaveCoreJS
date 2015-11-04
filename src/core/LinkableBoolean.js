@@ -80,5 +80,6 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableBoolean = LinkableBoolean;
+    weavecore.ClassUtils.registerClass('weavecore.LinkableBoolean', LinkableBoolean);
 
 }());

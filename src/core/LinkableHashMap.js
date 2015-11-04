@@ -648,6 +648,7 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableHashMap = LinkableHashMap;
+    weavecore.ClassUtils.registerClass('weavecore.LinkableHashMap', LinkableHashMap);
 
     // namespace
     if (typeof window === 'undefined') {

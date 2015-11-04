@@ -191,5 +191,6 @@ if (typeof window === 'undefined') {
 
 
     weavecore.ChildListCallbackInterface = ChildListCallbackInterface;
+    weavecore.ClassUtils.registerClass('weavecore.ChildListCallbackInterface', ChildListCallbackInterface);
 
 }());

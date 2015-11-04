@@ -231,6 +231,7 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.LinkablePromise = LinkablePromise;
+    weavecore.ClassUtils.registerClass('weavecore.LinkablePromise', LinkablePromise);
 
 
 }());

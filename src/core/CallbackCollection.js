@@ -470,6 +470,7 @@ if (typeof window === 'undefined') {
 
 
     weavecore.CallbackCollection = CallbackCollection;
+    weavecore.ClassUtils.registerClass('weavecore.CallbackCollection', CallbackCollection);
 
 
     // constructor:

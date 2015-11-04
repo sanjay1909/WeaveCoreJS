@@ -69,6 +69,8 @@
 
                 <li><a href="../classes/Ticker.html">Ticker</a></li>
 
+                <li><a href="../classes/weave.WeavePath.html">weave.WeavePath</a></li>
+
             </ul>
 
             <ul id="api-modules" class="apis modules">
@@ -402,6 +404,7 @@ if (typeof window === &#x27;undefined&#x27;) {
     };
 
     weavecore.LinkableWatcher = LinkableWatcher;
+    weavecore.ClassUtils.registerClass(&#x27;weavecore.LinkableWatcher&#x27;, LinkableWatcher);
 
     /*
 			// JavaScript test code for path dependency case
@@ -436,7 +439,6 @@ if (typeof window === &#x27;undefined&#x27;) {
 			// a.getState(null): &quot;b value&quot;
 		*/
 }());
-
     </pre>
 </div>
 

@@ -282,6 +282,7 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableWatcher = LinkableWatcher;
+    weavecore.ClassUtils.registerClass('weavecore.LinkableWatcher', LinkableWatcher);
 
     /*
 			// JavaScript test code for path dependency case

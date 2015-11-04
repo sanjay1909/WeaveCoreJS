@@ -81,5 +81,6 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableString = LinkableString;
+    weavecore.ClassUtils.registerClass('weavecore.LinkableString', LinkableString);
 
 }());

@@ -61,5 +61,6 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.ILinkableObject = ILinkableObject;
+    weavecore.ClassUtils.registerClass('weavecore.ILinkableObject', ILinkableObject);
 
 }());

@@ -8,6 +8,7 @@ module.exports = function (grunt) {
             // 2. Configuration for concatinating files goes here.
             dist: {
                 src: [
+                     'src/utils/ClassUtils.js',
                     'src/utils/ArraySortOn.js',
                     'src/utils/WeakReference.js',
 
@@ -29,6 +30,7 @@ module.exports = function (grunt) {
                     'src/primitive/WeaveTreeItem.js',
                     'src/primitive/Dictionary2D.js',
                     'src/core/SessionManager.js',
+                    'src/core/ErrorManager.js',
 
                     'src/utils/URLUtil.js',
                     'src/utils/URLRequestUtils.js',
@@ -57,7 +59,9 @@ module.exports = function (grunt) {
                     'src/core/SessionStateLog.js',
 
                     'src/utils/URLRequestUtils.js',
-                    'src/utils/AsyncSort.js'
+                    'src/utils/AsyncSort.js',
+
+                     'src/WeavePath.js'
                ],
                 dest: 'weavecore.js',
             }
