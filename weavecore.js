@@ -12746,7 +12746,7 @@ if (typeof window === 'undefined') {
         // we nee dot get namespace of that object here too
         // temp solution store  Ns name in the object instance as String
         if (objectType)
-            this._setLocalObjectType(objectType.constructor.NS + '.' + objectType.constructor.CLASS_NAME);
+            this._setLocalObjectType(objectType.NS + '.' + objectType.CLASS_NAME);
         else
             this.target = null;
 
