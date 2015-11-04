@@ -388,7 +388,7 @@ if (!this.WeaveAPI)
             if (!WeaveAPI.SessionManager.objectWasDisposed(args[0])) {
                 args2 = args[2];
                 if (args2 !== null &amp;&amp; args2 &amp;&amp; args2.length &gt; 0)
-                    args[1].apply(null, args2);
+                    args[1].apply(args2[0], args2); //args2[0] constians the original context
                 else
                     args[1].call();
             }
@@ -670,7 +670,6 @@ if (!this.WeaveAPI)
 
 
 }());
-
     </pre>
 </div>
 
