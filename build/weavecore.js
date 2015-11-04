@@ -13445,7 +13445,7 @@ if (!this.WeaveAPI)
                 console.log(getTimer() - time, stackTrace);
                 // this is incorrect behavior, but we can put a breakpoint here
                 if (useTimeParameter)
-                    progress = task(_currentTaskStopTime);
+                    progress = task(this._currentTaskStopTime);
                 else
                     progress = task();
             }
@@ -13457,7 +13457,7 @@ if (!this.WeaveAPI)
                 WeaveAPI.ProgressIndicator.removeTask(task);
                 // run final callback after task completes and is removed
                 if (finalCallback !== null)
-                    finalCallback();
+                    context ? finalCallback.call(context) : finalCallback(); // to avoid this error in the finalcallback
                 return;
             }
 
