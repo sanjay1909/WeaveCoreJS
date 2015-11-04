@@ -155,6 +155,7 @@ if (typeof window === &#x27;undefined&#x27;) {
                 return null;
             },
             set: function (newValue) {
+                var keys = this.dictionary.keys();
                 for (var i = 0; i &lt; keys.length; i++) {
                     var key = keys[i]
                     if (key === newValue)

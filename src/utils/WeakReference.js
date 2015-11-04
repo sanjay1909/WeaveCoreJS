@@ -35,6 +35,7 @@ if (typeof window === 'undefined') {
                 return null;
             },
             set: function (newValue) {
+                var keys = this.dictionary.keys();
                 for (var i = 0; i < keys.length; i++) {
                     var key = keys[i]
                     if (key === newValue)
