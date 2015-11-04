@@ -73,8 +73,7 @@ if (typeof window === 'undefined') {
         // the callback collection for this object
         // private const
         Object.defineProperty(this, '_cc', {
-            value: WeaveAPI.SessionManager.registerDisposableChild(this, new weavecore.CallbackCollection()),
-            writable: false
+            value: WeaveAPI.SessionManager.registerDisposableChild(this, new weavecore.CallbackCollection())
         });
 
         Object.defineProperty(LinkableDynamicObject, 'ARRAY_CLASS_NAME', {

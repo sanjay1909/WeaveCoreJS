@@ -137,6 +137,7 @@ Array.NUMERIC = 16;
     }
 
 }());
+
 /*
  * Event
  * Visit http://createjs.com/ for documentation, updates and examples.
@@ -7172,6 +7173,7 @@ if (typeof window === 'undefined') {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
+
 /**
  * @module weavecore
  */
@@ -8609,6 +8611,7 @@ if (typeof window === 'undefined') {
     }
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -9314,6 +9317,7 @@ if (typeof window === 'undefined') {
     WeaveAPI.DebugUtils = new DebugUtils();
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -12135,6 +12139,7 @@ if (typeof window === 'undefined') {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
+
 /**
  * @module weavecore
  */
@@ -12560,8 +12565,7 @@ if (typeof window === 'undefined') {
         // the callback collection for this object
         // private const
         Object.defineProperty(this, '_cc', {
-            value: WeaveAPI.SessionManager.registerDisposableChild(this, new weavecore.CallbackCollection()),
-            writable: false
+            value: WeaveAPI.SessionManager.registerDisposableChild(this, new weavecore.CallbackCollection())
         });
 
         Object.defineProperty(LinkableDynamicObject, 'ARRAY_CLASS_NAME', {
@@ -12889,7 +12893,6 @@ if (typeof window === 'undefined') {
 
 
 }());
-
 // namespace
 
 if (!this.weavecore)
@@ -13442,6 +13445,7 @@ if (!this.WeaveAPI)
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
