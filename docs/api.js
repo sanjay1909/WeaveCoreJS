@@ -14,7 +14,8 @@ YUI.add("yuidoc-meta", function(Y) {
         "LinkablePromise",
         "LinkableWatcher",
         "SessionManager",
-        "Ticker"
+        "Ticker",
+        "weave.WeavePath"
     ],
     "modules": [
         "CreateJS",

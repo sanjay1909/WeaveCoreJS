@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>/Users/sanjay/git/WeaveCoreJS/src/primitive/Dictionary2D.js - weavecore</title>
+    <title>weave.WeavePath - weavecore</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
     <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
     <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
@@ -116,134 +116,67 @@
             <div class="apidocs">
                 <div id="docs-main">
                     <div class="content">
-                        <h1 class="file-heading">File: /Users/sanjay/git/WeaveCoreJS/src/primitive/Dictionary2D.js</h1>
-
-<div class="file">
-    <pre class="code prettyprint linenums">
-/*
-    Weave (Web-based Analysis and Visualization Environment)
-    Copyright (C) 2008-2011 University of Massachusetts Lowell
-
-    This file is a part of Weave.
-
-    Weave is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, Version 3,
-    as published by the Free Software Foundation.
-
-    Weave is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Weave.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
-*/
-
-if (typeof window === &#x27;undefined&#x27;) {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-/**
- * This is a wrapper for a 2-dimensional Dictionary.
- *
- * @author adufilie
- * @author sanjay1909
- */
-
-(function () {
-    function Dictionary2D(weakPrimaryKeys, weakSecondaryKeys, defaultType) {
-        weakPrimaryKeys = (weakPrimaryKeys === undefined) ? false : weakPrimaryKeys;
-        weakSecondaryKeys = (weakSecondaryKeys === undefined) ? false : weakSecondaryKeys;
-
-        this.dictionary = weakPrimaryKeys ? new Map() : new Map();
-        this.defaultType = defaultType; // used for creating objects automatically via get()
-        this.weak2 = weakSecondaryKeys // used as a constructor parameter for nested Dictionaries
-    }
-
-    var p = Dictionary2D.prototype;
-
-    /**
-     *
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @return The value in the dictionary.
-     */
-    p.get = function (key1, key2) {
-        var value;
-        var d2 = this.dictionary.get(key1);
-        if (d2)
-            value = d2.get(key2);
-        if (value === undefined &amp;&amp; this.defaultType) {
-            value = new this.defaultType();
-            this.set(key1, key2, value);
-        }
-        return value;
-    };
-
-    /**
-     * This will add or replace an entry in the dictionary.
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @param value The value to put into the dictionary.
-     */
-    p.set = function (key1, key2, value) {
-        var d2 = this.dictionary.get(key1);
-        if (d2 === null || d2 === undefined)
-            d2 = this.weak2 ? new Map() : new Map();
-        this.dictionary.set(key1, d2);
-        d2.set(key2, value);
-    };
-
-    /**
-     * This removes all values associated with the given primary key.
-     * @param key1 The first dictionary key.
-     */
-    p.removeAllPrimary = function (key1) {
-        this.dictionary.delete(key1);
-    };
-
-    /**
-     * This removes all values associated with the given secondary key.
-     * @param key2 The second dictionary key.
-     */
-    p.removeAllSecondary = function (key2) {
-        this.dictionary.forEach(function (value, key1) {
-            this.dictionary.get(key1).delete(key2);
-
-        }.bind(this));
-
-    };
-
-    /**
-     * This removes a value associated with the given primary and secondary keys.
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @return The value that was in the dictionary.
-     */
-    p.remove = function (key1, key2) {
-        var value;
-        var d2 = this.dictionary.get(key1);
-        if (d2) {
-            value = d2.get(key2);
-            d2.delete(key2);
-        }
+                        <h1>weave.WeavePath Class</h1>
+<div class="box meta">
 
 
-        for (var v2 of d2.values())
-            return value;
 
-        // otherwise, remove it
-        this.dictionary.delete(key1);
 
-        return value;
-    };
 
-    weavecore.Dictionary2D = Dictionary2D;
-}());
+        <div class="foundat">
+            Defined in: <a href="../files/_Users_sanjay_git_WeaveCoreJS_src_WeavePath.js.html#l555"><code>&#x2F;Users&#x2F;sanjay&#x2F;git&#x2F;WeaveCoreJS&#x2F;src&#x2F;WeavePath.js:555</code></a>
+        </div>
 
-    </pre>
+
+
+
+            Module: <a href="../modules/weavecore.html">weavecore</a>
+
+
+
+
+</div>
+
+
+
+<div class="box intro">
+    <p>WeavePath constructor.  WeavePath objects are immutable after they are created.</p>
+
+</div>
+
+
+
+<div id="classdocs" class="tabview">
+    <ul class="api-class-tabs">
+        <li class="api-class-tab index"><a href="#index">Index</a></li>
+
+
+
+
+
+    </ul>
+
+    <div>
+        <div id="index" class="api-class-tabpanel index">
+            <h2 class="off-left">Item Index</h2>
+
+
+
+
+
+
+
+
+        </div>
+
+
+
+
+
+
+
+
+    </div>
 </div>
 
                     </div>
