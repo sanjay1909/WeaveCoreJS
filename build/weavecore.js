@@ -12728,7 +12728,7 @@ if (typeof window === 'undefined') {
             // stop if there are no items
             if (!newState.length) {
                 if (removeMissingDynamicObjects)
-                    target = null;
+                    this.target = null;
                 return;
             }
 
@@ -12807,14 +12807,14 @@ if (typeof window === 'undefined') {
         var classDef = eval(className);
         if ((classDef.prototype instanceof weavecore.ILinkableObject || classDef.SESSIONABLE) && (this._typeRestriction === null || this._typeRestriction === undefined || classDef === this._typeRestriction)) {
 
-            var obj = target;
-            if (!obj || obj.constructor !== classDef)
+            var obj = this.target;
+            if (!obj || obj.constructor !== classDef || !(obj instanceof classDef))
                 weavecore.LinkableWatcher.prototype.target = new classDef();
         } else {
             weavecore.LinkableWatcher.prototype.target = null;
         }
 
-        _cc.resumeCallbacks();
+        this._cc.resumeCallbacks();
     };
 
     /**
@@ -12839,7 +12839,7 @@ if (typeof window === 'undefined') {
 
         this._cc.resumeCallbacks();
 
-        return target;
+        return this.target;
     };
 
     /**
