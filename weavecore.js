@@ -13247,9 +13247,10 @@ if (!this.WeaveAPI)
             // don't call the function if the relevantContext was disposed.
             if (!WeaveAPI.SessionManager.objectWasDisposed(args[0])) {
                 args2 = args[2];
-                if (args2 !== null && args2 && args2.length > 0)
-                    args[1].apply(args2[0], args2); //args2[0] constians the original context
-                else
+                if (args2 !== null && args2 && args2.length > 0) {
+                    var rc = args2[0] ? args2[0] : null; //args2[0] constians the original context
+                    args[1].apply(rc, args2);
+                } else
                     args[1].call();
             }
 
@@ -13337,9 +13338,10 @@ if (!this.WeaveAPI)
                 // TODO: PROFILING: check how long this function takes to execute.
                 // if it takes a long time (> 1000 ms), something's wrong...
                 args2 = args[2];
-                if (args2 !== null && args2.length > 0)
-                    args[1].apply(null, args2);
-                else
+                if (args2 !== null && args2.length > 0) {
+                    var rc = args2[0] ? args2[0] : null; //args2[0] constians the original context
+                    args[1].apply(rc, args2);
+                } else
                     args[1].call();
             }
 
@@ -13530,7 +13532,6 @@ if (!this.WeaveAPI)
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
