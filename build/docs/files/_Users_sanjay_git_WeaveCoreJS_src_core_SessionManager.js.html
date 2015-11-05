@@ -933,7 +933,7 @@ if (typeof window === &#x27;undefined&#x27;) {
                 return false; //Private properties are ignored
             else {
                 var isSessionable = false;
-                if (linkableObject[propName] instanceof weavecore.ILinkableObject || linkableObject[propName].sessionable) {
+                if (linkableObject[propName] instanceof weavecore.ILinkableObject || (linkableObject[propName] &amp;&amp; linkableObject[propName].sessionable)) {
                     isSessionable = true
                 }
             }
@@ -1557,7 +1557,6 @@ if (typeof window === &#x27;undefined&#x27;) {
     }
 
 }());
-
     </pre>
 </div>
 

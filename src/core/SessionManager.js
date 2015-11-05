@@ -811,7 +811,7 @@ if (typeof window === 'undefined') {
                 return false; //Private properties are ignored
             else {
                 var isSessionable = false;
-                if (linkableObject[propName] instanceof weavecore.ILinkableObject || linkableObject[propName].sessionable) {
+                if (linkableObject[propName] instanceof weavecore.ILinkableObject || (linkableObject[propName] && linkableObject[propName].sessionable)) {
                     isSessionable = true
                 }
             }

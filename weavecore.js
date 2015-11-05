@@ -51,6 +51,7 @@ if (typeof window === 'undefined') {
     //WeaveAPI.ClassUtils = new ClassUtils();
 
 }());
+
 Array.CASEINSENSITIVE = 1;
 Array.DESCENDING = 2;
 Array.UNIQUESORT = 4;
@@ -5859,6 +5860,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.ILinkableObject', ILinkableObject);
 
 }());
+
 /**
  * @module weavecore
  */
@@ -6688,6 +6690,7 @@ if (typeof window === 'undefined') {
     weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -7969,7 +7972,7 @@ if (typeof window === 'undefined') {
                 return false; //Private properties are ignored
             else {
                 var isSessionable = false;
-                if (linkableObject[propName] instanceof weavecore.ILinkableObject || linkableObject[propName].sessionable) {
+                if (linkableObject[propName] instanceof weavecore.ILinkableObject || (linkableObject[propName] && linkableObject[propName].sessionable)) {
                     isSessionable = true
                 }
             }
@@ -8593,7 +8596,6 @@ if (typeof window === 'undefined') {
     }
 
 }());
-
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -8637,6 +8639,7 @@ if (typeof window === 'undefined') {
     WeaveAPI.ErrorManager = new ErrorManager();
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -10491,6 +10494,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.LinkableVariable', LinkableVariable);
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -10595,6 +10599,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.LinkableNumber', LinkableNumber);
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -10680,6 +10685,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.LinkableBoolean', LinkableBoolean);
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -10766,6 +10772,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.LinkableString', LinkableString);
 
 }());
+
 /**
  * @module weavecore
  */
@@ -10962,6 +10969,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.ChildListCallbackInterface', ChildListCallbackInterface);
 
 }());
+
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -11185,6 +11193,7 @@ if (typeof window === 'undefined') {
     WeaveAPI.ProgressIndicator = new ProgressIndicator();
 
 }());
+
 /**
  * @module weavecore
  */
@@ -11504,6 +11513,7 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
+
 /**
  * @module weavecore
  */
@@ -12165,6 +12175,7 @@ if (typeof window === 'undefined') {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
+
 /**
  * @module weavecore
  */
@@ -12402,6 +12413,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -12515,6 +12527,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.LinkableFile', LinkableFile);
 
 }());
+
 /**
  * @module weavecore
  */
@@ -14020,6 +14033,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.SessionStateLog', SessionStateLog);
 
 }());
+
 /* ***** BEGIN LICENSE BLOCK *****
  *
  * This file is part of Weave.
