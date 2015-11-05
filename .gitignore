@@ -6,3 +6,5 @@
 /.DS_Store
 /experiment/
 /.idea
+/.publish
+/.bowerrc
