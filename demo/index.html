@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="sliderDemoApp" id="top">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>AngularUI - Slider demo</title>
+    <link rel="stylesheet" href="./bower_components/jquery-ui/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="./labelledSlider/jquery.ui.labeledslider.css">
+    <link rel="stylesheet" href="./bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./bower_components/angular-bootstrap-nav-tree/dist/abn_tree.css">
+    <link rel="stylesheet" href="./css/slider.css" />
+    <link rel="stylesheet" href="./css/styles.css" />
+
+    <style>
+        .point {
+            fill: #c36f1c;
+            stroke: #afa2dc;
+        }
+
+        .selected {
+            fill: #afa2dc;
+            stroke: #2f225d;
+        }
+
+        .axis {
+            font: 10px sans-serif;
+        }
+
+        p {
+            font: 12px sans-serif;
+            margin: 0 0 2px 0;
+            padding: 0;
+        }
+
+        .clear-button {
+            font: 14px sans-serif;
+            cursor: pointer;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        .brush .extent {
+            stroke: #fff;
+            fill-opacity: .125;
+            shape-rendering: crispEdges;
+        }
+    </style>
+
+
+    <script type="text/javascript" src="./bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="./bower_components/jquery-ui/ui/minified/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="./bower_components/angular/angular.js"></script>
+    <script type="text/javascript" src="./slider.js"></script>
+    <script type="text/javascript" src="./labelledSlider/jquery.ui.labeledslider.js"></script>
+    <script type="text/javascript" src="./bower_components/angular-bootstrap-nav-tree/dist/abn_tree_directive.js"></script>
+
+    <script type="text/javascript" src="./bower_components/d3/d3.js"></script>
+
+    <script type="text/javascript" src="../weavecore.js"></script>
+    <script type="text/javascript" src="./js/app.js"></script>
+</head>
+
+<body ng-controller="sliderDemoCtrl as dC">
+    <div>
+        <h3><u>
+        This demo showcases the 'sessioning' ability of WeaveCoreJS.</u></h3>
+        <h4>All the changed values of the number are recorded in a 'session'.</h4>
+        <h4> And this session can be replayed using the slider.
+    </h4>
+        <br/>
+
+        <h4> Try the following :</h4>
+        <ol>
+            <li>Play with the numeric stepper which changes the sessioned number. </li>
+            <li>Trying moving the slider knob back (undo) and forth (redo) ,one step at a time, and observe the sessioned number.</li>
+        </ol>
+
+        <br/>
+        <br/>
+        <div class="slider">
+            Sessioned Number :
+            <input class=" ln form-control" type="text" ng-model="dC.testVar.value" />
+            <button style="display:inline-block" class="btn btn-default btn-sm" ng-click="dC.increment()">
+                <span style="font-size:15px" class="glyphicon glyphicon-chevron-up"></span></button>
+            <button style="display:inline-block" class="btn btn-default btn-sm" ng-click="dC.decrement()">
+                <span style="font-size:15px" class="glyphicon glyphicon-chevron-down"></span></button>
+            <div>
+                <br/>
+                <div ui-slider="dC.labeledslider.options" min="0" max="{{dC.log._undoHistory.length + dC.log._redoHistory.length}}" step="1" tick="1" ng-model="dC.sliderPosition"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <!--<div style="width:250px;margin-left:5px;background:whitesmoke;border:1px solid lightgray;border-radius:5px;">
+    <abn-tree tree-data="my_data" tree-control="my_tree" on-select="my_tree_handler(branch)" expand-level="1"></abn-tree>
+</div>-->
+</body>
+
+<footer>
+    <h5>This demo has been prepared using Angular 1.3 and Bootstrap</h5></footer>
+
+</html>
