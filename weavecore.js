@@ -2828,6 +2828,30 @@ if (typeof window === 'undefined') {
         value: 'VARS'
     });
 
+    /**
+     * longer patterns appear earlier so they will match before shorter patterns when checked in order
+     */
+    Object.defineProperty(Compiler, '_validStatementPatterns', {
+        value: [
+			[Compiler.ST_IF, Compiler.PN_PARAMS, Compiler.PN_STMT, Compiler.ST_ELSE, Compiler.PN_STMT],
+			[Compiler.ST_IF, Compiler.PN_PARAMS, Compiler.PN_STMT],
+			[Compiler.ST_FOR_EACH, Compiler.PN_PARAMS, Compiler.PN_STMT],
+			[Compiler.ST_FOR, Compiler.PN_PARAMS, Compiler.PN_STMT],
+			[Compiler.ST_DO, Compiler.PN_STMT, Compiler.ST_WHILE, Compiler.PN_PARAMS],
+			[Compiler.ST_WHILE, Compiler.PN_PARAMS, Compiler.PN_STMT],
+			[Compiler.ST_TRY, Compiler.PN_BLOCK, Compiler.ST_CATCH, Compiler.PN_PARAMS, Compiler.PN_BLOCK, Compiler.ST_FINALLY, Compiler.PN_BLOCK],
+			[Compiler.ST_TRY, Compiler.PN_BLOCK, Compiler.ST_FINALLY, Compiler.PN_BLOCK],
+			[Compiler.ST_TRY, Compiler.PN_BLOCK, Compiler.ST_CATCH, Compiler.PN_PARAMS, Compiler.PN_BLOCK],
+			[Compiler.ST_BREAK],
+			[Compiler.ST_CONTINUE],
+			[Compiler.ST_RETURN, Compiler.PN_EXPR],
+			[Compiler.ST_RETURN],
+			[Compiler.ST_THROW, Compiler.PN_EXPR],
+			[Compiler.ST_VAR, Compiler.PN_VARS],
+			[Compiler.ST_IMPORT, Compiler.PN_EXPR]
+		]
+    });
+
 
 
     /**
@@ -3512,10 +3536,10 @@ if (typeof window === 'undefined') {
 
             // if there are any remaining ';', compile separate statements
             if (tokens.indexOf(';') >= 0)
-                return compileOperator.call(this, ';', compileArray.call(this,tokens, ';'));
+                return compileOperator.call(this, ';', compileArray.call(this, tokens, ';'));
 
             // there are no more ';'
-            assertValidStatementParams.call(this,tokens);
+            assertValidStatementParams.call(this, tokens);
             for (i = 0; i < tokens.length; i++)
                 compileStatement.call(this, tokens, i);
 
@@ -4850,8 +4874,8 @@ if (typeof window === 'undefined') {
         var varNames;
 
         // find a matching statement pattern
-        nextPattern: for (var index = 0; index < _validStatementPatterns.length; index++) {
-            var pattern = _validStatementPatterns[index]
+        nextPattern: for (var index = 0; index < Compiler._validStatementPatterns.length; index++) {
+            var pattern = Compiler._validStatementPatterns[index]
             for (var iPattern = 0; iPattern < pattern.length; iPattern++) {
                 if (startIndex + iPattern >= tokens.length)
                     continue nextPattern;
@@ -5648,7 +5672,6 @@ if (typeof window === 'undefined') {
 
     weavecore.Compiler = Compiler;
 }(this));
-
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
