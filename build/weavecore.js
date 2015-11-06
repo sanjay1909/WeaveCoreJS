@@ -2987,7 +2987,7 @@ if (typeof window === 'undefined') {
     Compiler.parseConstant = function (constantExpression) {
         if (!Compiler._staticInstance)
             Compiler._staticInstance = new Compiler(false);
-        var compiled = Compiler._staticInstance.finalize(Compiler._staticInstance.compileTokens(Compiler._staticInstance.getTokens(constantExpression), false), true);
+        var compiled = Compiler._staticInstance.finalize.call(Compiler._staticInstance, Compiler._staticInstance.compileTokens(Compiler._staticInstance.getTokens.call(Compiler._staticInstance, constantExpression), false), true);
         if (compiled instanceof weavecore.CompiledConstant) {
             return (compiled).value;
         } else {
@@ -5084,7 +5084,7 @@ if (typeof window === 'undefined') {
 
         // if there is only a single variable name, wrap it in an operator ',' call
         if (!args.compiledParams)
-            args = compileOperator.call(this,',', [args]);
+            args = compileOperator.call(this, ',', [args]);
 
         if (args.evaluatedMethod !== this.operators[','])
             throwInvalidSyntax.call(this, functionOperator);
@@ -5672,7 +5672,6 @@ if (typeof window === 'undefined') {
 
     weavecore.Compiler = Compiler;
 }(this));
-
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
