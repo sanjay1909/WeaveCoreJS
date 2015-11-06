@@ -348,7 +348,7 @@ weave.evaluateExpression = function (scopeObjectPathOrVariableName, expression, 
         else
             return result;
     } catch (e) {
-        externalError(e);
+        externalError(e.message);
     }
     return undefined;
 }
