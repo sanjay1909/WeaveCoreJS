@@ -1,9 +1,9 @@
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
-    this.weavecore = this.weavecore || {};
+    // this.weavecore = this.weavecore || {};
 } else {
     window.WeaveAPI = window.WeaveAPI || {};
-    window.weavecore = window.weavecore || {};
+    //  window.weavecore = window.weavecore || {};
 }
 
 (function () {
@@ -44,7 +44,7 @@ if (typeof window === 'undefined') {
         return idString;
     }
 
-    weavecore.DebugUtils = DebugUtils;
-    WeaveAPI.DebugUtils = new DebugUtils();
+    // weavecore.DebugUtils = DebugUtils;
+    WeaveAPI.DebugUtils = DebugUtils;
 
 }());
