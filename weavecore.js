@@ -5672,6 +5672,7 @@ if (typeof window === 'undefined') {
 
     weavecore.Compiler = Compiler;
 }(this));
+
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -11734,32 +11735,32 @@ if (typeof window === 'undefined') {
     /*
 			// JavaScript test code for path dependency case
 			var lhm = weave.path('lhm').remove().request('LinkableHashMap');
-
+			
 			var a = lhm.push('a').request('LinkableDynamicObject').state(lhm.getPath('b', null));
-
+			
 			a.addCallback(function () {
 			if (a.getType(null))
 			console.log('a.getState(null): ', JSON.stringify(a.getState(null)));
 			else
 			console.log('a has no internal object');
 			}, false, true);
-
+			
 			var b = lhm.push('b').request('LinkableDynamicObject').state(lhm.getPath('c'));
-
+			
 			// a has no internal object
-
+			
 			var c = lhm.push('c').request('LinkableDynamicObject').request(null, 'LinkableString').state(null, 'c value');
-
+			
 			// a.getState(null): []
 			// a.getState(null): [{"className":"weave.core::LinkableString","objectName":null,"sessionState":null}]
 			// a.getState(null): [{"className":"weave.core::LinkableString","objectName":null,"sessionState":"c value"}]
-
+			
 			b.remove(null);
-
+			
 			// a has no internal object
-
+			
 			b.request(null, 'LinkableString').state(null, 'b value');
-
+			
 			// a.getState(null): null
 			// a.getState(null): "b value"
 		*/
@@ -13839,7 +13840,7 @@ if (typeof window === 'undefined') {
         this.forward = forward; // the diff for applying redo
         this.backward = backward; // the diff for applying undo
         this.triggerDelay = triggerDelay; // the length of time between the last synchronization and the diff
-        this.diffDuration = diffDuration; // the length of time in which the diff took place
+        this.diffDuration = diffDuration; // the length of time in which the diff took place	
     }
 
     /**
@@ -14253,7 +14254,7 @@ if (typeof window === 'undefined') {
             switch (version) {
             case 0:
                 {
-                    // note: some states from version 0 may include enableLogging, but here we ignore it
+                    // note: some states from version 0 may include enableLogging, but here we ignore it					
                     this._prevState = state.currentState;
                     this._undoHistory = LogEntry.convertGenericObjectsToLogEntries(state.undoHistory, this._syncDelay);
                     this._redoHistory = LogEntry.convertGenericObjectsToLogEntries(state.redoHistory, this._syncDelay);
@@ -14608,7 +14609,7 @@ weave.evaluateExpression = function (scopeObjectPathOrVariableName, expression, 
             throw new Error("Invalid variable name: " + weavecore.Compiler.encodeString(assignVariableName));
 
         // To avoid "variable is undefined" errors, treat variables[''] as an Array of keys and set any missing properties to undefined
-        if (variables)
+        if (variables && variables[''])
             variables[''].forEach(function (key) {
                 if (!variables.hasOwnProperty(key))
                     variables[key] = undefined;
