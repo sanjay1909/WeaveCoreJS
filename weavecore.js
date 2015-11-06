@@ -54,7 +54,9 @@ if (typeof window === 'undefined') {
     }
 
     ClassUtils.getClassName = function (classDefn) {
-        return ClassUtils.classNameLookUp[classDefn];
+        //TO-DO: need to figure out why look up creates the object rather just using as key till then use NS and CLASSNAME
+        var className = classDefn.NS ? classDefn.NS + '.' + classDefn.CLASS_NAME : ClassUtils.classNameLookUp[classDefn];
+        return className;
 
     }
 
@@ -109,7 +111,6 @@ if (typeof window === 'undefined') {
     //WeaveAPI.ClassUtils = new ClassUtils();
 
 }());
-
 Array.CASEINSENSITIVE = 1;
 Array.DESCENDING = 2;
 Array.UNIQUESORT = 4;
@@ -8817,6 +8818,7 @@ if (typeof window === 'undefined') {
     }
 
 }());
+
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
