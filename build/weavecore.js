@@ -8795,9 +8795,11 @@ if (typeof window === 'undefined') {
             var classDef: Class = ClassUtils.getClassDefinition(classQName);
             editorClass = _editorLookup[classDef] as Class
             if (editorClass)
-                return editorClass;*/
+                return editorClass;
+        }*/
+        return null;
     }
-    return null;
+
 
 
     /**
@@ -8834,7 +8836,6 @@ if (typeof window === 'undefined') {
     WeaveAPI.EditorManager = new EditorManager();
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
