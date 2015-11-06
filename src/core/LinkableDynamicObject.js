@@ -335,9 +335,9 @@ if (typeof window === 'undefined') {
 
         this.targetPath = null;
 
-        var classDef = eval(className);
         if ((classDef.prototype instanceof weavecore.ILinkableObject || classDef.SESSIONABLE) && (this._typeRestriction === null || this._typeRestriction === undefined || classDef === this._typeRestriction)) {
-
+            var classDef = weavecore.ClassUtils.hasClassDefinition(className) ? weavecore.ClassUtils.getClassDefinition(className) : null;
+            classDef = classDef ? classDef : eval(className);
             var obj = this.target;
             if (!obj || obj.constructor !== classDef || !(obj instanceof classDef))
                 weavecore.LinkableWatcher.prototype.target = new classDef();
