@@ -604,14 +604,16 @@ if (typeof window === 'undefined') {
      */
     p.isValidSymbolName = function (expression) {
         try {
-            var tokens = getTokens(expression);
+            var tokens = getTokens.call(this, expression);
             if (tokens.length !== 1 || expression !== tokens[0])
                 return false;
             var str = tokens[0];
             if (operators.hasOwnProperty(str.charAt(0)))
                 return false;
             return !Compiler.numberRegex.exec(str);
-        } catch (e) {}
+        } catch (e) {
+            console.warn(e);
+        }
         return false;
     }
 

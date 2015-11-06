@@ -318,7 +318,7 @@ weave.evaluateExpression = function (scopeObjectPathOrVariableName, expression, 
 
         var isAssignment = (assignVariableName !== null); // allows '' to be used to ignore resulting value
         if (assignVariableName && !weave._compiler.isValidSymbolName(assignVariableName))
-            throw new Error("Invalid variable name: " + weave._compiler.encodeString(assignVariableName));
+            throw new Error("Invalid variable name: " + weavecore.Compiler.encodeString(assignVariableName));
 
         // To avoid "variable is undefined" errors, treat variables[''] as an Array of keys and set any missing properties to undefined
         if (variables)

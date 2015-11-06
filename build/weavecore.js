@@ -3177,14 +3177,16 @@ if (typeof window === 'undefined') {
      */
     p.isValidSymbolName = function (expression) {
         try {
-            var tokens = getTokens(expression);
+            var tokens = getTokens.call(this, expression);
             if (tokens.length !== 1 || expression !== tokens[0])
                 return false;
             var str = tokens[0];
             if (operators.hasOwnProperty(str.charAt(0)))
                 return false;
             return !Compiler.numberRegex.exec(str);
-        } catch (e) {}
+        } catch (e) {
+            console.warn(e);
+        }
         return false;
     }
 
@@ -14579,7 +14581,7 @@ weave.evaluateExpression = function (scopeObjectPathOrVariableName, expression, 
 
         var isAssignment = (assignVariableName !== null); // allows '' to be used to ignore resulting value
         if (assignVariableName && !weave._compiler.isValidSymbolName(assignVariableName))
-            throw new Error("Invalid variable name: " + weave._compiler.encodeString(assignVariableName));
+            throw new Error("Invalid variable name: " + weavecore.Compiler.encodeString(assignVariableName));
 
         // To avoid "variable is undefined" errors, treat variables[''] as an Array of keys and set any missing properties to undefined
         if (variables)
