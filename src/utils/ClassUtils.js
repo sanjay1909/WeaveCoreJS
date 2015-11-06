@@ -54,7 +54,9 @@ if (typeof window === 'undefined') {
     }
 
     ClassUtils.getClassName = function (classDefn) {
-        return ClassUtils.classNameLookUp[classDefn];
+        //TO-DO: need to figure out why look up creates the object rather just using as key till then use NS and CLASSNAME
+        var className = classDefn.NS ? classDefn.NS + '.' + classDefn.CLASS_NAME : ClassUtils.classNameLookUp[classDefn];
+        return className;
 
     }
 
