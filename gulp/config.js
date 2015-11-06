@@ -33,6 +33,7 @@ var buildOrder = [
                     primitive + '/Dictionary2D.js',
                     core + '/SessionManager.js',
                     core + '/ErrorManager.js',
+                    core + '/EditorManager.js',
 
 
                     utils + '/URLUtil.js',

@@ -31,6 +31,7 @@ module.exports = function (grunt) {
                     'src/primitive/Dictionary2D.js',
                     'src/core/SessionManager.js',
                     'src/core/ErrorManager.js',
+                    'src/core/EditorManager.js',
 
                     'src/utils/URLUtil.js',
                     'src/utils/URLRequestUtils.js',
