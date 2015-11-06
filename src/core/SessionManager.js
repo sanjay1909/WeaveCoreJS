@@ -193,7 +193,7 @@ if (typeof window === 'undefined') {
          * @type weavecore.Dictionary2D
          */
         Object.defineProperty(this, "_treeCache", {
-            value: new weavecore.Dictionary2D(weavecore.WeaveTreeItem)
+            value: new weavecore.Dictionary2D(false, false, weavecore.WeaveTreeItem)
         });
 
 
