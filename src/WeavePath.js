@@ -321,7 +321,7 @@ weave.evaluateExpression = function (scopeObjectPathOrVariableName, expression, 
             throw new Error("Invalid variable name: " + weavecore.Compiler.encodeString(assignVariableName));
 
         // To avoid "variable is undefined" errors, treat variables[''] as an Array of keys and set any missing properties to undefined
-        if (variables)
+        if (variables && variables[''])
             variables[''].forEach(function (key) {
                 if (!variables.hasOwnProperty(key))
                     variables[key] = undefined;
