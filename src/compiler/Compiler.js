@@ -908,7 +908,7 @@ if (typeof window === 'undefined') {
             i = tokens.length;
             while (i--) {
                 if (isFunctionHeader.call(this, tokens[i]))
-                    tokens.splice(i, 2, compileFunctionDefinition(tokens[i], tokens[i + 1]));
+                    tokens.splice(i, 2, compileFunctionDefinition.call(this, tokens[i], tokens[i + 1]));
                 else if (this.assignmentOperators.hasOwnProperty(tokens[i]))
                     break;
             }
