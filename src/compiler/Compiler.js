@@ -353,6 +353,15 @@ if (typeof window === 'undefined') {
          */
 
         this.unaryOperatorSymbols = null;
+
+        /**
+         * This is used to temporarily store the host of the property that was accessed by the last call to the '.' operator.
+         */
+        this._propertyHost = null;
+        /**
+         * This is used to temporarily store the property name that was accessed by the last call to the '.' operator.
+         */
+        this._propertyName = null;
         /**
          * Set this to true to enable trace statements for debugging.
          */
@@ -2594,11 +2603,11 @@ if (typeof window === 'undefined') {
             var chain = Array.prototype.slice.call(arguments);
             object = chain.shift();
             var iHost = chain.length - 2;
-            _propertyHost = object;
-            _propertyName = chain[iHost + 1];
+            this._propertyHost = object;
+            this._propertyName = chain[iHost + 1];
             for (var i = 0; i < chain.length; i++) {
                 if (i === iHost)
-                    _propertyHost = object;
+                    this._propertyHost = object;
                 object = object[chain[i]];
             }
             return object;
