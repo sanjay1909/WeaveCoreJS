@@ -2511,7 +2511,7 @@ if (typeof window === 'undefined') {
 
         // if there is only a single variable name, wrap it in an operator ',' call
         if (!args.compiledParams)
-            args = compileOperator(',', [args]);
+            args = compileOperator.call(this,',', [args]);
 
         if (args.evaluatedMethod !== operators[','])
             throwInvalidSyntax.call(this, functionOperator);
