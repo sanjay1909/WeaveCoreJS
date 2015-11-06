@@ -109,6 +109,7 @@ if (typeof window === 'undefined') {
     //WeaveAPI.ClassUtils = new ClassUtils();
 
 }());
+
 Array.CASEINSENSITIVE = 1;
 Array.DESCENDING = 2;
 Array.UNIQUESORT = 4;
@@ -9606,10 +9607,10 @@ if (typeof window === 'undefined') {
 
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
-    this.weavecore = this.weavecore || {};
+    // this.weavecore = this.weavecore || {};
 } else {
     window.WeaveAPI = window.WeaveAPI || {};
-    window.weavecore = window.weavecore || {};
+    //  window.weavecore = window.weavecore || {};
 }
 
 (function () {
@@ -9650,11 +9651,10 @@ if (typeof window === 'undefined') {
         return idString;
     }
 
-    weavecore.DebugUtils = DebugUtils;
-    WeaveAPI.DebugUtils = new DebugUtils();
+    // weavecore.DebugUtils = DebugUtils;
+    WeaveAPI.DebugUtils = DebugUtils;
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
