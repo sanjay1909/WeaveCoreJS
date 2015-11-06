@@ -608,7 +608,7 @@ if (typeof window === 'undefined') {
             if (tokens.length !== 1 || expression !== tokens[0])
                 return false;
             var str = tokens[0];
-            if (operators.hasOwnProperty(str.charAt(0)))
+            if (this.operators.hasOwnProperty(str.charAt(0)))
                 return false;
             return !Compiler.numberRegex.exec(str);
         } catch (e) {
