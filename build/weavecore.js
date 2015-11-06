@@ -2106,6 +2106,7 @@ if (typeof window === 'undefined') {
 
     weavecore.StandardLib = StandardLib;
 }());
+
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
