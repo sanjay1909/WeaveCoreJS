@@ -2593,7 +2593,7 @@ if (typeof window === 'undefined') {
  * @author adufilie
  * @author sanbalag
  */
-(function () {
+(function (domain) {
     "use strict";
 
 
@@ -2854,6 +2854,14 @@ if (typeof window === 'undefined') {
 		]
     });
 
+    /**
+     * The list of packages to check when looking up class definitions.
+     */
+    Object.defineProperty(Compiler, 'defaultPackages', {
+        value: []
+    });
+
+
     Compiler._staticInstance = null;
 
 
@@ -3080,33 +3088,29 @@ if (typeof window === 'undefined') {
         if (def)
             return def;
 
-        /*var altName = name; // altName possibly uses colon notation
-
-
-        def = classAliases[name];
-        if (def)
-        {
-        	classAliases[altName] = def;
-        	return def;
+        if (domain[name]) {
+            return domain[name];
         }
+
 
         // if it's not a fully qualified name, check the default packages
-        var domain:ApplicationDomain = ApplicationDomain.currentDomain;
-        for (var i = -1; i < defaultPackages.length; i++)
-        {
-        	var qname = i < 0 ? name : (defaultPackages[i] + "::" + name);
-        	if (domain.hasDefinition(qname))
-        	{
-        		// cache definition for next time
-        		def = domain.getDefinition(qname);
-        		classAliases[name] = def;
-        		classAliases[altName] = def;
-        		return def;
-        	}
+
+        for (var i = -1; i < Compiler.defaultPackages.length; i++) {
+            var pkg = i < 0 ? "" : Compiler.defaultPackages[i];
+            var qname = i < 0 ? name : (Compiler.defaultPackages[i] + "." + name);
+            if (domain[pkg] && domain[pkg][name]) {
+                // cache definition for next time
+                def = weavecore.ClassUtils.hasClassDefinition(qname) ? weavecore.ClassUtils.getClassDefinition(qname) : null
+                def = def ? def : eval(qname);
+                if (def) {
+                    classAliases[name] = def;
+                    classAliases[altName] = def;
+                }
+                return def;
+            }
         }
 
-        // this will throw a meaningful error if there is no definition
-        return domain.getDefinition(name);*/
+
     }
 
     var p = Compiler.prototype;
@@ -3166,6 +3170,22 @@ if (typeof window === 'undefined') {
         //trace("source:", expression, "tokens:" + tokens.join(' '));
         var compiledObject = finalize.call(this, compileTokens.call(this, tokens, true));
         return this.compileObjectToFunction(compiledObject, symbolTable, errorHandler, useThisScope, paramNames, paramDefaults);
+    }
+
+    /**
+     * Tests if an expression is a single, valid symbol name.
+     */
+    p.isValidSymbolName = function (expression) {
+        try {
+            var tokens = getTokens(expression);
+            if (tokens.length !== 1 || expression !== tokens[0])
+                return false;
+            var str = tokens[0];
+            if (operators.hasOwnProperty(str.charAt(0)))
+                return false;
+            return !Compiler.numberRegex.exec(str);
+        } catch (e) {}
+        return false;
     }
 
     function getTokens(expression) {
@@ -5625,7 +5645,7 @@ if (typeof window === 'undefined') {
 
 
     weavecore.Compiler = Compiler;
-}());
+}(this));
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
