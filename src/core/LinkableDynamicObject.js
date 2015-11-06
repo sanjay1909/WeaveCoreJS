@@ -62,7 +62,7 @@ if (typeof window === 'undefined') {
         if (typeRestriction === undefined) typeRestriction = null;
         // this is a constraint on the type of object that can be linked
         this._typeRestrictionClassName;
-        this._typeRestriction = typeRestriction;
+        //this._typeRestriction = typeRestriction;
         // when this is true, the linked object cannot be changed
         this._locked = false;
 
@@ -335,9 +335,10 @@ if (typeof window === 'undefined') {
 
         this.targetPath = null;
 
-        if ((classDef.prototype instanceof weavecore.ILinkableObject || classDef.SESSIONABLE) && (this._typeRestriction === null || this._typeRestriction === undefined || classDef === this._typeRestriction)) {
-            var classDef = weavecore.ClassUtils.hasClassDefinition(className) ? weavecore.ClassUtils.getClassDefinition(className) : null;
-            classDef = classDef ? classDef : eval(className);
+        var classDef = weavecore.ClassUtils.hasClassDefinition(className) ? weavecore.ClassUtils.getClassDefinition(className) : null;
+        classDef = classDef ? classDef : eval(className);
+        if ((classDef.prototype instanceof weavecore.ILinkableObject || classDef.SESSIONABLE) && (this._typeRestriction === null || this._typeRestriction === undefined || weavecore.ClassUtils.classExtends(className, this._typeRestrictionClassName))) {
+
             var obj = this.target;
             if (!obj || obj.constructor !== classDef || !(obj instanceof classDef))
                 weavecore.LinkableWatcher.prototype.target = new classDef();
