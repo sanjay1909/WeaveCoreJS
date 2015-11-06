@@ -492,6 +492,30 @@ if (typeof window === 'undefined') {
     }
 
 
+    /**
+     * This function performs find and replace operations on a String.
+     * @param string A String to perform replacements on.
+     * @param findStr A String to find.
+     * @param replaceStr A String to replace occurrances of the 'findStr' String with.
+     * @param moreFindAndReplace A list of additional find,replace parameters to use.
+     * @return The String with all the specified replacements performed.
+     */
+    StandardLib.replace = function (string, findStr, replaceStr, moreFindAndReplace) {
+        var args = Array.prototype.slice.call(arguments);
+        string = args.shift();
+        findStr = args.shift();
+        replaceStr = args.shift();
+        moreFindAndReplace = args;
+        string = string.split(findStr).join(replaceStr);
+        while (moreFindAndReplace.length > 1) {
+            findStr = moreFindAndReplace.shift();
+            replaceStr = moreFindAndReplace.shift();
+            string = string.split(findStr).join(replaceStr);
+        }
+        return string;
+    }
+
+
 
     weavecore.StandardLib = StandardLib;
 }());
