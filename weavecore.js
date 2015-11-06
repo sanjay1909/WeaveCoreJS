@@ -67,11 +67,11 @@ if (typeof window === 'undefined') {
         if (classQName === extendsQName)
             return true;
         try {
-            if (!cacheClassInfo(classQName))
+            if (!ClassUtils.cacheClassInfo(classQName))
                 return false;
-            return classExtendsMap[classQName][extendsQName] !== undefined;
+            return ClassUtils.classExtendsMap[classQName][extendsQName] !== undefined;
         } catch (e) {
-            console.log(e.stack());
+            console.log(e.stack);
         }
         return false;
     }
@@ -84,7 +84,7 @@ if (typeof window === 'undefined') {
      * @return true if the class info has been cached.
      */
     ClassUtils.cacheClassInfo = function (classQName) {
-        if (classExtendsMap[classQName] !== undefined)
+        if (ClassUtils.classExtendsMap[classQName] !== undefined)
             return true; // already cached
 
         var classDef = ClassUtils.getClassDefinition(classQName);
@@ -100,7 +100,7 @@ if (typeof window === 'undefined') {
                 eMap[ClassUtils.getClassName(_extends)] = true;
             _extends = _extends.prototype ? _extends.prototype : _extends.__proto__;
         }
-        classExtendsMap[classQName] = eMap;
+        ClassUtils.classExtendsMap[classQName] = eMap;
 
         return true; // successfully cached
     }
@@ -13313,6 +13313,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 // namespace
 
 if (!this.weavecore)
