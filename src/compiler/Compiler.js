@@ -2394,7 +2394,7 @@ if (typeof window === 'undefined') {
             var originalTokens = tokens.slice(startIndex, startIndex + pattern.length);
             var params = tokens.splice(startIndex + 1, pattern.length - 1);
 
-            if (stmt === ST_VAR) {
+            if (stmt === Compiler.ST_VAR) {
                 token = compileOperator.call(this, Compiler.ST_VAR, [new weavecore.CompiledConstant(null, varNames)]);
                 call = params[0];
                 if (call.evaluatedMethod === this.operators['in']) {
