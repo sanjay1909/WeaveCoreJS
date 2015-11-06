@@ -2408,7 +2408,7 @@ if (typeof window === 'undefined') {
                 }
                 originalTokens = null; // avoid infinite decompile recursion
                 tokens[startIndex] = token;
-            } else if (stmt === ST_IMPORT) {
+            } else if (stmt === Compiler.ST_IMPORT) {
                 originalTokens = null;
                 call = (params[0] && params[0] instanceof weavecore.CompiledFunctionCall) ? params[0] : null;
                 // support multiple imports separated by commas
