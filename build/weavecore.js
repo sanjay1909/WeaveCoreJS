@@ -5086,7 +5086,7 @@ if (typeof window === 'undefined') {
         if (!args.compiledParams)
             args = compileOperator.call(this,',', [args]);
 
-        if (args.evaluatedMethod !== operators[','])
+        if (args.evaluatedMethod !== this.operators[','])
             throwInvalidSyntax.call(this, functionOperator);
 
         // verify that each parameter inside operator ',' is a variable name or a local assignment to a constant.
@@ -5101,13 +5101,13 @@ if (typeof window === 'undefined') {
                 // local variable
                 variableNames.push(variable.evaluatedMethod);
                 variableValues.push(undefined);
-            } else if (variable.evaluatedMethod === operators['='] && variable.compiledParams.length === 2 && variable.compiledParams[1] instanceof weavecore.CompiledConstant) {
+            } else if (variable.evaluatedMethod === this.operators['='] && variable.compiledParams.length === 2 && variable.compiledParams[1] instanceof weavecore.CompiledConstant) {
                 // local variable assignment
                 variableNames.push(variable.evaluatedParams[0]);
                 variableValues.push(variable.evaluatedParams[1]);
             } else
                 throwInvalidSyntax.call(this, functionOperator);
-        })
+        }.bind(this))
         var functionParams = {};
         functionParams[Compiler.FUNCTION_PARAM_NAMES] = variableNames;
         functionParams[Compiler.FUNCTION_PARAM_VALUES] = variableValues;
