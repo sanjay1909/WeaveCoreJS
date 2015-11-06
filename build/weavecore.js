@@ -3512,10 +3512,10 @@ if (typeof window === 'undefined') {
 
             // if there are any remaining ';', compile separate statements
             if (tokens.indexOf(';') >= 0)
-                return compileOperator.call(this, ';', compileArray(tokens, ';'));
+                return compileOperator.call(this, ';', compileArray.call(this,tokens, ';'));
 
             // there are no more ';'
-            assertValidStatementParams(tokens);
+            assertValidStatementParams.call(this,tokens);
             for (i = 0; i < tokens.length; i++)
                 compileStatement.call(this, tokens, i);
 
@@ -5648,6 +5648,7 @@ if (typeof window === 'undefined') {
 
     weavecore.Compiler = Compiler;
 }(this));
+
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
