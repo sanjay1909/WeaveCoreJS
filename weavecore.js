@@ -8752,6 +8752,7 @@ if (typeof window === 'undefined') {
     WeaveAPI.EditorManager = new EditorManager();
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -14483,7 +14484,7 @@ weave.evaluateExpression = function (scopeObjectPathOrVariableName, expression, 
         // passed-in variables take precedence over stored ActionScript weave._variables
         var compiledMethod = weave._compiler.compileObjectToFunction(
             compiledObject, [variables, weave._variables],
-            WeaveAPI.ErrorManager.reportError,
+            WeaveAPI.ErrorManager.reportError.bind(WeaveAPI.ErrorManager),
             thisObject !== null,
             null,
             null,
