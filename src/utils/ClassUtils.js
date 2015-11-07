@@ -55,7 +55,7 @@ if (typeof window === 'undefined') {
 
     ClassUtils.getClassName = function (classDefn) {
         //TO-DO: need to figure out why look up creates the object rather just using as key till then use NS and CLASSNAME
-        var className = classDefn.NS ? classDefn.NS + '.' + classDefn.CLASS_NAME : ClassUtils.classNameLookUp[classDefn];
+        var className = (classDefn.constructor && classDefn.constructor.NS) ? classDefn.constructor.NS + '.' + classDefn.constructor.CLASS_NAME : ClassUtils.classNameLookUp[classDefn];
         return className;
 
     }
@@ -68,16 +68,17 @@ if (typeof window === 'undefined') {
     ClassUtils.classExtends = function (classQName, extendsQName) {
         if (classQName === extendsQName)
             return true;
-        try {
-            if (!ClassUtils.cacheClassInfo(classQName))
-                return false;
-            return ClassUtils.classExtendsMap[classQName][extendsQName] !== undefined;
-        } catch (e) {
-            console.log(e.stack);
-        }
-        return false;
-    }
 
+
+        /* try {
+             if (!ClassUtils.cacheClassInfo(classQName))
+                 return false;
+             return ClassUtils.classExtendsMap[classQName][extendsQName] !== undefined;
+         } catch (e) {
+             console.log(e.stack);
+         }*/
+        return ClassUtils.getClassDefinition(classQName).prototype instanceof ClassUtils.getClassDefinition(extendsQName)
+    }
 
 
     /**
