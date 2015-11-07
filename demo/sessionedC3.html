@@ -9,17 +9,15 @@
     <link rel="stylesheet" href="bower_components/c3/c3.css">
 
 
-    <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
-    <script type="text/javascript" src="bower_components/jquery-ui/jquery-ui.min.js"></script>
-    <script type="text/javascript" src="bower_components/angular/angular.js"></script>
-    <script type="text/javascript" src="bower_components/d3/d3.js"></script>
-    <script type="text/javascript" src="bower_components/c3/c3.js"></script>
-    <script type="text/javascript" src="slider.js"></script>
-    <script type="text/javascript" src="labelledSlider/jquery.ui.labeledslider.js"></script>
+    <script type="text/javascript" src="./bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="./bower_components/jquery-ui/ui/minified/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="./bower_components/angular/angular.js"></script>
+    <script type="text/javascript" src="./bower_components/d3/d3.js"></script>
+    <script type="text/javascript" src="./bower_components/c3/c3.js"></script>
+    <script type="text/javascript" src="./slider.js"></script>
+    <script type="text/javascript" src="./labelledSlider/jquery.ui.labeledslider.js"></script>
     <script type="text/javascript" src="../weavecore.js"></script>
-    <script type="text/javascript" src="adapter/WeaveAdapter.js"></script>
-    <script type="text/javascript" src="adapter/WeavePeer.js"></script>
-    <script type="text/javascript" src="adapter/C3Hook.js"></script>
+    <script type="text/javascript" src="./bower_components/VizAdapter/VizAdapter.js"></script>
 
     <script type="text/javascript">
         var app = angular.module('sliderDemoApp', ['ui.slider']);
@@ -73,19 +71,14 @@
             }
 
 
+            var weaveInteractionPeer = new peer.WeaveJSInterface();
 
-            // get ref of Probe and Selection keys
-            var probeKeys = weavePeer.Interaction.probeKeys;
-            probeKeys.setSessionState([]);
-            var selectionKeys = weavePeer.Interaction.selectionKeys;
-            selectionKeys.setSessionState([]);
 
             $scope.log.clearHistory();
 
-            var weaveInteractionPeer = new weavePeer.Interaction();
 
 
-            var scatterplot = test.scatter = c3.generate({
+            var config = {
                 bindto: '#scatterplotdiv',
                 /* size: {
                      width: 400,
@@ -110,9 +103,9 @@
                 point: {
                     r: 5
                 }
-            });
+            }
 
-            var barchart = c3.generate({
+            var config2 = {
                 bindto: '#barchartdiv',
                 /**/
                 data: {
@@ -136,32 +129,14 @@
                     // or
                     //width: 100 // this makes bar width 100px
                 }
-            });
+            };
 
-            /* var linechart = c3.generate({
-                bindto: '#linechartdiv',
+            var scatterplot = test.scatter = c3.generate(config);
 
-                data: {
-                    x: 'data1',
-                    y: 'data2',
-                    columns: [
-             ['data1', 30, 200, 100, 400, 150, 250],
-            ['data2', 130, 100, 140, 200, 150, 50]
-        ],
-                    selection: {
-                        enabled: true
-                    },
-                    onselected: onUISelection,
-                    onmouseover: onUIProbe
-                }
-            });*/
+            var barchart = c3.generate(config2);
 
 
 
-
-            weaveInteractionPeer.hooks.push(new c3Hook.Interaction(scatterplot));
-            weaveInteractionPeer.hooks.push(new c3Hook.Interaction(barchart));
-            // weaveInteractionPeer.hooks.push(new c3Hook.Interaction(linechart));
 
             function onUISelection(d) {
 
@@ -179,7 +154,7 @@
 
             function onUIProbe(d) {
                 weaveInteractionPeer.activeHook = this;
-                //weaveInteractionPeer.doProbe(d.index);
+                weaveInteractionPeer.doProbe(d.index);
             }
 
 
