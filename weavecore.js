@@ -112,6 +112,7 @@ if (typeof window === 'undefined') {
     //WeaveAPI.ClassUtils = new ClassUtils();
 
 }());
+
 Array.CASEINSENSITIVE = 1;
 Array.DESCENDING = 2;
 Array.UNIQUESORT = 4;
@@ -14422,7 +14423,7 @@ weave.getSessionState = function (objectPath) {
         return state;
     }
 
-    externalWarning("No ILinkableObject from which to get session state at path {0}", weave._compiler.stringify(objectPath));
+    externalWarning("No ILinkableObject from which to get session state at path {0}", weavecore.Compiler.stringify(objectPath));
     return null;
 }
 
@@ -14451,7 +14452,7 @@ weave.setSessionState = function (objectPath, newState, removeMissingObjects) {
         return true;
     }
 
-    externalError("No ILinkableObject for which to set session state at path {0}", weave._compiler.stringify(objectPath));
+    externalError("No ILinkableObject for which to set session state at path {0}", weavecore.Compiler.stringify(objectPath));
     return false;
 }
 
@@ -14480,7 +14481,7 @@ weave.getChildNames = function (objectPath) {
         return WeaveAPI.SessionManager.getLinkablePropertyNames(object, true);
     }
 
-    externalError("No ILinkableObject for which to get child names at path {0}", weave._compiler.stringify(objectPath));
+    externalError("No ILinkableObject for which to get child names at path {0}", weavecore.Compiler.stringify(objectPath));
     return null;
 }
 
@@ -14497,7 +14498,7 @@ weave.setChildNameOrder = function (hashMapPath, orderedChildNames) {
         return true;
     }
 
-    externalError("No ILinkableHashMap for which to reorder children at path {0}", weave._compiler.stringify(hashMapPath));
+    externalError("No ILinkableHashMap for which to reorder children at path {0}", weavecore.Compiler.stringify(hashMapPath));
     return false;
 }
 
@@ -14509,7 +14510,7 @@ weave.requestObject = function (objectPath, objectType) {
     var classQName = objectType;
     var classDef = weavecore.ClassUtils.getClassDefinition(objectType);
     if (classDef === null) {
-        externalError("No class definition for {0}", weave._compiler.stringify(classQName));
+        externalError("No class definition for {0}", weavecore.Compiler.stringify(classQName));
         return false;
     }
     /* if (ClassUtils.isClassDeprecated(classQName))
@@ -14546,7 +14547,7 @@ weave.requestObject = function (objectPath, objectType) {
     if (child && child.constructor === classDef)
         return true;
 
-    externalError("Request for {0} failed at path {1}", objectType, weave._compiler.stringify(objectPath));
+    externalError("Request for {0} failed at path {1}", objectType, weavecore.Compiler.stringify(objectPath));
     return false;
 }
 
@@ -14569,7 +14570,7 @@ weave.removeObject = function (objectPath) {
             childName = hashMap.getNames()[childName];
 
         if (hashMap.objectIsLocked(String(childName))) {
-            externalError("Object is locked and cannot be removed (path: {0})", weave._compiler.stringify(objectPath));
+            externalError("Object is locked and cannot be removed (path: {0})", weavecore.Compiler.stringify(objectPath));
             return false;
         }
 
@@ -14580,7 +14581,7 @@ weave.removeObject = function (objectPath) {
     var dynamicObject = (parent && parent instanceof weavecore.LinkableDynamicObject) ? parent : null;
     if (dynamicObject) {
         if (dynamicObject.locked) {
-            externalError("Object is locked and cannot be removed (path: {0})", weave._compiler.stringify(objectPath));
+            externalError("Object is locked and cannot be removed (path: {0})", weavecore.Compiler.stringify(objectPath));
             return false;
         }
 
@@ -14589,9 +14590,9 @@ weave.removeObject = function (objectPath) {
     }
 
     if (parent)
-        externalError("Parent object does not support dynamic children, so cannot remove child at path {0}", weave._compiler.stringify(objectPath));
+        externalError("Parent object does not support dynamic children, so cannot remove child at path {0}", weavecore.Compiler.stringify(objectPath));
     else
-        externalError("No parent from which to remove a child at path {0}", weave._compiler.stringify(objectPath));
+        externalError("No parent from which to remove a child at path {0}", weavecore.Compiler.stringify(objectPath));
     return false;
 }
 
@@ -14635,7 +14636,7 @@ function getObjectFromPathOrVariableName(objectPathOrVariableName) {
         if (object)
             return object;
 
-        weave._getObjectFromPathOrVariableName_error = "No ILinkableObject at path " + weave._compiler.stringify(objectPathOrVariableName);
+        weave._getObjectFromPathOrVariableName_error = "No ILinkableObject at path " + weavecore.Compiler.stringify(objectPathOrVariableName);
         return null;
     }
 
@@ -14644,7 +14645,7 @@ function getObjectFromPathOrVariableName(objectPathOrVariableName) {
         if (weave._variables.hasOwnProperty(variableName))
             return weave._variables[variableName];
 
-        weave._getObjectFromPathOrVariableName_error = "Undefined variable " + weave._compiler.stringify(variableName);
+        weave._getObjectFromPathOrVariableName_error = "Undefined variable " + weavecore.Compiler.stringify(variableName);
         return null;
     }
 
@@ -14724,7 +14725,7 @@ weave.addCallback = function (scopeObjectPathOrVariableName, callback, triggerCa
             return false;
         }
         if (object === null || object === undefined) {
-            externalError("No ILinkableObject to which to add a callback at path or variable {0}", weave._compiler.stringify(scopeObjectPathOrVariableName));
+            externalError("No ILinkableObject to which to add a callback at path or variable {0}", weavecore.Compiler.stringify(scopeObjectPathOrVariableName));
             return false;
         }
 
@@ -14796,7 +14797,7 @@ weave.removeCallback = function (objectPathOrVariableName, callback, everywhere)
             return false;
         }
         if (object === null) {
-            externalWarning("No ILinkableObject from which to remove a callback at path or variable {0}", weave._compiler.stringify(objectPathOrVariableName));
+            externalWarning("No ILinkableObject from which to remove a callback at path or variable {0}", weavecore.Compiler.stringify(objectPathOrVariableName));
             return false;
         }
 
