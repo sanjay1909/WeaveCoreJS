@@ -47,6 +47,7 @@ var buildOrder = [
                     api + '/detectLinkableObjectChange.js',
 
                     core + '/LinkableVariable.js',
+    core + '/UntypedLinkableVariable.js',
                     core + '/LinkableNumber.js',
                     core + '/LinkableBoolean.js',
                     core + '/LinkableString.js',
