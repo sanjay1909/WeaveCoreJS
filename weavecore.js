@@ -5450,8 +5450,7 @@ if (typeof window === 'undefined') {
             return typeof (value);
         };
         //this.pureOperators['as'] = function(a, b) { return a as b; };
-        //this.pureOperators['is'] =
-        this.pureOperators['instanceof'] = function (a, classOrQName) {
+        this.pureOperators['is'] = this.pureOperators['instanceof'] = function (a, classOrQName) {
             var classDef = classOrQName;
             if (!classDef && classOrQName)
                 classDef = Compiler.getDefinition(String(classOrQName));
@@ -5733,7 +5732,6 @@ if (typeof window === 'undefined') {
 
     weavecore.Compiler = Compiler;
 }(this));
-
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -14922,7 +14920,7 @@ function externalError() {
 
 
 
-function externalWarning(format, ...args) {
+function externalWarning() {
     var args = Array.prototype.slice.call(arguments);
     var format = args.shift();
     externalError(StandardLib.substitute("Warning: " + format, args));
