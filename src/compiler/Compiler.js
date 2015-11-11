@@ -1596,7 +1596,7 @@ if (typeof window === 'undefined') {
 
             if (bindThis === null)
                 builtInSymbolTable['this'] = this;
-            builtInSymbolTable['arguments'] = arguments;
+            builtInSymbolTable['arguments'] = Array.prototype.slice.call(arguments);
 
             allSymbolTables[LOCAL_SYMBOL_TABLE_INDEX] = localSymbolTable;
             if (useThisScope)
