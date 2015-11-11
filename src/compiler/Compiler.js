@@ -2816,8 +2816,7 @@ if (typeof window === 'undefined') {
             return typeof (value);
         };
         //this.pureOperators['as'] = function(a, b) { return a as b; };
-        //this.pureOperators['is'] =
-        this.pureOperators['instanceof'] = function (a, classOrQName) {
+        this.pureOperators['is'] = this.pureOperators['instanceof'] = function (a, classOrQName) {
             var classDef = classOrQName;
             if (!classDef && classOrQName)
                 classDef = Compiler.getDefinition(String(classOrQName));

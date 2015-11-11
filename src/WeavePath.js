@@ -489,7 +489,7 @@ function externalError() {
 
 
 
-function externalWarning(format, ...args) {
+function externalWarning() {
     var args = Array.prototype.slice.call(arguments);
     var format = args.shift();
     externalError(StandardLib.substitute("Warning: " + format, args));
