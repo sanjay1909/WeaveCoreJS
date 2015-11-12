@@ -1593,10 +1593,11 @@ if (typeof window === 'undefined') {
             var i;
             var propertyHost;
             var propertyName;
+            var args = Array.prototype.slice.call(arguments);
 
             if (bindThis === null)
                 builtInSymbolTable['this'] = this;
-            builtInSymbolTable['arguments'] = Array.prototype.slice.call(arguments);
+            builtInSymbolTable['arguments'] = args;
 
             allSymbolTables[LOCAL_SYMBOL_TABLE_INDEX] = localSymbolTable;
             if (useThisScope)
@@ -1606,7 +1607,7 @@ if (typeof window === 'undefined') {
             if (paramNames)
                 for (i = 0; i < paramNames.length; i++) {
                     var parName = (paramNames[i].constructor === String) ? paramNames[i] : null;
-                    localSymbolTable[parName] = i < (arguments.length ? arguments[i] : paramDefaults[i]);
+                    localSymbolTable[parName] = i < (args.length ? args[i] : paramDefaults[i]);
                 }
 
             // initialize top-level function and push it onto the stack
