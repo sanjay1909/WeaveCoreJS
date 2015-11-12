@@ -5736,6 +5736,7 @@ if (typeof window === 'undefined') {
 
     weavecore.Compiler = Compiler;
 }(this));
+
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -8046,7 +8047,7 @@ if (typeof window === 'undefined') {
         for (var i = 0; i < propertyNames.length; i++) {
             var name = propertyNames[i];
             if (!newState.hasOwnProperty(name)) {
-                if (removeMissingDynamicObjects) //&& linkableObject is ILinkableObjectWithNewProperties
+                if (removeMissingDynamicObjects && linkableObject.handleMissingSessionStateProperty)
                     foundMissingProperty = true;
                 continue;
             }
@@ -8822,7 +8823,6 @@ if (typeof window === 'undefined') {
     }
 
 }());
-
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
