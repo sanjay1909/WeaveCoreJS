@@ -659,7 +659,7 @@ if (typeof window === 'undefined') {
         for (var i = 0; i < propertyNames.length; i++) {
             var name = propertyNames[i];
             if (!newState.hasOwnProperty(name)) {
-                if (removeMissingDynamicObjects) //&& linkableObject is ILinkableObjectWithNewProperties
+                if (removeMissingDynamicObjects && linkableObject.handleMissingSessionStateProperty)
                     foundMissingProperty = true;
                 continue;
             }
