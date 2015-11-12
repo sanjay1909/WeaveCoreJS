@@ -1607,7 +1607,7 @@ if (typeof window === 'undefined') {
             if (paramNames)
                 for (i = 0; i < paramNames.length; i++) {
                     var parName = (paramNames[i].constructor === String) ? paramNames[i] : null;
-                    localSymbolTable[parName] = i < (args.length ? args[i] : paramDefaults[i]);
+                    localSymbolTable[parName] = (i < args.length) ? args[i] : paramDefaults[i];
                 }
 
             // initialize top-level function and push it onto the stack
