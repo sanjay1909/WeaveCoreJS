@@ -3172,6 +3172,9 @@ if (typeof window === 'undefined') {
         var def = Compiler.classAliases[name];
         if (def)
             return def;
+        def = weavecore.ClassUtils.hasClassDefinition(name) ? weavecore.ClassUtils.getClassDefinition(name) : null;
+        if (def)
+            return def;
 
         if (domain[name]) {
             return domain[name];
