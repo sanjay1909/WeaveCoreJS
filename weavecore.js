@@ -5452,7 +5452,7 @@ if (typeof window === 'undefined') {
         };
         //this.pureOperators['as'] = function(a, b) { return a as b; };
         this.pureOperators['is'] = this.pureOperators['instanceof'] = function (a, classOrQName) {
-            var classDef = classOrQName;
+            var classDef = (classOrQName && typeof (classOrQName) !== 'string') ? classOrQName : null;
             if (!classDef && classOrQName)
                 classDef = Compiler.getDefinition(String(classOrQName));
             return a instanceof classDef;
