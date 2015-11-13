@@ -9440,7 +9440,7 @@ WeaveAPI._jsonReviver = function (key, value) {
         for (key in value)
             if (key !== WP)
                 return value;
-        return WeaveAPI.SessionManager.getObject(value[WP]);
+        return WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, value[WP]);
     }
     return value;
 }
