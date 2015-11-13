@@ -9017,15 +9017,22 @@ if (typeof window === 'undefined') {
             "id": id,
             "catch": false
         };
-        var script = [
+        /* var script = [
 		"var func = this." + JavaScript.JSON_REVIVER + "('', id);",
 		"return func.apply(func['this'], args);"
-	].join('\n');
+	].join('\n');*/
 
         var func = function () {
             params['args'] = Array.prototype.slice.call(arguments);
-            return JavaScript.exec(params, script);
+            return (function () {
+                var args = params['args'];
+                var id = params['id'];
+                var func = this._jsonReviver('', id);
+                return func.apply(func['this'], args);
+            }).apply(weave);
         };
+
+
 
         JavaScript._jsonLookup[func] = id;
         JavaScript._jsonLookup[id] = func;
@@ -9052,68 +9059,133 @@ if (typeof window === 'undefined') {
 
 
         //ExternalInterface.addCallback(JavaScript.JSON_CALL, _jsonCall);
+        weave[JavaScript.JSON_CALL] = JavaScript._jsonCall;
 
-        JavaScript.exec({
-                "JSON_FUNCTION_PREFIX": JavaScript.JSON_FUNCTION_PREFIX,
-                "JSON_EXTENSIONS": JavaScript.JSON_EXTENSIONS,
-                "JSON_REPLACER": JavaScript.JSON_REPLACER,
-                "JSON_REVIVER": JavaScript.JSON_REVIVER,
-                "JSON_SUFFIX": JavaScript.JSON_SUFFIX,
-                "JSON_LOOKUP": JavaScript.JSON_LOOKUP,
-                "JSON_CALL": JavaScript.JSON_CALL
-            },
-            'var flash = this;',
-            'var toJson = function(value) { return JSON.stringify(value, flash[JSON_REPLACER]); };',
-            'var fromJson = function(value) { return JSON.parse(value, flash[JSON_REVIVER]); };',
-            'var functionCounter = 0;',
-            'var lookup = flash[JSON_LOOKUP] = {};',
-            'var extensions = flash[JSON_EXTENSIONS] = [];',
-            'var symbols = [NaN, Infinity, -Infinity];',
-            'for (var i in symbols)',
-            '   lookup[symbols[i] + JSON_SUFFIX] = symbols[i];',
-            'function cacheProxyFunction(id) {',
-            '   var func = function() {',
-            '       if (!flash[JSON_CALL])',
-            '           throw new Error("Cannot use the JavaScript API of a Flash object after it has been removed from the DOM.");',
-            '       var params = Array.prototype.slice.call(arguments);',
-            '       var paramsJson = toJson(params);',
-            '       var resultJson = flash[JSON_CALL](id, paramsJson);',
-            '       return fromJson(resultJson);',
-            '   };',
-            '   func[JSON_FUNCTION_PREFIX] = id;',
-            '   return lookup[id] = func;',
-            '}',
-            'flash[JSON_REPLACER] = function(key, value) {',
-            '   if (typeof value === "function") {',
-            '       if (!value[JSON_FUNCTION_PREFIX]) {',
-            '           var id = JSON_FUNCTION_PREFIX + (--functionCounter);',
-            '           value[JSON_FUNCTION_PREFIX] = id;',
-            '           lookup[id] = value;',
-            '       }',
-            '       value = value[JSON_FUNCTION_PREFIX];',
-            '   }',
-            '   else if (typeof value === "number" && !isFinite(value))',
-            '       value = value + JSON_SUFFIX;',
-            '   else if (Array.isArray(value) && !(value instanceof Array))',
-            '       value = Array.prototype.slice.call(value);',
-            '   for (var i in extensions)',
-            '       if (typeof extensions[i] === "object" && typeof extensions[i].replacer === "function")',
-            '           value = extensions[i].replacer.call(flash, key, value);',
-            '   return value;',
-            '};',
-            'flash[JSON_REVIVER] = function(key, value) {',
-            '   if (typeof value === "string") {',
-            '       if (lookup.hasOwnProperty(value))',
-            '           value = lookup[value];',
-            '       else if (value.substr(0, JSON_FUNCTION_PREFIX.length) == JSON_FUNCTION_PREFIX)',
-            '           value = cacheProxyFunction(value);',
-            '   }',
-            '   for (var i in extensions)',
-            '       if (typeof extensions[i] === "object" && typeof extensions[i].reviver === "function")',
-            '           value = extensions[i].reviver.call(flash, key, value);',
-            '   return value;',
-            '};'
-        );
+        (function () {
+            var JSON_CALL = JavaScript.JSON_CALL;
+            var JSON_LOOKUP = JavaScript.JSON_LOOKUP;
+            var JSON_SUFFIX = JavaScript.JSON_SUFFIX;
+            var JSON_REVIVER = JavaScript.JSON_REVIVER;
+            var JSON_REPLACER = JavaScript.JSON_REPLACER;
+            var JSON_EXTENSIONS = JavaScript.JSON_EXTENSIONS;
+            var JSON_FUNCTION_PREFIX = JavaScript.JSON_FUNCTION_PREFIX;
+            var flash = this;
+            var toJson = function (value) {
+                return JSON.stringify(value, flash[JSON_REPLACER]);
+            };
+            var fromJson = function (value) {
+                return JSON.parse(value, flash[JSON_REVIVER]);
+            };
+            var functionCounter = 0;
+            var lookup = flash[JSON_LOOKUP] = {};
+            var extensions = flash[JSON_EXTENSIONS] = [];
+            var symbols = [NaN, Infinity, -Infinity];
+            for (var i in symbols)
+                lookup[symbols[i] + JSON_SUFFIX] = symbols[i];
+
+            function cacheProxyFunction(id) {
+                var func = function () {
+                    if (!flash[JSON_CALL])
+                        throw new Error("Cannot use the JavaScript API of a Flash object after it has been removed from the DOM.");
+                    var params = Array.prototype.slice.call(arguments);
+                    var paramsJson = toJson(params);
+                    var resultJson = flash[JSON_CALL](id, paramsJson);
+                    return fromJson(resultJson);
+                };
+                func[JSON_FUNCTION_PREFIX] = id;
+                return lookup[id] = func;
+            }
+            flash[JSON_REPLACER] = function (key, value) {
+                if (typeof value === "function") {
+                    if (!value[JSON_FUNCTION_PREFIX]) {
+                        var id = JSON_FUNCTION_PREFIX + (--functionCounter);
+                        value[JSON_FUNCTION_PREFIX] = id;
+                        lookup[id] = value;
+                    }
+                    value = value[JSON_FUNCTION_PREFIX];
+                } else if (typeof value === "number" && !isFinite(value))
+                    value = value + JSON_SUFFIX;
+                else if (Array.isArray(value) && !(value instanceof Array))
+                    value = Array.prototype.slice.call(value);
+                for (var i in extensions)
+                    if (typeof extensions[i] === "object" && typeof extensions[i].replacer === "function")
+                        value = extensions[i].replacer.call(flash, key, value);
+                return value;
+            };
+            flash[JSON_REVIVER] = function (key, value) {
+                if (typeof value === "string") {
+                    if (lookup.hasOwnProperty(value))
+                        value = lookup[value];
+                    else if (value.substr(0, JSON_FUNCTION_PREFIX.length) == JSON_FUNCTION_PREFIX)
+                        value = cacheProxyFunction(value);
+                }
+                for (var i in extensions)
+                    if (typeof extensions[i] === "object" && typeof extensions[i].reviver === "function")
+                        value = extensions[i].reviver.call(flash, key, value);
+                return value;
+            };
+        }).apply(weave);
+        /* JavaScript.exec({
+                 "JSON_FUNCTION_PREFIX": JavaScript.JSON_FUNCTION_PREFIX,
+                 "JSON_EXTENSIONS": JavaScript.JSON_EXTENSIONS,
+                 "JSON_REPLACER": JavaScript.JSON_REPLACER,
+                 "JSON_REVIVER": JavaScript.JSON_REVIVER,
+                 "JSON_SUFFIX": JavaScript.JSON_SUFFIX,
+                 "JSON_LOOKUP": JavaScript.JSON_LOOKUP,
+                 "JSON_CALL": JavaScript.JSON_CALL
+             },
+             'var flash = this;',
+             'var toJson = function(value) { return JSON.stringify(value, flash[JSON_REPLACER]); };',
+             'var fromJson = function(value) { return JSON.parse(value, flash[JSON_REVIVER]); };',
+             'var functionCounter = 0;',
+             'var lookup = flash[JSON_LOOKUP] = {};',
+             'var extensions = flash[JSON_EXTENSIONS] = [];',
+             'var symbols = [NaN, Infinity, -Infinity];',
+             'for (var i in symbols)',
+             '   lookup[symbols[i] + JSON_SUFFIX] = symbols[i];',
+             'function cacheProxyFunction(id) {',
+             '   var func = function() {',
+             '       if (!flash[JSON_CALL])',
+             '           throw new Error("Cannot use the JavaScript API of a Flash object after it has been removed from the DOM.");',
+             '       var params = Array.prototype.slice.call(arguments);',
+             '       var paramsJson = toJson(params);',
+             '       var resultJson = flash[JSON_CALL](id, paramsJson);',
+             '       return fromJson(resultJson);',
+             '   };',
+             '   func[JSON_FUNCTION_PREFIX] = id;',
+             '   return lookup[id] = func;',
+             '}',
+             'flash[JSON_REPLACER] = function(key, value) {',
+             '   if (typeof value === "function") {',
+             '       if (!value[JSON_FUNCTION_PREFIX]) {',
+             '           var id = JSON_FUNCTION_PREFIX + (--functionCounter);',
+             '           value[JSON_FUNCTION_PREFIX] = id;',
+             '           lookup[id] = value;',
+             '       }',
+             '       value = value[JSON_FUNCTION_PREFIX];',
+             '   }',
+             '   else if (typeof value === "number" && !isFinite(value))',
+             '       value = value + JSON_SUFFIX;',
+             '   else if (Array.isArray(value) && !(value instanceof Array))',
+             '       value = Array.prototype.slice.call(value);',
+             '   for (var i in extensions)',
+             '       if (typeof extensions[i] === "object" && typeof extensions[i].replacer === "function")',
+             '           value = extensions[i].replacer.call(flash, key, value);',
+             '   return value;',
+             '};',
+             'flash[JSON_REVIVER] = function(key, value) {',
+             '   if (typeof value === "string") {',
+             '       if (lookup.hasOwnProperty(value))',
+             '           value = lookup[value];',
+             '       else if (value.substr(0, JSON_FUNCTION_PREFIX.length) == JSON_FUNCTION_PREFIX)',
+             '           value = cacheProxyFunction(value);',
+             '   }',
+             '   for (var i in extensions)',
+             '       if (typeof extensions[i] === "object" && typeof extensions[i].reviver === "function")',
+             '           value = extensions[i].reviver.call(flash, key, value);',
+             '   return value;',
+             '};'
+         );*/
     }
 
     JavaScript.exec = function () {
@@ -9300,6 +9372,36 @@ if (typeof window === 'undefined') {
 
     }
 
+    /**
+     * Handles a JavaScript request.
+     * @param methodId The ID of the method to call.
+     * @param paramsJson An Array of parameters to pass to the method, stringified with JSON.
+     * @return The result of calling the method, stringified with JSON.
+     */
+    JavaScript._jsonCall = function (methodId, paramsJson) {
+        //ExternalInterface.marshallExceptions = true; // let the external code handle errors
+
+        var method = JavaScript._jsonReviver('', methodId);
+        method = (method && method instanceof Function) ? method : null;
+        if (method === null)
+            throw new Error('No method with id="' + methodId + '"');
+
+        // json to object
+        var params = JSON.parse(paramsJson, JavaScript._jsonReviver);
+
+        var result = method.apply(null, params);
+
+        // object to json
+        var resultJson = JSON.stringify(result, JavaScript._jsonReplacer) || 'null';
+
+
+        // work around unescaped backslash bug
+        if (typeof resultJson === 'string' && JavaScript.backslashNeedsEscaping && (resultJson).indexOf('\\') >= 0)
+            resultJson = (resultJson).split('\\').join('\\\\');
+
+        return resultJson;
+    }
+
     weavecore.JavaScript = JavaScript;
 
 }());
@@ -9396,6 +9498,7 @@ WeaveAPI._needsReviving = function (key, value) {
         'weave[JSON_EXTENSIONS].push({"description": "ILinkableObject/WeavePath", "replacer": replacer, "reviver": reviver});'
     );
 };*/
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -14447,22 +14550,27 @@ if (typeof window === 'undefined') {
      */
     ExternalSessionStateInterface._d2d_callback_target = new weavecore.Dictionary2D();
     ExternalSessionStateInterface._funcToWrapper = new Map();
+    ExternalSessionStateInterface._getObjectFromPathOrVariableName_error = null;
+
+
+    // need to nmke them static ans this referenc elost when called from jsonCall
+    /**
+     * This object maps an expression name to the saved expression function.
+     */
+    Object.defineProperties(ExternalSessionStateInterface, {
+        '_compiler': {
+            value: new weavecore.Compiler()
+        },
+        '_variables': {
+            value: {} //This object maps an expression name to the saved expression function.
+        }
+
+    });
 
     function ExternalSessionStateInterface() {
-        this._getObjectFromPathOrVariableName_error = null;
 
-        /**
-         * This object maps an expression name to the saved expression function.
-         */
-        Object.defineProperties(this, {
-            '_compiler': {
-                value: new weavecore.Compiler()
-            },
-            '_variables': {
-                value: {} //This object maps an expression name to the saved expression function.
-            }
 
-        });
+
     }
 
     var p = ExternalSessionStateInterface.prototype;
@@ -14655,7 +14763,7 @@ if (typeof window === 'undefined') {
      */
     //private
     function _getObjectFromPathOrVariableName(objectPathOrVariableName) {
-        this._getObjectFromPathOrVariableName_error = null;
+        ExternalSessionStateInterface._getObjectFromPathOrVariableName_error = null;
 
         if (objectPathOrVariableName === null || objectPathOrVariableName === undefined)
             return null;
@@ -14665,16 +14773,16 @@ if (typeof window === 'undefined') {
             if (object)
                 return object;
 
-            this._getObjectFromPathOrVariableName_error = "No ILinkableObject at path " + weavecore.Compiler.stringify(objectPathOrVariableName);;
+            ExternalSessionStateInterface._getObjectFromPathOrVariableName_error = "No ILinkableObject at path " + weavecore.Compiler.stringify(objectPathOrVariableName);;
             return null;
         }
 
         var variableName = String(objectPathOrVariableName);
         if (variableName) {
-            if (this._variables.hasOwnProperty(variableName))
-                return this._variables[variableName];
+            if (ExternalSessionStateInterface._variables.hasOwnProperty(variableName))
+                return ExternalSessionStateInterface._variables[variableName];
 
-            this._getObjectFromPathOrVariableName_error = "Undefined variable " + weavecore.Compiler.stringify(variableName);;
+            ExternalSessionStateInterface._getObjectFromPathOrVariableName_error = "Undefined variable " + weavecore.Compiler.stringify(variableName);;
             return null;
         }
 
@@ -14691,10 +14799,10 @@ if (typeof window === 'undefined') {
 
         try {
             if (staticLibraries)
-                this._compiler.includeLibraries.apply(null, staticLibraries);
+                ExternalSessionStateInterface._compiler.includeLibraries.apply(null, staticLibraries);
 
             var isAssignment = (assignVariableName !== null); // allows '' to be used to ignore resulting value
-            if (assignVariableName && !this._compiler.isValidSymbolName(assignVariableName))
+            if (assignVariableName && !ExternalSessionStateInterface._compiler.isValidSymbolName(assignVariableName))
                 throw new Error("Invalid variable name: " + weavecore.Compiler.encodeString(assignVariableName));
 
             // To avoid "variable is undefined" errors, treat variables[''] as an Array of keys and set any missing properties to undefined
@@ -14705,13 +14813,13 @@ if (typeof window === 'undefined') {
                 });
 
             var thisObject = _getObjectFromPathOrVariableName(scopeObjectPathOrVariableName);
-            if (this._getObjectFromPathOrVariableName_error)
-                throw new Error(this._getObjectFromPathOrVariableName_error);
-            var compiledObject = this._compiler.compileToObject(expression);
-            var isFuncDef = this._compiler.compiledObjectIsFunctionDefinition(compiledObject);
+            if (ExternalSessionStateInterface._getObjectFromPathOrVariableName_error)
+                throw new Error(ExternalSessionStateInterface._getObjectFromPathOrVariableName_error);
+            var compiledObject = ExternalSessionStateInterface._compiler.compileToObject(expression);
+            var isFuncDef = ExternalSessionStateInterface._compiler.compiledObjectIsFunctionDefinition(compiledObject);
             // passed-in variables take precedence over stored ActionScript weave._variables
-            var compiledMethod = this._compiler.compileObjectToFunction(
-                compiledObject, [variables, this._variables],
+            var compiledMethod = ExternalSessionStateInterface._compiler.compileObjectToFunction(
+                compiledObject, [variables, ExternalSessionStateInterface._variables],
                 WeaveAPI.ErrorManager.reportError.bind(WeaveAPI.ErrorManager),
                 thisObject !== null,
                 null,
@@ -14721,7 +14829,7 @@ if (typeof window === 'undefined') {
             );
             var result = isFuncDef ? compiledMethod : compiledMethod.apply(thisObject);
             if (isAssignment)
-                this._variables[assignVariableName] = result;
+                ExternalSessionStateInterface._variables[assignVariableName] = result;
             else
                 return result;
         } catch (e) {
@@ -14747,8 +14855,8 @@ if (typeof window === 'undefined') {
 
             var object = _getObjectFromPathOrVariableName(scopeObjectPathOrVariableName);
             object = (object && object instanceof weavecore.ILinkableObject) ? object : null;
-            if (this._getObjectFromPathOrVariableName_error) {
-                externalError(this._getObjectFromPathOrVariableName_error);
+            if (ExternalSessionStateInterface._getObjectFromPathOrVariableName_error) {
+                externalError(ExternalSessionStateInterface._getObjectFromPathOrVariableName_error);
                 return false;
             }
             if (object === null || object === undefined) {
@@ -14813,8 +14921,8 @@ if (typeof window === 'undefined') {
 
             var object = _getObjectFromPathOrVariableName(objectPathOrVariableName);
             object = (object && object instanceof weavecore.ILinkableObject) ? object : null;
-            if (this._getObjectFromPathOrVariableName_error) {
-                externalError(this._getObjectFromPathOrVariableName_error);
+            if (ExternalSessionStateInterface._getObjectFromPathOrVariableName_error) {
+                externalError(ExternalSessionStateInterface._getObjectFromPathOrVariableName_error);
                 return false;
             }
             if (object === null || object === undefined) {
@@ -14868,6 +14976,7 @@ if (typeof window === 'undefined') {
     weavecore.ExternalSessionStateInterface = ExternalSessionStateInterface;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -15374,71 +15483,7 @@ if (typeof window === 'undefined') {
 
 
 //WeaveAPI.addJsonExtension();
-(function () {
-    var JSON_CALL = "_jsonCall";
-    var JSON_LOOKUP = "_jsonLookup";
-    var JSON_SUFFIX = ";0.6993383441586047;Fri Nov 13 2015 01:36:13 GMT-0500 (EST)";
-    var JSON_REVIVER = "_jsonReviver";
-    var JSON_REPLACER = "_jsonReplacer";
-    var JSON_EXTENSIONS = "_jsonExtensions";
-    var JSON_FUNCTION_PREFIX = "function;0.6993383441586047;Fri Nov 13 2015 01:36:13 GMT-0500 (EST);";
-    var flash = this;
-    console.log(flash)
-    var toJson = function (value) {
-        return JSON.stringify(value, flash[JSON_REPLACER]);
-    };
-    var fromJson = function (value) {
-        return JSON.parse(value, flash[JSON_REVIVER]);
-    };
-    var functionCounter = 0;
-    var lookup = flash[JSON_LOOKUP] = {};
-    var extensions = flash[JSON_EXTENSIONS] = [];
-    var symbols = [NaN, Infinity, -Infinity];
-    for (var i in symbols)
-        lookup[symbols[i] + JSON_SUFFIX] = symbols[i];
 
-    function cacheProxyFunction(id) {
-        var func = function () {
-            if (!flash[JSON_CALL])
-                throw new Error("Cannot use the JavaScript API of a Flash object after it has been removed from the DOM.");
-            var params = Array.prototype.slice.call(arguments);
-            var paramsJson = toJson(params);
-            var resultJson = flash[JSON_CALL](id, paramsJson);
-            return fromJson(resultJson);
-        };
-        func[JSON_FUNCTION_PREFIX] = id;
-        return lookup[id] = func;
-    }
-    flash[JSON_REPLACER] = function (key, value) {
-        if (typeof value === "function") {
-            if (!value[JSON_FUNCTION_PREFIX]) {
-                var id = JSON_FUNCTION_PREFIX + (--functionCounter);
-                value[JSON_FUNCTION_PREFIX] = id;
-                lookup[id] = value;
-            }
-            value = value[JSON_FUNCTION_PREFIX];
-        } else if (typeof value === "number" && !isFinite(value))
-            value = value + JSON_SUFFIX;
-        else if (Array.isArray(value) && !(value instanceof Array))
-            value = Array.prototype.slice.call(value);
-        for (var i in extensions)
-            if (typeof extensions[i] === "object" && typeof extensions[i].replacer === "function")
-                value = extensions[i].replacer.call(flash, key, value);
-        return value;
-    };
-    flash[JSON_REVIVER] = function (key, value) {
-        if (typeof value === "string") {
-            if (lookup.hasOwnProperty(value))
-                value = lookup[value];
-            else if (value.substr(0, JSON_FUNCTION_PREFIX.length) == JSON_FUNCTION_PREFIX)
-                value = cacheProxyFunction(value);
-        }
-        for (var i in extensions)
-            if (typeof extensions[i] === "object" && typeof extensions[i].reviver === "function")
-                value = extensions[i].reviver.call(flash, key, value);
-        return value;
-    };
-}).apply(weave);
 
 
 //register all weave-method
@@ -15450,7 +15495,7 @@ if (typeof window === 'undefined') {
             weavecore.JavaScript.registerMethod.call(weave, key, es[key]);
     });
 
-}())
+}());
 
 
 var asFunction_lookup = {};
@@ -16004,7 +16049,7 @@ weave.WeavePath.prototype._failMessage = function (methodName, message, path) {
 (function () {
     weavecore.JavaScript.extendJson(WeaveAPI._jsonReplacer, WeaveAPI._jsonReviver, WeaveAPI._needsReviving);
     var JSON_EXTENSIONS = weavecore.JavaScript.JSON_EXTENSIONS;
-    var WP = weave.WeavePath;
+    var WP = "WeavePath";
 
     function replacer(key, value) {
         if (value instanceof weave[WP]) {

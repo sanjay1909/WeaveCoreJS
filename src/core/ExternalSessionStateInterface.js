@@ -46,22 +46,27 @@ if (typeof window === 'undefined') {
      */
     ExternalSessionStateInterface._d2d_callback_target = new weavecore.Dictionary2D();
     ExternalSessionStateInterface._funcToWrapper = new Map();
+    ExternalSessionStateInterface._getObjectFromPathOrVariableName_error = null;
+
+
+    // need to nmke them static ans this referenc elost when called from jsonCall
+    /**
+     * This object maps an expression name to the saved expression function.
+     */
+    Object.defineProperties(ExternalSessionStateInterface, {
+        '_compiler': {
+            value: new weavecore.Compiler()
+        },
+        '_variables': {
+            value: {} //This object maps an expression name to the saved expression function.
+        }
+
+    });
 
     function ExternalSessionStateInterface() {
-        this._getObjectFromPathOrVariableName_error = null;
 
-        /**
-         * This object maps an expression name to the saved expression function.
-         */
-        Object.defineProperties(this, {
-            '_compiler': {
-                value: new weavecore.Compiler()
-            },
-            '_variables': {
-                value: {} //This object maps an expression name to the saved expression function.
-            }
 
-        });
+
     }
 
     var p = ExternalSessionStateInterface.prototype;
@@ -254,7 +259,7 @@ if (typeof window === 'undefined') {
      */
     //private
     function _getObjectFromPathOrVariableName(objectPathOrVariableName) {
-        this._getObjectFromPathOrVariableName_error = null;
+        ExternalSessionStateInterface._getObjectFromPathOrVariableName_error = null;
 
         if (objectPathOrVariableName === null || objectPathOrVariableName === undefined)
             return null;
@@ -264,16 +269,16 @@ if (typeof window === 'undefined') {
             if (object)
                 return object;
 
-            this._getObjectFromPathOrVariableName_error = "No ILinkableObject at path " + weavecore.Compiler.stringify(objectPathOrVariableName);;
+            ExternalSessionStateInterface._getObjectFromPathOrVariableName_error = "No ILinkableObject at path " + weavecore.Compiler.stringify(objectPathOrVariableName);;
             return null;
         }
 
         var variableName = String(objectPathOrVariableName);
         if (variableName) {
-            if (this._variables.hasOwnProperty(variableName))
-                return this._variables[variableName];
+            if (ExternalSessionStateInterface._variables.hasOwnProperty(variableName))
+                return ExternalSessionStateInterface._variables[variableName];
 
-            this._getObjectFromPathOrVariableName_error = "Undefined variable " + weavecore.Compiler.stringify(variableName);;
+            ExternalSessionStateInterface._getObjectFromPathOrVariableName_error = "Undefined variable " + weavecore.Compiler.stringify(variableName);;
             return null;
         }
 
@@ -290,10 +295,10 @@ if (typeof window === 'undefined') {
 
         try {
             if (staticLibraries)
-                this._compiler.includeLibraries.apply(null, staticLibraries);
+                ExternalSessionStateInterface._compiler.includeLibraries.apply(null, staticLibraries);
 
             var isAssignment = (assignVariableName !== null); // allows '' to be used to ignore resulting value
-            if (assignVariableName && !this._compiler.isValidSymbolName(assignVariableName))
+            if (assignVariableName && !ExternalSessionStateInterface._compiler.isValidSymbolName(assignVariableName))
                 throw new Error("Invalid variable name: " + weavecore.Compiler.encodeString(assignVariableName));
 
             // To avoid "variable is undefined" errors, treat variables[''] as an Array of keys and set any missing properties to undefined
@@ -304,13 +309,13 @@ if (typeof window === 'undefined') {
                 });
 
             var thisObject = _getObjectFromPathOrVariableName(scopeObjectPathOrVariableName);
-            if (this._getObjectFromPathOrVariableName_error)
-                throw new Error(this._getObjectFromPathOrVariableName_error);
-            var compiledObject = this._compiler.compileToObject(expression);
-            var isFuncDef = this._compiler.compiledObjectIsFunctionDefinition(compiledObject);
+            if (ExternalSessionStateInterface._getObjectFromPathOrVariableName_error)
+                throw new Error(ExternalSessionStateInterface._getObjectFromPathOrVariableName_error);
+            var compiledObject = ExternalSessionStateInterface._compiler.compileToObject(expression);
+            var isFuncDef = ExternalSessionStateInterface._compiler.compiledObjectIsFunctionDefinition(compiledObject);
             // passed-in variables take precedence over stored ActionScript weave._variables
-            var compiledMethod = this._compiler.compileObjectToFunction(
-                compiledObject, [variables, this._variables],
+            var compiledMethod = ExternalSessionStateInterface._compiler.compileObjectToFunction(
+                compiledObject, [variables, ExternalSessionStateInterface._variables],
                 WeaveAPI.ErrorManager.reportError.bind(WeaveAPI.ErrorManager),
                 thisObject !== null,
                 null,
@@ -320,7 +325,7 @@ if (typeof window === 'undefined') {
             );
             var result = isFuncDef ? compiledMethod : compiledMethod.apply(thisObject);
             if (isAssignment)
-                this._variables[assignVariableName] = result;
+                ExternalSessionStateInterface._variables[assignVariableName] = result;
             else
                 return result;
         } catch (e) {
@@ -346,8 +351,8 @@ if (typeof window === 'undefined') {
 
             var object = _getObjectFromPathOrVariableName(scopeObjectPathOrVariableName);
             object = (object && object instanceof weavecore.ILinkableObject) ? object : null;
-            if (this._getObjectFromPathOrVariableName_error) {
-                externalError(this._getObjectFromPathOrVariableName_error);
+            if (ExternalSessionStateInterface._getObjectFromPathOrVariableName_error) {
+                externalError(ExternalSessionStateInterface._getObjectFromPathOrVariableName_error);
                 return false;
             }
             if (object === null || object === undefined) {
@@ -412,8 +417,8 @@ if (typeof window === 'undefined') {
 
             var object = _getObjectFromPathOrVariableName(objectPathOrVariableName);
             object = (object && object instanceof weavecore.ILinkableObject) ? object : null;
-            if (this._getObjectFromPathOrVariableName_error) {
-                externalError(this._getObjectFromPathOrVariableName_error);
+            if (ExternalSessionStateInterface._getObjectFromPathOrVariableName_error) {
+                externalError(ExternalSessionStateInterface._getObjectFromPathOrVariableName_error);
                 return false;
             }
             if (object === null || object === undefined) {

@@ -29,71 +29,7 @@ if (typeof window === 'undefined') {
 
 
 //WeaveAPI.addJsonExtension();
-(function () {
-    var JSON_CALL = "_jsonCall";
-    var JSON_LOOKUP = "_jsonLookup";
-    var JSON_SUFFIX = ";0.6993383441586047;Fri Nov 13 2015 01:36:13 GMT-0500 (EST)";
-    var JSON_REVIVER = "_jsonReviver";
-    var JSON_REPLACER = "_jsonReplacer";
-    var JSON_EXTENSIONS = "_jsonExtensions";
-    var JSON_FUNCTION_PREFIX = "function;0.6993383441586047;Fri Nov 13 2015 01:36:13 GMT-0500 (EST);";
-    var flash = this;
-    console.log(flash)
-    var toJson = function (value) {
-        return JSON.stringify(value, flash[JSON_REPLACER]);
-    };
-    var fromJson = function (value) {
-        return JSON.parse(value, flash[JSON_REVIVER]);
-    };
-    var functionCounter = 0;
-    var lookup = flash[JSON_LOOKUP] = {};
-    var extensions = flash[JSON_EXTENSIONS] = [];
-    var symbols = [NaN, Infinity, -Infinity];
-    for (var i in symbols)
-        lookup[symbols[i] + JSON_SUFFIX] = symbols[i];
 
-    function cacheProxyFunction(id) {
-        var func = function () {
-            if (!flash[JSON_CALL])
-                throw new Error("Cannot use the JavaScript API of a Flash object after it has been removed from the DOM.");
-            var params = Array.prototype.slice.call(arguments);
-            var paramsJson = toJson(params);
-            var resultJson = flash[JSON_CALL](id, paramsJson);
-            return fromJson(resultJson);
-        };
-        func[JSON_FUNCTION_PREFIX] = id;
-        return lookup[id] = func;
-    }
-    flash[JSON_REPLACER] = function (key, value) {
-        if (typeof value === "function") {
-            if (!value[JSON_FUNCTION_PREFIX]) {
-                var id = JSON_FUNCTION_PREFIX + (--functionCounter);
-                value[JSON_FUNCTION_PREFIX] = id;
-                lookup[id] = value;
-            }
-            value = value[JSON_FUNCTION_PREFIX];
-        } else if (typeof value === "number" && !isFinite(value))
-            value = value + JSON_SUFFIX;
-        else if (Array.isArray(value) && !(value instanceof Array))
-            value = Array.prototype.slice.call(value);
-        for (var i in extensions)
-            if (typeof extensions[i] === "object" && typeof extensions[i].replacer === "function")
-                value = extensions[i].replacer.call(flash, key, value);
-        return value;
-    };
-    flash[JSON_REVIVER] = function (key, value) {
-        if (typeof value === "string") {
-            if (lookup.hasOwnProperty(value))
-                value = lookup[value];
-            else if (value.substr(0, JSON_FUNCTION_PREFIX.length) == JSON_FUNCTION_PREFIX)
-                value = cacheProxyFunction(value);
-        }
-        for (var i in extensions)
-            if (typeof extensions[i] === "object" && typeof extensions[i].reviver === "function")
-                value = extensions[i].reviver.call(flash, key, value);
-        return value;
-    };
-}).apply(weave);
 
 
 //register all weave-method
@@ -105,7 +41,7 @@ if (typeof window === 'undefined') {
             weavecore.JavaScript.registerMethod.call(weave, key, es[key]);
     });
 
-}())
+}());
 
 
 var asFunction_lookup = {};
@@ -659,7 +595,7 @@ weave.WeavePath.prototype._failMessage = function (methodName, message, path) {
 (function () {
     weavecore.JavaScript.extendJson(WeaveAPI._jsonReplacer, WeaveAPI._jsonReviver, WeaveAPI._needsReviving);
     var JSON_EXTENSIONS = weavecore.JavaScript.JSON_EXTENSIONS;
-    var WP = weave.WeavePath;
+    var WP = "WeavePath";
 
     function replacer(key, value) {
         if (value instanceof weave[WP]) {
