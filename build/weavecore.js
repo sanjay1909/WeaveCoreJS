@@ -9498,6 +9498,7 @@ WeaveAPI._needsReviving = function (key, value) {
         'weave[JSON_EXTENSIONS].push({"description": "ILinkableObject/WeavePath", "replacer": replacer, "reviver": reviver});'
     );
 };*/
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -14594,6 +14595,10 @@ if (typeof window === 'undefined') {
      * @param state A session state that may contain nested XML objects.
      */
     function _convertSessionStateToPrimitives(state) {
+        var stateType = typeof state;
+        if (stateType === 'string' || stateType === 'number' || stateType === 'boolean') {
+            return;
+        }
         for (var key in state) {
             var value = state[key];
             _convertSessionStateToPrimitives(value);
