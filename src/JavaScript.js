@@ -159,7 +159,9 @@ if (typeof window === 'undefined') {
                     if (!flash[JSON_CALL])
                         throw new Error("Cannot use the JavaScript API of a Flash object after it has been removed from the DOM.");
                     var params = Array.prototype.slice.call(arguments);
+                    console.log('params:', params);
                     var paramsJson = toJson(params);
+                    console.log('paramsJson:', paramsJson);
                     var resultJson = flash[JSON_CALL](id, paramsJson);
                     return fromJson(resultJson);
                 };
