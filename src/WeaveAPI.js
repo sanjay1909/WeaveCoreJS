@@ -27,13 +27,15 @@ Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_LOW', {
 });
 
 
+WeaveAPI._pathLookup = new Map();
+
 WeaveAPI._jsonReviver = function (key, value) {
     var WP = 'WeavePath';
     if (value !== null && typeof (value) === 'object' && value.hasOwnProperty(WP) && value[WP] instanceof Array) {
         for (key in value)
             if (key !== WP)
                 return value;
-        return WeaveAPI.getObject(value[WP]);
+        return WeaveAPI.SessionManager.getObject(value[WP]);
     }
     return value;
 }
@@ -42,7 +44,7 @@ WeaveAPI._jsonReplacer = function (key, value) {
     if (value instanceof weavecore.ILinkableObject) {
         var obj = WeaveAPI._pathLookup.get(value);
         if (obj === undefined || obj === null) {
-            var path = WeaveAPI.SessionManager.getPath(value);
+            var path = WeaveAPI.SessionManager.getPath(WeaveAPI.globalHashMap, value);
             // return null for ILinkableObjects not in session state tree
             obj = path ? {
                 "WeavePath": path
@@ -56,7 +58,7 @@ WeaveAPI._jsonReplacer = function (key, value) {
 
 
 
-WeaveAPI._pathLookup = new Map();
+
 
 
 WeaveAPI._needsReviving = function (key, value) {

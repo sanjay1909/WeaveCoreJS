@@ -9017,11 +9017,8 @@ if (typeof window === 'undefined') {
             "id": id,
             "catch": false
         };
-        /* var script = [
-		"var func = this." + JavaScript.JSON_REVIVER + "('', id);",
-		"return func.apply(func['this'], args);"
-	].join('\n');*/
 
+        //replaced JavaScript Exec with the function to avoid eval
         var func = function () {
             params['args'] = Array.prototype.slice.call(arguments);
             return (function () {
@@ -9405,6 +9402,7 @@ if (typeof window === 'undefined') {
     weavecore.JavaScript = JavaScript;
 
 }());
+
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -9434,13 +9432,15 @@ Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_LOW', {
 });
 
 
+WeaveAPI._pathLookup = new Map();
+
 WeaveAPI._jsonReviver = function (key, value) {
     var WP = 'WeavePath';
     if (value !== null && typeof (value) === 'object' && value.hasOwnProperty(WP) && value[WP] instanceof Array) {
         for (key in value)
             if (key !== WP)
                 return value;
-        return WeaveAPI.getObject(value[WP]);
+        return WeaveAPI.SessionManager.getObject(value[WP]);
     }
     return value;
 }
@@ -9449,7 +9449,7 @@ WeaveAPI._jsonReplacer = function (key, value) {
     if (value instanceof weavecore.ILinkableObject) {
         var obj = WeaveAPI._pathLookup.get(value);
         if (obj === undefined || obj === null) {
-            var path = WeaveAPI.SessionManager.getPath(value);
+            var path = WeaveAPI.SessionManager.getPath(WeaveAPI.globalHashMap, value);
             // return null for ILinkableObjects not in session state tree
             obj = path ? {
                 "WeavePath": path
@@ -9463,7 +9463,7 @@ WeaveAPI._jsonReplacer = function (key, value) {
 
 
 
-WeaveAPI._pathLookup = new Map();
+
 
 
 WeaveAPI._needsReviving = function (key, value) {
@@ -9498,7 +9498,6 @@ WeaveAPI._needsReviving = function (key, value) {
         'weave[JSON_EXTENSIONS].push({"description": "ILinkableObject/WeavePath", "replacer": replacer, "reviver": reviver});'
     );
 };*/
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
