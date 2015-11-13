@@ -27,478 +27,85 @@ if (typeof window === 'undefined') {
 }
 
 
-weave._getObjectFromPathOrVariableName_error = null;
-/**
- * Stores information for removeCallback() and removeAllCallbacks()
- */
-weave._d2d_callback_target = new weavecore.Dictionary2D(false, true);
-weave._funcToWrapper = new Map();
 
-Object.defineProperties(weave, {
-    '_compiler': {
-        value: new weavecore.Compiler()
-    },
-    '_variables': {
-        value: {} //This object maps an expression name to the saved expression function.
-    }
-
-});
-
-
-
-
-
-
-
-
-/**
- * A set of static functions intended for use as a  API.
- *
- * The user interface in Weave is initially generated from a saved session state.
- * User interactions affect the session state, and changes in the session state affect
- * the display at runtime.  The API provides a window into the session state so most
- * interactions that can be made through the GUI can also be made through JavaScript calls.
- *
- * @author adufilie
- */
-
-/**
- * @inheritDoc
- */
-weave.getSessionState = function (objectPath) {
-    var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
-    if (object) {
-        var state = WeaveAPI.SessionManager.getSessionState(object);
-        convertSessionStateToPrimitives(state); // do not allow XML objects to be returned
-        return state;
-    }
-
-    externalWarning("No ILinkableObject from which to get session state at path {0}", weavecore.Compiler.stringify(objectPath));
-    return null;
-}
-
-/**
- * This function modifies a session state, converting any nested XML objects to Strings.
- * @param state A session state that may contain nested XML objects.
- */
-function convertSessionStateToPrimitives(state) {
-    for (var key in state) {
-        var value = state[key];
-        /*if (value is XML)
-        	state[key] = (value as XML).toXMLString();
-        else*/
-        convertSessionStateToPrimitives(value);
-    }
-}
-
-/**
- * @inheritDoc
- */
-weave.setSessionState = function (objectPath, newState, removeMissingObjects) {
-    removeMissingObjects = (removeMissingObjects === undefined) ? true : removeMissingObjects;
-    var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
-    if (object) {
-        WeaveAPI.SessionManager.setSessionState(object, newState, removeMissingObjects);
-        return true;
-    }
-
-    externalError("No ILinkableObject for which to set session state at path {0}", weavecore.Compiler.stringify(objectPath));
-    return false;
-}
-
-/**
- * @inheritDoc
- */
-weave.getObjectType = function (objectPath) {
-    var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
-    if (object)
-        return object.constructor.name;
-
-    // no warning since getObjectType() may be used to check whether or not an object exists.
-    return null;
-}
-
-/**
- * @inheritDoc
- */
-weave.getChildNames = function (objectPath) {
-    var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
-    if (object) {
-        if (object instanceof weavecore.LinkableHashMap)
-            return object.getNames();
-        if (object instanceof weavecore.LinkableDynamicObject)
-            return [null];
-        return WeaveAPI.SessionManager.getLinkablePropertyNames(object, true);
-    }
-
-    externalError("No ILinkableObject for which to get child names at path {0}", weavecore.Compiler.stringify(objectPath));
-    return null;
-}
-
-/**
- * @inheritDoc
- */
-weave.setChildNameOrder = function (hashMapPath, orderedChildNames) {
-    var hm = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, hashMapPath);
-    var hashMap = (hm && hm instanceof weavecore.LinkableHashMap) ? hm : null;
-    if (hashMap) {
-        // it's ok if there are no names specified, because that wouldn't accomplish anything anyway
-        if (orderedChildNames)
-            hashMap.setNameOrder(orderedChildNames);
-        return true;
-    }
-
-    externalError("No ILinkableHashMap for which to reorder children at path {0}", weavecore.Compiler.stringify(hashMapPath));
-    return false;
-}
-
-/**
- * @inheritDoc
- */
-weave.requestObject = function (objectPath, objectType) {
-    // get class definition
-    var classQName = objectType;
-    var classDef = weavecore.ClassUtils.getClassDefinition(objectType);
-    if (classDef === null) {
-        externalError("No class definition for {0}", weavecore.Compiler.stringify(classQName));
-        return false;
-    }
-    /* if (ClassUtils.isClassDeprecated(classQName))
-         externalWarning("{0} is deprecated.", objectType);*/
-
-    // stop if there is no path specified
-    if (!objectPath || !objectPath.length) {
-        if (Object(WeaveAPI.globalHashMap).constructor === classDef)
-            return true;
-
-        externalError("Cannot request an object at the root path");
-        return false;
-    }
-
-    // Get parent object first in case there is some backwards compatibility code that gets
-    // executed when it is accessed (registering deprecated class definitions, for example).
-    var parentPath = objectPath.concat();
-    var childName = parentPath.pop();
-    var parent = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, parentPath);
-
-    // request the child object
-    var hashMap = (parent && parent instanceof weavecore.LinkableHashMap) ? parent : null;
-    var dynamicObject = (parent && parent instanceof weavecore.LinkableDynamicObject) ? parent : null;
-    var child = null;
-    if (hashMap) {
-        if (typeof (childName) === 'number')
-            childName = hashMap.getNames()[childName];
-        child = hashMap.requestObject(String(childName), classDef, false);
-    } else if (dynamicObject)
-        child = dynamicObject.requestGlobalObject(String(childName), classDef, false);
-    else
-        child = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
-
-    if (child && child.constructor === classDef)
-        return true;
-
-    externalError("Request for {0} failed at path {1}", objectType, weavecore.Compiler.stringify(objectPath));
-    return false;
-}
-
-/**
- * @inheritDoc
- */
-weave.removeObject = function (objectPath) {
-    if (!objectPath || !objectPath.length) {
-        externalError("Cannot remove root object");
-        return false;
-    }
-
-    var parentPath = objectPath.concat();
-    var childName = parentPath.pop();
-    var parent = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, parentPath);
-
-    var hashMap = (parent && parent instanceof weavecore.LinkableHashMap) ? parent : null;;
-    if (hashMap) {
-        if (typeof (childName) === 'number')
-            childName = hashMap.getNames()[childName];
-
-        if (hashMap.objectIsLocked(String(childName))) {
-            externalError("Object is locked and cannot be removed (path: {0})", weavecore.Compiler.stringify(objectPath));
-            return false;
-        }
-
-        hashMap.removeObject(childName);
-        return true;
-    }
-
-    var dynamicObject = (parent && parent instanceof weavecore.LinkableDynamicObject) ? parent : null;
-    if (dynamicObject) {
-        if (dynamicObject.locked) {
-            externalError("Object is locked and cannot be removed (path: {0})", weavecore.Compiler.stringify(objectPath));
-            return false;
-        }
-
-        dynamicObject.removeObject();
-        return true;
-    }
-
-    if (parent)
-        externalError("Parent object does not support dynamic children, so cannot remove child at path {0}", weavecore.Compiler.stringify(objectPath));
-    else
-        externalError("No parent from which to remove a child at path {0}", weavecore.Compiler.stringify(objectPath));
-    return false;
-}
-
-
-/**
- * @inheritDoc
- */
-/*public function convertSessionStateObjectToXML(sessionState, tagName = null)
-{
-	var result:XML = WeaveXMLEncoder.encode(sessionState, tagName || "sessionState");
-	return result.toXMLString();
-}*/
-
-/**
- * @inheritDoc
- */
-/*public function convertSessionStateXMLToObject(sessionStateXML)
-{
-	var xml:XML = XML(sessionStateXML);
-	var state = WeaveXMLDecoder.decode(xml);
-	convertSessionStateToPrimitives(state); // do not allow XML objects to be returned
-	return state;
-}*/
-
-
-
-/**
- * Gets an object from a path or a variable name and sets weave._getObjectFromPathOrVariableName_error.
- * If the path was invalid or the variable uninitialized, weave._getObjectFromPathOrVariableName_error will be set with an appropriate error message.
- * @param objectPathOrVariableName Either an Array for a path or a String for a variable name.
- * @return The object at the specified path, the value of the specified variable, or null if the parameter was null.
- */
-function getObjectFromPathOrVariableName(objectPathOrVariableName) {
-    weave._getObjectFromPathOrVariableName_error = null;
-
-    if (objectPathOrVariableName === null || objectPathOrVariableName === undefined)
-        return null;
-
-    if (objectPathOrVariableName.constructor === Array) {
-        var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPathOrVariableName);
-        if (object)
-            return object;
-
-        weave._getObjectFromPathOrVariableName_error = "No ILinkableObject at path " + weavecore.Compiler.stringify(objectPathOrVariableName);
-        return null;
-    }
-
-    var variableName = String(objectPathOrVariableName);
-    if (variableName) {
-        if (weave._variables.hasOwnProperty(variableName))
-            return weave._variables[variableName];
-
-        weave._getObjectFromPathOrVariableName_error = "Undefined variable " + weavecore.Compiler.stringify(variableName);
-        return null;
-    }
-
-    return null;
-}
-
-
-
-/**
- * @inheritDoc
- */
-weave.evaluateExpression = function (scopeObjectPathOrVariableName, expression, variables, staticLibraries, assignVariableName) {
-    variables = (variables === undefined) ? null : variables;
-    staticLibraries = (staticLibraries === undefined) ? null : staticLibraries;
-    assignVariableName = (assignVariableName === undefined) ? null : assignVariableName;
-
-    try {
-        if (staticLibraries)
-            weave._compiler.includeLibraries.apply(null, staticLibraries);
-
-        var isAssignment = (assignVariableName !== null); // allows '' to be used to ignore resulting value
-        if (assignVariableName && !weave._compiler.isValidSymbolName(assignVariableName))
-            throw new Error("Invalid variable name: " + weavecore.Compiler.encodeString(assignVariableName));
-
-        // To avoid "variable is undefined" errors, treat variables[''] as an Array of keys and set any missing properties to undefined
-        if (variables && variables[''])
-            variables[''].forEach(function (key) {
-                if (!variables.hasOwnProperty(key))
-                    variables[key] = undefined;
-            });
-
-        var thisObject = getObjectFromPathOrVariableName(scopeObjectPathOrVariableName);
-        if (weave._getObjectFromPathOrVariableName_error)
-            throw new Error(weave._getObjectFromPathOrVariableName_error);
-        var compiledObject = weave._compiler.compileToObject(expression);
-        var isFuncDef = weave._compiler.compiledObjectIsFunctionDefinition(compiledObject);
-        // passed-in variables take precedence over stored ActionScript weave._variables
-        var compiledMethod = weave._compiler.compileObjectToFunction(
-            compiledObject, [variables, weave._variables],
-            WeaveAPI.ErrorManager.reportError.bind(WeaveAPI.ErrorManager),
-            thisObject !== null,
-            null,
-            null,
-            true,
-            thisObject
-        );
-        var result = isFuncDef ? compiledMethod : compiledMethod.apply(thisObject);
-        if (isAssignment)
-            weave._variables[assignVariableName] = result;
-        else
-            return result;
-    } catch (e) {
-        externalError(e.message);
-    }
-    return undefined;
-}
-
-
-
-/**
- * @inheritDoc
- */
-weave.addCallback = function (scopeObjectPathOrVariableName, callback, triggerCallbackNow, immediateMode, delayWhileBusy) {
-    triggerCallbackNow = (triggerCallbackNow === undefined) ? false : triggerCallbackNow;
-    immediateMode = (immediateMode === undefined) ? false : immediateMode;
-    delayWhileBusy = (delayWhileBusy === undefined) ? true : delayWhileBusy;
-    try {
-        if (scopeObjectPathOrVariableName === null || scopeObjectPathOrVariableName === undefined) {
-            externalError("addCallback(): No path or variable name given");
-            return false;
-        }
-
-        var ob = getObjectFromPathOrVariableName(scopeObjectPathOrVariableName)
-        var object = (ob && ob instanceof weavecore.ILinkableObject) ? ob : null;
-        if (weave._getObjectFromPathOrVariableName_error) {
-            externalError(weave._getObjectFromPathOrVariableName_error);
-            return false;
-        }
-        if (object === null || object === undefined) {
-            externalError("No ILinkableObject to which to add a callback at path or variable {0}", weavecore.Compiler.stringify(scopeObjectPathOrVariableName));
-            return false;
-        }
-
-        if (delayWhileBusy) {
-            var fn = (weave._funcToWrapper[callback] && weave._funcToWrapper[callback] instanceof Function) ? weave._funcToWrapper[callback] : null
-            callback = fn || (weave._funcToWrapper[callback] = generateBusyWaitWrapper(callback));
-        }
-
-
-        weave._d2d_callback_target.set(callback, object, true);
-        if (immediateMode)
-            WeaveAPI.SessionManager.getCallbackCollection(object).addImmediateCallback(null, callback, triggerCallbackNow);
-        else
-            WeaveAPI.SessionManager.getCallbackCollection(object).addGroupedCallback(null, callback, triggerCallbackNow);
-        return true;
-    } catch (e) {
-        // unexpected error reported in Weave interface
-        WeaveAPI.ErrorManager.reportError(e);
-    }
-    return false;
-}
-
-
-
-function generateBusyWaitWrapper(callback) {
-    var wrapper = function () {
-        var keys = weave._d2d_callback_target.dictionary.get(wrapper).keys();
-        for (var i = 0; i < keys.length; i++) {
-            var target = keys[i];
-            if (WeaveAPI.SessionManager.linkableObjectIsBusy(target))
-                return;
-        }
-        callback();
+//WeaveAPI.addJsonExtension();
+(function () {
+    var JSON_CALL = "_jsonCall";
+    var JSON_LOOKUP = "_jsonLookup";
+    var JSON_SUFFIX = ";0.6993383441586047;Fri Nov 13 2015 01:36:13 GMT-0500 (EST)";
+    var JSON_REVIVER = "_jsonReviver";
+    var JSON_REPLACER = "_jsonReplacer";
+    var JSON_EXTENSIONS = "_jsonExtensions";
+    var JSON_FUNCTION_PREFIX = "function;0.6993383441586047;Fri Nov 13 2015 01:36:13 GMT-0500 (EST);";
+    var flash = this;
+    console.log(flash)
+    var toJson = function (value) {
+        return JSON.stringify(value, flash[JSON_REPLACER]);
     };
-    return wrapper;
-}
+    var fromJson = function (value) {
+        return JSON.parse(value, flash[JSON_REVIVER]);
+    };
+    var functionCounter = 0;
+    var lookup = flash[JSON_LOOKUP] = {};
+    var extensions = flash[JSON_EXTENSIONS] = [];
+    var symbols = [NaN, Infinity, -Infinity];
+    for (var i in symbols)
+        lookup[symbols[i] + JSON_SUFFIX] = symbols[i];
 
-/**
- * @inheritDoc
- */
-weave.removeCallback = function (objectPathOrVariableName, callback, everywhere) {
-    everywhere = (everywhere === undefined) ? false : everywhere;
-    var wrapper = weave._funcToWrapper[callback];
-    if (wrapper !== null && !removeCallback(objectPathOrVariableName, wrapper, everywhere))
-        return false;
-
-    if (everywhere) {
-        var keys = weave._d2d_callback_target.dictionary.get(callback).keys();
-        for (var i = 0; i < keys.length; i++) {
-            var target = keys[i];
-            WeaveAPI.SessionManager.getCallbackCollection(target).removeCallback(callback);
-        }
-
-        weave._d2d_callback_target.dictionary.delete(callback);
-        weave._funcToWrapper.delete(callback);
-        return true;
+    function cacheProxyFunction(id) {
+        var func = function () {
+            if (!flash[JSON_CALL])
+                throw new Error("Cannot use the JavaScript API of a Flash object after it has been removed from the DOM.");
+            var params = Array.prototype.slice.call(arguments);
+            var paramsJson = toJson(params);
+            var resultJson = flash[JSON_CALL](id, paramsJson);
+            return fromJson(resultJson);
+        };
+        func[JSON_FUNCTION_PREFIX] = id;
+        return lookup[id] = func;
     }
-
-    try {
-        if (objectPathOrVariableName === null) {
-            externalWarning("removeCallback(): No path or variable name given");
-            return false;
+    flash[JSON_REPLACER] = function (key, value) {
+        if (typeof value === "function") {
+            if (!value[JSON_FUNCTION_PREFIX]) {
+                var id = JSON_FUNCTION_PREFIX + (--functionCounter);
+                value[JSON_FUNCTION_PREFIX] = id;
+                lookup[id] = value;
+            }
+            value = value[JSON_FUNCTION_PREFIX];
+        } else if (typeof value === "number" && !isFinite(value))
+            value = value + JSON_SUFFIX;
+        else if (Array.isArray(value) && !(value instanceof Array))
+            value = Array.prototype.slice.call(value);
+        for (var i in extensions)
+            if (typeof extensions[i] === "object" && typeof extensions[i].replacer === "function")
+                value = extensions[i].replacer.call(flash, key, value);
+        return value;
+    };
+    flash[JSON_REVIVER] = function (key, value) {
+        if (typeof value === "string") {
+            if (lookup.hasOwnProperty(value))
+                value = lookup[value];
+            else if (value.substr(0, JSON_FUNCTION_PREFIX.length) == JSON_FUNCTION_PREFIX)
+                value = cacheProxyFunction(value);
         }
+        for (var i in extensions)
+            if (typeof extensions[i] === "object" && typeof extensions[i].reviver === "function")
+                value = extensions[i].reviver.call(flash, key, value);
+        return value;
+    };
+}).apply(weave);
 
-        var ob = getObjectFromPathOrVariableName(objectPathOrVariableName)
-        var object = (ob && ob instanceof weavecore.ILinkableObject) ? ob : null;
-        if (weave._getObjectFromPathOrVariableName_error) {
-            externalError(weave._getObjectFromPathOrVariableName_error);
-            return false;
-        }
-        if (object === null) {
-            externalWarning("No ILinkableObject from which to remove a callback at path or variable {0}", weavecore.Compiler.stringify(objectPathOrVariableName));
-            return false;
-        }
 
-        weave._d2d_callback_target.remove(callback, object);
-        WeaveAPI.SessionManager.getCallbackCollection(object).removeCallback(callback);
-        return true;
-    } catch (e) {
-        // unexpected error reported in Weave interface
-        WeaveAPI.ErrorManager.reportError(e);
-    }
-    return false;
-}
-
-/**
- * @inheritDoc
- */
-weave.removeAllCallbacks = function () {
-    var keys = weave._d2d_callback_target.dictionary.keys();
-    keys.forEach(function (callback) {
-        var targets = weave._d2d_callback_target.dictionary.get(callback).keys();
-        targets.forEach(function (target) {
-            WeaveAPI.SessionManager.getCallbackCollection(target).removeCallback(callback);
-        });
+//register all weave-method
+(function () {
+    var es = new weavecore.ExternalSessionStateInterface();
+    keys = Object.keys(es.__proto__);
+    keys.forEach(function (key) {
+        if (key !== 'constructor' && es[key] instanceof Function)
+            weavecore.JavaScript.registerMethod.call(weave, key, es[key]);
     });
 
-
-    weave._d2d_callback_target = new weavecore.Dictionary2D(true, true);
-}
-
-
-function externalError() {
-    var args = Array.prototype.slice.call(arguments);
-    var format = args.shift();
-    var str = weavecore.StandardLib.substitute(format, args);
-    // temporary solution for Flash not escaping double-quotes when generating JavaScript throw statement
-    str = weavecore.StandardLib.replace(str, '"', "'");
-    throw new Error(str);
-}
-
-
-
-function externalWarning() {
-    var args = Array.prototype.slice.call(arguments);
-    var format = args.shift();
-    externalError(StandardLib.substitute("Warning: " + format, args));
-}
-
-
-
-
-
+}())
 
 
 var asFunction_lookup = {};
@@ -1045,3 +652,38 @@ weave.WeavePath.prototype._failMessage = function (methodName, message, path) {
     }
     throw new Error(str);
 };
+
+
+
+//WeaveAPI.addJsonExtension (exec)
+(function () {
+    weavecore.JavaScript.extendJson(WeaveAPI._jsonReplacer, WeaveAPI._jsonReviver, WeaveAPI._needsReviving);
+    var JSON_EXTENSIONS = weavecore.JavaScript.JSON_EXTENSIONS;
+    var WP = weave.WeavePath;
+
+    function replacer(key, value) {
+        if (value instanceof weave[WP]) {
+            var obj = {};
+            obj[WP] = value.getPath();
+            return obj;
+        }
+        return value;
+    }
+
+    function reviver(key, value) {
+        if (value != null && typeof value === "object" && value.hasOwnProperty(WP) && Array.isArray(value[WP])) {
+            for (key in value)
+                if (key != WP)
+                    return value;
+            return weave.path(value[WP]);
+        }
+        return value;
+    }
+
+    weave[JSON_EXTENSIONS].push({
+        "description": "ILinkableObject/WeavePath",
+        "replacer": replacer,
+        "reviver": reviver
+    });
+
+})();
