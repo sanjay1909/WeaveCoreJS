@@ -79,7 +79,7 @@ if (typeof window === 'undefined') {
     /**
      * If this is true, backslashes need to be escaped when returning a String to JavaScript.
      */
-    JavaScript.backslashNeedsEscaping = true;
+    JavaScript.backslashNeedsEscaping = false;
 
     /**
      * Caches a new proxy function for a JavaScript function in _jsonLookup.
@@ -125,7 +125,7 @@ if (typeof window === 'undefined') {
 
         // determine if backslashes need to be escaped
         var slashes = "\\\\";
-        JavaScript.backslashNeedsEscaping = true;
+        JavaScript.backslashNeedsEscaping = false;
         //(ExternalInterface.call('function(slashes){ return slashes; }', slashes) !== slashes);
 
 
