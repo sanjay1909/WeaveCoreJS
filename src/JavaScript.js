@@ -19,7 +19,7 @@ if (typeof window === 'undefined') {
      * Also maps a Function to its corresponding ID.
      */
     Object.defineProperty(JavaScript, '_jsonLookup', {
-        value: new Map()
+        value: {}
     });
 
 
@@ -120,7 +120,7 @@ if (typeof window === 'undefined') {
 
         // save special IDs for values not supported by JSON
 			[NaN, Infinity, -Infinity].forEach(function (symbol) {
-            JavaScript._jsonLookup.set(symbol + JavaScript.JSON_SUFFIX, symbol)
+            JavaScript._jsonLookup[symbol + JavaScript.JSON_SUFFIX] = symbol
         });
 
         // determine if backslashes need to be escaped
@@ -155,14 +155,14 @@ if (typeof window === 'undefined') {
                 lookup[symbols[i] + JSON_SUFFIX] = symbols[i];
 
             function cacheProxyFunction(id) {
-                var func = function () {
+                var func = function () { //these proxy function represent weave->getObject, evaulavteExpression....
                     if (!flash[JSON_CALL])
                         throw new Error("Cannot use the JavaScript API of a Flash object after it has been removed from the DOM.");
                     var params = Array.prototype.slice.call(arguments);
                     console.log('params:', params);
                     var paramsJson = toJson(params);
                     console.log('paramsJson:', paramsJson);
-                    var resultJson = flash[JSON_CALL](id, paramsJson);
+                    var resultJson = flash[JSON_CALL](id, paramsJson); //id which is passed through cacheProxyfunction was saved due to fucntion closure for respective functions like weave ->evaluavtexpression, getobject
                     return fromJson(resultJson);
                 };
                 func[JSON_FUNCTION_PREFIX] = id;
@@ -381,8 +381,8 @@ if (typeof window === 'undefined') {
      */
     JavaScript._jsonReviver = function (key, value) {
         if (typeof (value) === 'string') {
-            if (JavaScript._jsonLookup.hasOwnProperty(value))
-                value = JavaScript._jsonLookup.get(value);
+            if (JavaScript._jsonLookup[value])
+                value = JavaScript._jsonLookup[value];
             else if ((value).substr(0, JavaScript.JSON_FUNCTION_PREFIX.length) === JavaScript.JSON_FUNCTION_PREFIX)
                 value = JavaScript._cacheProxyFunction(value); // ID -> Function
         }
@@ -400,11 +400,11 @@ if (typeof window === 'undefined') {
     JavaScript._jsonReplacer = function (key, value) {
         // Function -> ID
         if (value && value instanceof Function) {
-            var id = JavaScript._jsonLookup.get(value);
+            var id = JavaScript._jsonLookup[value];
             if (!id) {
                 id = JavaScript.JSON_FUNCTION_PREFIX + (++JavaScript._functionCounter);
-                JavaScript._jsonLookup.set(value, id);
-                JavaScript._jsonLookup.set(id, value);
+                JavaScript._jsonLookup[value] = id;
+                JavaScript._jsonLookup[id] = value;
             }
             JavaScript._needsReviving = true;
             value = id;
