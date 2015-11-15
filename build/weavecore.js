@@ -4533,7 +4533,7 @@ if (typeof window === 'undefined') {
         // if the compiled object is a function definition, return that function definition instead of the wrapper.
         if (flattenFunctionDefinition && inst.compiledObjectIsFunctionDefinition.call(inst, compiledObject)) {
             cascadeThisScope = useThisScope;
-            return wrapperFunction.call(inst);
+            return wrapperFunction();
         }
 
         return wrapperFunction;
