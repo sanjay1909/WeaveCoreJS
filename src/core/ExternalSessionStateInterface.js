@@ -364,8 +364,11 @@ if (typeof window === 'undefined') {
                 return false;
             }
             if (delayWhileBusy) {
-                var fn = (ExternalSessionStateInterface._funcToWrapper.get(callback) && ExternalSessionStateInterface._funcToWrapper.get(callback) instanceof Function) ? ExternalSessionStateInterface._funcToWrapper.get(callback) : null
-                callback = fn || ExternalSessionStateInterface._funcToWrapper.set(callback, generateBusyWaitWrapper(callback));
+
+                if (!ExternalSessionStateInterface._funcToWrapper.get(callback)) {
+                    ExternalSessionStateInterface._funcToWrapper.set(callback, generateBusyWaitWrapper(callback))
+                }
+                callback = (ExternalSessionStateInterface._funcToWrapper.get(callback) && ExternalSessionStateInterface._funcToWrapper.get(callback) instanceof Function) ? ExternalSessionStateInterface._funcToWrapper.get(callback) : null;
             }
             ExternalSessionStateInterface._d2d_callback_target.set(callback, object, true);
             if (immediateMode)

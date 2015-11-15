@@ -9400,6 +9400,7 @@ if (typeof window === 'undefined') {
     weavecore.JavaScript = JavaScript;
 
 }());
+
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -14865,8 +14866,11 @@ if (typeof window === 'undefined') {
                 return false;
             }
             if (delayWhileBusy) {
-                var fn = (ExternalSessionStateInterface._funcToWrapper.get(callback) && ExternalSessionStateInterface._funcToWrapper.get(callback) instanceof Function) ? ExternalSessionStateInterface._funcToWrapper.get(callback) : null
-                callback = fn || ExternalSessionStateInterface._funcToWrapper.set(callback, generateBusyWaitWrapper(callback));
+
+                if (!ExternalSessionStateInterface._funcToWrapper.get(callback)) {
+                    ExternalSessionStateInterface._funcToWrapper.set(callback, generateBusyWaitWrapper(callback))
+                }
+                callback = (ExternalSessionStateInterface._funcToWrapper.get(callback) && ExternalSessionStateInterface._funcToWrapper.get(callback) instanceof Function) ? ExternalSessionStateInterface._funcToWrapper.get(callback) : null;
             }
             ExternalSessionStateInterface._d2d_callback_target.set(callback, object, true);
             if (immediateMode)
@@ -14977,7 +14981,6 @@ if (typeof window === 'undefined') {
     weavecore.ExternalSessionStateInterface = ExternalSessionStateInterface;
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
