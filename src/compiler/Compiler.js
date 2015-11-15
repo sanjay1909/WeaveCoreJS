@@ -1582,7 +1582,7 @@ if (typeof window === 'undefined') {
         // so we keep track of recursion depth and re-use copies of the CompiledFunctionCall.
         var recursion = 0;
         var recursiveCalls = [compiledObject];
-
+        var inst = this;
         // this function avoids unnecessary function call overhead by keeping its own call stack rather than using recursion.
         var wrapperFunction = function () {
             const stack = []; // used as a queue of function calls
@@ -1599,7 +1599,7 @@ if (typeof window === 'undefined') {
             var args = Array.prototype.slice.call(arguments);
 
             if (bindThis === null)
-                builtInSymbolTable['this'] = this;
+                builtInSymbolTable['this'] = inst;
             builtInSymbolTable['arguments'] = args;
 
             allSymbolTables[LOCAL_SYMBOL_TABLE_INDEX] = localSymbolTable;
@@ -1627,15 +1627,15 @@ if (typeof window === 'undefined') {
                 call = (stack[stack.length - 1] && stack[stack.length - 1] instanceof weavecore.CompiledFunctionCall) ? stack[stack.length - 1] : null;
 
                 // if we got here because of a break, advance evalIndex
-                if (method === this.operators[Compiler.ST_BREAK])
+                if (method === inst.operators[Compiler.ST_BREAK])
                     call.evalIndex++;
 
                 method = call.evaluatedMethod;
                 compiledParams = call.compiledParams;
 
                 if (compiledParams) {
-                    if (this.LOOP_LOOKUP.get(method) && call.evalIndex === Compiler.INDEX_METHOD) {
-                        if (method === this.operators[Compiler.ST_DO] || method === this.operators[Compiler.ST_FOR_DO]) {
+                    if (inst.LOOP_LOOKUP.get(method) && call.evalIndex === Compiler.INDEX_METHOD) {
+                        if (method === inst.operators[Compiler.ST_DO] || method === inst.operators[Compiler.ST_FOR_DO]) {
                             // skip first evaluation of loop condition
                             call.evaluatedParams[Compiler.INDEX_CONDITION] = true;
                             call.evalIndex = Compiler.INDEX_TRUE;
@@ -1648,8 +1648,8 @@ if (typeof window === 'undefined') {
 
                         // handle branching and short-circuiting
                         // skip evaluation of true or false branch depending on condition and branch operator
-                        if (this.BRANCH_LOOKUP.get(method) !== undefined && call.evalIndex > Compiler.INDEX_CONDITION)
-                            if (this.BRANCH_LOOKUP.get(method) === (call.evalIndex != (call.evaluatedParams[Compiler.INDEX_CONDITION] ? Compiler.INDEX_TRUE : Compiler.INDEX_FALSE)))
+                        if (inst.BRANCH_LOOKUP.get(method) !== undefined && call.evalIndex > Compiler.INDEX_CONDITION)
+                            if (inst.BRANCH_LOOKUP.get(method) === (call.evalIndex != (call.evaluatedParams[Compiler.INDEX_CONDITION] ? Compiler.INDEX_TRUE : Compiler.INDEX_FALSE)))
                                 continue;
 
                         if (call.evalIndex === Compiler.INDEX_METHOD)
@@ -1660,11 +1660,11 @@ if (typeof window === 'undefined') {
                         if (subCall != null) {
                             // special case for for-in and for-each
                             // implemented as "for (each|in)(\in(list), item=undefined, stmt)
-                            if (this.LOOP_LOOKUP.get(method) && call.evalIndex === Compiler.INDEX_FOR_ITEM && (method === this.operators[Compiler.ST_FOR_IN] || method === this.operators[Compiler.ST_FOR_EACH])) {
+                            if (inst.LOOP_LOOKUP.get(method) && call.evalIndex === Compiler.INDEX_FOR_ITEM && (method === inst.operators[Compiler.ST_FOR_IN] || method === inst.operators[Compiler.ST_FOR_EACH])) {
                                 if ((call.evaluatedParams[Compiler.INDEX_FOR_LIST]).length > 0) {
                                     // next item
                                     result = (call.evaluatedParams[Compiler.INDEX_FOR_LIST]).shift(); // property name
-                                    if (method === this.operators[Compiler.ST_FOR_EACH]) {
+                                    if (method === inst.operators[Compiler.ST_FOR_EACH]) {
                                         // get property value from property name
                                         var _in = (call.compiledParams[Compiler.INDEX_FOR_LIST] && call.compiledParams[Compiler.INDEX_FOR_LIST] instanceof weavecore.CompiledFunctionCall) ? call.compiledParams[Compiler.INDEX_FOR_LIST] : null;
                                         result = _in.evaluatedParams[0][result]; // property value
@@ -1673,7 +1673,7 @@ if (typeof window === 'undefined') {
                                     subCall.evaluatedParams[subCall.evaluatedParams.length - 1] = result;
                                 } else {
                                     // break out of loop
-                                    method = this.operators[Compiler.ST_BREAK];
+                                    method = inst.operators[Compiler.ST_BREAK];
                                     break;
                                 }
                             }
@@ -1688,8 +1688,8 @@ if (typeof window === 'undefined') {
                 // no parameters need to be evaluated, so make the function call now
                 try {
                     // reset _propertyHost and _propertyName prior to method apply in case we are calling operator '.'
-                    propertyHost = this._propertyHost = null;
-                    propertyName = this._propertyName = null;
+                    propertyHost = inst._propertyHost = null;
+                    propertyName = inst._propertyName = null;
 
                     if (!compiledParams) // no compiled params means it's a variable lookup
                     {
@@ -1710,12 +1710,12 @@ if (typeof window === 'undefined') {
                         }
 
                         if (i === allSymbolTables.length)
-                            result = Compiler.getDefinition.call(this, symbolName);
-                    } else if (this.JUMP_LOOKUP.get(method)) {
-                        if (method === this.operators[Compiler.ST_RETURN]) {
+                            result = Compiler.getDefinition.call(inst, symbolName);
+                    } else if (inst.JUMP_LOOKUP.get(method)) {
+                        if (method === inst.operators[Compiler.ST_RETURN]) {
                             recursion--;
                             return compiledParams.length ? call.evaluatedParams[0] : undefined;
-                        } else if (method === this.operators[Compiler.ST_CONTINUE]) {
+                        } else if (method === inst.operators[Compiler.ST_CONTINUE]) {
                             while (true) {
                                 stack.pop();
                                 if (stack.length === 0) {
@@ -1725,26 +1725,26 @@ if (typeof window === 'undefined') {
 
                                 call = (stack[stack.length - 1] && stack[stack.length - 1] instanceof weavecore.CompiledFunctionCall) ? stack[stack.length - 1] : null;
                                 method = call.evaluatedMethod;
-                                if (this.LOOP_LOOKUP.get(method) && this.LOOP_LOOKUP.get(method) !== Compiler.ST_BREAK)
+                                if (inst.LOOP_LOOKUP.get(method) && inst.LOOP_LOOKUP.get(method) !== Compiler.ST_BREAK)
                                     break; // loop will be handled below.
                             }
-                        } else if (method === this.operators[Compiler.ST_BREAK]) {
+                        } else if (method === inst.operators[Compiler.ST_BREAK]) {
                             while (stack.length > 1) {
                                 var popedCall = stack.pop();
                                 call = (popedCall && popedCall instanceof weavecore.CompiledFunctionCall) ? popedCall : null;
                                 method = call.evaluatedMethod;
-                                if (this.LOOP_LOOKUP.get(method) && this.LOOP_LOOKUP.get(method) != Compiler.ST_CONTINUE) {
-                                    method = this.operators[Compiler.ST_BREAK];
+                                if (inst.LOOP_LOOKUP.get(method) && inst.LOOP_LOOKUP.get(method) != Compiler.ST_CONTINUE) {
+                                    method = inst.operators[Compiler.ST_BREAK];
                                     continue stackLoop;
                                 }
                             }
                             recursion--;
                             return result; // executing break at top level
-                        } else if (method === this.operators[Compiler.ST_THROW]) {
+                        } else if (method === inst.operators[Compiler.ST_THROW]) {
                             //TODO - find try/catch/finally
                             throw call.evaluatedParams[0];
                         }
-                    } else if (this.ASSIGN_OP_LOOKUP.get(method) && compiledParams.length === 2) // two params means local assignment
+                    } else if (inst.ASSIGN_OP_LOOKUP.get(method) && compiledParams.length === 2) // two params means local assignment
                     {
                         // local assignment
                         symbolName = call.evaluatedParams[0];
@@ -1761,21 +1761,21 @@ if (typeof window === 'undefined') {
 
                         // assignment operator expects parameters like (host, ...chain, value)
                         result = method(allSymbolTables[i], symbolName, call.evaluatedParams[1]);
-                    } else if (method === this.operators[Compiler.ST_IMPORT]) {
+                    } else if (method === inst.operators[Compiler.ST_IMPORT]) {
                         call.evaluatedParams.forEach(function (result) {
                             result = (result.constructor === String) ? result : null;
                             symbolName = result;
                             if (symbolName)
-                                result = Compiler.getDefinition.call(this, result);
+                                result = Compiler.getDefinition.call(inst, result);
                             else if (!Compiler.isClass(result))
-                                throw new Error("Unable to import non-Class: " + this.decompileObject(call));
+                                throw new Error("Unable to import non-Class: " + inst.decompileObject(call));
 
                             if (!symbolName)
                                 symbolName = result.constructor.appName;
 
                             symbolName = symbolName.substr(Math.max(symbolName.lastIndexOf('.'), symbolName.lastIndexOf(':')) + 1);
                             allSymbolTables[LOCAL_SYMBOL_TABLE_INDEX][symbolName] = result;
-                        }.bind(this));
+                        }.bind(inst));
                     } else if (method && Compiler.isClass(method)) {
                         // type casting
                         if (method === Array) // special case for Array
@@ -1793,26 +1793,26 @@ if (typeof window === 'undefined') {
                         }
                         // special case for Class('some.qualified.ClassName')
                         else if (Compiler.isClass(method) && call.evaluatedParams[0].constructor === String) {
-                            result = Compiler.getDefinition.call(this, call.evaluatedParams[0]);
+                            result = Compiler.getDefinition.call(inst, call.evaluatedParams[0]);
                         } else // all other single-parameter type casting operations
                         {
                             result = cast(call.evaluatedParams[0], method);
                         }
-                    } else if (method === this.operators[Compiler.ST_VAR]) // variable initialization
+                    } else if (method === inst.operators[Compiler.ST_VAR]) // variable initialization
                     {
                         call.evaluatedParams[0].forEach(function (result) {
                             if (!localSymbolTable.hasOwnProperty(result))
                                 localSymbolTable[result] = undefined;
                         })
                         result = undefined;
-                    } else if (method === this.operators[Compiler.FUNCTION] || method === this.operators['=>']) // inline function definition
+                    } else if (method === inst.operators[Compiler.FUNCTION] || method === inst.operators['=>']) // inline function definition
                     {
                         var _symbolTables = [localSymbolTable].concat(symbolTable); // works whether symbolTable is an Array or Object
                         if (useThisScope)
                             _symbolTables.push(builtInSymbolTable['this']);
 
                         var funcParams = call.evaluatedParams[0];
-                        result = this.compileObjectToFunction.call(this,
+                        result = inst.compileObjectToFunction.call(inst,
                             funcParams[Compiler.FUNCTION_CODE],
                             _symbolTables,
                             errorHandler,
@@ -1820,7 +1820,7 @@ if (typeof window === 'undefined') {
                             funcParams[Compiler.FUNCTION_PARAM_NAMES],
                             funcParams[Compiler.FUNCTION_PARAM_VALUES],
                             false,
-                            method === this.operators['=>'] || (cascadeThisScope && bindThis !== null) ? builtInSymbolTable['this'] : null
+                            method === inst.operators['=>'] || (cascadeThisScope && bindThis !== null) ? builtInSymbolTable['this'] : null
                         );
                     }
                     /*else if (call.evaluatedHost is Proxy)
@@ -1834,16 +1834,16 @@ if (typeof window === 'undefined') {
                         // normal function call
                         result = method.apply(call.evaluatedHost, call.evaluatedParams);
                         // in case this is operator '.', save these values
-                        propertyHost = this._propertyHost;
-                        propertyName = this._propertyName;
+                        propertyHost = inst._propertyHost;
+                        propertyName = inst._propertyName;
                         // then reset them so they do not get re-used by mistake
-                        this._propertyHost = null;
-                        this._propertyName = null;
+                        inst._propertyHost = null;
+                        inst._propertyName = null;
                     }
                 } catch (e) {
                     recursion--;
 
-                    var decompiled = this.decompileObject(call);
+                    var decompiled = inst.decompileObject(call);
                     var err = e;
                     if (err) {
                         //to-do
@@ -1863,8 +1863,8 @@ if (typeof window === 'undefined') {
                 }
 
                 // handle while and for loops
-                if (this.LOOP_LOOKUP.get(method)) {
-                    if (method === this.operators[Compiler.ST_FOR_IN] || method === this.operators[Compiler.ST_FOR_EACH]) {
+                if (inst.LOOP_LOOKUP.get(method)) {
+                    if (method === inst.operators[Compiler.ST_FOR_IN] || method === inst.operators[Compiler.ST_FOR_EACH]) {
                         // skip evaluation of list to avoid infinite loop
                         call.evalIndex = Compiler.INDEX_FOR_ITEM;
                         continue;
@@ -1897,12 +1897,12 @@ if (typeof window === 'undefined') {
         };
 
         // if the compiled object is a function definition, return that function definition instead of the wrapper.
-        if (flattenFunctionDefinition && this.compiledObjectIsFunctionDefinition.call(this, compiledObject)) {
+        if (flattenFunctionDefinition && inst.compiledObjectIsFunctionDefinition.call(inst, compiledObject)) {
             cascadeThisScope = useThisScope;
-            return wrapperFunction.call(this);
+            return wrapperFunction.call(inst);
         }
 
-        return wrapperFunction.bind(this);
+        return wrapperFunction;
     }
 
     /**
