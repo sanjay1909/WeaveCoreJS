@@ -19,7 +19,7 @@ if (typeof window === 'undefined') {
      * Also maps a Function to its corresponding ID.
      */
     Object.defineProperty(JavaScript, '_jsonLookup', {
-        value: {}
+        value: new Map()
     });
 
 
@@ -105,8 +105,8 @@ if (typeof window === 'undefined') {
 
 
 
-        JavaScript._jsonLookup[func] = id;
-        JavaScript._jsonLookup[id] = func;
+        JavaScript._jsonLookup.set(func, id);
+        JavaScript._jsonLookup.set(id, func);
 
         return func;
     }
@@ -120,7 +120,7 @@ if (typeof window === 'undefined') {
 
         // save special IDs for values not supported by JSON
 			[NaN, Infinity, -Infinity].forEach(function (symbol) {
-            JavaScript._jsonLookup[symbol + JavaScript.JSON_SUFFIX] = symbol
+            JavaScript._jsonLookup.set(symbol + JavaScript.JSON_SUFFIX, symbol)
         });
 
         // determine if backslashes need to be escaped
@@ -148,7 +148,7 @@ if (typeof window === 'undefined') {
                 return JSON.parse(value, flash[JSON_REVIVER]);
             };
             var functionCounter = 0;
-            var lookup = flash[JSON_LOOKUP] = {};
+            var lookup = flash[JSON_LOOKUP] = {}; // Object is fine here as our keys are going to be string.
             var extensions = flash[JSON_EXTENSIONS] = [];
             var symbols = [NaN, Infinity, -Infinity];
             for (var i in symbols)
@@ -381,8 +381,8 @@ if (typeof window === 'undefined') {
      */
     JavaScript._jsonReviver = function (key, value) {
         if (typeof (value) === 'string') {
-            if (JavaScript._jsonLookup[value])
-                value = JavaScript._jsonLookup[value];
+            if (JavaScript._jsonLookup.get(value))
+                value = JavaScript._jsonLookup.get(value);
             else if ((value).substr(0, JavaScript.JSON_FUNCTION_PREFIX.length) === JavaScript.JSON_FUNCTION_PREFIX)
                 value = JavaScript._cacheProxyFunction(value); // ID -> Function
         }
@@ -400,11 +400,11 @@ if (typeof window === 'undefined') {
     JavaScript._jsonReplacer = function (key, value) {
         // Function -> ID
         if (value && value instanceof Function) {
-            var id = JavaScript._jsonLookup[value];
+            var id = JavaScript._jsonLookup.get(value);
             if (!id) {
                 id = JavaScript.JSON_FUNCTION_PREFIX + (++JavaScript._functionCounter);
-                JavaScript._jsonLookup[value] = id;
-                JavaScript._jsonLookup[id] = value;
+                JavaScript._jsonLookup.set(value, id);
+                JavaScript._jsonLookup.set(id, value);
             }
             JavaScript._needsReviving = true;
             value = id;
