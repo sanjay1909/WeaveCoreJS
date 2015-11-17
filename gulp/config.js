@@ -48,6 +48,8 @@ var buildOrder = [
                     api + '/debugId.js',
                     api + '/detectLinkableObjectChange.js',
 
+                    core + '/StageUtils.js',
+
                     core + '/LinkableVariable.js',
     core + '/UntypedLinkableVariable.js',
                     core + '/LinkableNumber.js',
@@ -59,11 +61,12 @@ var buildOrder = [
                     core + '/LinkableHashMap.js',
                     core + '/LinkablePromise.js',
                     core + '/LinkableFile.js',
+                    core + '/LinkableTextFormat.js',
 
 
 
                     core + '/LinkableDynamicObject.js',
-                    core + '/StageUtils.js',
+
                     core + '/ExternalSessionStateInterface.js',
                     core + '/SessionStateLog.js',
 
