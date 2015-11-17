@@ -7550,6 +7550,14 @@ if (typeof window === 'undefined') {
             value: new weavecore.Dictionary2D(false, false, weavecore.WeaveTreeItem)
         });
 
+        /**
+         * This maps destination and source ILinkableObjects to a function like:
+         *     function():void { setSessionState(destination, getSessionState(source), true); }
+         */
+        Object.defineProperty(this, "linkFunctionCache", {
+            value: new weavecore.Dictionary2D(true, true)
+        });
+
 
         this._getTreeItemChildren = this._getTreeItemChildren.bind(this);
 
@@ -8510,8 +8518,11 @@ if (typeof window === 'undefined') {
             //unlinkBindableProperty(linkableObject as ILinkableVariable, bindableParent, bindablePropertyName);
 
             // unlink this object from all other linkable objects
-            //for (var otherObject in linkFunctionCache.dictionary[linkableObject])
-            //unlinkSessionState(linkableObject, otherObject as ILinkableObject);
+            var otherObjectKeys = this.linkFunctionCache.dictionary.get(linkableObject).keys();
+            for (var i = 0; i < otherObjectKeys.length; i++) {
+                var otherObject = otherObjectKeys[i];
+                this.unlinkSessionState(linkableObject, otherObject);
+            }
 
             // dispose all registered children that this object owns
             var children = this._ownerToChildMap.get(object);
@@ -8765,6 +8776,61 @@ if (typeof window === 'undefined') {
         return baseDiff;
     };
 
+    /**************************************
+     * linking sessioned objects together
+     **************************************/
+
+
+
+    /**
+     * @inheritDoc
+     */
+    p.linkSessionState = function (primary, secondary) {
+            if (primary === null || primary === undefined || secondary === null || secondary === undefined) {
+                console.error("SessionManager.linkSessionState(): Parameters to this function cannot be null.");
+                return;
+            }
+            if (primary == secondary) {
+                console.error("Warning! Attempt to link session state of an object with itself");
+                return;
+            }
+            if (this.linkFunctionCache.get(primary, secondary) instanceof Function)
+                return; // already linked
+
+            if (weavecore.CallbackCollection.debug)
+                var stackTrace = new Error().getStackTrace();
+
+            var setPrimary = function () {
+                WeaveAPI.SessionManager.setSessionState(primary, WeaveAPI.SessionManager.getSessionState(secondary), true);
+            };
+            var setSecondary = function () {
+                WeaveAPI.SessionManager.setSessionState(secondary, WeaveAPI.SessionManager.getSessionState(primary), true);
+            };
+
+            this.linkFunctionCache.set(primary, secondary, setPrimary);
+            this.linkFunctionCache.set(secondary, primary, setSecondary);
+
+            // when secondary changes, copy from secondary to primary
+            WeaveAPI.SessionManager.getCallbackCollection(secondary).addImmediateCallback(primary, setPrimary);
+            // when primary changes, copy from primary to secondary
+            WeaveAPI.SessionManager.getCallbackCollection(primary).addImmediateCallback(secondary, setSecondary, true); // copy from primary now
+        }
+        /**
+         * @inheritDoc
+         */
+    p.unlinkSessionState = function (first, second) {
+        if (first === null || first === undefined || second === null || second === undefined) {
+            console.error("SessionManager.unlinkSessionState(): Parameters to this function cannot be null.");
+            return;
+        }
+
+        var setFirst = this.linkFunctionCache.remove(first, second);
+        var setSecond = this.linkFunctionCache.remove(second, first);
+
+        WeaveAPI.SessionManager.getCallbackCollection(second).removeCallback(setFirst);
+        WeaveAPI.SessionManager.getCallbackCollection(first).removeCallback(setSecond);
+    }
+
     /**
      * @public
      * @property  DIFF_DELETE
@@ -8789,7 +8855,6 @@ if (typeof window === 'undefined') {
     }
 
 }());
-
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -14981,6 +15046,7 @@ if (typeof window === 'undefined') {
     weavecore.ExternalSessionStateInterface = ExternalSessionStateInterface;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
