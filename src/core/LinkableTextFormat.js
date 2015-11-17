@@ -48,20 +48,7 @@ if (typeof window === 'undefined') {
         value: true
     });
 
-    Object.defineProperties(LinkableTextFormat, {
-        'defaultTextFormat': {
-            value: new LinkableTextFormat()
-        },
-        'DEFAULT_COLOR': {
-            value: 0x000000
-        },
-        'DEFAULT_SIZE': {
-            value: 11
-        },
-        'DEFAULT_FONT': {
-            value: "Sophia Nubian"
-        }
-    });
+
 
 
 
@@ -131,12 +118,20 @@ if (typeof window === 'undefined') {
         destination.underline = underline.value;
     }
 
-    p.setSessionState = function (val) {
-        if (typeof (val) === "string") {
-            val = weavecore.ObjectUtil.stringCompare(val, "true", true) === 0;
+    Object.defineProperties(LinkableTextFormat, {
+        'defaultTextFormat': {
+            value: new LinkableTextFormat()
+        },
+        'DEFAULT_COLOR': {
+            value: 0x000000
+        },
+        'DEFAULT_SIZE': {
+            value: 11
+        },
+        'DEFAULT_FONT': {
+            value: "Sophia Nubian"
         }
-        weavecore.LinkableVariable.prototype.setSessionState.call(this, val ? true : false);
-    };
+    });
 
     weavecore.LinkableTextFormat = LinkableTextFormat;
     weavecore.ClassUtils.registerClass('weavecore.LinkableTextFormat', LinkableTextFormat);
