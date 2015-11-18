@@ -8518,11 +8518,14 @@ if (typeof window === 'undefined') {
             //unlinkBindableProperty(linkableObject as ILinkableVariable, bindableParent, bindablePropertyName);
 
             // unlink this object from all other linkable objects
-            var otherObjectKeys = this.linkFunctionCache.dictionary.get(linkableObject).keys();
-            for (var i = 0; i < otherObjectKeys.length; i++) {
-                var otherObject = otherObjectKeys[i];
-                this.unlinkSessionState(linkableObject, otherObject);
+            if (this.linkFunctionCache.dictionary.get(linkableObject)) {
+                var otherObjectKeys = this.linkFunctionCache.dictionary.get(linkableObject).keys();
+                for (var i = 0; i < otherObjectKeys.length; i++) {
+                    var otherObject = otherObjectKeys[i];
+                    this.unlinkSessionState(linkableObject, otherObject);
+                }
             }
+
 
             // dispose all registered children that this object owns
             var children = this._ownerToChildMap.get(object);
@@ -8855,7 +8858,6 @@ if (typeof window === 'undefined') {
     }
 
 }());
-
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -14726,6 +14728,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
