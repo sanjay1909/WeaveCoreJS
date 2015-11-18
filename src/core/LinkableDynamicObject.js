@@ -190,7 +190,7 @@ if (typeof window === 'undefined') {
          */
         Object.defineProperty(this, 'locked', {
             get: function () {
-                return this.locked;
+                return this._locked;
             }
 
         });

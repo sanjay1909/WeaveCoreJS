@@ -14249,6 +14249,7 @@ public function bindStyle(relevantContext:Object, destination:UIComponent):void
 		true
 	);
 }*/
+
 /**
  * @module weavecore
  */
@@ -14441,7 +14442,7 @@ if (typeof window === 'undefined') {
          */
         Object.defineProperty(this, 'locked', {
             get: function () {
-                return this.locked;
+                return this._locked;
             }
 
         });
@@ -14725,7 +14726,6 @@ if (typeof window === 'undefined') {
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
