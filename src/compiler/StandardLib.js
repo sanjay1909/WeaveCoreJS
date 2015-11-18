@@ -515,6 +515,68 @@ if (typeof window === 'undefined') {
         return string;
     }
 
+    /**
+     * Takes a script where all lines have been indented with tabs,
+     * removes the common indentation from all lines and optionally
+     * replaces extra leading tabs with a number of spaces.
+     * @param script A script.
+     * @param spacesPerTab If zero or greater, this is the number of spaces to be used in place of each tab character used as indentation.
+     * @return The modified script.
+     */
+
+    StandardLib.unIndent = function (script, spacesPerTab) {
+        if (script === null)
+            return null;
+        spacesPerTab = (spacesPerTab === undefined) ? -1 : spacesPerTab;
+        // switch all line endings to \n
+        script = StandardLib.replace(script, '\r\n', '\n', '\r', '\n');
+        // remove trailing whitespace (not leading whitespace)
+        script = ('.' + script).trim().substr(1);
+        // separate into lines
+        var lines = script.split('\n');
+        // remove blank lines from the beginning
+        while (lines.length && !lines[0].trim())
+            lines.shift();
+        // stop if there's nothing left
+        if (!lines.length)
+            return '';
+        // find the common indentation
+        var commonIndent = Number.MAX_VALUE;
+        var line;
+        for (var i = 0; i < lines.length; i++) {
+            line = lines[i];
+            // ignore blank lines
+            if (!line.trim())
+                continue;
+            // count leading tabs
+            var lineIndent = 0;
+            while (line.charAt(lineIndent) === '\t')
+                lineIndent++;
+            // remember the minimum number of leading tabs
+            commonIndent = Math.min(commonIndent, lineIndent);
+        }
+
+        // remove the common indentation from each line
+        for (var j = 0; j < lines.length; j++) {
+            line = lines[j];
+            // prepare to remove common indentation
+            var t = 0;
+            while (t < commonIndent && line.charAt(t) === '\t')
+                t++;
+            // optionally, prepare to replace extra tabs with spaces
+            var spaces = '';
+            if (spacesPerTab >= 0) {
+                while (line.charAt(t) === '\t') {
+                    spaces += StandardLib.lpad('', spacesPerTab, '        ');
+                    t++;
+                }
+            }
+            // commit changes
+            lines[j] = spaces + line.substr(t);
+        }
+        return lines.join('\n');
+    }
+
 
 
     weavecore.StandardLib = StandardLib;
