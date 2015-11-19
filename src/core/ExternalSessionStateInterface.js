@@ -185,7 +185,7 @@ if (typeof window === 'undefined') {
                 childName = hashMap.getNames()[childName];
             child = hashMap.requestObject((childName === null) ? null : String(childName), classDef, false); //String(null) returns "null"
         } else if (dynamicObject)
-            child = dynamicObject.requestGlobalObject(String(childName), classDef, false);
+            child = dynamicObject.requestGlobalObject((childName === null) ? null : String(childName), classDef, false); //String(null) returns "null"
         else
             child = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
 
