@@ -183,7 +183,7 @@ if (typeof window === 'undefined') {
         if (hashMap) {
             if (typeof (childName) === 'number')
                 childName = hashMap.getNames()[childName];
-            child = hashMap.requestObject(String(childName), classDef, false);
+            child = hashMap.requestObject((childName === null) ? null : String(childName), classDef, false); //String(null) returns "null"
         } else if (dynamicObject)
             child = dynamicObject.requestGlobalObject(String(childName), classDef, false);
         else
