@@ -866,7 +866,7 @@ if (typeof window === 'undefined') {
                     return false;
 
                 return true;
-            });
+            }.bind(this));
             return filteredPropNames;
         }
         return propertyNames;

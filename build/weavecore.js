@@ -2229,6 +2229,7 @@ if (typeof window === 'undefined') {
 
     weavecore.StandardLib = StandardLib;
 }());
+
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
@@ -8344,7 +8345,7 @@ if (typeof window === 'undefined') {
                     return false;
 
                 return true;
-            });
+            }.bind(this));
             return filteredPropNames;
         }
         return propertyNames;
@@ -8982,7 +8983,6 @@ if (typeof window === 'undefined') {
     }
 
 }());
-
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
