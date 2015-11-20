@@ -8108,9 +8108,9 @@ if (typeof window === 'undefined') {
             }
             return;
         }
-        //linkableHashmap is handled, In As3 version it implements ILinkableCompositeObject
-        // in jS we couldnt do that, thats why linkableObject.getNames is used
-        if (linkableObject.getNames) {
+        //linkableHashmap and linkabledynamic object is handled, In As3 version it implements ILinkableCompositeObject
+        // in jS we couldnt do that, thats why linkableObject.setSessionState is used
+        if (linkableObject.setSessionState) {
             if (newState.constructor.name === "String")
                 newState = [newState];
 
@@ -8983,7 +8983,6 @@ if (typeof window === 'undefined') {
     }
 
 }());
-
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -15658,6 +15657,7 @@ if (typeof window === 'undefined') {
     weavecore.ExternalSessionStateInterface = ExternalSessionStateInterface;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
