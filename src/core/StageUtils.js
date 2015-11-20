@@ -58,10 +58,10 @@ if (!this.WeaveAPI)
      */
     p.listenToStage = function () {
         // do not create event listeners for these meta events
-        //if (eventType == POINT_CLICK_EVENT || eventType == THROTTLED_MOUSE_MOVE_EVENT)
+        //if (eventType === POINT_CLICK_EVENT || eventType === THROTTLED_MOUSE_MOVE_EVENT)
         //return;
 
-        //if (eventType == KeyboardEvent.KEY_DOWN && Capabilities.playerType == "Desktop")
+        //if (eventType === KeyboardEvent.KEY_DOWN && Capabilities.playerType === "Desktop")
         //cancelable = false;
 
         // Add a listener to the capture phase so the callbacks will run before the target gets the event.
@@ -99,6 +99,47 @@ if (!this.WeaveAPI)
     StageUtils.debug_async_stack = false;
     StageUtils.debug_delayTasks = false; // set this to true to delay async tasks
     StageUtils.debug_callLater = false; // set this to true to delay async tasks
+
+
+    /**
+     * This will generate an iterative task function that is the combination of a list of tasks to be completed in order.
+     * @param iterativeTasks An Array of iterative task functions.
+     * @return A single iterative task function that invokes the other tasks to completion in order.
+     *         The function will accept a stopTime parameter which when set to -1 will
+     *         reset the task counter to zero so the compound task will start from the first task again.
+     * @see #startTask()
+     */
+    StageUtils.generateCompoundIterativeTask = function () {
+        var iterativeTasks = Array.prototype.slice.call(arguments);
+        var iTask = 0;
+        return function (stopTime) {
+            if (stopTime < 0) // restart
+            {
+                iTask = 0;
+                return 0;
+            }
+            if (iTask >= iterativeTasks.length)
+                return 1;
+
+            var i = iTask; // need to detect if iTask changes
+            var iterate = iterativeTasks[iTask];
+            var progress;
+            if (iterate.length) {
+                progress = iterate(stopTime);
+            } else {
+                while (iTask === i && (progress = iterate()) < 1 && getTimer() < stopTime) {}
+            }
+            // if iTask changed as a result of iterating, we need to restart
+            if (iTask !== i)
+                return 0;
+
+            var totalProgress = (iTask + progress) / iterativeTasks.length;
+            if (progress === 1)
+                iTask++;
+            return totalProgress;
+        }
+    }
+
     //constructor
     function StageUtils() {
 
@@ -213,7 +254,7 @@ if (!this.WeaveAPI)
                 if (StandardLib.sum(frameTimes) >= 1000)
                 {
                     averageFrameTime = StandardLib.mean(frameTimes);
-                    var fps:Number = StandardLib.roundSignificant(1000 / averageFrameTime, 2);
+                    var fps = StandardLib.roundSignificant(1000 / averageFrameTime, 2);
                     trace(fps,'fps; max computation time',maxComputationTime);
                     frameTimes.length = 0;
                 }
@@ -238,9 +279,9 @@ if (!this.WeaveAPI)
         this._currentTaskStopTime = allStop; // make sure _iterateTask knows when to stop
 
         // first run the functions that should be called before anything else.
-        /*if (pauseForGCIfCollectionImminent != null)
+        /*if (pauseForGCIfCollectionImminent !== null)
         {
-            var t:int = getTimer();
+            var t = getTimer();
             pauseForGCIfCollectionImminent();
             t = getTimer() - t;
             if (t > maxComputationTimePerFrame)
