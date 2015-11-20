@@ -49,6 +49,13 @@ if (typeof window === 'undefined') {
         value: true
     });
 
+
+    Object.defineProperty(LinkableDynamicObject, 'ARRAY_CLASS_NAME', {
+        value: "Array"
+    });
+
+
+
     // constructor:
     /**
      * This object links to an internal ILinkableObject.
@@ -76,9 +83,7 @@ if (typeof window === 'undefined') {
             value: WeaveAPI.SessionManager.registerDisposableChild(this, new weavecore.CallbackCollection())
         });
 
-        Object.defineProperty(LinkableDynamicObject, 'ARRAY_CLASS_NAME', {
-            value: 'Array'
-        });
+
 
         /**
          * @inheritDoc
@@ -286,7 +291,7 @@ if (typeof window === 'undefined') {
                 sessionState = [objectName];
             }*/
 
-            if (className === ARRAY_CLASS_NAME || (!className && this.targetPath))
+            if (className === LinkableDynamicObject.ARRAY_CLASS_NAME || (!className && this.targetPath))
                 this.targetPath = sessionState;
             else if (className === SessionManager.DIFF_DELETE)
                 this.target = null;
