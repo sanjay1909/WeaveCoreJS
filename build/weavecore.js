@@ -54,8 +54,11 @@ if (typeof window === 'undefined') {
         }
     }
 
-    ClassUtils.is = function (klass, typeKlasss) {
-        var className = ClassUtils.classNameLookUp.get(klass);
+    ClassUtils.is = function (linkableObject, typeKlasss) {
+        if (linkableObject instanceof typeKlasss) { // for class files which aren't manually registered yet
+            return true;
+        }
+        var className = ClassUtils.classNameLookUp.get(linkableObject.constructor);
         if (!className) throw new Errorr('Sessioned Classes can alone use this function.' + klass.constructor.name + ' is not registered');
         var typeClassName = ClassUtils.classNameLookUp.get(typeKlasss);
         if (!typeClassName) throw new Errorr('Sessioned Classes can alone use this function.' + typeKlasss.constructor.name + ' is not registered');
