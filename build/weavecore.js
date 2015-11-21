@@ -2303,6 +2303,22 @@ if (typeof window === 'undefined') {
     }
 
 
+    /**
+     * This function constrains a number between min and max values.
+     * @param value A value to constrain between a min and max.
+     * @param min The minimum value.
+     * @param max The maximum value.
+     * @return If value &lt; min, returns min.  If value &gt; max, returns max.  Otherwise, returns value.
+     */
+    StandardLib.constrain = function (value, min, max) {
+        if (value < min)
+            return min;
+        if (value > max)
+            return max;
+        return value;
+    }
+
+
 
     weavecore.StandardLib = StandardLib;
 }());
