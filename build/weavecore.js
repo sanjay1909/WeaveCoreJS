@@ -2225,11 +2225,87 @@ if (typeof window === 'undefined') {
         return lines.join('\n');
     }
 
+    /**
+     * Code from Graphics Gems Volume 1
+     */
+    pStandardLib.getNiceNumber = function (x, round) {
+        var exponent;
+        var fractionalPart;
+        var niceFractionalPart;
+
+        // special case for nice number of 0, since Math.log(0) is -Infinity
+        if (x === 0)
+            return 0;
+
+        exponent = Math.floor(Math.log(x) / Math.LN10);
+        fractionalPart = x / Math.pow(10.0, exponent);
+
+        if (round) {
+            if (fractionalPart < 1.5) {
+                niceFractionalPart = 1.0;
+            } else if (fractionalPart < 3.0) {
+                niceFractionalPart = 2.0;
+            } else if (fractionalPart < 7.0) {
+                niceFractionalPart = 5.0;
+            } else {
+                niceFractionalPart = 10.0;
+            }
+        } else {
+            if (fractionalPart <= 1.0) {
+                niceFractionalPart = 1.0;
+            } else if (fractionalPart <= 2.0) {
+                niceFractionalPart = 2.0;
+            } else if (fractionalPart < 5.0) {
+                niceFractionalPart = 5.0;
+            } else {
+                niceFractionalPart = 10.0;
+            }
+        }
+
+        return niceFractionalPart * Math.pow(10.0, exponent);
+    }
+
+
+    /**
+     * Code from Graphics Gems Volume 1
+     * Note: This may return less than the requested number of values
+     */
+    StandardLib.getNiceNumbersInRange = function (min, max, numberOfValuesInRange) {
+        // special case
+        if (min === max)
+            return [min];
+
+        var nfrac;
+        var d;
+        var graphmin;
+        var graphmax;
+        var range;
+        var x;
+        var i = 0;
+
+        var values = [];
+
+        // Bug fix: getNiceNumbersInRange(0, 500, 6) returned [0,200,400] when it could be [0,100,200,300,400,500]
+        // Was: range = getNiceNumber(max - min, false);
+        range = max - min;
+
+        d = StandardLib.getNiceNumber(range / (numberOfValuesInRange - 1), true);
+        graphmin = Math.floor(min / d) * d;
+        graphmax = Math.ceil(max / d) * d;
+
+        nfrac = Math.max(-Math.floor(Math.log(d) / Math.LN10), 0);
+
+        for (x = graphmin; x < graphmax + 0.5 * d; x += d) {
+            values[i++] = StandardLib.roundSignificant(x); // this fixes values like x = 0.6000000000000001 that may occur from x += d
+        }
+
+        return values;
+    }
+
 
 
     weavecore.StandardLib = StandardLib;
 }());
-
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
@@ -11875,6 +11951,7 @@ if (!this.WeaveAPI)
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
