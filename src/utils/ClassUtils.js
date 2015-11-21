@@ -17,11 +17,15 @@ if (typeof window === 'undefined') {
     });
 
     Object.defineProperty(ClassUtils, 'classNameLookUp', {
-        value: {} //class -> className
+        value: new Map() //class -> className
     });
 
     Object.defineProperty(ClassUtils, 'classExtendsMap', {
         value: {}
+    })
+
+    Object.defineProperty(ClassUtils, 'classImplementMap', {
+        value: {} //[className] [classImplement] = true
     })
 
 
@@ -35,8 +39,34 @@ if (typeof window === 'undefined') {
             }
         }
 
-        if (!ClassUtils.classNameLookUp[klass])
-            ClassUtils.classNameLookUp[klass] = className;
+        if (!ClassUtils.classNameLookUp.get(klass))
+            ClassUtils.classNameLookUp.set(klass, className);
+    }
+
+
+
+    ClassUtils.registerImplementation = function (className, implementingClassName) {
+        if (!ClassUtils.classImplementMap[className]) {
+            ClassUtils.classImplementMap[className] = {};
+            ClassUtils.classImplementMap[className][implementingClassName] = true;
+        } else if (!ClassUtils.classImplementMap[className][implementingClassName]) {
+            ClassUtils.classImplementMap[className][implementingClassName] = true;
+        }
+    }
+
+    ClassUtils.is = function (klass, typeKlasss) {
+        var className = ClassUtils.classNameLookUp.get(klass);
+        if (!className) throw new Errorr('Sessioned Classes can alone use this function.' + klass.constructor.name + ' is not registered');
+        var typeClassName = ClassUtils.classNameLookUp.get(typeKlasss);
+        if (!typeClassName) throw new Errorr('Sessioned Classes can alone use this function.' + typeKlasss.constructor.name + ' is not registered');
+
+        if (!ClassUtils.classImplementMap[className]) {
+            return false;
+        } else if (!ClassUtils.classImplementMap[className][implementingClassName]) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     ClassUtils.getClassDefinition = function (className) {
@@ -55,7 +85,7 @@ if (typeof window === 'undefined') {
 
     ClassUtils.getClassName = function (classDefn) {
         //TO-DO: need to figure out why look up creates the object rather just using as key till then use NS and CLASSNAME
-        var className = (classDefn.constructor && classDefn.constructor.NS) ? classDefn.constructor.NS + '.' + classDefn.constructor.CLASS_NAME : ClassUtils.classNameLookUp[classDefn];
+        var className = (classDefn.constructor && classDefn.constructor.NS) ? classDefn.constructor.NS + '.' + classDefn.constructor.CLASS_NAME : ClassUtils.classNameLookUp.get(classDefn);
         return className;
 
     }
