@@ -2228,7 +2228,7 @@ if (typeof window === 'undefined') {
     /**
      * Code from Graphics Gems Volume 1
      */
-    pStandardLib.getNiceNumber = function (x, round) {
+    StandardLib.getNiceNumber = function (x, round) {
         var exponent;
         var fractionalPart;
         var niceFractionalPart;
