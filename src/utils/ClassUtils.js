@@ -65,7 +65,7 @@ if (typeof window === 'undefined') {
 
         if (!ClassUtils.classImplementMap[className]) {
             return false;
-        } else if (!ClassUtils.classImplementMap[className][implementingClassName]) {
+        } else if (!ClassUtils.classImplementMap[className][typeClassName]) {
             return false;
         } else {
             return true;
