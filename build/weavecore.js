@@ -145,6 +145,7 @@ if (typeof window === 'undefined') {
     //WeaveAPI.ClassUtils = new ClassUtils();
 
 }());
+
 Array.CASEINSENSITIVE = 1;
 Array.DESCENDING = 2;
 Array.UNIQUESORT = 4;
@@ -7797,7 +7798,7 @@ if (typeof window === 'undefined') {
          * @type weavecore.Dictionary2D
          */
         Object.defineProperty(this, "_treeCache", {
-            value: new weavecore.Dictionary2D(false, false, weavecore.WeaveTreeItem)
+            value: new weavecore.Dictionary2D(true, false, weavecore.WeaveTreeItem)
         });
 
         /**
@@ -8091,6 +8092,8 @@ if (typeof window === 'undefined') {
             treeItem.dependency = root instanceof weavecore.LinkableHashMap ? root.childListCallbacks : root;
 
         }
+        if (objectName)
+            treeItem.label = objectName;
         return treeItem;
     };
 
@@ -8129,9 +8132,13 @@ if (typeof window === 'undefined') {
             } else if (Object) {
                 names = this.getLinkablePropertyNames(object);
             }
-            names.map(function (name) {
+            for (var i = 0; i < names.length; i++) {
+                var name = names[i];
                 if (object instanceof weavecore.LinkableDynamicObject) {
                     childObject = object.internalObject;
+                }
+                if (object[name]) {
+                    childObject = object[name];
                 }
                 if (!childObject) {
                     return;
@@ -8143,7 +8150,8 @@ if (typeof window === 'undefined') {
                     ignoreList.set(childObject, true);
                     children.push(this.getSessionStateTree(childObject, name));
                 }
-            }.bind(this))
+
+            }
 
         }
         if (children.length === 0)
@@ -9108,7 +9116,6 @@ if (typeof window === 'undefined') {
     }
 
 }());
-
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
