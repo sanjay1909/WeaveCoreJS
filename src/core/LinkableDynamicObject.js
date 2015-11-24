@@ -97,13 +97,13 @@ if (typeof window === 'undefined') {
         // override public
         Object.defineProperty(this, 'targetPath', {
             get: function () {
-                return weavecore.LinkableWatcher.prototype.targetPath
+                return this.__proto__.targetPath
             },
 
             set: function (path) {
                 if (this._locked)
                     return;
-                weavecore.LinkableWatcher.prototype.targetPath = path;
+                this.__proto__.targetPath = path;
             },
             configurable: true
         });
@@ -111,7 +111,7 @@ if (typeof window === 'undefined') {
         // override public
         Object.defineProperty(this, 'target', {
             get: function () {
-                return weavecore.LinkableWatcher.prototype.target;
+                return this.__proto__.target;
             },
 
             set: function (newTarget) {
@@ -119,7 +119,7 @@ if (typeof window === 'undefined') {
                     return;
 
                 if (!newTarget) {
-                    weavecore.LinkableWatcher.prototype.target = null;
+                    this.__proto__.target = null;
                     return;
                 }
 
@@ -135,9 +135,9 @@ if (typeof window === 'undefined') {
                     // otherwise, unset the target
                     var owner = sm.getLinkableOwner(newTarget);
                     if (owner === this || !owner)
-                        weavecore.LinkableWatcher.prototype.target = newTarget;
+                        this.__proto__.target = newTarget;
                     else
-                        weavecore.LinkableWatcher.prototype.target = null;
+                        this.__proto__.target = null;
                 }
 
                 this._cc.resumeCallbacks();
@@ -346,9 +346,9 @@ if (typeof window === 'undefined') {
 
             var obj = this.target;
             if (!obj || obj.constructor !== classDef || !(obj instanceof classDef))
-                weavecore.LinkableWatcher.prototype.target = new classDef();
+                this.__proto__.target = new classDef();
         } else {
-            weavecore.LinkableWatcher.prototype.target = null;
+            this.__proto__.target = null;
         }
 
         this._cc.resumeCallbacks();
@@ -423,7 +423,7 @@ if (typeof window === 'undefined') {
 
     p.removeObject = function () {
         if (!this._locked)
-            weavecore.LinkableWatcher.prototype.target = null;
+            this.__proto__.target = null;
     };
 
     p.dispose = function () {
