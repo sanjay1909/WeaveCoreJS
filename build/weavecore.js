@@ -14095,9 +14095,6 @@ if (typeof window === 'undefined') {
      * This is used as a placeholder to prevent re-compiling erroneous code.
      */
     Object.defineProperties(LinkableFunction, {
-        '_macroProxy': { //* This is a proxy object for use as a symbol table for the compiler.
-            value: null
-        },
         'macros': {
             value: new weavecore.LinkableHashMap(LinkableFunction) //This is a list of macros that can be used in any LinkableFunction expression.
         },
@@ -14105,6 +14102,8 @@ if (typeof window === 'undefined') {
             value: WeaveAPI.SessionManager.registerLinkableChild(WeaveAPI.globalHashMap, new weavecore.LinkableVariable(null, LinkableFunction.verifyLibraries))
         }
     });
+
+    LinkableFunction._macroProxy = null; //* This is a proxy object for use as a symbol table for the compiler.
 
     LinkableFunction.debug = false;
     /**
