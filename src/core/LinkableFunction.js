@@ -233,7 +233,7 @@ if (typeof window === 'undefined') {
 
     }
 
-    LinkableFunction.prototype = new weavecore.LinkableVariable();
+    LinkableFunction.prototype = new weavecore.LinkableString();
     LinkableFunction.prototype.constructor = LinkableFunction;
 
     var p = LinkableFunction.prototype;
