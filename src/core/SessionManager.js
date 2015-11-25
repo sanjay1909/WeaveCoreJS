@@ -402,9 +402,12 @@ if (typeof window === 'undefined') {
         if (--depth <= 0)
             return;
 
-        for (var object of this._parentToChildMap.get(root).keys()) {
-            internalGetDescendants.call(this, output, object, filter, ignoreList, depth);
+        if (this._parentToChildMap.get(root)) {
+            for (var object of this._parentToChildMap.get(root).keys()) {
+                internalGetDescendants.call(this, output, object, filter, ignoreList, depth);
+            }
         }
+
     }
 
     function _getPath(tree, descendant) {
