@@ -9118,6 +9118,7 @@ if (typeof window === 'undefined') {
     }
 
 }());
+
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -14303,14 +14304,14 @@ if (typeof window === 'undefined') {
             this._isFunctionDefinition = false;
 
             if (LinkableFunction._macroProxy === null)
-                LinkableFunction._macroProxy = new weavecore.ProxyObject(_hasMacro, evaluateMacro, null, callMacro); // allows evaluating macros but not setting them
+                LinkableFunction._macroProxy = new weavecore.ProxyObject(LinkableFunction._hasMacro, LinkableFunction.evaluateMacro, null, LinkableFunction.callMacro); // allows evaluating macros but not setting them
 
-            if (WeaveAPI.SessionManager.detectLinkableObjectChange(LinkableFunction._getNewCompiler, LinkableFunction.macroLibraries))
+            if (WeaveAPI.detectLinkableObjectChange(LinkableFunction._getNewCompiler, LinkableFunction.macroLibraries))
                 LinkableFunction._compiler = LinkableFunction._getNewCompiler(true);
 
             var object = LinkableFunction._compiler.compileToObject(value);
             this._isFunctionDefinition = LinkableFunction._compiler.compiledObjectIsFunctionDefinition(object);
-            this._compiledMethod = LinkableFunction._compiler.compileObjectToFunction(object, _macroProxy, errorHandler.bind(this), _useThisScope, _paramNames);
+            this._compiledMethod = LinkableFunction._compiler.compileObjectToFunction(object, LinkableFunction._macroProxy, errorHandler.bind(this), this._useThisScope, this._paramNames);
         }
     }
 
@@ -14361,7 +14362,6 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.LinkableFunction', LinkableFunction);
 
 }());
-
 /**
  * @module weavecore
  */
