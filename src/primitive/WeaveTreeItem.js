@@ -291,7 +291,7 @@ if (typeof window === 'undefined') {
             }
 
             // on ArgumentError, pass in this WeaveTreeItem as the first parameter
-            console.log('executing after ArgumentError');
+            //console.log('executing after ArgumentError');
             return func(this);
 
         } catch (e) {

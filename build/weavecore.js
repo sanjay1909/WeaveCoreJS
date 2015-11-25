@@ -7365,7 +7365,7 @@ if (typeof window === 'undefined') {
             }
 
             // on ArgumentError, pass in this WeaveTreeItem as the first parameter
-            console.log('executing after ArgumentError');
+            //console.log('executing after ArgumentError');
             return func(this);
 
         } catch (e) {
@@ -8106,7 +8106,7 @@ if (typeof window === 'undefined') {
      */
     p._getTreeItemChildren = function (treeItem) {
         if (!treeItem) {
-            console.warn('Argument Warning: Need treeItem as Argument');
+            //console.warn('Argument Warning: Need treeItem as Argument');
         }
         var object = treeItem.data;
         var children = [];
@@ -9117,7 +9117,6 @@ if (typeof window === 'undefined') {
     }
 
 }());
-
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};

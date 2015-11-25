@@ -502,7 +502,7 @@ if (typeof window === 'undefined') {
      */
     p._getTreeItemChildren = function (treeItem) {
         if (!treeItem) {
-            console.warn('Argument Warning: Need treeItem as Argument');
+            //console.warn('Argument Warning: Need treeItem as Argument');
         }
         var object = treeItem.data;
         var children = [];
