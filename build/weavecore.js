@@ -7355,7 +7355,7 @@ if (typeof window === 'undefined') {
             } catch (e) {
                 //To-Docreate Argument error object
                 // and on each function if the argument is required, and if not passed throw that Argument error object
-                console.log(e);
+                // console.log(e);
                 /*if (!(e is ArgumentError))
 				{
 					if (e is Error)
@@ -7416,7 +7416,6 @@ if (typeof window === 'undefined') {
     weavecore.WeaveTreeItem = WeaveTreeItem;
 
 }());
-
 /*
     Weave (Web-based Analysis and Visualization Environment)
     Copyright (C) 2008-2011 University of Massachusetts Lowell
@@ -14361,6 +14360,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.LinkableFunction', LinkableFunction);
 
 }());
+
 /**
  * @module weavecore
  */

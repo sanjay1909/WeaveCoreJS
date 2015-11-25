@@ -281,7 +281,7 @@ if (typeof window === 'undefined') {
             } catch (e) {
                 //To-Docreate Argument error object
                 // and on each function if the argument is required, and if not passed throw that Argument error object
-                console.log(e);
+                // console.log(e);
                 /*if (!(e is ArgumentError))
 				{
 					if (e is Error)
