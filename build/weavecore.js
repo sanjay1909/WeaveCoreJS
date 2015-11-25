@@ -8131,7 +8131,6 @@ if (typeof window === 'undefined') {
             var deprecatedLookup = null;
             if (object instanceof weavecore.LinkableDynamicObject) {
                 names = object.targetPath ? null : [null];
-                Linkablehashmap;
             } else if (Object) {
                 names = this.getLinkablePropertyNames(object);
             }
