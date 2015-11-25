@@ -14308,7 +14308,7 @@ if (typeof window === 'undefined') {
             if (WeaveAPI.detectLinkableObjectChange(LinkableFunction._getNewCompiler, LinkableFunction.macroLibraries))
                 LinkableFunction._compiler = LinkableFunction._getNewCompiler(true);
 
-            var object = LinkableFunction._compiler.compileToObject(value);
+            var object = LinkableFunction._compiler.compileToObject(this.value);
             this._isFunctionDefinition = LinkableFunction._compiler.compiledObjectIsFunctionDefinition(object);
             this._compiledMethod = LinkableFunction._compiler.compileObjectToFunction(object, LinkableFunction._macroProxy, errorHandler.bind(this), this._useThisScope, this._paramNames);
         }
