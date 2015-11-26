@@ -2,15 +2,18 @@
  * @sanjaykrishna
  * @shwetapurushe
  */
-(function(){
+
+var test = {};
+(function () {
     angular.module('sliderDemoApp', ['ui.slider']);
 
     angular.module('sliderDemoApp').controller('sliderDemoCtrl', demoController);
 
     demoController.$inject = ['$scope', '$log', '$timeout'];
-    function demoController ($scope, $log, $timeout){
+
+    function demoController($scope, $log, $timeout) {
         var dC = this;
-        var test = {};
+
         dC.handleSliderValueChange = handleSliderValueChange;
         dC.updateSessionNavigator = updateSessionNavigator;
         dC.updateSliderValues = updateSliderValues;
@@ -36,21 +39,22 @@
             }
         }
 
-        dC.log = new weavecore.SessionStateLog(WeaveAPI.globalHashMap);
+        test.log = dC.log = new weavecore.SessionStateLog(WeaveAPI.globalHashMap);
         dC.testVar = dC.createNewSession("testNum") // this will cause issue as in session new object is created, tthe reference is changed
-        // $scope.testVar.value = 0;
+            // $scope.testVar.value = 0;
 
         dC.log.clearHistory();
 
         var cc = WeaveAPI.SessionManager.getCallbackCollection(dC.log);
         cc.addGroupedCallback({}, dC.updateSliderValues, true);
 
-        dC.increment = function(){
+        dC.increment = function () {
             dC.testVar.value++;
         }
-        dC.decrement = function(){
+        dC.decrement = function () {
             dC.testVar.value--;
         }
+
         function createNewSession(name) {
             var oo = test.grandParent.requestObject(name, weavecore.LinkableNumber, false);
             oo.value = 0;
@@ -102,5 +106,5 @@
                 }
             };
         }
-    };//end of controller def
+    }; //end of controller def
 })();

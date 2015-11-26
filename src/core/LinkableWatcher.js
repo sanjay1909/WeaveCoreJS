@@ -68,7 +68,11 @@ if (typeof window === 'undefined') {
         if (immediateCallback === undefined) immediateCallback = null;
         if (groupedCallback === undefined) groupedCallback = null;
 
-        weavecore.ILinkableObject.call(this);
+        //weavecore.ILinkableObject.call(this);
+
+        Object.defineProperty(this, 'sessionable', {
+            value: true;
+        });
 
         this._typeRestriction = typeRestriction;
 
@@ -133,8 +137,8 @@ if (typeof window === 'undefined') {
 
     }
 
-    LinkableWatcher.prototype = new weavecore.ILinkableObject();
-    LinkableWatcher.prototype.constructor = LinkableWatcher;
+    //LinkableWatcher.prototype = new weavecore.ILinkableObject();
+    // LinkableWatcher.prototype.constructor = LinkableWatcher;
 
     var p = LinkableWatcher.prototype;
 
