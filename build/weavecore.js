@@ -59,7 +59,7 @@ if (typeof window === 'undefined') {
             return true;
         }
         var className = ClassUtils.classNameLookUp.get(linkableObject.constructor);
-        if (!className) throw new Errorr('Sessioned Classes can alone use this function.' + klass.constructor.name + ' is not registered');
+        if (!className) throw new Errorr('Sessioned Classes can alone use this function.' + typeKlasss.constructor.name + ' is not registered');
         var typeClassName = ClassUtils.classNameLookUp.get(typeKlasss);
         if (!typeClassName) throw new Errorr('Sessioned Classes can alone use this function.' + typeKlasss.constructor.name + ' is not registered');
 
@@ -6242,6 +6242,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.ILinkableCompositeObject', ILinkableCompositeObject);
 
 }());
+
 /**
  * @module weavecore
  */
@@ -13410,6 +13411,7 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
+
 /**
  * @module weavecore
  */
@@ -14072,6 +14074,7 @@ if (typeof window === 'undefined') {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
+
 /**
  * @module weavecore
  */
@@ -15388,6 +15391,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
