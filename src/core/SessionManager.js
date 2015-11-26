@@ -529,26 +529,29 @@ if (typeof window === 'undefined') {
             } else if (Object) {
                 names = this.getLinkablePropertyNames(object);
             }
-            for (var i = 0; i < names.length; i++) {
-                var name = names[i];
-                if (object instanceof weavecore.LinkableDynamicObject) {
-                    childObject = object.internalObject;
-                }
-                if (object[name]) {
-                    childObject = object[name];
-                }
-                if (!childObject) {
-                    return;
-                }
-                if (this._childToParentMap.get(childObject) && this._childToParentMap.get(childObject).get(object)) {
-                    if (ignoreList.get(childObject) !== undefined) {
+            if (names) {
+                for (var i = 0; i < names.length; i++) {
+                    var name = names[i];
+                    if (object instanceof weavecore.LinkableDynamicObject) {
+                        childObject = object.internalObject;
+                    }
+                    if (object[name]) {
+                        childObject = object[name];
+                    }
+                    if (!childObject) {
                         return;
                     }
-                    ignoreList.set(childObject, true);
-                    children.push(this.getSessionStateTree(childObject, name));
-                }
+                    if (this._childToParentMap.get(childObject) && this._childToParentMap.get(childObject).get(object)) {
+                        if (ignoreList.get(childObject) !== undefined) {
+                            return;
+                        }
+                        ignoreList.set(childObject, true);
+                        children.push(this.getSessionStateTree(childObject, name));
+                    }
 
+                }
             }
+
 
         }
         if (children.length === 0)
