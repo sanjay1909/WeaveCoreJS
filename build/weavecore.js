@@ -13136,7 +13136,7 @@ if (typeof window === 'undefined') {
         //weavecore.ILinkableObject.call(this);
 
         Object.defineProperty(this, 'sessionable', {
-            value: true;
+            value: true
         });
 
         this._typeRestriction = typeRestriction;
