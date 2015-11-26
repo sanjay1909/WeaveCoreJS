@@ -649,6 +649,7 @@ if (typeof window === 'undefined') {
 
     weavecore.LinkableHashMap = LinkableHashMap;
     weavecore.ClassUtils.registerClass('weavecore.LinkableHashMap', LinkableHashMap);
+    weavecore.ClassUtils.registerImplementation('weavecore.LinkableHashMap', 'weavecore.ILinkableCompositeObject');
 
     // namespace
     if (typeof window === 'undefined') {

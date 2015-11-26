@@ -476,6 +476,7 @@ if (typeof window === 'undefined') {
 
     weavecore.LinkableDynamicObject = LinkableDynamicObject;
     weavecore.ClassUtils.registerClass('weavecore.LinkableDynamicObject', LinkableDynamicObject);
+    weavecore.ClassUtils.registerImplementation('weavecore.LinkableDynamicObject', 'weavecore.ILinkableCompositeObject');
 
 
 }());

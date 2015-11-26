@@ -51,7 +51,7 @@ if (typeof window === 'undefined') {
 
 
     function ILinkableCompositeObject() {
-
+        weavecore.ILinkableObject.call(this);
     }
 
 
@@ -79,5 +79,6 @@ if (typeof window === 'undefined') {
     p.setSessionState = function (newState, removeMissingDynamicObjects) {};
 
     weavecore.ILinkableCompositeObject = ILinkableCompositeObject;
+    weavecore.ClassUtils.registerClass('weavecore.ILinkableCompositeObject', ILinkableCompositeObject);
 
 }());
