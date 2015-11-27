@@ -20,12 +20,12 @@ var test = {};
         dC.TestItem = TestItem;
         dC.createNewSession = createNewSession;
 
-        test.grandParent = WeaveAPI.globalHashMap.requestObject("grandParent", weavecore.LinkableHashMap, false);
-        test.grandParent.addImmediateCallback(WeaveAPI.globalHashMap, function () {
-            console.log("Grandparent callback", test.grandParent)
+        test.hashMap = WeaveAPI.globalHashMap.requestObject("hashMap", weavecore.LinkableHashMap, false);
+        test.hashMap.addImmediateCallback(WeaveAPI.globalHashMap, function () {
+            console.log("hashMap callback", test.hashMap)
         });
-        //test.parent1 = test.grandParent.requestObject("parent1", weavecore.LinkableHashMap, false);
-        //test.parent2 = test.grandParent.requestObject("parent2", weavecore.LinkableHashMap, false);
+        //test.parent1 = test.hashMap.requestObject("parent1", weavecore.LinkableHashMap, false);
+        //test.parent2 = test.hashMap.requestObject("parent2", weavecore.LinkableHashMap, false);
 
         dC.labeledslider = {
             'options': {
@@ -40,8 +40,10 @@ var test = {};
         }
 
         test.log = dC.log = new weavecore.SessionStateLog(WeaveAPI.globalHashMap);
-        dC.testVar = dC.createNewSession("testNum") // this will cause issue as in session new object is created, tthe reference is changed
-            // $scope.testVar.value = 0;
+        test.ln = dC.ln = dC.createNewSession("testNum", weavecore.LinkableNumber); // this will cause issue as in session new object is created, tthe reference is changed
+        test.lnPath = WeaveAPI.SessionManager.getPath(WeaveAPI.globalHashMap, test.ln);
+        test.ldo = dC.ldo = dC.createNewSession("testDO", weavecore.LinkableDynamicObject);
+
 
         dC.log.clearHistory();
 
@@ -49,14 +51,14 @@ var test = {};
         cc.addGroupedCallback({}, dC.updateSliderValues, true);
 
         dC.increment = function () {
-            dC.testVar.value++;
+            dC.ln.value++;
         }
         dC.decrement = function () {
-            dC.testVar.value--;
+            dC.ln.value--;
         }
 
-        function createNewSession(name) {
-            var oo = test.grandParent.requestObject(name, weavecore.LinkableNumber, false);
+        function createNewSession(name, klass) {
+            var oo = test.hashMap.requestObject(name, klass, false);
             oo.value = 0;
 
             return oo;
