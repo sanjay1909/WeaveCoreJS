@@ -156,7 +156,7 @@ if (typeof window === 'undefined') {
      */
     p.internalSetTarget = function (newTarget) {
         if (this._foundTarget && this._typeRestriction)
-            newTarget = (newTarget && weavecore.ClassUitls.is(newTarget, this._typeRestriction)) ? newTarget : null;
+            newTarget = (newTarget && weavecore.ClassUtils.is(newTarget, this._typeRestriction)) ? newTarget : null;
 
         // do nothing if the targets are the same.
         if (this._target === newTarget)
