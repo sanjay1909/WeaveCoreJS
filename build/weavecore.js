@@ -8026,12 +8026,12 @@ if (typeof window === 'undefined') {
                 var path = _getPath(child, descendant);
                 if (path) {
                     path.unshift(child.label);
-                    console.log('Path returned:', path);
+                    //console.log('Path returned:', path);
                     return path;
                 }
             }
         }
-        console.log('null returned');
+        //console.log('null returned');
         return null;
     }
 
@@ -8241,7 +8241,7 @@ if (typeof window === 'undefined') {
         if (linkableObject instanceof weavecore.LinkableVariable) {
             var lv = linkableObject;
             if (removeMissingDynamicObjects === false && newState && newState.constructor.name === 'Object') {
-                lv.setSessionState.call(lv, this._applyDiff.call(this, Object.create(lv.getSessionState(lv)), newState));
+                lv.setSessionState.call(lv, this._applyDiff.call(this, copyObject(lv.getSessionState(lv)), newState));
             } else {
                 lv.setSessionState.call(lv, newState);
             }
@@ -8821,7 +8821,7 @@ if (typeof window === 'undefined') {
 
         // special case if types differ
         if (typeof (newState) !== type)
-            return newState;
+            return copyObject(newState); // make copies of non-primitives
 
 
         if (type === 'number') {
@@ -8835,7 +8835,7 @@ if (typeof window === 'undefined') {
         } else if (oldState === null || oldState === undefined || newState === null || newState === undefined || type !== 'object') // other primitive value
         {
             if (oldState !== newState) // no type-casting
-                return newState;
+                return copyObject(newState);
 
             return undefined; // no diff
         } else if (oldState.constructor === Array && newState.constructor === Array) {
@@ -8843,7 +8843,7 @@ if (typeof window === 'undefined') {
             if (!weavecore.DynamicState.isDynamicStateArray(oldState) && !weavecore.DynamicState.isDynamicStateArray(newState)) {
                 if (weavecore.StandardLib.compare(oldState, newState) === 0)
                     return undefined; // no diff
-                return newState;
+                return copyObject(newState);
             }
 
             // create an array of new DynamicState objects for all new names followed by missing old names
@@ -8883,10 +8883,10 @@ if (typeof window === 'undefined') {
                 // If the class is the same as before, then we can save a diff instead of the entire session state.
                 // If the class changed, we can't save only a diff -- we need to keep the entire session state.
                 // Replace the sessionState in the new DynamicState object with the diff.
-                if (oldTypedState !== undefined && oldTypedState[weavecore.DynamicState.CLASS_NAME] === className) {
+                if (oldTypedState !== undefined && oldTypedState !== null && oldTypedState[weavecore.DynamicState.CLASS_NAME] === className) {
                     className = null; // no change
                     diffValue = this.computeDiff(oldTypedState[weavecore.DynamicState.SESSION_STATE], sessionState);
-                    if (diffValue === undefined) {
+                    if (diffValue === undefined) { // important not to check null -as nul reperests object there has no value
                         // Since the class name is the same and the session state is the same,
                         // we only need to specify that this name is still present.
                         result.push(objectName);
@@ -8897,6 +8897,8 @@ if (typeof window === 'undefined') {
                         continue;
                     }
                     sessionState = diffValue;
+                } else {
+                    sessionState = copyObject(sessionState);
                 }
 
                 // save in new array and remove from lookup
@@ -8934,7 +8936,7 @@ if (typeof window === 'undefined') {
                 if (oldState[newName] === undefined) {
                     if (!diff)
                         diff = {};
-                    diff[newName] = newState[newName]; // TODO: same object pointer.. potential problem?
+                    diff[newName] = copyObject(newState[newName]);
                 }
             }
 
@@ -8957,7 +8959,7 @@ if (typeof window === 'undefined') {
         // special cases
         if (baseDiff === null || baseDiff === undefined || diffToAdd === null || diffToAdd === undefined || baseType !== diffType || baseType !== 'object') {
             if (diffType === 'object') // not a primitive, so make a copy
-                baseDiff = Object.getPrototypeOf(Object.create(diffToAdd)).slice(0); //TODO: find better solution for array copy(currently Shallow copy)
+                baseDiff = copyObject(diffToAdd); //TODO: find better solution for array copy(currently Shallow copy)
             else
                 baseDiff = diffToAdd;
         } else if (Array.isArray(baseDiff) && Array.isArray(diffToAdd)) {
@@ -9003,16 +9005,13 @@ if (typeof window === 'undefined') {
                     // apply diff
                     var oldTypedState = baseLookup[objectName];
                     if (typeof oldTypedState === 'string' || oldTypedState instanceof String || oldTypedState === null || oldTypedState === undefined) {
-                        if (typeof typedState === 'string' || typedState instanceof String || typedState === null || typedState === undefined)
-                            baseLookup[objectName] = typedState; // avoid unnecessary function call overhead
-                        else
-                            baseLookup[objectName] = Object.getPrototypeOf(Object.create(typedState)).slice(0); //TODO: Temp solution for Array Copy
+                        baseLookup[objectName] = copyObject(typedState); // avoid unnecessary function call overhead
                     } else if (!(typeof typedState === 'string' || typedState instanceof String || typedState === null || typedState === undefined)) // update dynamic state
                     {
                         var className = typedState[weavecore.DynamicState.CLASS_NAME];
                         // if new className is different and not null, start with a fresh typedState diff
                         if (className && className != oldTypedState[weavecore.DynamicState.CLASS_NAME]) {
-                            baseLookup[objectName] = Object.getPrototypeOf(Object.create(typedState)).slice(0); //TODO: Temp solution for Array Copy
+                            baseLookup[objectName] = copyObject(typedState); //TODO: Temp solution for Array Copy
                         } else // className hasn't changed, so combine the diffs
                         {
                             oldTypedState[weavecore.DynamicState.SESSION_STATE] = this.combineDiff(oldTypedState[weavecore.DynamicState.SESSION_STATE], typedState[weavecore.DynamicState.SESSION_STATE]);
@@ -9042,6 +9041,17 @@ if (typeof window === 'undefined') {
 
         return baseDiff;
     };
+
+    function copyObject(object) {
+        if (object === null || typeof object != 'object') // primitive value
+            return object;
+        else { // make copies of non-primitives
+            var jsonString = JSON.stringify(object);
+            var copy = JSON.parse(jsonString);
+            return copy;
+        }
+        //return Object.getPrototypeOf(Object.create(object)).slice(0)
+    }
 
     /**************************************
      * linking sessioned objects together
@@ -9122,7 +9132,6 @@ if (typeof window === 'undefined') {
     }
 
 }());
-
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -11418,6 +11427,7 @@ WeaveAPI.detectLinkableObjectChange = function () {
     })
     return changeDetected;
 }
+
 // namespace
 
 if (!this.weavecore)
@@ -13798,7 +13808,7 @@ if (typeof window === 'undefined') {
             {
                 // If this name is not associated with an object of the specified type,
                 // associate the name with a new object of the specified type.
-                console.log(className);
+                //console.log(className);
                 var classDef = eval(className);
                 //var classDef = window['weavecore'][className]; //TODO:remove hardcoded weavecore with namespace
                 var object = this._nameToObjectMap[name];
@@ -14085,7 +14095,6 @@ if (typeof window === 'undefined') {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
-
 /**
  * @module weavecore
  */

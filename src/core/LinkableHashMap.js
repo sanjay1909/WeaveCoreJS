@@ -373,7 +373,7 @@ if (typeof window === 'undefined') {
             {
                 // If this name is not associated with an object of the specified type,
                 // associate the name with a new object of the specified type.
-                console.log(className);
+                //console.log(className);
                 var classDef = eval(className);
                 //var classDef = window['weavecore'][className]; //TODO:remove hardcoded weavecore with namespace
                 var object = this._nameToObjectMap[name];
