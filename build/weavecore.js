@@ -7558,6 +7558,7 @@ if (typeof window === 'undefined') {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -12296,12 +12297,12 @@ if (!this.WeaveAPI)
             console.log('StageUtils.callLater(): received null "method" parameter');
             return;
         }
-
-        this._priorityCallLaterQueues[this._nextCallLaterPriority].push(arguments);
+        var args = Array.prototype.slice.call(arguments);
+        this._priorityCallLaterQueues[this._nextCallLaterPriority].push(args);
         this._nextCallLaterPriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE;
 
         if (StageUtils.debug_async_stack)
-            this._stackTraceMap.set(arguments, new Error("This is the stack trace from when callLater() was called.").getStackTrace());
+            this._stackTraceMap.set(args, new Error("This is the stack trace from when callLater() was called.").getStackTrace());
     };
 
     suP._handleCallLater = function () {
@@ -12667,7 +12668,6 @@ if (!this.WeaveAPI)
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
