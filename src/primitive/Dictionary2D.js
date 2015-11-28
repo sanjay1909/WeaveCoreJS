@@ -88,12 +88,9 @@ if (typeof window === 'undefined') {
      * @param key2 The second dictionary key.
      */
     p.removeAllSecondary = function (key2) {
-        var keys = this.dictionary.keys();
-        keys.forEach(function (key1) {
+        for (var key1 of this.dictionary.keys()) {
             this.dictionary.get(key1).delete(key2);
-
-        }, this);
-
+        };
     };
 
     /**

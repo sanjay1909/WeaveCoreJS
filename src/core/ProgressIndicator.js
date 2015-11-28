@@ -84,23 +84,21 @@ if (typeof window === 'undefined') {
      */
     p.debugTasks = function () {
         var result = [];
-        var keys = this._progress.keys();
-        keys.forEach(function (task) {
+        for(var task of this._progress.keys()){
             result.push(WeaveAPI.debugID(task));
-        });
+        };
 
         return result;
     }
 
     p.getDescriptions = function () {
         var result = [];
-        var keys = this._progress.keys();
-        keys.forEach(function (task) {
+        for(var task of this._progress.keys()) {
             var desc = this._description.get(task) || "Unnamed task";
             if (desc)
                 result.push(WeaveAPI.debugId(task) + " (" + (100 * this._progress.get(task)) + "%) " + desc);
 
-        }, this);
+        };
 
         WeaveAPI.StandardLib.sort(result);
         return result;
@@ -205,13 +203,12 @@ if (typeof window === 'undefined') {
     p.getNormalizedProgress = function () {
         // add up the percentages
         var sum = 0;
-        var keys = this._progress.keys();
-        keys.forEach(function (task) {
+        for(var task of this._progress.keys()){
             var stackTrace = this._stackTrace.get(task); // check this when debugging
             var progress = this._progress.get(task);
             if (isFinite(progress))
                 sum += progress;
-        }, this);
+        };
 
         // make any pending requests that no longer exist count as 100% done
         sum += _maxTaskCount - _taskCount;
