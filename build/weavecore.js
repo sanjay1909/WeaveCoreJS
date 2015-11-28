@@ -9132,6 +9132,7 @@ if (typeof window === 'undefined') {
     }
 
 }());
+
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -9302,10 +9303,320 @@ if (typeof window === 'undefined') {
         'JSON_LOOKUP': { //TThe name of the property used to store a reviver function for the second parameter of JSON.parse
             value: "_jsonLookup"
         },
+        'DEBOUNCE': { //The name of the property used to store a function that will cache a debounced version of a function to be used when reviving functions from JSON.
+            value: "_debounce"
+        },
         'JSON_SUFFIX': { //A random String which is highly unlikely to appear in any String value.  Used as a suffix for <code>NaN, -Infinity, Infinity</code>.
             value: ';' + Math.random() + ';' + new Date()
         }
 
+    });
+
+    Object.defineProperty(JavaScript, 'POLYFILLS', {
+        value: `
+			if (!Array.isArray)
+				Array.isArray = function(arg) { return Object.prototype.toString.call(arg) === '[object Array]'; };
+
+			if (!Array.prototype.map)
+				Array.prototype.map = function(callback, thisArg) {
+					var T, A, k;
+					if (this == null)
+						throw new TypeError(" this is null or not defined");
+					var O = Object(this);
+					var len = O.length >>> 0;
+					if (typeof callback !== "function")
+						throw new TypeError(callback + " is not a function");
+					if (arguments.length > 1)
+						T = thisArg;
+					A = new Array(len);
+					k = 0;
+					while (k < len) {
+						var kValue, mappedValue;
+						if (k in O) {
+							kValue = O[k];
+							mappedValue = callback.call(T, kValue, k, O);
+							A[k] = mappedValue;
+						}
+						k++;
+					}
+					return A;
+				};
+
+			if (!Object.keys)
+				Object.keys = (function () {
+					'use strict';
+					var hasOwnProperty = Object.prototype.hasOwnProperty,
+					hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
+					dontEnums = [
+						'toString',
+						'toLocaleString',
+						'valueOf',
+						'hasOwnProperty',
+						'isPrototypeOf',
+						'propertyIsEnumerable',
+						'constructor'
+					],
+					dontEnumsLength = dontEnums.length;
+
+					return function (obj) {
+						if (typeof obj !== 'object' && (typeof obj !== 'function' || obj === null))
+							throw new TypeError('Object.keys called on non-object');
+
+						var result = [], prop, i;
+
+						for (prop in obj)
+							if (hasOwnProperty.call(obj, prop))
+								result.push(prop);
+
+						if (hasDontEnumBug)
+							for (i = 0; i < dontEnumsLength; i++)
+								if (hasOwnProperty.call(obj, dontEnums[i]))
+									result.push(dontEnums[i]);
+						return result;
+					};
+				}());
+
+			if (!Function.prototype.bind)
+				Function.prototype.bind = function (oThis) {
+					if (typeof this !== "function")
+						throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+
+					var aArgs = Array.prototype.slice.call(arguments, 1),
+						fToBind = this,
+						fNOP = function () {},
+						fBound = function () {
+							return fToBind.apply(this instanceof fNOP && oThis
+								? this
+								: oThis,
+								aArgs.concat(Array.prototype.slice.call(arguments)));
+						};
+
+					fNOP.prototype = this.prototype;
+					fBound.prototype = new fNOP();
+
+					return fBound;
+				};
+		 `
+    });
+
+    Object.defineProperty(JavaScript, 'LODASH_DEBOUNCE', {
+        value: `
+			/**
+			 * lodash 4.0.0-pre <https://lodash.com/>
+			 * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+			 * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+			 * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+			 * Available under MIT license <https://lodash.com/license>
+			 */
+
+			/**
+			 * Checks if value is the [language type](https://es5.github.io/#x8) of Object.
+			 * (e.g. arrays, functions, objects, regexes, new Number(0), and new String(''))
+			 *
+			 * @static
+			 * @memberOf _
+			 * @category Lang
+			 * @param {*} value The value to check.
+			 * @returns {boolean} Returns true if value is an object, else false.
+			 * @example
+			 *
+			 * _.isObject({});
+			 * // => true
+			 *
+			 * _.isObject([1, 2, 3]);
+			 * // => true
+			 *
+			 * _.isObject(_.noop);
+			 * // => true
+			 *
+			 * _.isObject(null);
+			 * // => false
+			 */
+			function isObject(value) {
+			  // Avoid a V8 JIT bug in Chrome 19-20.
+			  // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+			  var type = typeof value;
+			  return !!value && (type == 'object' || type == 'function');
+			}
+
+			/**
+			 * Creates a debounced function that delays invoking func until after wait
+			 * milliseconds have elapsed since the last time the debounced function was
+			 * invoked. The debounced function comes with a cancel method to cancel
+			 * delayed func invocations and a flush method to immediately invoke them.
+			 * Provide an options object to indicate that func should be invoked on the
+			 * leading and/or trailing edge of the wait timeout. Subsequent calls to the
+			 * debounced function return the result of the last func invocation.
+			 *
+			 * **Note:** If leading and trailing options are true, func is invoked
+			 * on the trailing edge of the timeout only if the the debounced function is
+			 * invoked more than once during the wait timeout.
+			 *
+			 * See [David Corbacho's article](http://drupalmotion.com/article/debounce-and-throttle-visual-explanation)
+			 * for details over the differences between _.debounce and _.throttle.
+			 *
+			 * @static
+			 * @memberOf _
+			 * @category Function
+			 * @param {Function} func The function to debounce.
+			 * @param {number} [wait=0] The number of milliseconds to delay.
+			 * @param {Object} [options] The options object.
+			 * @param {boolean} [options.leading=false] Specify invoking on the leading
+			 *  edge of the timeout.
+			 * @param {number} [options.maxWait] The maximum time func is allowed to be
+			 *  delayed before it's invoked.
+			 * @param {boolean} [options.trailing=true] Specify invoking on the trailing
+			 *  edge of the timeout.
+			 * @returns {Function} Returns the new debounced function.
+			 * @example
+			 *
+			 * // avoid costly calculations while the window size is in flux
+			 * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
+			 *
+			 * // invoke sendMail when the click event is fired, debouncing subsequent calls
+			 * jQuery('#postbox').on('click', _.debounce(sendMail, 300, {
+			 *   'leading': true,
+			 *   'trailing': false
+			 * }));
+			 *
+			 * // ensure batchLog is invoked once after 1 second of debounced calls
+			 * var source = new EventSource('/stream');
+			 * jQuery(source).on('message', _.debounce(batchLog, 250, {
+			 *   'maxWait': 1000
+			 * }));
+			 *
+			 * // cancel a debounced call
+			 * var todoChanges = _.debounce(batchLog, 1000);
+			 * Object.observe(models.todo, todoChanges);
+			 *
+			 * Object.observe(models, function(changes) {
+			 *   if (_.find(changes, { 'user': 'todo', 'type': 'delete'})) {
+			 *     todoChanges.cancel();
+			 *   }
+			 * }, ['delete']);
+			 *
+			 * // ...at some point models.todo is changed
+			 * models.todo.completed = true;
+			 *
+			 * // ...before 1 second has passed models.todo is deleted
+			 * // which cancels the debounced todoChanges call
+			 * delete models.todo;
+			 */
+			function debounce(func, wait, options) {
+			  var args,
+			      maxTimeoutId,
+			      result,
+			      stamp,
+			      thisArg,
+			      timeoutId,
+			      trailingCall,
+			      lastCalled = 0,
+			      leading = false,
+			      maxWait = false,
+			      trailing = true;
+
+			  if (typeof func != 'function') {
+			    throw new TypeError(FUNC_ERROR_TEXT);
+			  }
+			  wait = wait < 0 ? 0 : (+wait || 0);
+			  if (isObject(options)) {
+			    leading = !!options.leading;
+			    maxWait = 'maxWait' in options && Math.max(+options.maxWait || 0, wait);
+			    trailing = 'trailing' in options ? !!options.trailing : trailing;
+			  }
+
+			  function cancel() {
+			    if (timeoutId) {
+			      clearTimeout(timeoutId);
+			    }
+			    if (maxTimeoutId) {
+			      clearTimeout(maxTimeoutId);
+			    }
+			    lastCalled = 0;
+			    args = maxTimeoutId = thisArg = timeoutId = trailingCall = undefined;
+			  }
+
+			  function complete(isCalled, id) {
+			    if (id) {
+			      clearTimeout(id);
+			    }
+			    maxTimeoutId = timeoutId = trailingCall = undefined;
+			    if (isCalled) {
+			      lastCalled = Date.now();
+			      result = func.apply(thisArg, args);
+			      if (!timeoutId && !maxTimeoutId) {
+			        args = thisArg = undefined;
+			      }
+			    }
+			  }
+
+			  function delayed() {
+			    var remaining = wait - (Date.now() - stamp);
+			    if (remaining <= 0 || remaining > wait) {
+			      complete(trailingCall, maxTimeoutId);
+			    } else {
+			      timeoutId = setTimeout(delayed, remaining);
+			    }
+			  }
+
+			  function flush() {
+			    if ((timeoutId && trailingCall) || (maxTimeoutId && trailing)) {
+			      result = func.apply(thisArg, args);
+			    }
+			    cancel();
+			    return result;
+			  }
+
+			  function maxDelayed() {
+			    complete(trailing, timeoutId);
+			  }
+
+			  function debounced() {
+			    args = arguments;
+			    stamp = Date.now();
+			    thisArg = this;
+			    trailingCall = trailing && (timeoutId || !leading);
+
+			    if (maxWait === false) {
+			      var leadingCall = leading && !timeoutId;
+			    } else {
+			      if (!maxTimeoutId && !leading) {
+			        lastCalled = stamp;
+			      }
+			      var remaining = maxWait - (stamp - lastCalled),
+			          isCalled = remaining <= 0 || remaining > maxWait;
+
+			      if (isCalled) {
+			        if (maxTimeoutId) {
+			          maxTimeoutId = clearTimeout(maxTimeoutId);
+			        }
+			        lastCalled = stamp;
+			        result = func.apply(thisArg, args);
+			      }
+			      else if (!maxTimeoutId) {
+			        maxTimeoutId = setTimeout(maxDelayed, remaining);
+			      }
+			    }
+			    if (isCalled && timeoutId) {
+			      timeoutId = clearTimeout(timeoutId);
+			    }
+			    else if (!timeoutId && wait !== maxWait) {
+			      timeoutId = setTimeout(delayed, wait);
+			    }
+			    if (leadingCall) {
+			      isCalled = true;
+			      result = func.apply(thisArg, args);
+			    }
+			    if (isCalled && !timeoutId && !maxTimeoutId) {
+			      args = thisArg = undefined;
+			    }
+			    return result;
+			  }
+			  debounced.cancel = cancel;
+			  debounced.flush = flush;
+			  return debounced;
+			}
+		  `
     });
 
     //A random String which is highly unlikely to appear in any String value.  Used as a prefix for function identifiers in JSON.
@@ -9385,7 +9696,7 @@ if (typeof window === 'undefined') {
         JavaScript.initialized = true;
 
         // save special IDs for values not supported by JSON
-			[NaN, Infinity, -Infinity].forEach(function (symbol) {
+        [NaN, Infinity, -Infinity].forEach(function (symbol) {
             JavaScript._jsonLookup.set(symbol + JavaScript.JSON_SUFFIX, symbol)
         });
 
@@ -9406,6 +9717,311 @@ if (typeof window === 'undefined') {
             var JSON_REPLACER = JavaScript.JSON_REPLACER;
             var JSON_EXTENSIONS = JavaScript.JSON_EXTENSIONS;
             var JSON_FUNCTION_PREFIX = JavaScript.JSON_FUNCTION_PREFIX;
+            var DEBOUNCE = JavaScript.DEBOUNCE;
+
+            //PolyFills - CODE
+            if (!Array.isArray)
+                Array.isArray = function (arg) {
+                    return Object.prototype.toString.call(arg) === '[object Array]';
+                };
+
+            if (!Array.prototype.map)
+                Array.prototype.map = function (callback, thisArg) {
+                    var T, A, k;
+                    if (this == null)
+                        throw new TypeError(" this is null or not defined");
+                    var O = Object(this);
+                    var len = O.length >>> 0;
+                    if (typeof callback !== "function")
+                        throw new TypeError(callback + " is not a function");
+                    if (arguments.length > 1)
+                        T = thisArg;
+                    A = new Array(len);
+                    k = 0;
+                    while (k < len) {
+                        var kValue, mappedValue;
+                        if (k in O) {
+                            kValue = O[k];
+                            mappedValue = callback.call(T, kValue, k, O);
+                            A[k] = mappedValue;
+                        }
+                        k++;
+                    }
+                    return A;
+                };
+
+            if (!Object.keys)
+                Object.keys = (function () {
+                    'use strict';
+                    var hasOwnProperty = Object.prototype.hasOwnProperty,
+                        hasDontEnumBug = !({
+                            toString: null
+                        }).propertyIsEnumerable('toString'),
+                        dontEnums = [
+						'toString',
+						'toLocaleString',
+						'valueOf',
+						'hasOwnProperty',
+						'isPrototypeOf',
+						'propertyIsEnumerable',
+						'constructor'
+					],
+                        dontEnumsLength = dontEnums.length;
+
+                    return function (obj) {
+                        if (typeof obj !== 'object' && (typeof obj !== 'function' || obj === null))
+                            throw new TypeError('Object.keys called on non-object');
+
+                        var result = [],
+                            prop, i;
+
+                        for (prop in obj)
+                            if (hasOwnProperty.call(obj, prop))
+                                result.push(prop);
+
+                        if (hasDontEnumBug)
+                            for (i = 0; i < dontEnumsLength; i++)
+                                if (hasOwnProperty.call(obj, dontEnums[i]))
+                                    result.push(dontEnums[i]);
+                        return result;
+                    };
+                }());
+
+            if (!Function.prototype.bind)
+                Function.prototype.bind = function (oThis) {
+                    if (typeof this !== "function")
+                        throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+
+                    var aArgs = Array.prototype.slice.call(arguments, 1),
+                        fToBind = this,
+                        fNOP = function () {},
+                        fBound = function () {
+                            return fToBind.apply(this instanceof fNOP && oThis ? this : oThis,
+                                aArgs.concat(Array.prototype.slice.call(arguments)));
+                        };
+
+                    fNOP.prototype = this.prototype;
+                    fBound.prototype = new fNOP();
+
+                    return fBound;
+                };
+
+            //LODASH - DEBOUNCE -code
+            /**
+             * lodash 4.0.0-pre <https://lodash.com/>
+             * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+             * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+             * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+             * Available under MIT license <https://lodash.com/license>
+             */
+
+            /**
+             * Checks if `value` is the [language type](https://es5.github.io/#x8) of `Object`.
+             * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+             *
+             * @static
+             * @memberOf _
+             * @category Lang
+             * @param {*} value The value to check.
+             * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+             * @example
+             *
+             * _.isObject({});
+             * // => true
+             *
+             * _.isObject([1, 2, 3]);
+             * // => true
+             *
+             * _.isObject(_.noop);
+             * // => true
+             *
+             * _.isObject(null);
+             * // => false
+             */
+            function isObject(value) {
+                // Avoid a V8 JIT bug in Chrome 19-20.
+                // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
+                var type = typeof value;
+                return !!value && (type == 'object' || type == 'function');
+            }
+
+            /**
+             * Creates a debounced function that delays invoking `func` until after `wait`
+             * milliseconds have elapsed since the last time the debounced function was
+             * invoked. The debounced function comes with a `cancel` method to cancel
+             * delayed `func` invocations and a `flush` method to immediately invoke them.
+             * Provide an options object to indicate that `func` should be invoked on the
+             * leading and/or trailing edge of the `wait` timeout. Subsequent calls to the
+             * debounced function return the result of the last `func` invocation.
+             *
+             * **Note:** If `leading` and `trailing` options are `true`, `func` is invoked
+             * on the trailing edge of the timeout only if the the debounced function is
+             * invoked more than once during the `wait` timeout.
+             *
+             * See [David Corbacho's article](http://drupalmotion.com/article/debounce-and-throttle-visual-explanation)
+             * for details over the differences between `_.debounce` and `_.throttle`.
+             *
+             * @static
+             * @memberOf _
+             * @category Function
+             * @param {Function} func The function to debounce.
+             * @param {number} [wait=0] The number of milliseconds to delay.
+             * @param {Object} [options] The options object.
+             * @param {boolean} [options.leading=false] Specify invoking on the leading
+             *  edge of the timeout.
+             * @param {number} [options.maxWait] The maximum time `func` is allowed to be
+             *  delayed before it's invoked.
+             * @param {boolean} [options.trailing=true] Specify invoking on the trailing
+             *  edge of the timeout.
+             * @returns {Function} Returns the new debounced function.
+             * @example
+             *
+             * // avoid costly calculations while the window size is in flux
+             * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
+             *
+             * // invoke `sendMail` when the click event is fired, debouncing subsequent calls
+             * jQuery('#postbox').on('click', _.debounce(sendMail, 300, {
+             *   'leading': true,
+             *   'trailing': false
+             * }));
+             *
+             * // ensure `batchLog` is invoked once after 1 second of debounced calls
+             * var source = new EventSource('/stream');
+             * jQuery(source).on('message', _.debounce(batchLog, 250, {
+             *   'maxWait': 1000
+             * }));
+             *
+             * // cancel a debounced call
+             * var todoChanges = _.debounce(batchLog, 1000);
+             * Object.observe(models.todo, todoChanges);
+             *
+             * Object.observe(models, function(changes) {
+             *   if (_.find(changes, { 'user': 'todo', 'type': 'delete'})) {
+             *     todoChanges.cancel();
+             *   }
+             * }, ['delete']);
+             *
+             * // ...at some point `models.todo` is changed
+             * models.todo.completed = true;
+             *
+             * // ...before 1 second has passed `models.todo` is deleted
+             * // which cancels the debounced `todoChanges` call
+             * delete models.todo;
+             */
+            function debounce(func, wait, options) {
+                var args,
+                    maxTimeoutId,
+                    result,
+                    stamp,
+                    thisArg,
+                    timeoutId,
+                    trailingCall,
+                    lastCalled = 0,
+                    leading = false,
+                    maxWait = false,
+                    trailing = true;
+
+                if (typeof func != 'function') {
+                    throw new TypeError(FUNC_ERROR_TEXT);
+                }
+                wait = wait < 0 ? 0 : (+wait || 0);
+                if (isObject(options)) {
+                    leading = !!options.leading;
+                    maxWait = 'maxWait' in options && Math.max(+options.maxWait || 0, wait);
+                    trailing = 'trailing' in options ? !!options.trailing : trailing;
+                }
+
+                function cancel() {
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                    }
+                    if (maxTimeoutId) {
+                        clearTimeout(maxTimeoutId);
+                    }
+                    lastCalled = 0;
+                    args = maxTimeoutId = thisArg = timeoutId = trailingCall = undefined;
+                }
+
+                function complete(isCalled, id) {
+                    if (id) {
+                        clearTimeout(id);
+                    }
+                    maxTimeoutId = timeoutId = trailingCall = undefined;
+                    if (isCalled) {
+                        lastCalled = Date.now();
+                        result = func.apply(thisArg, args);
+                        if (!timeoutId && !maxTimeoutId) {
+                            args = thisArg = undefined;
+                        }
+                    }
+                }
+
+                function delayed() {
+                    var remaining = wait - (Date.now() - stamp);
+                    if (remaining <= 0 || remaining > wait) {
+                        complete(trailingCall, maxTimeoutId);
+                    } else {
+                        timeoutId = setTimeout(delayed, remaining);
+                    }
+                }
+
+                function flush() {
+                    if ((timeoutId && trailingCall) || (maxTimeoutId && trailing)) {
+                        result = func.apply(thisArg, args);
+                    }
+                    cancel();
+                    return result;
+                }
+
+                function maxDelayed() {
+                    complete(trailing, timeoutId);
+                }
+
+                function debounced() {
+                    args = arguments;
+                    stamp = Date.now();
+                    thisArg = this;
+                    trailingCall = trailing && (timeoutId || !leading);
+
+                    if (maxWait === false) {
+                        var leadingCall = leading && !timeoutId;
+                    } else {
+                        if (!maxTimeoutId && !leading) {
+                            lastCalled = stamp;
+                        }
+                        var remaining = maxWait - (stamp - lastCalled),
+                            isCalled = remaining <= 0 || remaining > maxWait;
+
+                        if (isCalled) {
+                            if (maxTimeoutId) {
+                                maxTimeoutId = clearTimeout(maxTimeoutId);
+                            }
+                            lastCalled = stamp;
+                            result = func.apply(thisArg, args);
+                        } else if (!maxTimeoutId) {
+                            maxTimeoutId = setTimeout(maxDelayed, remaining);
+                        }
+                    }
+                    if (isCalled && timeoutId) {
+                        timeoutId = clearTimeout(timeoutId);
+                    } else if (!timeoutId && wait !== maxWait) {
+                        timeoutId = setTimeout(delayed, wait);
+                    }
+                    if (leadingCall) {
+                        isCalled = true;
+                        result = func.apply(thisArg, args);
+                    }
+                    if (isCalled && !timeoutId && !maxTimeoutId) {
+                        args = thisArg = undefined;
+                    }
+                    return result;
+                }
+                debounced.cancel = cancel;
+                debounced.flush = flush;
+                return debounced;
+            }
+
+            // Weave - CODE
             var flash = this;
             var toJson = function (value) {
                 return JSON.stringify(value, flash[JSON_REPLACER]);
@@ -9460,6 +10076,15 @@ if (typeof window === 'undefined') {
                     if (typeof extensions[i] === "object" && typeof extensions[i].reviver === "function")
                         value = extensions[i].reviver.call(flash, key, value);
                 return value;
+            };
+            flash[DEBOUNCE] = function (func, wait) {
+                if (func.hasOwnProperty('cancel') && func.hasOwnProperty('flush') && func.hasOwnProperty(JSON_FUNCTION_PREFIX))
+                    return func;
+                var id = flash[JSON_REPLACER]('', func);
+                var debounced = debounce(func, wait);
+                debounced['this'] = func['this'];
+                debounced[JSON_FUNCTION_PREFIX] = id;
+                return lookup[id] = debounced;
             };
         }).apply(weave);
         /* JavaScript.exec({
@@ -9739,10 +10364,11 @@ if (typeof window === 'undefined') {
         return resultJson;
     }
 
+
+
     weavecore.JavaScript = JavaScript;
 
 }());
-
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -14095,6 +14721,7 @@ if (typeof window === 'undefined') {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
+
 /**
  * @module weavecore
  */
@@ -16435,8 +17062,11 @@ var _addCallback = weave.addCallback;
 
 weave.addCallback = function (target, callback, triggerNow, immediateMode, delayWhileBusy) {
     callback = asFunction(callback, Array.isArray(target) ? weave.path(target) : weave.path());
-    /*if (!immediateMode)
-        callback = WeaveAPI.StageUtils.callLater(this, callback);*/
+    if (!immediateMode) {
+        var thisArg = callback['this'];
+        callback = weave._debounce(callback);
+        callback['this'] = thisArg;
+    }
     return _addCallback.apply(this, Array.prototype.slice.call(arguments));
 };
 
