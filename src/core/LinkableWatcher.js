@@ -98,22 +98,7 @@ if (typeof window === 'undefined') {
              * This will set a path which should be watched for new targets.
              * Callbacks will be triggered immediately if the path changes or points to a new target.
              */
-            set: function (path) {
-                // do not allow watching the globalHashMap
-                if (path && path.length === 0)
-                    path = null;
-                if (weavecore.StandardLib.compare(this._targetPath, path) !== 0) {
-                    var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
-                    cc.delayCallbacks();
-
-                    resetPathDependencies.call(this);
-                    this._targetPath = path;
-                    handlePath.call(this);
-                    cc.triggerCallbacks.call(cc);
-
-                    cc.resumeCallbacks.call(cc);
-                }
-            },
+            set: this._setTarget,
             configurable: true
         });
 
@@ -125,13 +110,7 @@ if (typeof window === 'undefined') {
             get: function () {
                 return this._foundTarget ? this._target : null;
             },
-            set: function (newTarget) {
-                var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
-                cc.delayCallbacks();
-                this.targetPath = null;
-                this.internalSetTarget(newTarget);
-                cc.resumeCallbacks();
-            },
+            set: this._setTargetPath,
             configurable: true
         });
 
@@ -141,6 +120,35 @@ if (typeof window === 'undefined') {
     // LinkableWatcher.prototype.constructor = LinkableWatcher;
 
     var p = LinkableWatcher.prototype;
+
+
+    // overridable setter function for 'targetPath'
+    p._setTarget = function (newTarget) {
+        var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
+        cc.delayCallbacks();
+        this.targetPath = null;
+        this.internalSetTarget(newTarget);
+        cc.resumeCallbacks();
+    }
+
+
+    // overridable setter function for 'target'
+    p._setTargetPath = function (path) {
+        // do not allow watching the globalHashMap
+        if (path && path.length === 0)
+            path = null;
+        if (weavecore.StandardLib.compare(this._targetPath, path) !== 0) {
+            var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
+            cc.delayCallbacks();
+
+            resetPathDependencies.call(this);
+            this._targetPath = path;
+            handlePath.call(this);
+            cc.triggerCallbacks.call(cc);
+
+            cc.resumeCallbacks.call(cc);
+        }
+    }
 
     /**
      * This sets the new target to be watched without resetting targetPath.

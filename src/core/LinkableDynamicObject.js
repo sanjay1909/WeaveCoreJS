@@ -85,6 +85,7 @@ if (typeof window === 'undefined') {
 
 
 
+
         /**
          * @inheritDoc
          */
@@ -96,52 +97,17 @@ if (typeof window === 'undefined') {
 
         // override public
         Object.defineProperty(this, 'targetPath', {
-            get: function () {
-                return this.__proto__.targetPath
-            },
 
-            set: function (path) {
-                if (this._locked)
-                    return;
-                this.__proto__.targetPath = path;
-            },
+
+            set: this._setTargetPath,
             configurable: true
         });
 
         // override public
         Object.defineProperty(this, 'target', {
-            get: function () {
-                return this.__proto__.target;
-            },
 
-            set: function (newTarget) {
-                if (this._locked)
-                    return;
 
-                if (!newTarget) {
-                    this.__proto__.target = null;
-                    return;
-                }
-
-                this._cc.delayCallbacks();
-
-                // if the target can be found by a path, use the path
-                var sm = WeaveAPI.SessionManager;
-                var path = sm.getPath(WeaveAPI.globalHashMap, newTarget);
-                if (path) {
-                    this.targetPath = path;
-                } else {
-                    // it's ok to assign a local object that we own or that doesn't have an owner yet
-                    // otherwise, unset the target
-                    var owner = sm.getLinkableOwner(newTarget);
-                    if (owner === this || !owner)
-                        this.__proto__.target = newTarget;
-                    else
-                        this.__proto__.target = null;
-                }
-
-                this._cc.resumeCallbacks();
-            },
+            set: this._setTarget,
             configurable: true
         });
 
@@ -214,16 +180,51 @@ if (typeof window === 'undefined') {
 
         });
 
-
-
-
-
     }
 
     LinkableDynamicObject.prototype = new weavecore.LinkableWatcher();
     LinkableDynamicObject.prototype.constructor = LinkableDynamicObject;
 
     var p = LinkableDynamicObject.prototype;
+
+    // overridable setter function for 'target'
+    p._setTarget = function (newTarget) {
+        if (this._locked)
+            return;
+
+        if (!newTarget) {
+            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
+            return;
+        }
+
+        this._cc.delayCallbacks();
+
+        // if the target can be found by a path, use the path
+        var sm = WeaveAPI.SessionManager;
+        var path = sm.getPath(WeaveAPI.globalHashMap, newTarget);
+        if (path) {
+            this.targetPath = path;
+        } else {
+            // it's ok to assign a local object that we own or that doesn't have an owner yet
+            // otherwise, unset the target
+            var owner = sm.getLinkableOwner(newTarget);
+            if (owner === this || !owner)
+                weavecore.LinkableWatcher.prototype._setTarget.call(this, newTarget);
+            else
+                weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
+        }
+
+        this._cc.resumeCallbacks();
+    }
+
+
+    // overridable setter function for 'targetPath'
+    p._setTargetPath = function (path) {
+        if (this._locked)
+            return;
+        weavecore.LinkableWatcher.prototype._setTargetPath.call(this, path);
+
+    }
 
 
     p.lock = function () {
@@ -323,7 +324,7 @@ if (typeof window === 'undefined') {
         if (newTarget === this || WeaveAPI.SessionManager.getLinkableDescendants(newTarget, LinkableDynamicObject).indexOf(this) >= 0)
             newTarget = null;
 
-        weavecore.LinkableWatcher.prototype.internalSetTarget(newTarget);
+        weavecore.LinkableWatcher.prototype.internalSetTarget.call(this, newTarget);
     };
 
 
@@ -346,9 +347,9 @@ if (typeof window === 'undefined') {
 
             var obj = this.target;
             if (!obj || obj.constructor !== classDef || !(obj instanceof classDef))
-                this.__proto__.target = new classDef();
+                weavecore.LinkableWatcher.prototype._setTarget.call(this, new classDef());
         } else {
-            this.__proto__.target = null;
+            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
         }
 
         this._cc.resumeCallbacks();
@@ -423,13 +424,13 @@ if (typeof window === 'undefined') {
 
     p.removeObject = function () {
         if (!this._locked)
-            this.__proto__.target = null;
+            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
     };
 
     p.dispose = function () {
         // explicitly dispose the CallbackCollection before anything else
         this._cc.dispose();
-        weavecore.LinkableWatcher.prototype.dispose();
+        weavecore.LinkableWatcher.prototype.dispose.call(this);
     };
 
     ////////////////////////////////////////////////////////////////////////

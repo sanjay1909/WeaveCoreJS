@@ -13163,22 +13163,7 @@ if (typeof window === 'undefined') {
              * This will set a path which should be watched for new targets.
              * Callbacks will be triggered immediately if the path changes or points to a new target.
              */
-            set: function (path) {
-                // do not allow watching the globalHashMap
-                if (path && path.length === 0)
-                    path = null;
-                if (weavecore.StandardLib.compare(this._targetPath, path) !== 0) {
-                    var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
-                    cc.delayCallbacks();
-
-                    resetPathDependencies.call(this);
-                    this._targetPath = path;
-                    handlePath.call(this);
-                    cc.triggerCallbacks.call(cc);
-
-                    cc.resumeCallbacks.call(cc);
-                }
-            },
+            set: this._setTarget,
             configurable: true
         });
 
@@ -13190,13 +13175,7 @@ if (typeof window === 'undefined') {
             get: function () {
                 return this._foundTarget ? this._target : null;
             },
-            set: function (newTarget) {
-                var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
-                cc.delayCallbacks();
-                this.targetPath = null;
-                this.internalSetTarget(newTarget);
-                cc.resumeCallbacks();
-            },
+            set: this._setTargetPath,
             configurable: true
         });
 
@@ -13206,6 +13185,35 @@ if (typeof window === 'undefined') {
     // LinkableWatcher.prototype.constructor = LinkableWatcher;
 
     var p = LinkableWatcher.prototype;
+
+
+    // overridable setter function for 'targetPath'
+    p._setTarget = function (newTarget) {
+        var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
+        cc.delayCallbacks();
+        this.targetPath = null;
+        this.internalSetTarget(newTarget);
+        cc.resumeCallbacks();
+    }
+
+
+    // overridable setter function for 'target'
+    p._setTargetPath = function (path) {
+        // do not allow watching the globalHashMap
+        if (path && path.length === 0)
+            path = null;
+        if (weavecore.StandardLib.compare(this._targetPath, path) !== 0) {
+            var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
+            cc.delayCallbacks();
+
+            resetPathDependencies.call(this);
+            this._targetPath = path;
+            handlePath.call(this);
+            cc.triggerCallbacks.call(cc);
+
+            cc.resumeCallbacks.call(cc);
+        }
+    }
 
     /**
      * This sets the new target to be watched without resetting targetPath.
@@ -13415,7 +13423,6 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
-
 /**
  * @module weavecore
  */
@@ -15000,6 +15007,7 @@ if (typeof window === 'undefined') {
 
 
 
+
         /**
          * @inheritDoc
          */
@@ -15011,52 +15019,17 @@ if (typeof window === 'undefined') {
 
         // override public
         Object.defineProperty(this, 'targetPath', {
-            get: function () {
-                return this.__proto__.targetPath
-            },
 
-            set: function (path) {
-                if (this._locked)
-                    return;
-                this.__proto__.targetPath = path;
-            },
+
+            set: this._setTargetPath,
             configurable: true
         });
 
         // override public
         Object.defineProperty(this, 'target', {
-            get: function () {
-                return this.__proto__.target;
-            },
 
-            set: function (newTarget) {
-                if (this._locked)
-                    return;
 
-                if (!newTarget) {
-                    this.__proto__.target = null;
-                    return;
-                }
-
-                this._cc.delayCallbacks();
-
-                // if the target can be found by a path, use the path
-                var sm = WeaveAPI.SessionManager;
-                var path = sm.getPath(WeaveAPI.globalHashMap, newTarget);
-                if (path) {
-                    this.targetPath = path;
-                } else {
-                    // it's ok to assign a local object that we own or that doesn't have an owner yet
-                    // otherwise, unset the target
-                    var owner = sm.getLinkableOwner(newTarget);
-                    if (owner === this || !owner)
-                        this.__proto__.target = newTarget;
-                    else
-                        this.__proto__.target = null;
-                }
-
-                this._cc.resumeCallbacks();
-            },
+            set: this._setTarget,
             configurable: true
         });
 
@@ -15129,16 +15102,51 @@ if (typeof window === 'undefined') {
 
         });
 
-
-
-
-
     }
 
     LinkableDynamicObject.prototype = new weavecore.LinkableWatcher();
     LinkableDynamicObject.prototype.constructor = LinkableDynamicObject;
 
     var p = LinkableDynamicObject.prototype;
+
+    // overridable setter function for 'target'
+    p._setTarget = function (newTarget) {
+        if (this._locked)
+            return;
+
+        if (!newTarget) {
+            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
+            return;
+        }
+
+        this._cc.delayCallbacks();
+
+        // if the target can be found by a path, use the path
+        var sm = WeaveAPI.SessionManager;
+        var path = sm.getPath(WeaveAPI.globalHashMap, newTarget);
+        if (path) {
+            this.targetPath = path;
+        } else {
+            // it's ok to assign a local object that we own or that doesn't have an owner yet
+            // otherwise, unset the target
+            var owner = sm.getLinkableOwner(newTarget);
+            if (owner === this || !owner)
+                weavecore.LinkableWatcher.prototype._setTarget.call(this, newTarget);
+            else
+                weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
+        }
+
+        this._cc.resumeCallbacks();
+    }
+
+
+    // overridable setter function for 'targetPath'
+    p._setTargetPath = function (path) {
+        if (this._locked)
+            return;
+        weavecore.LinkableWatcher.prototype._setTargetPath.call(this, path);
+
+    }
 
 
     p.lock = function () {
@@ -15238,7 +15246,7 @@ if (typeof window === 'undefined') {
         if (newTarget === this || WeaveAPI.SessionManager.getLinkableDescendants(newTarget, LinkableDynamicObject).indexOf(this) >= 0)
             newTarget = null;
 
-        weavecore.LinkableWatcher.prototype.internalSetTarget(newTarget);
+        weavecore.LinkableWatcher.prototype.internalSetTarget.call(this, newTarget);
     };
 
 
@@ -15261,9 +15269,9 @@ if (typeof window === 'undefined') {
 
             var obj = this.target;
             if (!obj || obj.constructor !== classDef || !(obj instanceof classDef))
-                this.__proto__.target = new classDef();
+                weavecore.LinkableWatcher.prototype._setTarget.call(this, new classDef());
         } else {
-            this.__proto__.target = null;
+            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
         }
 
         this._cc.resumeCallbacks();
@@ -15338,13 +15346,13 @@ if (typeof window === 'undefined') {
 
     p.removeObject = function () {
         if (!this._locked)
-            this.__proto__.target = null;
+            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
     };
 
     p.dispose = function () {
         // explicitly dispose the CallbackCollection before anything else
         this._cc.dispose();
-        weavecore.LinkableWatcher.prototype.dispose();
+        weavecore.LinkableWatcher.prototype.dispose.call(this);
     };
 
     ////////////////////////////////////////////////////////////////////////
@@ -15395,7 +15403,6 @@ if (typeof window === 'undefined') {
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
