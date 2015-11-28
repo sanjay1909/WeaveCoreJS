@@ -7561,6 +7561,7 @@ if (typeof window === 'undefined') {
 
     weavecore.Dictionary2D = Dictionary2D;
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
