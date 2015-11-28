@@ -13423,6 +13423,7 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
+
 /**
  * @module weavecore
  */
@@ -15163,7 +15164,7 @@ if (typeof window === 'undefined') {
         if (!obj)
             return [];
 
-        var className = obj.constructor.NS + obj.constructor.CLASS_NAME;
+        var className = obj.constructor.NS + '.' + obj.constructor.CLASS_NAME;
         var sessionState = obj || WeaveAPI.SessionManager.getSessionState(obj);
         return [weavecore.DynamicState.create(null, className, sessionState)];
     };
@@ -15403,7 +15404,6 @@ if (typeof window === 'undefined') {
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {

@@ -241,7 +241,7 @@ if (typeof window === 'undefined') {
         if (!obj)
             return [];
 
-        var className = obj.constructor.NS + obj.constructor.CLASS_NAME;
+        var className = obj.constructor.NS + '.' + obj.constructor.CLASS_NAME;
         var sessionState = obj || WeaveAPI.SessionManager.getSessionState(obj);
         return [weavecore.DynamicState.create(null, className, sessionState)];
     };
