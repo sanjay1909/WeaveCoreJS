@@ -68,9 +68,10 @@ if (typeof window === 'undefined') {
      */
     p.set = function (key1, key2, value) {
         var d2 = this.dictionary.get(key1);
-        if (d2 === null || d2 === undefined)
+        if (d2 === null || d2 === undefined) {
             d2 = this.weak2 ? new Map() : new Map();
-        this.dictionary.set(key1, d2);
+            this.dictionary.set(key1, d2);
+        }
         d2.set(key2, value);
     };
 
@@ -87,10 +88,11 @@ if (typeof window === 'undefined') {
      * @param key2 The second dictionary key.
      */
     p.removeAllSecondary = function (key2) {
-        this.dictionary.forEach(function (value, key1) {
+        var keys = this.dictionary.keys();
+        keys.forEach(function (key1) {
             this.dictionary.get(key1).delete(key2);
 
-        }.bind(this));
+        }, this);
 
     };
 
