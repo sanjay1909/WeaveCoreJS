@@ -294,7 +294,7 @@ if (typeof window === 'undefined') {
 
             if (className === LinkableDynamicObject.ARRAY_CLASS_NAME || (!className && this.targetPath))
                 this.targetPath = sessionState;
-            else if (className === SessionManager.DIFF_DELETE)
+            else if (className === WeaveAPI.SessionManager.DIFF_DELETE)
                 this.target = null;
             else {
                 var prevTarget = this.target;

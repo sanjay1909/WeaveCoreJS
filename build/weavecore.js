@@ -13423,6 +13423,7 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
+
 /**
  * @module weavecore
  */
@@ -15216,7 +15217,7 @@ if (typeof window === 'undefined') {
 
             if (className === LinkableDynamicObject.ARRAY_CLASS_NAME || (!className && this.targetPath))
                 this.targetPath = sessionState;
-            else if (className === SessionManager.DIFF_DELETE)
+            else if (className === WeaveAPI.SessionManager.DIFF_DELETE)
                 this.target = null;
             else {
                 var prevTarget = this.target;
@@ -15403,7 +15404,6 @@ if (typeof window === 'undefined') {
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
