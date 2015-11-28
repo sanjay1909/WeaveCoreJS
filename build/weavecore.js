@@ -2661,6 +2661,7 @@ if (typeof window === 'undefined') {
     weavecore.ObjectUtil = ObjectUtil;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -12928,6 +12929,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.LinkableVariable', LinkableVariable);
 
 }());
+
 /**
  * @module weavecore
  */
@@ -13572,21 +13574,23 @@ if (typeof window === 'undefined') {
      */
     p.debugTasks = function () {
         var result = [];
-        this._progress.forEach(function (value, task) {
-            result.push(WeaveAPI.debugId(task));
-        }, this._progress);
+        var keys = this._progress.keys();
+        keys.forEach(function (task) {
+            result.push(WeaveAPI.debugID(task));
+        });
 
         return result;
     }
 
     p.getDescriptions = function () {
         var result = [];
-        this._progress.forEach(function (value, task) {
+        var keys = this._progress.keys();
+        keys.forEach(function (task) {
             var desc = this._description.get(task) || "Unnamed task";
             if (desc)
                 result.push(WeaveAPI.debugId(task) + " (" + (100 * this._progress.get(task)) + "%) " + desc);
 
-        }, this._progress);
+        }, this);
 
         WeaveAPI.StandardLib.sort(result);
         return result;
@@ -13691,12 +13695,13 @@ if (typeof window === 'undefined') {
     p.getNormalizedProgress = function () {
         // add up the percentages
         var sum = 0;
-        this._progress.forEach(function (value, task) {
+        var keys = this._progress.keys();
+        keys.forEach(function (task) {
             var stackTrace = this._stackTrace.get(task); // check this when debugging
             var progress = this._progress.get(task);
             if (isFinite(progress))
                 sum += progress;
-        }, this._progress);
+        }, this);
 
         // make any pending requests that no longer exist count as 100% done
         sum += _maxTaskCount - _taskCount;
@@ -13709,7 +13714,6 @@ if (typeof window === 'undefined') {
     WeaveAPI.ProgressIndicator = new ProgressIndicator();
 
 }());
-
 /**
  * @module weavecore
  */
