@@ -40,15 +40,15 @@ if (typeof window === 'undefined') {
      */
     Internal.detectLinkableObjectChange = function (observer, linkableObject, clearChangedNow) {
         clearChangedNow = (clearChangedNow === undefined) ? true : clearChangedNow;
-        if (!Internal._triggerCounterMap[linkableObject])
-            Internal._triggerCounterMap[linkableObject] = new Map();
+        if (!Internal._triggerCounterMap.get(linkableObject))
+            Internal._triggerCounterMap.set(linkableObject, new Map());
 
-        var previousCount = Internal._triggerCounterMap[linkableObject][observer]; // untyped to handle undefined value
+        var previousCount = Internal._triggerCounterMap.get(linkableObject).get(observer); // untyped to handle undefined value
         var newCount = WeaveAPI.SessionManager.getCallbackCollection(linkableObject).triggerCounter;
         if (previousCount !== newCount) // !== avoids casting to handle the case (0 !== undefined)
         {
             if (clearChangedNow)
-                Internal._triggerCounterMap[linkableObject][observer] = newCount;
+                Internal._triggerCounterMap.get(linkableObject).set(observer, newCount);
             return true;
         }
         return false;
