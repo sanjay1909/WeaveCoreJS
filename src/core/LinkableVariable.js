@@ -175,7 +175,7 @@ if (typeof window === 'undefined') {
 
             if (type === 'object' && value.constructor !== Object && value.constructor !== Array) {
                 // convert to dynamic Object prior to sessionStateEquals comparison
-                value = Object.create(value);
+                value = weavecore.ObjectUtil.copy(value);
                 wasCopied = true;
             }
         }
@@ -190,10 +190,7 @@ if (typeof window === 'undefined') {
         // two LinkableVariables to share the same object as their session state.
         if (type === 'object') {
             if (!wasCopied) {
-                if (value.constructor === Array) //TODO:Temp solution for array copy - its a shallow copy now
-                    value = Object.getPrototypeOf(Object.create(value)).slice(0);
-                else
-                    value = Object.create(value);
+                value = weavecore.ObjectUtil.copy(value);
             }
 
             weavecore.DynamicState.alterSessionStateToBypassDiff(value);
@@ -203,10 +200,7 @@ if (typeof window === 'undefined') {
             this._sessionStateExternal = value;
 
             // save internal copy
-            if (value.constructor === Array) // TODO:Temp solution for array copy - its a shallow copy now
-                this._sessionStateInternal = Object.getPrototypeOf(Object.create(value)).slice(0);
-            else
-                this._sessionStateInternal = Object.create(value);
+            this._sessionStateInternal = weavecore.ObjectUtil.copy(value);
 
         } else {
             // save primitive value

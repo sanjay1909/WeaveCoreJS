@@ -281,6 +281,25 @@ if (typeof window === 'undefined') {
         return oRef
     }
 
+
+    /**
+     *
+     */
+    ObjectUtil.copy = function (object) {
+
+        if (object === null || typeof object !== 'object') // primitive value
+            return object;
+        else if (object.constructor === Array) { //TODO:Temp solution for array copy - its a shallow copy now){
+            var arrayCopy = Object.getPrototypeOf(Object.create(value)).slice(0);
+            return arrayCopy;
+        } else { // make copies of non-primitives
+            var jsonString = JSON.stringify(object);
+            var copy = JSON.parse(jsonString);
+            return copy;
+        }
+        //return Object.getPrototypeOf(Object.create(object)).slice(0)
+    }
+
     weavecore.ObjectUtil = ObjectUtil;
 
 }());
