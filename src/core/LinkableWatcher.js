@@ -98,7 +98,7 @@ if (typeof window === 'undefined') {
              * This will set a path which should be watched for new targets.
              * Callbacks will be triggered immediately if the path changes or points to a new target.
              */
-            set: this._setTarget,
+            set: this._setTargetPath,
             configurable: true
         });
 
@@ -110,7 +110,7 @@ if (typeof window === 'undefined') {
             get: function () {
                 return this._foundTarget ? this._target : null;
             },
-            set: this._setTargetPath,
+            set: this._setTarget,
             configurable: true
         });
 
