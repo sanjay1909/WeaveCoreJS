@@ -2650,7 +2650,7 @@ if (typeof window === 'undefined') {
         else if (object.constructor === Array) { //TODO:Temp solution for array copy - its a shallow copy now)
             var arrayCopy = []
             if (object.length > 0)
-                arrayCopy = Object.getPrototypeOf(Object.create(value)).slice(0);
+                arrayCopy = Object.getPrototypeOf(Object.create(object)).slice(0);
             return arrayCopy;
         } else { // make copies of non-primitives
             var jsonString = JSON.stringify(object);
@@ -2663,7 +2663,6 @@ if (typeof window === 'undefined') {
     weavecore.ObjectUtil = ObjectUtil;
 
 }());
-
 /**
  * @module weavecore
  */
