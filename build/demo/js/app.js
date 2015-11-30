@@ -122,10 +122,12 @@ var test = {};
 
         test.log = dC.log = new weavecore.SessionStateLog(WeaveAPI.globalHashMap);
         test.ln = dC.ln = dC.createNewSession("testNum", weavecore.LinkableNumber); // this will cause issue as in session new object is created, tthe reference is changed
+        test.ln2 = dC.ln = dC.createNewSession("testNum2", weavecore.LinkableNumber);
         test.lnPath = WeaveAPI.SessionManager.getPath(WeaveAPI.globalHashMap, test.ln);
+        test.lnPath2 = WeaveAPI.SessionManager.getPath(WeaveAPI.globalHashMap, test.ln2);
         test.ldo = dC.ldo = dC.createNewSession("testDO", weavecore.LinkableDynamicObject);
 
-        test.co = WeaveAPI.globalHashMap.requestObject("co", weavecore.CompositeObject, false);
+        /*test.co = WeaveAPI.globalHashMap.requestObject("co", weavecore.CompositeObject, false);
 
         var cc = WeaveAPI.SessionManager.getCallbackCollection(test.co);
         cc.addImmediateCallback(this, testing);
@@ -140,7 +142,7 @@ var test = {};
                 console.log("string: ", test.co.sessionString.value);
             }
 
-        }
+        }*/
 
         dC.log.clearHistory();
 
