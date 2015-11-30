@@ -114,6 +114,10 @@ if (typeof window === 'undefined') {
             configurable: true
         });
 
+        this.__proto__._handleTargetTrigger = this.__proto__._handleTargetTrigger.bind(this);
+        this.__proto__._handleTargetDispose = this.__proto__._handleTargetDispose.bind(this);
+        this.__proto__._handlePathDependencies = this.__proto__._handlePathDependencies.bind(this);
+
     }
 
     //LinkableWatcher.prototype = new weavecore.ILinkableObject();
@@ -166,8 +170,8 @@ if (typeof window === 'undefined') {
 
         // unlink from old target
         if (this._target) {
-            sm.getCallbackCollection(this._target).removeCallback(handleTargetTrigger.bind(this));
-            sm.getCallbackCollection(this._target).removeCallback(handleTargetDispose.bind(this));
+            sm.getCallbackCollection(this._target).removeCallback(this._handleTargetTrigger);
+            sm.getCallbackCollection(this._target).removeCallback(this._handleTargetDispose);
             // if we own the previous target, dispose it
             if (sm.getLinkableOwner(this._target) === this)
                 sm.disposeObject(this._target);
@@ -183,17 +187,20 @@ if (typeof window === 'undefined') {
             sm.registerLinkableChild(this, this._target);
             // we don't want the target triggering our callbacks directly
             sm.getCallbackCollection(this._target).removeCallback(sm.getCallbackCollection(this).triggerCallbacks);
-            sm.getCallbackCollection(this._target).addImmediateCallback(this, handleTargetTrigger.bind(this), false, true);
+            //this._handleTargetTrigger = this._handleTargetTrigger.bind(this);
+            //this.__proto__._handleTargetTrigger = this.__proto__._handleTargetTrigger.bind(this);
+            sm.getCallbackCollection(this._target).addImmediateCallback(this, this._handleTargetTrigger, false, true);
             // we need to know when the target is disposed
-            sm.getCallbackCollection(this._target).addDisposeCallback(this, handleTargetDispose.bind(this));
+            //this.__proto__._handleTargetDispose = this.__proto__._handleTargetDispose.bind(this);
+            sm.getCallbackCollection(this._target).addDisposeCallback(this, this._handleTargetDispose);
         }
 
         if (this._foundTarget)
-            handleTargetTrigger.call(this);
+            this._handleTargetTrigger.call(this);
     };
 
 
-    function handleTargetTrigger() {
+    p._handleTargetTrigger = function () {
         if (this._foundTarget) {
             var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
             cc.triggerCallbacks.call(cc);
@@ -203,7 +210,7 @@ if (typeof window === 'undefined') {
 
 
 
-    function handleTargetDispose() {
+    p._handleTargetDispose = function () {
         if (this._targetPath) {
             handlePath.call(this);
         } else {
@@ -279,8 +286,9 @@ if (typeof window === 'undefined') {
             var child = WeaveAPI.SessionManager.getObject(parent, [pathElement]);
             this._pathDependencies.set(parent, pathElement, child);
             var dependencyCallbacks = getDependencyCallbacks(parent);
-            dependencyCallbacks.addImmediateCallback(this, handlePathDependencies.bind(this));
-            dependencyCallbacks.addDisposeCallback(this, handlePathDependencies.bind(this));
+            //this.__proto__._handlePathDependencies = this.__proto__._handlePathDependencies.bind(this);
+            dependencyCallbacks.addImmediateCallback(this, this._handlePathDependencies);
+            dependencyCallbacks.addDisposeCallback(this, this._handlePathDependencies);
         }
 
     };
@@ -293,7 +301,7 @@ if (typeof window === 'undefined') {
     }
 
 
-    function handlePathDependencies() {
+    p._handlePathDependencies = function () {
         var sm = WeaveAPI.SessionManager;
         for (var parent of this._pathDependencies.dictionary.keys()) {
             for (var pathElement of this._pathDependencies.dictionary.get(parent).keys()) {
@@ -311,7 +319,7 @@ if (typeof window === 'undefined') {
 
     function resetPathDependencies() {
         for (var parent of this._pathDependencies.dictionary.keys())
-            getDependencyCallbacks(parent).removeCallback(handlePathDependencies);
+            getDependencyCallbacks(parent).removeCallback(this._handlePathDependencies);
         this._pathDependencies = new weavecore.Dictionary2D(true, false);
     };
 

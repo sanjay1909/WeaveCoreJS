@@ -205,7 +205,7 @@ if (typeof window === 'undefined') {
         });
 
 
-        this._getTreeItemChildren = this._getTreeItemChildren.bind(this);
+        this.__proto__._getTreeItemChildren = this.__proto__._getTreeItemChildren.bind(this);
 
     }
 
@@ -270,8 +270,9 @@ if (typeof window === 'undefined') {
 
             // make child changes trigger parent callbacks
             var parentCC = this.getCallbackCollection(linkableParent);
+            parentCC.triggerCallbacks = parentCC.triggerCallbacks.bind(parentCC, "Parent's -triggerCallback");
             // set alwaysCallLast=true for triggering parent callbacks, so parent will be triggered after all the other child callbacks
-            this.getCallbackCollection(linkableChild).addImmediateCallback(linkableParent, parentCC.triggerCallbacks.bind(parentCC, "Parent's -triggerCallback"), false, true); // parent-child relationship
+            this.getCallbackCollection(linkableChild).addImmediateCallback(linkableParent, parentCC.triggerCallbacks, false, true); // parent-child relationship
         }
 
         this._treeCallbacks.triggerCallbacks("Session Tree: Child Registered");
@@ -319,7 +320,7 @@ if (typeof window === 'undefined') {
             this._childToParentMap.get(child).delete(parent);
         if (this._parentToChildMap.get(parent))
             this._parentToChildMap.get(parent).delete(child);
-        this.getCallbackCollection(child).removeCallback(this.getCallbackCollection(parent).triggerCallbacks.bind(parent));
+        this.getCallbackCollection(child).removeCallback(this.getCallbackCollection(parent).triggerCallbacks);
 
         this._treeCallbacks.triggerCallbacks("Session Tree: Child un-Registered");
     };

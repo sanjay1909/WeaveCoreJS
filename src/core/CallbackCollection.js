@@ -618,7 +618,8 @@ if (typeof window === 'undefined') {
 
 
         if (!GroupedCallbackEntry._initialized) {
-            WeaveAPI.StageUtils.addEventCallback("tick", null, GroupedCallbackEntry._handleGroupedCallbacks.bind(this));
+            GroupedCallbackEntry._handleGroupedCallbacks = GroupedCallbackEntry._handleGroupedCallbacks.bind(this)
+            WeaveAPI.StageUtils.addEventCallback("tick", null, GroupedCallbackEntry._handleGroupedCallbacks);
             GroupedCallbackEntry._initialized = true;
         }
     }
@@ -711,7 +712,8 @@ if (typeof window === 'undefined') {
         // The relevantContext parameter is set to null for entry.trigger so the same callback can be added multiple times to the same
         // target using different contexts without having the side effect of losing the callback when one of those contexts is disposed.
         // The entry.trigger function will be removed once all contexts are disposed.
-        callbackCollection.addImmediateCallback(null, entry.trigger.bind(entry), triggerCallbackNow);
+        entry.trigger = entry.trigger.bind(entry);
+        callbackCollection.addImmediateCallback(null, entry.trigger, triggerCallbackNow);
     };
 
     /**
