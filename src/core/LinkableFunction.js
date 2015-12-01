@@ -225,7 +225,8 @@ if (typeof window === 'undefined') {
         });
 
         LinkableFunction.macroLibraries.addImmediateCallback(this, this.triggerCallbacks, false, true);
-        WeaveAPI.SessionManager.getCallbackCollection(LinkableFunction.macros).addImmediateCallback(this, handleMacros.bind(this), false, true);
+        handleMacros = handleMacros.bind(this);
+        WeaveAPI.SessionManager.getCallbackCollection(LinkableFunction.macros).addImmediateCallback(this, handleMacros, false, true);
 
 
 

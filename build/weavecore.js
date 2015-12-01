@@ -7095,6 +7095,7 @@ if (typeof window === 'undefined') {
     weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -9154,6 +9155,7 @@ if (typeof window === 'undefined') {
     }
 
 }());
+
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -12102,7 +12104,9 @@ if (!this.WeaveAPI)
     });
 
     function EventCallbackCollection(eventManager, eventType) {
-        weavecore.CallbackCollection.call(this, this.setEvent.bind(this));
+        this.__proto__.setEvent = this.__proto__.setEvent.bind(this);
+        weavecore.CallbackCollection.call(this, this.setEvent);
+        this.__proto__._tickerListener = this.__proto__._tickerListener.bind(this);
         this._eventManager = eventManager;
         this._eventType = eventType;
 
@@ -12147,12 +12151,12 @@ if (!this.WeaveAPI)
 
         // If the target is the stage, the capture listener won't be called, so add
         // an additional listener that runs callbacks when the stage is the target.
-        createjs.Ticker.addEventListener(this._eventType, this._tickerListener.bind(this)); // do not use capture phase
+        createjs.Ticker.addEventListener(this._eventType, this._tickerListener); // do not use capture phase
 
         // when callbacks are disposed, remove the listeners
         this.addDisposeCallback(null, function () {
             //stage.removeEventListener(eventType, captureListener, true);
-            createjs.Ticker.removeEventListener(this._eventType, this._tickerListener.bind(this));
+            createjs.Ticker.removeEventListener(this._eventType, this._tickerListener);
         });
     };
 
@@ -12266,7 +12270,10 @@ if (!this.WeaveAPI)
         this._activePriorityElapsedTime = 0;
         this._deactivatedMaxComputationTimePerFrame = 1000;
         this._nextCallLaterPriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE; // private variable to control the priority of the next callLater() internally
-        this.addEventCallback("tick", null, this._handleCallLater.bind(this));
+
+        this.__proto__._iterateTask = this.__proto__._iterateTask.bind(this);
+        this.__proto__._handleCallLater = this.__proto__._handleCallLater.bind(this);
+        this.addEventCallback("tick", null, this._handleCallLater);
         this.maxComputationTimePerFrame = 100;
         this.maxComputationTimePerFrame_noActivity = 250;
 
@@ -12535,7 +12542,7 @@ if (!this.WeaveAPI)
         // Set relevantContext as null for callLater because we always want _iterateTask to be called later.
         // This makes sure that the task is removed when the actual context is disposed.
         this._nextCallLaterPriority = priority;
-        this.callLater(null, _iterateTask.bind(this), [relevantContext, iterativeTask, priority, finalCallback, useTimeParameter]);
+        this.callLater(null, this._iterateTask, [relevantContext, iterativeTask, priority, finalCallback, useTimeParameter]);
         //_iterateTask(relevantContext, iterativeTask, priority, finalCallback);
 
 
@@ -12545,7 +12552,7 @@ if (!this.WeaveAPI)
         return new Date().getTime();
     }
 
-    function _iterateTask(context, task, priority, finalCallback, useTimeParameter) {
+    suP._iterateTask = function (context, task, priority, finalCallback, useTimeParameter) {
         // remove the task if the context was disposed
         if (WeaveAPI.SessionManager.objectWasDisposed(context)) {
             var arr = this._debugTaskTimes.get(task);
@@ -12621,7 +12628,7 @@ if (!this.WeaveAPI)
         // Set relevantContext as null for callLater because we always want _iterateTask to be called later.
         // This makes sure that the task is removed when the actual context is disposed.
         this._nextCallLaterPriority = priority;
-        this.callLater(null, _iterateTask.bind(this), arguments);
+        this.callLater(null, this._iterateTask, arguments);
     }
 
 
@@ -12671,7 +12678,6 @@ if (!this.WeaveAPI)
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -14082,6 +14088,7 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
+
 /**
  * @module weavecore
  */
@@ -14972,7 +14979,8 @@ if (typeof window === 'undefined') {
         });
 
         LinkableFunction.macroLibraries.addImmediateCallback(this, this.triggerCallbacks, false, true);
-        WeaveAPI.SessionManager.getCallbackCollection(LinkableFunction.macros).addImmediateCallback(this, handleMacros.bind(this), false, true);
+        handleMacros = handleMacros.bind(this);
+        WeaveAPI.SessionManager.getCallbackCollection(LinkableFunction.macros).addImmediateCallback(this, handleMacros, false, true);
 
 
 
@@ -15065,7 +15073,6 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.LinkableFunction', LinkableFunction);
 
 }());
-
 /**
  * @module weavecore
  */
