@@ -43,6 +43,17 @@ if (typeof window === 'undefined') {
             ClassUtils.classNameLookUp.set(klass, className);
     }
 
+    // A simple bind function that takes an Object `obj`
+    // and a method `m` and returns a function that will
+    // lookup the method `m` in `o` and call it with the
+    // object `o` as the context.
+    ClassUtils.bind = function (obj, method) {
+        return function () {
+            method.apply(obj, Array.prototype.slice.call(arguments));
+        };
+    };
+
+
 
 
     ClassUtils.registerImplementation = function (className, implementingClassName) {

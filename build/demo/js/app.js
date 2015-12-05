@@ -84,6 +84,23 @@ if (typeof window === 'undefined') {
 
 }());
 
+var bind = function (obj, m) {
+    return function () {
+        obj[m].apply(obj, Array.prototype.slice.call(arguments));
+    };
+};
+
+(function () {
+    function ClosureFn(xx) {
+        this.prop = xx;
+        this.__proto__.method = bind(this, 'method');
+    }
+    ClosureFn.prototype.method = function () {
+        console.log(this.method.name);
+    };
+    this.ClosureFn = ClosureFn;
+}());
+
 var test = {};
 (function () {
     angular.module('sliderDemoApp', ['ui.slider']);

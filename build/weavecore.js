@@ -43,6 +43,17 @@ if (typeof window === 'undefined') {
             ClassUtils.classNameLookUp.set(klass, className);
     }
 
+    // A simple bind function that takes an Object `obj`
+    // and a method `m` and returns a function that will
+    // lookup the method `m` in `o` and call it with the
+    // object `o` as the context.
+    ClassUtils.bind = function (obj, method) {
+        return function () {
+            method.apply(obj, Array.prototype.slice.call(arguments));
+        };
+    };
+
+
 
 
     ClassUtils.registerImplementation = function (className, implementingClassName) {
@@ -145,7 +156,6 @@ if (typeof window === 'undefined') {
     //WeaveAPI.ClassUtils = new ClassUtils();
 
 }());
-
 Array.CASEINSENSITIVE = 1;
 Array.DESCENDING = 2;
 Array.UNIQUESORT = 4;
@@ -6347,6 +6357,21 @@ if (typeof window === 'undefined') {
 
         weavecore.ILinkableObject.call(this);
 
+        var p = this;
+        p.addImmediateCallback = weavecore.ClassUtils.bind(this, addImmediateCallback);
+        p.triggerCallbacks = weavecore.ClassUtils.bind(this, triggerCallbacks);
+        p.removeCallback = weavecore.ClassUtils.bind(this, removeCallback);
+        p.delayCallbacks = weavecore.ClassUtils.bind(this, delayCallbacks);
+        p.resumeCallbacks = weavecore.ClassUtils.bind(this, resumeCallbacks);
+        p.addDisposeCallback = weavecore.ClassUtils.bind(this, addDisposeCallback);
+        p.dispose = weavecore.ClassUtils.bind(this, dispose);
+        p.addGroupedCallback = weavecore.ClassUtils.bind(this, addGroupedCallback);
+        p._runCallbacksImmediately = weavecore.ClassUtils.bind(this, _runCallbacksImmediately);
+
+
+
+
+
         //private properties:
 
         /**
@@ -6485,13 +6510,15 @@ if (typeof window === 'undefined') {
             }
         });
 
+
+
     }
 
     CallbackCollection.prototype = new weavecore.ILinkableObject();
     CallbackCollection.prototype.constructor = CallbackCollection;
 
     // Prototypes
-    var p = CallbackCollection.prototype;
+    //var p = CallbackCollection.prototype;
     // public methods:
     /**
      * This adds the given function as a callback.  The function must not require any parameters.
@@ -6502,7 +6529,7 @@ if (typeof window === 'undefined') {
      * @param {Boolean} runCallbackNow If this is set to true, the callback will be run immediately after it is added.
      * @param {Boolean} alwaysCallLast If this is set to true, the callback will be always be called after any callbacks that were added with alwaysCallLast=false.  Use this to establish the desired child-to-parent triggering order.
      */
-    p.addImmediateCallback = function (contextObj, callback, runCallbackNow, alwaysCallLast) {
+    function addImmediateCallback(contextObj, callback, runCallbackNow, alwaysCallLast) {
         if (callback === null || callback === undefined)
             return;
 
@@ -6534,7 +6561,7 @@ if (typeof window === 'undefined') {
      * If the delay count is greater than zero, the callbacks will not be called immediately.
      * @method triggerCallbacks
      */
-    p.triggerCallbacks = function () {
+    function triggerCallbacks() {
 
         if (CallbackCollection.debug) {
             if (arguments)
@@ -6552,7 +6579,7 @@ if (typeof window === 'undefined') {
             this._runCallbacksIsPending = true;
             return;
         }
-        this._runCallbacksImmediately.call(this);
+        this._runCallbacksImmediately();
     };
 
 
@@ -6564,7 +6591,7 @@ if (typeof window === 'undefined') {
      * @protected
      * @final
      */
-    p._runCallbacksImmediately = function () {
+    function _runCallbacksImmediately() {
         if (CallbackCollection.debug) {
             if (arguments.length > 1) console.log("_runCallbacksImmediately: ", arguments);
         }
@@ -6631,7 +6658,7 @@ if (typeof window === 'undefined') {
      * @method removeCallback
      * @param {Function} callback The function to remove from the list of callbacks.
      */
-    p.removeCallback = function (callback) {
+    function removeCallback(callback) {
         // if the callback was added as a grouped callback, we need to remove the trigger function
         GroupedCallbackEntry.removeGroupedCallback(this, callback);
         // find the matching CallbackEntry, if any
@@ -6655,7 +6682,7 @@ if (typeof window === 'undefined') {
      * As long as the delay count is greater than zero, effects of triggerCallbacks() will be delayed.
      * @method delayCallbacks
      */
-    p.delayCallbacks = function () {
+    function delayCallbacks() {
         this._delayCount++;
     };
 
@@ -6664,7 +6691,7 @@ if (typeof window === 'undefined') {
      * If triggerCallbacks() was called while the delay count was greater than zero, immediate callbacks will be called now.
      * @method resumeCallbacks
      */
-    p.resumeCallbacks = function () {
+    function resumeCallbacks() {
         if (this._delayCount > 0)
             this._delayCount--;
 
@@ -6678,7 +6705,7 @@ if (typeof window === 'undefined') {
      * @param {Object} relevantContext If this is not null, then the callback will be removed when the relevantContext object is disposed via SessionManager.dispose().  This parameter is typically a 'this' pointer.
      * @param callback {Function} The function to call when this callback collection is disposed.
      */
-    p.addDisposeCallback = function (relevantContext, callback) {
+    function addDisposeCallback(relevantContext, callback) {
         // don't do anything if the dispose callback was already added
         for (var i = 0; i < this._disposeCallbackEntries.length; i++) {
             var entry = this._disposeCallbackEntries[i];
@@ -6696,7 +6723,7 @@ if (typeof window === 'undefined') {
      * Use disposeObject() instead so parent-child relationships get cleaned up automatically.
      * @method dispose
      */
-    p.dispose = function () {
+    function dispose() {
         // remove all callbacks
         if (CallbackCollection.debug)
             this._oldEntries = this._oldEntries ? this._oldEntries.concat(this._callbackEntries) : this._callbackEntries.concat();
@@ -6726,7 +6753,7 @@ if (typeof window === 'undefined') {
      * @param groupedCallback {Function} The callback function that will only be allowed to run during a scheduled time each frame.  It must not require any parameters.
      * @param triggerCallbackNow {Boolean} If this is set to true, the callback will be triggered to run during the scheduled time after it is added.
      */
-    p.addGroupedCallback = function (relevantContext, groupedCallback, triggerCallbackNow) {
+    function addGroupedCallback(relevantContext, groupedCallback, triggerCallbackNow) {
         //set default value for parameters
         if (triggerCallbackNow === null || triggerCallbackNow === undefined)
             triggerCallbackNow = false;
@@ -6795,6 +6822,10 @@ if (typeof window === 'undefined') {
          */
         this.removeCallback_stackTrace;
 
+        // var p = this.prototype ? this.prototype : this.__proto__;
+        var p = this;
+        p.dispose = weavecore.ClassUtils.bind(this, callbackEntryDispose);
+
         if (CallbackCollection.debug)
             this.addCallback_stackTrace = new Error(CallbackEntry.STACK_TRACE_ADD).stack;
     }
@@ -6841,7 +6872,7 @@ if (typeof window === 'undefined') {
      * Call this when the callback entry is no longer needed.
      * @method dispose
      */
-    CallbackEntry.prototype.dispose = function () {
+    function callbackEntryDispose() {
         if (CallbackCollection.debug && this.callback !== null && this.callback !== undefined)
             this.removeCallback_stackTrace = new Error(CallbackEntry.STACK_TRACE_REMOVE).stack;
 
@@ -6864,6 +6895,11 @@ if (typeof window === 'undefined') {
     function GroupedCallbackEntry(groupedCallback) {
 
         CallbackEntry.call(this, [], groupedCallback);
+
+        // var p = this.prototype ? this.prototype : this.__proto__;
+        var p = this;
+        p.trigger = weavecore.ClassUtils.bind(this, trigger);
+        p.handleGroupedCallback = weavecore.ClassUtils.bind(this, handleGroupedCallback);
         /**
          * If true, the callback was triggered this frame.
          * @public
@@ -6884,7 +6920,6 @@ if (typeof window === 'undefined') {
 
 
         if (!GroupedCallbackEntry._initialized) {
-            GroupedCallbackEntry._handleGroupedCallbacks = GroupedCallbackEntry._handleGroupedCallbacks.bind(this)
             WeaveAPI.StageUtils.addEventCallback("tick", null, GroupedCallbackEntry._handleGroupedCallbacks);
             GroupedCallbackEntry._initialized = true;
         }
@@ -6978,7 +7013,7 @@ if (typeof window === 'undefined') {
         // The relevantContext parameter is set to null for entry.trigger so the same callback can be added multiple times to the same
         // target using different contexts without having the side effect of losing the callback when one of those contexts is disposed.
         // The entry.trigger function will be removed once all contexts are disposed.
-        entry.trigger = entry.trigger.bind(entry);
+        // entry.trigger = entry.trigger.bind(entry);
         callbackCollection.addImmediateCallback(null, entry.trigger, triggerCallbackNow);
     };
 
@@ -7046,7 +7081,7 @@ if (typeof window === 'undefined') {
      * This also takes care of preventing recursion.
      * @method trigger
      */
-    gcP.trigger = function () {
+    function trigger() {
         // if handling recursive callbacks, call now
         if (GroupedCallbackEntry._handlingRecursiveGroupedCallbacks) {
             this.handleGroupedCallback();
@@ -7065,7 +7100,8 @@ if (typeof window === 'undefined') {
      * Checks the context(s) before calling groupedCallback
      * @method handleGroupedCallback
      */
-    gcP.handleGroupedCallback = function () {
+    //gcP.handleGroupedCallback =
+    function handleGroupedCallback() {
         if (!this.context)
             return;
 
@@ -7085,7 +7121,7 @@ if (typeof window === 'undefined') {
         // avoid immediate recursion
         if (this.recursionCount === 0) {
             this.recursionCount++;
-            this.callback.apply();
+            this.callback();
             this.recursionCount--;
         }
         // avoid delayed recursion
@@ -7095,7 +7131,6 @@ if (typeof window === 'undefined') {
     weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -12678,6 +12713,7 @@ if (!this.WeaveAPI)
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -15073,6 +15109,7 @@ if (typeof window === 'undefined') {
     weavecore.ClassUtils.registerClass('weavecore.LinkableFunction', LinkableFunction);
 
 }());
+
 /**
  * @module weavecore
  */
