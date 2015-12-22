@@ -10,68 +10,37 @@ if (typeof window === 'undefined') {
  * @author sanjay1909
  */
 (function () {
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableNumber, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableNumber, 'CLASS_NAME', {
-        value: 'LinkableNumber'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableNumber, 'SESSIONABLE', {
-        value: true
-    });
 
     function LinkableNumber(defaultValue, verifier, defaultValueTriggersCallbacks) {
         // set default values for Parameters
-        if (defaultValue === undefined) defaultValue = NaN;
-        if (verifier === undefined) verifier = null;
-        if (defaultValueTriggersCallbacks === undefined) defaultValueTriggersCallbacks = true;
+        defaultValue = typeof defaultValue !== 'undefined' ? defaultValue : NaN;
+        verifier = typeof verifier !== 'undefined' ? verifier : null;
+        defaultValueTriggersCallbacks = typeof defaultValueTriggersCallbacks !== 'undefined' ? defaultValueTriggersCallbacks : true;
+        LinkableNumber.base(this, 'constructor', Number, verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
 
         // Note: Calling  weavecore.LinkableVariable.call() will set all the default values for member variables defined in the super class,
         // which means we can't set _sessionStateInternal = NaN here.
-        weavecore.LinkableVariable.call(this, "number", verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
+        //weavecore.LinkableVariable.call(this, "number", verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
 
-        Object.defineProperty(this, 'value', {
-            get: function () {
-                return this._sessionStateExternal;
-            },
-            set: function (val) {
-                this.setSessionState(val);
-            }
-        });
+
 
     }
 
-    LinkableNumber.prototype = new weavecore.LinkableVariable();
-    LinkableNumber.prototype.constructor = LinkableNumber;
+    goog.inherits(LinkableNumber, weavecore.LinkableVariable);
 
     var p = LinkableNumber.prototype;
+
+    Object.defineProperties(p, {
+        value: {
+            get: function () {
+                return this._sessionStateExternal;
+            },
+            set: function (value) {
+                this.setSessionState(value);
+            }
+        }
+    });
 
     // override is important to avoid sending undefiend value
     // getSessionState usally called from Sessionmanager, main purpose is to create log entries..
@@ -86,7 +55,7 @@ if (typeof window === 'undefined') {
             if (val === null || val === '' || val === undefined) val = NaN;
             else val = Number(val);
         }
-        weavecore.LinkableVariable.prototype.setSessionState.call(this, val);
+        LinkableNumber.base(this, 'setSessionState', val);
     };
 
     p.sessionStateEquals = function (otherSessionState) {
@@ -99,6 +68,17 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableNumber = LinkableNumber;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableNumber', LinkableNumber);
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableNumber',
+            qName: 'weavecore.LinkableNumber'
+        }]
+    };
 
 }());

@@ -12,36 +12,7 @@ if (typeof window === 'undefined') {
  */
 (function () {
 
-    /**
-     * This is an entry in the session history log.  It contains both undo and redo session state diffs.
-     * The triggerDelay is the time it took for the user to make a change since the last synchronization.
-     * This time difference does not include the time it took to set the session state.  This way, when
-     * the session state is replayed at a reasonable speed regardless of the speed of the computer.
-     * @param id
-     * @param forward The diff for applying redo.
-     * @param backward The diff for applying undo.
-     * @param triggerDelay The length of time between the last synchronization and the diff.
-     */
-    function LogEntry(id, forward, backward, triggerDelay, diffDuration) {
-        this.id = id;
-        this.forward = forward; // the diff for applying redo
-        this.backward = backward; // the diff for applying undo
-        this.triggerDelay = triggerDelay; // the length of time between the last synchronization and the diff
-        this.diffDuration = diffDuration; // the length of time in which the diff took place	
-    }
 
-    /**
-     * This will convert an Array of generic objects to an Array of LogEntry objects.
-     * Generic objects are easier to create backwards compatibility for.
-     */
-    LogEntry.convertGenericObjectsToLogEntries = function (array, defaultTriggerDelay) {
-        for (var i = 0; i < array.length; i++) {
-            var o = array[i];
-            if (!(o instanceof LogEntry))
-                array[i] = new LogEntry(o.id, o.forward, o.backward, o.triggerDelay || defaultTriggerDelay, o.diffDuration);
-        }
-        return array;
-    };
 
 
     function getTimer() {
@@ -49,70 +20,154 @@ if (typeof window === 'undefined') {
         return start;
     }
 
+    Object.defineProperty(SessionStateLog, 'debug', {
+        value: false,
+        writable: true
+    });
+    Object.defineProperty(SessionStateLog, 'enableHistoryRewrite', {
+        value: true,
+        writable: true
+    });
+
     function SessionStateLog(subject, syncDelay) {
         // set default values
-        if (syncDelay === undefined)
-            syncDelay = 0;
-        this._subject = subject; // the object we are monitoring
-        this._syncDelay = syncDelay; // the number of milliseconds to wait before automatically synchronizing
-        this._prevState = WeaveAPI.SessionManager.getSessionState(this._subject); // remember the initial state
+        syncDelay = typeof syncDelay !== 'undefined' ? syncDelay : 0;
+
+        this._saveDiff = goog.bind(_saveDiff, this);
+        this._groupedCallback = goog.bind(_groupedCallback, this);
+        this._immediateCallback = goog.bind(_immediateCallback, this);
+        this.synchronizeNow = goog.bind(synchronizeNow, this);
 
         /**
          * When this is set to true, changes in the session state of the subject will be automatically logged.
          */
-        SessionStateLog.prototype.enableLogging = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(true), this.synchronizeNow.bind(this));
-
-
-        WeaveAPI.SessionManager.registerDisposableChild(this._subject, this); // make sure this is disposed when _subject is disposed
-
-        var cc = WeaveAPI.SessionManager.getCallbackCollection(this._subject);
-        cc.addImmediateCallback(this, this._immediateCallback.bind(this));
-        cc.addGroupedCallback(this, this._groupedCallback.bind(this));
-
+        this.enableLogging = WeaveAPI.linkableChild(this, new weavecore.LinkableBoolean(true), this.synchronizeNow);
+        this._syncTime = getTimer(); // this is set to getTimer() when synchronization occurs
         this._undoHistory = []; // diffs that can be undone
         this._redoHistory = []; // diffs that can be redone
-        this._nextId = 0; // gets incremented each time a new diff is created
-        this._undoActive = false; // true while an undo operation is active
-        this._redoActive = false; // true while a redo operation is active
+        this._subject = subject; // the object we are monitoring
+        this._syncDelay = syncDelay; // the number of milliseconds to wait before automatically synchronizing
+        this._prevState = WeaveAPI.getState(this._subject); // remember the initial state
 
-        this._syncTime = getTimer(); // this is set to getTimer() when synchronization occurs
-        this._triggerDelay = -1; // this is set to (getTimer() - _syncTime) when immediate callbacks are triggered for the first time since the last synchronization occurred
-        this._saveTime = 0; // this is set to getTimer() + _syncDelay to determine when the next diff should be computed and logged
-        this._savePending = false; // true when a diff should be computed
+        WeaveAPI.disposableChild(this._subject, this); // make sure this is disposed when _subject is disposed
 
-        Object.defineProperty(SessionStateLog, 'debug', {
-            value: false,
-            writable: true
-        });
-        Object.defineProperty(SessionStateLog, 'enableHistoryRewrite', {
-            value: true,
-            writable: true
-        });
+        var cc = WeaveAPI.getCallbacks(this._subject);
+        cc.addImmediateCallback(this, this._immediateCallback);
+        cc.addGroupedCallback(this, this._groupedCallback);
+    }
 
-        /**
-         * @TODO create an interface for the objects in this Array
-         */
-        Object.defineProperty(this, 'undoHistory', {
+
+
+    var p = SessionStateLog.prototype;
+
+
+
+
+    /**
+     * @private
+     * @type {weavecore.ILinkableObject}
+     */
+    p._subject;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._syncDelay;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._prevState = null;
+
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._undoHistory;
+
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._redoHistory;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._nextId = 0;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._undoActive = false;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._redoActive = false;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._syncTime;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._triggerDelay = -1;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._saveTime = 0;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._savePending = false;
+
+
+    /**
+     * @export
+     * @type {weavejs.core.LinkableBoolean}
+     */
+    p.enableLogging;
+
+    Object.defineProperties(p, {
+        'undoHistory': {
             get: function () {
                 return this._undoHistory;
             }
-        });
-
-        /**
-         * @TODO create an interface for the objects in this Array
-         */
-        Object.defineProperty(this, 'redoHistory', {
+        },
+        'redoHistory': {
             get: function () {
                 return this._redoHistory;
             }
-        });
+        }
 
-    }
+    });
 
-    SessionStateLog.prototype = new weavecore.LinkableVariable();
-    SessionStateLog.prototype.constructor = SessionStateLog;
 
-    var p = SessionStateLog.prototype;
 
 
     /**
@@ -131,8 +186,8 @@ if (typeof window === 'undefined') {
      * This function will save any pending diff in session state.
      * Use this function only when necessary (for example, when writing a collaboration service that must synchronize).
      */
-    p.synchronizeNow = function () {
-        this._saveDiff.call(this, true);
+    function synchronizeNow() {
+        this._saveDiff(true);
     };
 
 
@@ -140,7 +195,7 @@ if (typeof window === 'undefined') {
     /**
      * This gets called as an immediate callback of the subject.
      */
-    p._immediateCallback = function () {
+    function _immediateCallback() {
         if (!this.enableLogging.value)
             return;
 
@@ -150,7 +205,7 @@ if (typeof window === 'undefined') {
         // make sure only one call to saveDiff() is pending
         if (!this._savePending) {
             this._savePending = true;
-            this._saveDiff.call(this);
+            this._saveDiff();
         }
 
 
@@ -164,7 +219,7 @@ if (typeof window === 'undefined') {
     /**
      * This gets called as a grouped callback of the subject.
      */
-    p._groupedCallback = function () {
+    function _groupedCallback() {
         if (!this.enableLogging.value)
             return;
 
@@ -185,7 +240,7 @@ if (typeof window === 'undefined') {
      * This will save a diff in the history, if there is any.
      * @param immediately Set to true if it should be saved immediately, or false if it can wait.
      */
-    p._saveDiff = function (immediately) {
+    function _saveDiff(immediately) {
         //console.log("save difference is called");
         if (immediately === undefined) {
             immediately = false;
@@ -204,7 +259,7 @@ if (typeof window === 'undefined') {
         if (!immediately && getTimer() < this._saveTime) {
             // console.log("save difference is Paused");
             // we have to wait until the next frame to save the diff because grouped callbacks haven't finished.
-            WeaveAPI.StageUtils.callLater(this, this._saveDiff.bind(this));
+            WeaveAPI.StageUtils.callLater(this, this._saveDiff);
             return;
         }
 
@@ -224,14 +279,14 @@ if (typeof window === 'undefined') {
                 // To prevent new undo history from being added as a result of applying an undo, overwrite first redo entry.
                 // Keep existing delay/duration.
                 oldEntry = this._redoHistory[0];
-                newEntry = new LogEntry(this._nextId++, backwardDiff, forwardDiff, oldEntry.triggerDelay, oldEntry.diffDuration);
+                newEntry = new weavecore.LogEntry(this._nextId++, backwardDiff, forwardDiff, oldEntry.triggerDelay, oldEntry.diffDuration);
                 if (this.enableHistoryRewrite) {
                     this._redoHistory[0] = newEntry;
                 } else if (weavecore.StandardLib.compare(oldEntry.forward, newEntry.forward) !== 0) {
                     this._redoHistory.unshift(newEntry);
                 }
             } else {
-                newEntry = new LogEntry(this._nextId++, forwardDiff, backwardDiff, this._triggerDelay, diffDuration);
+                newEntry = new weavecore.LogEntry(this._nextId++, forwardDiff, backwardDiff, this._triggerDelay, diffDuration);
                 if (this._redoActive) {
                     // To prevent new undo history from being added as a result of applying a redo, overwrite last undo entry.
                     // Keep existing delay/duration.
@@ -443,8 +498,8 @@ if (typeof window === 'undefined') {
                 {
                     // note: some states from version 0 may include enableLogging, but here we ignore it					
                     this._prevState = state.currentState;
-                    this._undoHistory = LogEntry.convertGenericObjectsToLogEntries(state.undoHistory, this._syncDelay);
-                    this._redoHistory = LogEntry.convertGenericObjectsToLogEntries(state.redoHistory, this._syncDelay);
+                    this._undoHistory = weavecore.LogEntry.convertGenericObjectsToLogEntries(state.undoHistory, this._syncDelay);
+                    this._redoHistory = weavecore.LogEntry.convertGenericObjectsToLogEntries(state.redoHistory, this._syncDelay);
                     this._nextId = state.nextId;
 
                     break;
@@ -469,6 +524,18 @@ if (typeof window === 'undefined') {
         }
     };
     weavecore.SessionStateLog = SessionStateLog;
-    weavecore.ClassUtils.registerClass('weavecore.SessionStateLog', SessionStateLog);
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'SessionStateLog',
+            qName: 'weavecore.SessionStateLog'
+        }],
+        interfaces: [weavecore.ILinkableVariable, weavecore.IDisposableObject]
+    };
+
 
 }());

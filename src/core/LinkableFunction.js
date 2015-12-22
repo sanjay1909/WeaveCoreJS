@@ -11,42 +11,6 @@ if (typeof window === 'undefined') {
 
 (function () {
     "use strict";
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableFunction, 'NS', {
-        value: 'weavecore'
-    });
-
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableFunction, 'CLASS_NAME', {
-        value: 'LinkableFunction'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableFunction, 'SESSIONABLE', {
-        value: true
-    });
 
     /**
      * This is used as a placeholder to prevent re-compiling erroneous code.
@@ -202,31 +166,18 @@ if (typeof window === 'undefined') {
      * @param paramNames An Array of parameter names that can be used in the function definition.
      */
     function LinkableFunction(defaultValue, ignoreRuntimeErrors, useThisScope, paramNames) {
-        if (defaultValue === undefined) defaultValue = null;
-        if (ignoreRuntimeErrors === undefined) ignoreRuntimeErrors = false;
-        if (useThisScope === undefined) useThisScope = false;
-        if (paramNames === undefined) paramNames = null;
-        weavecore.LinkableString.call(weavecore.StandardLib.unIndent(defaultValue));
-
-        this._catchErrors = false;
+        efaultValue = typeof defaultValue !== 'undefined' ? defaultValue : null;
+        ignoreRuntimeErrors = typeof ignoreRuntimeErrors !== 'undefined' ? ignoreRuntimeErrors : false;
+        paramNames = typeof paramNames !== 'undefined' ? paramNames : null;
+        LinkableFunction.base(this, 'constructor', weavecore.StandardLib.unIndent(defaultValue));
         this._ignoreRuntimeErrors = ignoreRuntimeErrors;
-        this._useThisScope = useThisScope;
-        this._compiledMethod = null;
-        this._paramNames = paramNames && paramNames.concat();;
-        this._isFunctionDefinition = false;
-        this._triggerCount = 0;
+        this._paramNames = paramNames ? paramNames.concat() : [];
 
-        Object.defineProperty(this, "length", {
-            get: function () { //* This gets the length property of the generated Function.
-                if (this._triggerCount !== this.triggerCounter)
-                    this.validate();
-                return this._compiledMethod.length;
-            }
-        });
+
 
         LinkableFunction.macroLibraries.addImmediateCallback(this, this.triggerCallbacks, false, true);
-        handleMacros = handleMacros.bind(this);
-        WeaveAPI.SessionManager.getCallbackCollection(LinkableFunction.macros).addImmediateCallback(this, handleMacros, false, true);
+
+        WeaveAPI.SessionManager.getCallbackCollection(LinkableFunction.macros).addImmediateCallback(this, this.handleMacros, false, true);
 
 
 
@@ -234,12 +185,67 @@ if (typeof window === 'undefined') {
 
     }
 
-    LinkableFunction.prototype = new weavecore.LinkableString();
-    LinkableFunction.prototype.constructor = LinkableFunction;
+    goog.inherits(LinkableFunction, weavecore.LinkableString);
+
 
     var p = LinkableFunction.prototype;
 
-    function handleMacros() {
+
+
+    Object.defineProperties(p, {
+        /** @export */
+        length: {
+            get: function () {
+                if (this._triggerCount != this.triggerCounter)
+                    this.validate();
+                return this._compiledMethod.length;
+            }
+        }
+    });
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._catchErrors = false;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._ignoreRuntimeErrors = false;
+
+
+    /**
+     * @private
+     * @type {Function}
+     */
+    p._compiledMethod = null;
+
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._paramNames = null;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._isFunctionDefinition = false;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._triggerCount = 0;
+
+    p.handleMacros = function () {
         if (WeaveAPI.SessionManager.getLinkableOwner(this) !== LinkableFunction.macros)
             this.triggerCallbacks();
     }
@@ -250,6 +256,7 @@ if (typeof window === 'undefined') {
      * This will attempt to compile the function.  An Error will be thrown if this fails.
      */
     p.validate = function () {
+
         if (this._triggerCount !== this.triggerCounter) {
             // if this LinkableFunction is in the macros list, errors should be caught and reported.
             if (LinkableFunction.macros.getName(this))
@@ -268,11 +275,11 @@ if (typeof window === 'undefined') {
 
             var object = LinkableFunction._compiler.compileToObject(this.value);
             this._isFunctionDefinition = LinkableFunction._compiler.compiledObjectIsFunctionDefinition(object);
-            this._compiledMethod = LinkableFunction._compiler.compileObjectToFunction(object, LinkableFunction._macroProxy, errorHandler.bind(this), this._useThisScope, this._paramNames);
+            this._compiledMethod = LinkableFunction._compiler.compileObjectToFunction(object, LinkableFunction._macroProxy, this.errorHandler, this._useThisScope, this._paramNames);
         }
     }
 
-    function errorHandler(e) {
+    p.errorHandler = function (e) {
         if (LinkableFunction.debug)
             console.error(e);
 
@@ -316,6 +323,18 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.LinkableFunction = LinkableFunction;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableFunction', LinkableFunction);
+
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableFunction',
+            qName: 'weavecore.LinkableFunction'
+        }]
+    };
 
 }());

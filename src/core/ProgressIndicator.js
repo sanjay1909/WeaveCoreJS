@@ -12,79 +12,48 @@ if (typeof window === 'undefined') {
  * @author sanjay1909
  */
 (function () {
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ProgressIndicator, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ProgressIndicator, 'CLASS_NAME', {
-        value: 'ProgressIndicator'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ProgressIndicator, 'SESSIONABLE', {
-        value: true
-    });
 
 
     Object.defineProperty(ProgressIndicator, 'debug', {
         value: false
     });
 
-    function ProgressIndicator() {
-
-        weavecore.ILinkableObject.call(this);
-
-        this._taskCount = 0;
-        this._maxTaskCount = 0;
-        Object.defineProperties(this, {
-            '_progress': {
-                value: new Map()
-            },
-            '_description': {
-                value: new Map()
-            },
-            '_stackTrace': {
-                value: new Map()
-            }
-        });
-
-    }
-
-    ProgressIndicator.prototype = new weavecore.ILinkableObject();
-    ProgressIndicator.prototype.constructor = ProgressIndicator;
+    function ProgressIndicator() {}
 
     var p = ProgressIndicator.prototype;
 
+    /**
+     * @private
+     * @type {number}
+     */
+    p._taskCount = 0;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._maxTaskCount = 0;
+
+
+    Object.defineProperties(p, {
+        '_progress': {
+            value: new Map()
+        },
+        '_description': {
+            value: new Map()
+        },
+        '_stackTrace': {
+            value: new Map()
+        }
+    });
     /**
      * For debugging, returns debugIds for active tasks.
      */
     p.debugTasks = function () {
         var result = [];
-        for(var task of this._progress.keys()){
+        for (var task of this._progress.keys()) {
             result.push(WeaveAPI.debugID(task));
         };
 
@@ -93,7 +62,7 @@ if (typeof window === 'undefined') {
 
     p.getDescriptions = function () {
         var result = [];
-        for(var task of this._progress.keys()) {
+        for (var task of this._progress.keys()) {
             var desc = this._description.get(task) || "Unnamed task";
             if (desc)
                 result.push(WeaveAPI.debugId(task) + " (" + (100 * this._progress.get(task)) + "%) " + desc);
@@ -203,7 +172,7 @@ if (typeof window === 'undefined') {
     p.getNormalizedProgress = function () {
         // add up the percentages
         var sum = 0;
-        for(var task of this._progress.keys()){
+        for (var task of this._progress.keys()) {
             var stackTrace = this._stackTrace.get(task); // check this when debugging
             var progress = this._progress.get(task);
             if (isFinite(progress))
@@ -217,7 +186,20 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.ProgressIndicator = ProgressIndicator;
-    weavecore.ClassUtils.registerClass('weavecore.ProgressIndicator', ProgressIndicator);
     WeaveAPI.ProgressIndicator = new ProgressIndicator();
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'ProgressIndicator',
+            qName: 'weavecore.ProgressIndicator'
+        }],
+        interfaces: [weavecore.IProgressIndicator]
+    };
+
 
 }());

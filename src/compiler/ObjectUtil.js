@@ -285,10 +285,11 @@ if (typeof window === 'undefined') {
     /**
      *
      */
-    ObjectUtil.copy = function (object) {
+    /*ObjectUtil.copy = function (object) {
 
         if (object === null || typeof object !== 'object') // primitive value
             return object;
+
         else if (object.constructor === Array) { //TODO:Temp solution for array copy - its a shallow copy now)
             var arrayCopy = []
             if (object.length > 0)
@@ -299,8 +300,22 @@ if (typeof window === 'undefined') {
             var copy = JSON.parse(jsonString);
             return copy;
         }
-        //return Object.getPrototypeOf(Object.create(object)).slice(0)
-    }
+    }*/
+
+    /**
+     * Makes a deep copy of an object.
+     * @export
+     * @param {Object} object
+     * @return {Object}
+     */
+    ObjectUtil.copy = function (object) {
+        if (object === null || typeof (object) !== 'object')
+            return object;
+        var copy = object.constructor === Array ? [] : {};
+        for (var key in object)
+            copy[key] = ObjectUtil.copyObject(object[key]);
+        return copy;
+    };
 
     weavecore.ObjectUtil = ObjectUtil;
 

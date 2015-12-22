@@ -17,13 +17,16 @@ if (typeof window === 'undefined') {
             }
         });
 
+        var p = this;
+        p.reportError = weavecore.ClassUtils.bind(this, reportError);
+
     }
 
     ErrorManager.prototype = new weavecore.ILinkableObject();
     ErrorManager.prototype.constructor = ErrorManager;
     var p = ErrorManager.prototype;
 
-    p.reportError = function (error, faultMessage, faultContent) {
+    function reportError(error, faultMessage, faultContent) {
         faultMessage = (faultMessage === undefined) ? null : faultMessage;
         faultContent = (faultContent === undefined) ? null : faultContent;
 

@@ -1,9 +1,298 @@
+/**
+ * @module weavecore
+ */
+
+//namesapce
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+
+/**
+ * @interface
+ */
+weavecore.ILinkableObject = function () {};
+
+
+/**
+ * Metadata
+ *
+ * @type {Object.<string, Array.<Object>>}
+ */
+weavecore.ILinkableObject.prototype.CLASS_INFO = {
+    names: [{
+        name: 'ILinkableObject',
+        qName: 'weavecore.ILinkableObject'
+    }]
+};
+/**
+ * @module weavecore
+ */
+
+//namesapce
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+/**
+ * @interface
+ */
+weavecore.IDisposableObject = function () {};
+weavecore.IDisposableObject.prototype.dispose = function () {};
+
+
+/**
+ * Metadata
+ *
+ * @type {Object.<string, Array.<Object>>}
+ */
+weavecore.IDisposableObject.prototype.CLASS_INFO = {
+    names: [{
+        name: 'IDisposableObject',
+        qName: 'weavecore.IDisposableObject'
+    }]
+};
+/**
+ * @interface
+ * @extends {weavecore.ILinkableObject}
+ */
+weavecore.ILinkableVariable = function () {};
+weavecore.ILinkableVariable.prototype.getSessionState = function () {};
+weavecore.ILinkableVariable.prototype.setSessionState = function (value) {};
+
+
+/**
+ * Metadata
+ *
+ * @type {Object.<string, Array.<Object>>}
+ */
+weavecore.ILinkableVariable.prototype.CLASS_INFO = {
+    names: [{
+        name: 'ILinkableVariable',
+        qName: 'weavecore.ILinkableVariable'
+    }],
+    interfaces: [weavecore.ILinkableObject]
+};
+/**
+ * @interface
+ * @extends {weavecore.ILinkableObject}
+ */
+weavecore.IProgressIndicator = function () {};
+weavecore.IProgressIndicator.prototype.getTaskCount = function () {};
+weavecore.IProgressIndicator.prototype.addTask = function (taskToken, busyObject, description) {};
+weavecore.IProgressIndicator.prototype.hasTask = function (taskToken) {};
+weavecore.IProgressIndicator.prototype.updateTask = function (taskToken, progress) {};
+weavecore.IProgressIndicator.prototype.removeTask = function (taskToken) {};
+weavecore.IProgressIndicator.prototype.getNormalizedProgress = function () {};
+
+
+/**
+ * Metadata
+ *
+ * @type {Object.<string, Array.<Object>>}
+ */
+weavecore.IProgressIndicator.prototype.CLASS_INFO = {
+    names: [{
+        name: 'IProgressIndicator',
+        qName: 'weavecore.IProgressIndicator'
+    }],
+    interfaces: [weavecore.ILinkableObject]
+};
+/**
+ * @interface
+ */
+weavecore.ISessionManager = function () {};
+weavecore.ISessionManager.prototype.getCallbackCollection = function (linkableObject) {};
+weavecore.ISessionManager.prototype.getLinkableObjectFromCallbackCollection = function (callbackCollection) {};
+weavecore.ISessionManager.prototype.newLinkableChild = function (linkableParent, linkableChildType, callback, useGroupedCallback) {};
+weavecore.ISessionManager.prototype.registerLinkableChild = function (linkableParent, linkableChild, callback, useGroupedCallback) {};
+weavecore.ISessionManager.prototype.newDisposableChild = function (disposableParent, disposableChildType) {};
+weavecore.ISessionManager.prototype.registerDisposableChild = function (disposableParent, disposableChild) {};
+weavecore.ISessionManager.prototype.getLinkableOwner = function (child) {};
+weavecore.ISessionManager.prototype.getLinkableDescendants = function (root, filter) {};
+weavecore.ISessionManager.prototype.assignBusyTask = function (taskToken, busyObject) {};
+weavecore.ISessionManager.prototype.unassignBusyTask = function (taskToken) {};
+weavecore.ISessionManager.prototype.linkableObjectIsBusy = function (linkableObject) {};
+weavecore.ISessionManager.prototype.setSessionState = function (linkableObject, newState, removeMissingDynamicObjects) {};
+weavecore.ISessionManager.prototype.getSessionState = function (linkableObject) {};
+weavecore.ISessionManager.prototype.computeDiff = function (oldState, newState) {};
+weavecore.ISessionManager.prototype.combineDiff = function (baseDiff, diffToAdd) {};
+weavecore.ISessionManager.prototype.copySessionState = function (source, destination) {};
+weavecore.ISessionManager.prototype.linkSessionState = function (primary, secondary) {};
+weavecore.ISessionManager.prototype.unlinkSessionState = function (first, second) {};
+weavecore.ISessionManager.prototype.disposeObject = function (object) {};
+weavecore.ISessionManager.prototype.objectWasDisposed = function (object) {};
+weavecore.ISessionManager.prototype.getPath = function (root, descendant) {};
+weavecore.ISessionManager.prototype.getObject = function (root, path) {};
+
+
+/**
+ * Metadata
+ *
+ * @type {Object.<string, Array.<Object>>}
+ */
+weavecore.ISessionManager.prototype.CLASS_INFO = {
+    names: [{
+        name: 'ISessionManager',
+        qName: 'weavecore.ISessionManager'
+    }]
+};
+/**
+ * @interface
+ * @extends {weavecore.ILinkableObject}
+ */
+weavecore.ILinkableCompositeObject = function () {};
+weavecore.ILinkableCompositeObject.prototype.getSessionState = function () {};
+weavecore.ILinkableCompositeObject.prototype.setSessionState = function (newState, removeMissingDynamicObjects) {};
+
+
+/**
+ * Metadata
+ *
+ * @type {Object.<string, Array.<Object>>}
+ */
+weavecore.ILinkableCompositeObject.prototype.CLASS_INFO = {
+    names: [{
+        name: 'ILinkableCompositeObject',
+        qName: 'weavecore.ILinkableCompositeObject'
+    }],
+    interfaces: [weavecore.ILinkableObject]
+};
+/**
+ * @interface
+ * @extends {weavecore.ILinkableCompositeObject}
+ */
+weavecore.ILinkableDynamicObject = function () {};
+/**  * @type {weavecore.ILinkableObject}
+ */
+weavecore.ILinkableDynamicObject.prototype.internalObject;
+weavecore.ILinkableDynamicObject.prototype.requestGlobalObject = function (name, objectType, lockObject) {};
+weavecore.ILinkableDynamicObject.prototype.requestLocalObject = function (objectType, lockObject) {};
+weavecore.ILinkableDynamicObject.prototype.requestLocalObjectCopy = function (objectToCopy) {};
+weavecore.ILinkableDynamicObject.prototype.lock = function () {};
+weavecore.ILinkableDynamicObject.prototype.removeObject = function () {};
+
+
+/**
+ * Metadata
+ *
+ * @type {Object.<string, Array.<Object>>}
+ */
+weavecore.ILinkableDynamicObject.prototype.CLASS_INFO = {
+    names: [{
+        name: 'ILinkableDynamicObject',
+        qName: 'weavecore.ILinkableDynamicObject'
+    }],
+    interfaces: [weavecore.ILinkableCompositeObject]
+};
+/**
+ * @interface
+ * @extends {weavecore.ILinkableCompositeObject}
+ */
+weavecore.ILinkableHashMap = function () {};
+/**  * @type {Object}
+ */
+weavecore.ILinkableHashMap.prototype.typeRestriction;
+weavecore.ILinkableHashMap.prototype.setNameOrder = function (newOrder) {};
+weavecore.ILinkableHashMap.prototype.getNames = function (filter) {};
+weavecore.ILinkableHashMap.prototype.getObjects = function (filter) {};
+weavecore.ILinkableHashMap.prototype.getName = function (object) {};
+weavecore.ILinkableHashMap.prototype.getObject = function (name) {};
+weavecore.ILinkableHashMap.prototype.requestObject = function (name, classDef, lockObject) {};
+weavecore.ILinkableHashMap.prototype.requestObjectCopy = function (name, objectToCopy) {};
+weavecore.ILinkableHashMap.prototype.renameObject = function (oldName, newName) {};
+weavecore.ILinkableHashMap.prototype.objectIsLocked = function (name) {};
+weavecore.ILinkableHashMap.prototype.removeObject = function (name) {};
+weavecore.ILinkableHashMap.prototype.removeAllObjects = function () {};
+weavecore.ILinkableHashMap.prototype.generateUniqueName = function (baseName) {};
+
+
+/**
+ * Metadata
+ *
+ * @type {Object.<string, Array.<Object>>}
+ */
+weavecore.ILinkableHashMap.prototype.CLASS_INFO = {
+    names: [{
+        name: 'ILinkableHashMap',
+        qName: 'weavecore.ILinkableHashMap'
+    }],
+    interfaces: [weavecore.ILinkableCompositeObject]
+};
+/**
+ * @module weavecore
+ */
+
+//namesapce
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+/**
+ * @interface
+ * @extends {weavecore.ILinkableObject}
+ */
+weavecore.ICallbackCollection = function () {};
+weavecore.ICallbackCollection.prototype.addImmediateCallback = function (relevantContext, callback, runCallbackNow, alwaysCallLast) {};
+weavecore.ICallbackCollection.prototype.addGroupedCallback = function (relevantContext, groupedCallback, triggerCallbackNow, delayWhileBusy) {};
+weavecore.ICallbackCollection.prototype.addDisposeCallback = function (relevantContext, callback) {};
+weavecore.ICallbackCollection.prototype.removeCallback = function (relevantContext, callback) {};
+weavecore.ICallbackCollection.prototype.triggerCallbacks = function () {};
+/**  * @type {number}
+ */
+weavecore.ICallbackCollection.prototype.triggerCounter;
+weavecore.ICallbackCollection.prototype.delayCallbacks = function () {};
+weavecore.ICallbackCollection.prototype.resumeCallbacks = function () {};
+
+
+/**
+ * Metadata
+ *
+ * @type {Object.<string, Array.<Object>>}
+ */
+weavecore.ICallbackCollection.prototype.CLASS_INFO = {
+    names: [{
+        name: 'ICallbackCollection',
+        qName: 'weavecore.ICallbackCollection'
+    }],
+    interfaces: [weavecore.ILinkableObject]
+};
+/**
+ * @interface
+ * @extends {weavejs.api.core.ICallbackCollection}
+ */
+weavecore.IChildListCallbackInterface = function () {};
+/**  * @type {weavejs.api.core.ILinkableObject}
+ */
+weavecore.IChildListCallbackInterface.prototype.lastObjectAdded;
+
+
+/**
+ * Metadata
+ *
+ * @type {Object.<string, Array.<Object>>}
+ */
+weavecore.IChildListCallbackInterface.prototype.CLASS_INFO = {
+    names: [{
+        name: 'IChildListCallbackInterface',
+        qName: 'weavecore.IChildListCallbackInterface'
+    }],
+    interfaces: [weavecore.ICallbackCollection]
+};
 if (typeof window === 'undefined') {
     //this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
+    this.goog = this.goog || {};
 } else {
     //window.WeaveAPI = window.WeaveAPI || {};
     window.weavecore = window.weavecore || {};
+    window.goog = window.goog || {};
 }
 
 (function () {
@@ -11,6 +300,9 @@ if (typeof window === 'undefined') {
     function ClassUtils() {
 
     }
+
+
+
 
     Object.defineProperty(ClassUtils, 'classLookUp', {
         value: {} //className -> class
@@ -22,13 +314,231 @@ if (typeof window === 'undefined') {
 
     Object.defineProperty(ClassUtils, 'classExtendsMap', {
         value: {}
-    })
+    });
 
     Object.defineProperty(ClassUtils, 'classImplementMap', {
         value: {} //[className] [classImplement] = true
-    })
+    });
 
 
+    /**
+     * Inherit the prototype methods from one constructor into another.
+     *
+     * @param {Function} childCtor Child class.
+     * @param {Function} parentCtor Parent class.
+     */
+    goog.inherits = function (childCtor, parentCtor) {
+        /** @constructor */
+        function tempCtor() {};
+        tempCtor.prototype = parentCtor.prototype;
+        childCtor.superClass_ = parentCtor.prototype;
+        childCtor.prototype = new tempCtor();
+        /** @override */
+        childCtor.prototype.constructor = childCtor;
+
+        /**
+         * Calls superclass constructor/method.
+         *
+         *
+         * @param {!Object} me Should always be "this".
+         * @param {string} methodName The method name to call. Calling
+         *     superclass constructor can be done with the special string
+         *     'constructor'.
+         * @param {...*} var_args The arguments to pass to superclass
+         *     method/constructor.
+         * @return {*} The return value of the superclass method/constructor.
+         */
+        childCtor.base = function (me, methodName, var_args) {
+            // Copying using loop to avoid deop due to passing arguments object to
+            // function. This is faster in many JS engines as of late 2014.
+            var args = new Array(arguments.length - 2);
+            for (var i = 2; i < arguments.length; i++) {
+                args[i - 2] = arguments[i];
+            }
+            return parentCtor.prototype[methodName].apply(me, args);
+        };
+    };
+
+    goog.base = function (me, opt_methodName, var_args) {
+        var caller = arguments.callee.caller;
+
+        /* if (goog.STRICT_MODE_COMPATIBLE || (goog.DEBUG && !caller)) {
+           throw Error('arguments.caller not defined.  goog.base() cannot be used ' +
+                       'with strict mode code. See ' +
+                       'http://www.ecma-international.org/ecma-262/5.1/#sec-C');
+         }*/
+
+        if (caller.superClass_) {
+            // Copying using loop to avoid deop due to passing arguments object to
+            // function. This is faster in many JS engines as of late 2014.
+            var ctorArgs = new Array(arguments.length - 1);
+            for (var i = 1; i < arguments.length; i++) {
+                ctorArgs[i - 1] = arguments[i];
+            }
+            // This is a constructor. Call the superclass constructor.
+            return caller.superClass_.constructor.apply(me, ctorArgs);
+        }
+
+        // Copying using loop to avoid deop due to passing arguments object to
+        // function. This is faster in many JS engines as of late 2014.
+        var args = new Array(arguments.length - 2);
+        for (var i = 2; i < arguments.length; i++) {
+            args[i - 2] = arguments[i];
+        }
+        var foundCaller = false;
+        for (var ctor = me.constructor; ctor; ctor = ctor.superClass_ && ctor.superClass_.constructor) {
+            if (ctor.prototype[opt_methodName] === caller) {
+                foundCaller = true;
+            } else if (foundCaller) {
+                return ctor.prototype[opt_methodName].apply(me, args);
+            }
+        }
+
+        // If we did not find the caller in the prototype chain, then one of two
+        // things happened:
+        // 1) The caller is an instance method.
+        // 2) This method was not called by the right caller.
+        if (me[opt_methodName] === caller) {
+            return me.constructor.prototype[opt_methodName].apply(me, args);
+        } else {
+            throw Error(
+                'ClassUtils.base called from a method of one name ' +
+                'to a method of a different name');
+        }
+    };
+
+
+    /**
+     * caches closures and returns the one closure
+     *
+     * @export
+     * @param {Function} fn The method on the instance.
+     * @param {Object} object The instance.
+     * @param {string} boundMethodName The name to use to cache the closure.
+     * @return {Function} The closure.
+     */
+    goog.closure = function (fn, object, boundMethodName) {
+        if (object.hasOwnProperty(boundMethodName)) {
+            return object[boundMethodName];
+        }
+        var boundMethod = goog.bind(fn, object);
+        Object.defineProperty(object, boundMethodName, {
+            value: boundMethod
+        });
+        return boundMethod;
+    };
+
+
+
+
+
+    goog.bind = function (fn, selfObj, var_args) {
+        // TODO(nicksantos): narrow the type signature.
+        if (Function.prototype.bind &&
+            // NOTE(nicksantos): Somebody pulled base.js into the default Chrome
+            // extension environment. This means that for Chrome extensions, they get
+            // the implementation of Function.prototype.bind that calls goog.bind
+            // instead of the native one. Even worse, we don't want to introduce a
+            // circular dependency between goog.bind and Function.prototype.bind, so
+            // we have to hack this to make sure it works correctly.
+            Function.prototype.bind.toString().indexOf('native code') != -1) {
+            goog.bind = goog.bindNative_;
+        } else {
+            goog.bind = goog.bindJs_;
+        }
+        return goog.bind.apply(null, arguments);
+    };
+
+    /**
+     * A native implementation of goog.bind.
+     * @param {Function} fn A function to partially apply.
+     * @param {Object|undefined} selfObj Specifies the object which this should
+     *     point to when the function is run.
+     * @param {...*} var_args Additional arguments that are partially applied to the
+     *     function.
+     * @return {!Function} A partially-applied form of the function bind() was
+     *     invoked as a method of.
+     * @private
+     * @suppress {deprecated} The compiler thinks that Function.prototype.bind is
+     *     deprecated because some people have declared a pure-JS version.
+     *     Only the pure-JS version is truly deprecated.
+     */
+    goog.bindNative_ = function (fn, selfObj, var_args) {
+        return /** @type {!Function} */ (fn.call.apply(fn.bind, arguments));
+    };
+
+
+    /**
+     * A pure-JS implementation of goog.bind.
+     * @param {Function} fn A function to partially apply.
+     * @param {Object|undefined} selfObj Specifies the object which this should
+     *     point to when the function is run.
+     * @param {...*} var_args Additional arguments that are partially applied to the
+     *     function.
+     * @return {!Function} A partially-applied form of the function bind() was
+     *     invoked as a method of.
+     * @private
+     */
+    goog.bindJs_ = function (fn, selfObj, var_args) {
+        if (!fn) {
+            throw new Error();
+        }
+
+        if (arguments.length > 2) {
+            var boundArgs = Array.prototype.slice.call(arguments, 2);
+            return function () {
+                // Prepend the bound arguments to the current arguments.
+                var newArgs = Array.prototype.slice.call(arguments);
+                Array.prototype.unshift.apply(newArgs, boundArgs);
+                return fn.apply(selfObj, newArgs);
+            };
+
+        } else {
+            return function () {
+                return fn.apply(selfObj, arguments);
+            };
+        }
+    };
+
+
+    /**
+     * superGetter calls the getter on the given class' superclass.
+     *
+     * @export
+     * @param {Object} clazz The class.
+     * @param {Object} pthis The this pointer.
+     * @param {string} prop The name of the getter.
+     * @return {Object}
+     */
+    ClassUtils.superGetter = function (clazz, pthis, prop) {
+        var superClass = clazz.superClass_;
+        var superdesc = Object.getOwnPropertyDescriptor(superClass, prop);
+        while (superdesc == null) {
+            superClass = superClass.constructor.superClass_;
+            superdesc = Object.getOwnPropertyDescriptor(superClass, prop);
+        }
+        return superdesc.get.call(pthis);
+    };
+
+
+    /**
+     * superSetter calls the setter on the given class' superclass.
+     *
+     * @export
+     * @param {Object} clazz The class.
+     * @param {Object} pthis The this pointer.
+     * @param {string} prop The name of the getter.
+     * @param {Object} value The value.
+     */
+    ClassUtils.superSetter = function (clazz, pthis, prop, value) {
+        var superClass = clazz.superClass_;
+        var superdesc = Object.getOwnPropertyDescriptor(superClass, prop);
+        while (superdesc == null) {
+            superClass = superClass.constructor.superClass_;
+            superdesc = Object.getOwnPropertyDescriptor(superClass, prop);
+        }
+        superdesc.set.apply(pthis, [value]);
+    };
 
     ClassUtils.registerClass = function (className, klass) {
         if (!ClassUtils.classLookUp[className]) {
@@ -49,7 +559,7 @@ if (typeof window === 'undefined') {
     // object `o` as the context.
     ClassUtils.bind = function (obj, method) {
         return function () {
-            method.apply(obj, Array.prototype.slice.call(arguments));
+            return method.apply(obj, Array.prototype.slice.call(arguments));
         };
     };
 
@@ -65,7 +575,7 @@ if (typeof window === 'undefined') {
         }
     }
 
-    ClassUtils.is = function (linkableObject, typeKlasss) {
+    /*ClassUtils.is = function (linkableObject, typeKlasss) {
         if (linkableObject instanceof typeKlasss) { // for class files which aren't manually registered yet
             return true;
         }
@@ -81,7 +591,91 @@ if (typeof window === 'undefined') {
         } else {
             return true;
         }
-    }
+    }*/
+
+
+    /**
+     * Implementation of "classDef is Class"
+     * @export
+     * @param {Object} classDef
+     * @return {boolean}
+     */
+    ClassUtils.isClass = function (classDef) {
+        return typeof (classDef) === 'function' && classDef.prototype && classDef.prototype.constructor === classDef;
+    };
+
+
+
+    /**
+     * is()
+     *
+     * @export
+     * @param {?} leftOperand The lefthand operand of the
+     *     binary as operator in AS3.
+     * @param {?} rightOperand The righthand operand of the
+     *     binary operator in AS3.
+     * @return {boolean}
+     */
+    ClassUtils.is = function (leftOperand, rightOperand) {
+        var checkInterfaces, superClass;
+
+        if (leftOperand == null)
+            return false;
+
+        if (leftOperand && rightOperand == null) {
+            return false;
+        }
+
+        checkInterfaces = function (left) {
+            var i, interfaces;
+
+            interfaces = left.CLASS_INFO.interfaces;
+            for (i = interfaces.length - 1; i > -1; i--) {
+                if (interfaces[i] === rightOperand) {
+                    return true;
+                }
+
+                if (interfaces[i].prototype.CLASS_INFO.interfaces) {
+                    var isit = checkInterfaces(new interfaces[i]());
+                    if (isit) return true;
+                }
+            }
+
+            return false;
+        };
+
+        if ((rightOperand === String && typeof leftOperand === 'string') ||
+            (leftOperand instanceof(rightOperand))) {
+            return true;
+        }
+        if (typeof leftOperand === 'string')
+            return false; // right was not String otherwise exit above
+        if (typeof leftOperand === 'number')
+            return rightOperand === Number;
+        if (rightOperand === Array && Array.isArray(leftOperand))
+            return true;
+        if (leftOperand.CLASS_INFO === undefined)
+            return false; // could be a function but not an instance
+        if (leftOperand.CLASS_INFO.interfaces) {
+            if (checkInterfaces(leftOperand)) {
+                return true;
+            }
+        }
+
+        superClass = leftOperand.constructor.superClass_;
+        if (superClass) {
+            while (superClass && superClass.CLASS_INFO) {
+                if (superClass.CLASS_INFO.interfaces) {
+                    if (checkInterfaces(superClass)) {
+                        return true;
+                    }
+                }
+                superClass = superClass.constructor.superClass_;
+            }
+        }
+
+        return false;
+    };
 
     ClassUtils.getClassDefinition = function (className) {
         if (ClassUtils.classLookUp[className])
@@ -266,49 +860,60 @@ if (typeof window === 'undefined') {
      */
     function WeakReference(value) {
         value = (value === undefined) ? null : value;
-        /**
-         * The reference is stored as a key in this Dictionary, which uses the weakKeys option.
-         */
-        this.dictionary = new Map();
-        //this._keyObj = {};
-
-        /**
-         * A weak reference to an object.
-         */
-        Object.defineProperty(this, 'value', {
-            get: function () {
-                var keys = this.dictionary.keys();
-                for (var i = 0; i < keys.length; i++) {
-                    var key = keys[i]
-                    return key;
-                }
-
-                return null;
-            },
-            set: function (newValue) {
-                var keys = this.dictionary.keys();
-                for (var i = 0; i < keys.length; i++) {
-                    var key = keys[i]
-                    if (key === newValue)
-                        return;
-                    this.dictionary.delete(key);
-                }
-
-                if (newValue !== null) {
-                    this.dictionary.set(newValue, null);
-                }
-            }
-
-        });
 
         this.value = value;
 
     }
 
-    weavecore.WeakReference = WeakReference
+    var p = WeakReference.prototype;
+
+    /**
+     * The reference is stored as a key in this Dictionary, which uses the weakKeys option.
+     */
+    p.dictionary = new Map();
+    //this._keyObj = {};
+
+    /**
+     * A weak reference to an object.
+     */
+    Object.defineProperty(p, 'value', {
+        get: function () {
+            var keys = this.dictionary.keys();
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i]
+                return key;
+            }
+
+            return null;
+        },
+        set: function (newValue) {
+            var keys = this.dictionary.keys();
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i]
+                if (key === newValue)
+                    return;
+                this.dictionary.delete(key);
+            }
+
+            if (newValue !== null) {
+                this.dictionary.set(newValue, null);
+            }
+        }
+
+    });
+
+    p.value;
+
+    weavecore.WeakReference = WeakReference;
+
+    p.CLASS_INFO = {
+        names: [{
+            name: 'WeakReference',
+            qName: 'weavecore.WeakReference'
+        }]
+    };
 
 }());
-
 /*
  * Event
  * Visit http://createjs.com/ for documentation, updates and examples.
@@ -2364,8 +2969,19 @@ if (typeof window === 'undefined') {
 
 
     weavecore.StandardLib = StandardLib;
-}());
 
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    StandardLib.prototype.CLASS_INFO = {
+        names: [{
+            name: 'StandardLib',
+            qName: 'weavecore.StandardLib'
+        }]
+    };
+}());
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
@@ -2653,10 +3269,11 @@ if (typeof window === 'undefined') {
     /**
      *
      */
-    ObjectUtil.copy = function (object) {
+    /*ObjectUtil.copy = function (object) {
 
         if (object === null || typeof object !== 'object') // primitive value
             return object;
+
         else if (object.constructor === Array) { //TODO:Temp solution for array copy - its a shallow copy now)
             var arrayCopy = []
             if (object.length > 0)
@@ -2667,13 +3284,26 @@ if (typeof window === 'undefined') {
             var copy = JSON.parse(jsonString);
             return copy;
         }
-        //return Object.getPrototypeOf(Object.create(object)).slice(0)
-    }
+    }*/
+
+    /**
+     * Makes a deep copy of an object.
+     * @export
+     * @param {Object} object
+     * @return {Object}
+     */
+    ObjectUtil.copy = function (object) {
+        if (object === null || typeof (object) !== 'object')
+            return object;
+        var copy = object.constructor === Array ? [] : {};
+        for (var key in object)
+            copy[key] = ObjectUtil.copyObject(object[key]);
+        return copy;
+    };
 
     weavecore.ObjectUtil = ObjectUtil;
 
 }());
-
 /**
  * @module weavecore
  */
@@ -2725,13 +3355,26 @@ if (typeof window === 'undefined') {
 
     }
 
-    CompiledConstant.prototype = new weavecore.ICompiledObject();
-    CompiledConstant.prototype.constructor = CompiledConstant;
+    var p = CompiledConstant.prototype;
+    p.name;
+    p.value;
 
     weavecore.CompiledConstant = CompiledConstant;
 
-}());
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'CompiledConstant',
+            qName: 'weavecore.CompiledConstant'
+        }],
+        interfaces: [weavecore.ICompiledObject]
+    };
 
+}());
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
@@ -2773,32 +3416,7 @@ if (typeof window === 'undefined') {
 
 
 
-        /**
-         * This is used to keep track of which compiled parameter is currently being evaluated.
-         */
-        this.evalIndex;
-        /**
-         * When the function is called as a property of an object, this will store a pointer to the object
-         * so that it can be used as the 'this' parameter in Function.apply().
-         */
-        this.evaluatedHost;
-        /**
-         * When the function is called as a property of an object, this will store the property name in case the host is a Proxy object.
-         */
-        this.evaluatedMethodName;
-        /**
-         * This is used to store the result of evaluating the compiledMethod before evaluating the parameters.
-         */
-        this.evaluatedMethod;
-        /**
-         * This is an Array of constants to use as parameters to the method.
-         * This Array is used to store the results of evaluating the compiledParams Array before calling the method.
-         */
-        this.evaluatedParams;
-        /**
-         * An optional set of original tokens to use in place of this CompiledFunctionCall when decompiling.
-         */
-        this.originalTokens;
+
 
         this.evaluateConstants();
     }
@@ -2812,10 +3430,44 @@ if (typeof window === 'undefined') {
         return obj;
     }
 
-    CompiledFunctionCall.prototype = new weavecore.ICompiledObject();
-    CompiledFunctionCall.prototype.constructor = CompiledFunctionCall;
 
     var p = CompiledFunctionCall.prototype;
+
+    /**
+     * This is a compiled object that evaluates to a method.
+     */
+    p.compiledMethod;
+    /**
+     * This is an Array of CompiledObjects that must be evaluated before calling the method.
+     */
+    p.compiledParams;
+
+    /**
+     * This is used to keep track of which compiled parameter is currently being evaluated.
+     */
+    p.evalIndex;
+    /**
+     * When the function is called as a property of an object, this will store a pointer to the object
+     * so that it can be used as the 'this' parameter in Function.apply().
+     */
+    p.evaluatedHost;
+    /**
+     * When the function is called as a property of an object, this will store the property name in case the host is a Proxy object.
+     */
+    p.evaluatedMethodName;
+    /**
+     * This is used to store the result of evaluating the compiledMethod before evaluating the parameters.
+     */
+    p.evaluatedMethod;
+    /**
+     * This is an Array of constants to use as parameters to the method.
+     * This Array is used to store the results of evaluating the compiledParams Array before calling the method.
+     */
+    p.evaluatedParams;
+    /**
+     * An optional set of original tokens to use in place of this CompiledFunctionCall when decompiling.
+     */
+    p.originalTokens;
 
     p.evaluateConstants = function () {
         // if name is constant, evaluate it once now
@@ -2849,8 +3501,20 @@ if (typeof window === 'undefined') {
 
     weavecore.CompiledFunctionCall = CompiledFunctionCall;
 
-}());
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'CompiledFunctionCall',
+            qName: 'weavecore.CompiledFunctionCall'
+        }],
+        interfaces: [weavecore.ICompiledObject]
+    };
 
+}());
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
@@ -3168,95 +3832,6 @@ if (typeof window === 'undefined') {
     Compiler._staticInstance = null;
 
 
-    //constructor
-    function Compiler(includeDefaultLibraries) {
-        //private
-        Object.defineProperty(this, 'JUMP_LOOKUP', {
-            value: new Map() // Function -> true
-        });
-        Object.defineProperty(this, 'LOOP_LOOKUP', {
-            value: new Map() // Function -> true
-        });
-        Object.defineProperty(this, 'BRANCH_LOOKUP', {
-            value: new Map() // // Function -> Boolean, for short-circuiting
-        });
-        Object.defineProperty(this, 'ASSIGN_OP_LOOKUP', {
-            value: new Map() // Function -> true
-        });
-        Object.defineProperty(this, 'PURE_OP_LOOKUP', {
-            value: new Map() // Function -> true
-        });
-        Object.defineProperty(this, 'MAX_OPERATOR_LENGTH', {
-            value: 4
-        });
-
-
-        /**
-         * This is a list of objects and/or classes containing functions and constants supported by the compiler.
-         */
-        Object.defineProperty(this, 'libraries', {
-            value: []
-        });
-
-
-        /**
-         * This object maps the name of a predefined constant to its value.
-         */
-
-        this.constants = null;
-        /**
-         * This object maps the name of a global symbol to its value.
-         */
-
-        this.globals = null;
-        /**
-         * This object maps an operator like "*" to a Function or a valie of true if there is no function.
-         */
-
-        this.operators = null;
-        /**
-         * A pure operator is one that always gives the same result when invoked with the same parameters.
-         * This object maps a pure operator like "+" to its corresponding function.
-         */
-
-        this.pureOperators = null;
-        /**
-         * This object maps an assignment operator like "=" to its corresponding function.
-         * This object is used  quick lookup to see if an operator is an assignment operator.
-         */
-
-        this.assignmentOperators = null;
-        /**
-         * This is a two-dimensional Array of operator symbols arranged in the order they should be evaluated.
-         * Each nested Array is a group of operators that should be evaluated in the same pass.
-         */
-
-        this.orderedOperators = null;
-        /**
-         * This is an Array of all the unary operator symbols.
-         */
-
-        this.unaryOperatorSymbols = null;
-
-        /**
-         * This is used to temporarily store the host of the property that was accessed by the last call to the '.' operator.
-         */
-        this._propertyHost = null;
-        /**
-         * This is used to temporarily store the property name that was accessed by the last call to the '.' operator.
-         */
-        this._propertyName = null;
-        /**
-         * Set this to true to enable trace statements for debugging.
-         */
-        this.debug = false;
-
-        initialize.call(this);
-        if (includeDefaultLibraries)
-            includeLibraries(Math, weavecore.StandardLib);
-        //includeLibraries(Math, StringUtil, weavecore.StandardLib, Dictionary);
-    }
-
     /**
      * Attempts to compile an expression as a constant, then returns the constant value.
      * @param constantExpression
@@ -3419,7 +3994,101 @@ if (typeof window === 'undefined') {
 
     }
 
+
+    //constructor
+    function Compiler(includeDefaultLibraries) {
+        //private
+
+
+        initialize.call(this);
+        if (includeDefaultLibraries)
+            includeLibraries(Math, weavecore.StandardLib);
+        //includeLibraries(Math, StringUtil, weavecore.StandardLib, Dictionary);
+    }
+
     var p = Compiler.prototype;
+
+    Object.defineProperty(p, 'JUMP_LOOKUP', {
+        value: new Map() // Function -> true
+    });
+    Object.defineProperty(p, 'LOOP_LOOKUP', {
+        value: new Map() // Function -> true
+    });
+    Object.defineProperty(p, 'BRANCH_LOOKUP', {
+        value: new Map() // // Function -> Boolean, for short-circuiting
+    });
+    Object.defineProperty(p, 'ASSIGN_OP_LOOKUP', {
+        value: new Map() // Function -> true
+    });
+    Object.defineProperty(p, 'PURE_OP_LOOKUP', {
+        value: new Map() // Function -> true
+    });
+    Object.defineProperty(p, 'MAX_OPERATOR_LENGTH', {
+        value: 4
+    });
+
+
+    /**
+     * This is a list of objects and/or classes containing functions and constants supported by the compiler.
+     */
+    Object.defineProperty(p, 'libraries', {
+        value: []
+    });
+
+
+    /**
+     * This object maps the name of a predefined constant to its value.
+     */
+
+    p.constants = null;
+    /**
+     * This object maps the name of a global symbol to its value.
+     */
+
+    p.globals = null;
+    /**
+     * This object maps an operator like "*" to a Function or a valie of true if there is no function.
+     */
+
+    p.operators = null;
+    /**
+     * A pure operator is one that always gives the same result when invoked with the same parameters.
+     * This object maps a pure operator like "+" to its corresponding function.
+     */
+
+    p.pureOperators = null;
+    /**
+     * This object maps an assignment operator like "=" to its corresponding function.
+     * This object is used  quick lookup to see if an operator is an assignment operator.
+     */
+
+    p.assignmentOperators = null;
+    /**
+     * This is a two-dimensional Array of operator symbols arranged in the order they should be evaluated.
+     * Each nested Array is a group of operators that should be evaluated in the same pass.
+     */
+
+    p.orderedOperators = null;
+    /**
+     * This is an Array of all the unary operator symbols.
+     */
+
+    p.unaryOperatorSymbols = null;
+
+    /**
+     * This is used to temporarily store the host of the property that was accessed by the last call to the '.' operator.
+     */
+    p._propertyHost = null;
+    /**
+     * This is used to temporarily store the property name that was accessed by the last call to the '.' operator.
+     */
+    p._propertyName = null;
+    /**
+     * Set this to true to enable trace statements for debugging.
+     */
+    p.debug = false;
+
+
 
 
     /**
@@ -4753,7 +5422,7 @@ if (typeof window === 'undefined') {
             return wrapperFunction.call(this);
         }
 
-        return wrapperFunction.bind(this);
+        return wrapperFunction;
     }
 
     /**
@@ -5952,3377 +6621,14 @@ if (typeof window === 'undefined') {
 
 
     weavecore.Compiler = Compiler;
+    p.CLASS_INFO = {
+        names: [{
+            name: 'Compiler',
+            qName: 'weavecore.Compiler'
+        }]
+    };
+
 }(this));
-
-/**
- * @module weavecore
- */
-
-//namesapce
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-(function () {
-    "use strict";
-
-    // constructor
-    /**
-     * Utility Class to create Dynamic state objects with three properties: objectName, className, sessionState
-     * @class DynamicState
-     */
-    function DynamicState() {
-        throw "DynamicState cannot be instantiated.";
-    }
-
-    // Static Public Const Properties
-    /**
-     * The name of the property containing the name assigned to the object when the session state is generated.
-     * @static
-     * @public
-     * @property OBJECT_NAME
-     * @readOnly
-     * @default "objectName"
-     * @type String
-     */
-    Object.defineProperty(DynamicState, 'OBJECT_NAME', {
-        value: "objectName"
-    });
-
-    /**
-     * The name of the property containing the qualified class name of the original object providing the session state.
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @default "className"
-     * @type String
-     */
-    Object.defineProperty(DynamicState, 'CLASS_NAME', {
-        value: "className"
-    });
-
-    /**
-     * The name of the property containing the session state for an object of the type specified by className.
-     * @static
-     * @public
-     * @property SESSION_STATE
-     * @readOnly
-     * @default "sessionState"
-     * @type String
-     */
-    Object.defineProperty(DynamicState, 'SESSION_STATE', {
-        value: "sessionState"
-    });
-
-    /**
-     * The name of the property used to make isDynamicState() return false in order to bypass special diff logic for dynamic state arrays.
-     * @static
-     * @public
-     * @property BYPASS_DIFF
-     * @readOnly
-     * @default "bypassDiff"
-     * @type String
-     */
-    Object.defineProperty(DynamicState, 'BYPASS_DIFF', {
-        value: "bypassDiff"
-    });
-
-    //static Public Methods
-    /**
-     * Creates an Object having three properties: objectName, className, sessionState
-     * @method create
-     * @static
-     * @param {String} objectName The name assigned to the object when the session state is generated.
-     * @param {String} className The qualified class name of the original object providing the session state.
-     * @param {Object} sessionState The session state for an object of the type specified by className.
-     */
-    DynamicState.create = function (objectName, className, sessionState) {
-        var obj = {};
-        // convert empty strings ("") to null
-        obj[DynamicState.OBJECT_NAME] = objectName || null;
-        obj[DynamicState.CLASS_NAME] = className || null;
-        obj[DynamicState.SESSION_STATE] = sessionState;
-        return obj;
-    };
-
-    /**
-     * This function can be used to detect dynamic state objects within nested, untyped session state objects.
-     * This function will check if the given object has the three properties of a dynamic state object.
-     * @method isDynamicState
-     * @static
-     * @param {Object} object An object to check.
-     * @return {Boolean} true if the object has all three properties and no extras.
-     */
-    DynamicState.isDynamicState = function (object, handleBypassDiff) {
-        handleBypassDiff = (handleBypassDiff === undefined ? false : handleBypassDiff);
-        var matchCount = 0;
-        for (var name in object) {
-            if (name === DynamicState.OBJECT_NAME || name === DynamicState.CLASS_NAME || name === DynamicState.SESSION_STATE)
-                matchCount++;
-            else if (handleBypassDiff && name === DynamicState.BYPASS_DIFF)
-                continue;
-            else
-                return false;
-        }
-        return (matchCount == 3); // must match all three properties with no extras
-    };
-
-    /**
-     * This function checks whether or not a session state is an Array containing at least one
-     * object that looks like a DynamicState and has no other non-String items.
-     * @method isDynamicStateArray
-     * @static
-     * @param {Object} state
-     * @return {Boolean} A value of true if the Array looks like a dynamic session state or diff.
-     */
-    DynamicState.isDynamicStateArray = function (state, handleBypassDiff) {
-        handleBypassDiff = (handleBypassDiff === undefined ? false : handleBypassDiff);
-        if (!Array.isArray(state))
-            return false;
-        var result = false;
-        for (var i = 0; i < state.length; i++) {
-            var item = state[i];
-            if (typeof item == 'string' || item instanceof String)
-                continue; // dynamic state diffs can contain String values.
-            if (DynamicState.isDynamicState(item, handleBypassDiff))
-                result = true;
-            else
-                return false;
-        }
-        return result;
-    };
-
-    /**
-     * Alters a session state object to bypass special diff logic for dynamic state arrays.
-     * It does so by adding the "bypassDiff" property to any part for which isDynamicState(part) returns true.
-     * @method alterSessionStateToBypassDiff
-     * @static
-     * @param {Object} state
-     * @return {Boolean} A value of true if the Array looks like a dynamic session state or diff.
-     */
-    DynamicState.alterSessionStateToBypassDiff = function (object) {
-        if (DynamicState.isDynamicState(object)) {
-            object[DynamicState.BYPASS_DIFF] = true;
-            object = object[DynamicState.SESSION_STATE];
-        }
-        // in JS String (for Name in Object ) will return index number of all characters and Length as Properties of string
-        // so this flag is required
-        if (Object.hasOwnProperty(object) && object.constructor.name !== 'String') {
-            for (var name in object)
-                DynamicState.alterSessionStateToBypassDiff(object[name]);
-        }
-
-
-    };
-
-    weavecore.DynamicState = DynamicState;
-
-}());
-
-/**
- * @module weavecore
- */
-
-//namesapce
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-(function () {
-    "use strict";
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ILinkableObject, 'NS', {
-        value: 'weavecore'
-    });
-
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ILinkableObject, 'CLASS_NAME', {
-        value: 'ILinkableObject'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ILinkableObject, 'SESSIONABLE', {
-        value: true
-    });
-
-    // constructor:
-    /**
-     * An object that implements this empty interface has an associated CallbackCollection and session state,
-     * accessible through the global functions in the WeaveAPI Object. In order for an ILinkableObject to
-     * be created dynamically at runtime, it must not require any constructor parameters.
-     * @class ILinkableObject
-     * @constructor
-     */
-    function ILinkableObject() {
-
-    }
-
-    weavecore.ILinkableObject = ILinkableObject;
-    weavecore.ClassUtils.registerClass('weavecore.ILinkableObject', ILinkableObject);
-
-}());
-
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-/**
- * This is an interface to a composite object with dynamic state, meaning child objects can be dynamically added or removed.
- * The session state for this type of object is defined as an Array of DynamicState objects.
- * DynamicState objects are defined as having exactly three properties: objectName, className, and sessionState.
- * @see DynamicState
- *
- * @author adufilie
- * @author sanjay1909
- */
-(function () {
-
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @public
-     * @property NS
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ILinkableCompositeObject, 'NS', {
-        value: 'weavecore'
-    });
-
-    /**
-     * temporary solution to save the className for this class/prototype
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ILinkableCompositeObject, 'CLASS_NAME', {
-        value: 'ILinkableCompositeObject'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ILinkableCompositeObject, 'SESSIONABLE', {
-        value: true
-    });
-
-
-    function ILinkableCompositeObject() {
-        weavecore.ILinkableObject.call(this);
-    }
-
-
-
-    ILinkableCompositeObject.prototype = new weavecore.ILinkableObject();
-    ILinkableCompositeObject.prototype.constructor = ILinkableCompositeObject;
-
-    // Prototypes
-    var p = ILinkableCompositeObject.prototype;
-
-    /**
-     * This gets the session state of this composite object.
-     * @return An Array of DynamicState objects which compose the session state for this object.
-     * @see weave.api.core.DynamicState
-     */
-    p.getSessionState = function () {};
-
-    /**
-     * This sets the session state of this composite object.
-     * @param newState An Array of child name Strings or DynamicState objects containing the new values and types for child ILinkableObjects.
-     * @param removeMissingDynamicObjects If true, this will remove any child objects that do not appear in the session state.
-     *     As a special case, a null session state will result in no change regardless of the removeMissingDynamicObjects value.
-     * @see weave.api.core.DynamicState
-     */
-    p.setSessionState = function (newState, removeMissingDynamicObjects) {};
-
-    weavecore.ILinkableCompositeObject = ILinkableCompositeObject;
-    weavecore.ClassUtils.registerClass('weavecore.ILinkableCompositeObject', ILinkableCompositeObject);
-
-}());
-
-/**
- * @module weavecore
- */
-
-//namesapce
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-
-(function () {
-    "use strict";
-
-    // Static Public Const Properties
-    /**
-     * The name of the property containing the name assigned to the object when the session state is generated.
-     * @static
-     * @public
-     * @property DEFAULT_TRIGGER_COUNT
-     * @readOnly
-     * @default 1
-     * @type number
-     */
-    Object.defineProperty(CallbackCollection, 'DEFAULT_TRIGGER_COUNT', {
-        value: 1
-    });
-
-    /**
-     * TO-DO:temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(CallbackCollection, 'NS', {
-        value: 'weavecore'
-    });
-
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(CallbackCollection, 'CLASS_NAME', {
-        value: 'CallbackCollection'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(CallbackCollection, 'SESSIONABLE', {
-        value: true
-    });
-
-    // constructor:
-    /**
-     * This class manages a list of callback functions.
-     * If specified, the preCallback function will be called immediately before running each
-     * callback using the parameters passed to _runCallbacksImmediately(). This means if there
-     * are five callbacks added, preCallback() gets called five times whenever
-     * _runCallbacksImmediately() is called.  An example usage of this is to make sure a relevant
-     * variable is set to the appropriate value while each callback is running.  The preCallback
-     * function will not be called before grouped callbacks.
-     * @class CallbackCollection
-     * @param {Function} preCallback An optional function to call before each immediate callback.
-     * @constructor
-     */
-
-    function CallbackCollection(preCallback) {
-
-        weavecore.ILinkableObject.call(this);
-
-        var p = this;
-        p.addImmediateCallback = weavecore.ClassUtils.bind(this, addImmediateCallback);
-        p.triggerCallbacks = weavecore.ClassUtils.bind(this, triggerCallbacks);
-        p.removeCallback = weavecore.ClassUtils.bind(this, removeCallback);
-        p.delayCallbacks = weavecore.ClassUtils.bind(this, delayCallbacks);
-        p.resumeCallbacks = weavecore.ClassUtils.bind(this, resumeCallbacks);
-        p.addDisposeCallback = weavecore.ClassUtils.bind(this, addDisposeCallback);
-        p.dispose = weavecore.ClassUtils.bind(this, dispose);
-        p.addGroupedCallback = weavecore.ClassUtils.bind(this, addGroupedCallback);
-        p._runCallbacksImmediately = weavecore.ClassUtils.bind(this, _runCallbacksImmediately);
-
-
-
-
-
-        //private properties:
-
-        /**
-         * for debugging only... will be set when debug==true
-         * @private
-         * @property _linkableObject
-         * @type ILinkableObject
-         **/
-        this._linkableObject;
-
-        /**
-         * for debugging only... will be set when debug==true
-         * @private
-         * @property _lastTriggerStackTrace
-         * @type string
-         **/
-        this._lastTriggerStackTrace; //
-        /**
-         * @private
-         * @property _oldEntries
-         * @type Array
-         **/
-        this._oldEntries;
-
-        /**
-         * This is a list of CallbackEntry objects in the order they were created.
-         * @private
-         * @property _callbackEntries
-         * @type Array
-         **/
-        this._callbackEntries = [];
-
-        /**
-         * This is the function that gets called immediately before every callback.
-         * @protected
-         * @property _precallback
-         * @type function
-         **/
-        this._preCallback = preCallback;
-
-        /**
-         * If this is true, it means triggerCallbacks() has been called while delayed was true.
-         * @private
-         * @property _runCallbacksIsPending
-         * @defaut false
-         * @type boolean
-         **/
-        this._runCallbacksIsPending = false;
-
-        /**
-         * This is the number of times delayCallbacks() has been called without a matching call to resumeCallbacks().
-         * While this is greater than zero, effects of triggerCallbacks() will be delayed.
-         * @private
-         * @property _delayCount
-         * @type number
-         * @default 0
-         **/
-        this._delayCount = 0;
-
-        /**
-         * This value keeps track of how many times callbacks were triggered, and is returned by the public triggerCounter accessor function.
-         * The value starts at 1 to simplify code that compares the counter to a previous value.
-         * This allows the previous value to be set to zero so change will be detected the first time the counter is compared.
-         * This fixes potential bugs where the base case of zero is not considered.
-         * @private
-         * @property _runCallbacksIsPending
-         * @type boolean
-         **/
-        this._triggerCounter = CallbackCollection.DEFAULT_TRIGGER_COUNT;
-
-        /**
-         * A list of CallbackEntry objects for when dispose() is called.
-         * @private
-         * @property _disposeCallbackEntries
-         * @type Array
-         */
-        this._disposeCallbackEntries = [];
-        /**
-         * This value is used internally to remember if dispose() was called.
-         * @private
-         * @property _wasDisposed
-         * @type Boolean
-         * @default false
-         */
-        this._wasDisposed = false;
-
-        /**
-         * This flag is used in _runCallbacksImmediately() to detect when a recursive call has completed running all the callbacks.
-         * @private
-         * @property _runCallbacksCompleted
-         * @type Boolean
-         */
-        this._runCallbacksCompleted;
-
-        // public properties:
-        // readonly Properties
-
-        /**
-         * This counter gets incremented at the time that callbacks are triggered and before they are actually called.
-         * It is necessary in some situations to check this counter to determine if cached data should be used.
-         * @public
-         * @property triggerCounter
-         * @readOnly
-         * @type Number
-         */
-        Object.defineProperty(this, 'triggerCounter', {
-            get: function () {
-                return this._triggerCounter;
-            }
-        });
-
-        /**
-         * While this is true, it means the delay count is greater than zero and the effects of
-         * triggerCallbacks() are delayed until resumeCallbacks() is called to reduce the delay count.
-         * @public
-         * @property callbacksAreDelayed
-         * @readOnly
-         * @type Boolean
-         */
-        Object.defineProperty(this, 'callbacksAreDelayed', {
-            get: function () {
-                return this._delayCount > 0;
-            }
-        });
-
-        /**
-         * This flag becomes true after dispose() is called.
-         * @public
-         * @property wasDisposed
-         * @readOnly
-         * @type Boolean
-         */
-        Object.defineProperty(this, 'wasDisposed', {
-            get: function () {
-                return this._wasDisposed;
-            }
-        });
-
-
-
-    }
-
-    CallbackCollection.prototype = new weavecore.ILinkableObject();
-    CallbackCollection.prototype.constructor = CallbackCollection;
-
-    // Prototypes
-    //var p = CallbackCollection.prototype;
-    // public methods:
-    /**
-     * This adds the given function as a callback.  The function must not require any parameters.
-     * The callback function will not be called recursively as a result of it triggering callbacks recursively.
-     * @method addImmediateCallback
-     * @param {Object} relevantContext If this is not null, then the callback will be removed when the relevantContext object is disposed via SessionManager.dispose().  This parameter is typically a 'this' pointer.
-     * @param {Function} callback The function to call when callbacks are triggered.
-     * @param {Boolean} runCallbackNow If this is set to true, the callback will be run immediately after it is added.
-     * @param {Boolean} alwaysCallLast If this is set to true, the callback will be always be called after any callbacks that were added with alwaysCallLast=false.  Use this to establish the desired child-to-parent triggering order.
-     */
-    function addImmediateCallback(contextObj, callback, runCallbackNow, alwaysCallLast) {
-        if (callback === null || callback === undefined)
-            return;
-
-        // set default value for parameters
-        if (runCallbackNow === null || runCallbackNow === undefined)
-            runCallbackNow = false;
-
-        if (alwaysCallLast === null || alwaysCallLast === undefined)
-            alwaysCallLast = false;
-
-        // remove the callback if it was previously added
-        this.removeCallback(callback);
-
-        var entry = new CallbackEntry(contextObj, callback);
-        if (alwaysCallLast) // this will run the callback in second round of callback entries
-            entry.schedule = 1; //mostly parent.triggercallback are called last.
-        this._callbackEntries.push(entry);
-
-        if (runCallbackNow) {
-            // increase the recursion count while the function is running
-            entry.recursionCount++;
-            callback.call(this);
-            entry.recursionCount--;
-        }
-    };
-
-    /**
-     * This will trigger every callback function to be called with their saved arguments.
-     * If the delay count is greater than zero, the callbacks will not be called immediately.
-     * @method triggerCallbacks
-     */
-    function triggerCallbacks() {
-
-        if (CallbackCollection.debug) {
-            if (arguments)
-                console.log("triggerCallbacks", arguments);
-            else
-                console.log("triggerCallbacks", this);
-
-            this._lastTriggerStackTrace = new Error(CallbackCollection.STACK_TRACE_TRIGGER).stack;
-        }
-
-        if (this._delayCount > 0) {
-            // we still want to increase the counter even if callbacks are delayed
-            this._triggerCounter++;
-            if (CallbackCollection.debug) console.log("triggerCallbacks: _runCallbacksIsPending ->true", this._delayCount, this._triggerCounter);
-            this._runCallbacksIsPending = true;
-            return;
-        }
-        this._runCallbacksImmediately();
-    };
-
-
-    /**
-     * This function runs callbacks immediately, ignoring any delays.
-     * The preCallback function will be called with the specified preCallbackParams arguments.
-     * @method _runCallbacksImmediately
-     * @param preCallbackParams The arguments to pass to the preCallback function given in the constructor.
-     * @protected
-     * @final
-     */
-    function _runCallbacksImmediately() {
-        if (CallbackCollection.debug) {
-            if (arguments.length > 1) console.log("_runCallbacksImmediately: ", arguments);
-        }
-        var preCallbackParams = arguments;
-        //increase the counter immediately
-        this._triggerCounter++;
-        this._runCallbacksIsPending = false;
-
-        // This flag is set to false before running the callbacks.  When it becomes true, the loop exits.
-        this._runCallbacksCompleted = false;
-
-        for (var schedule = 0; schedule < 2; schedule++) {
-            // run the callbacks in the order they were added
-            for (var i = 0; i < this._callbackEntries.length; i++) {
-                // If this flag is set to true, it means a recursive call has finished running callbacks.
-                // If _preCallback is specified, we don't want to exit the loop because that cause a loss of information.
-                if (this._runCallbacksCompleted && (this._preCallback === undefined || this._preCallback === null))
-                    break;
-
-                var entry = this._callbackEntries[i];
-
-                // if we haven't reached the matching schedule yet, skip this callback
-                if (entry.schedule != schedule)
-                    continue;
-                // Remove the entry if the context was disposed by SessionManager.
-                var shouldRemoveEntry;
-                if (entry.callback === null || entry.callback === undefined)
-                    shouldRemoveEntry = true;
-                else if (entry.context instanceof CallbackCollection) // special case
-                    shouldRemoveEntry = entry.context.wasDisposed;
-                else
-                    shouldRemoveEntry = WeaveAPI.SessionManager.objectWasDisposed(entry.context);
-                if (shouldRemoveEntry) {
-                    if (CallbackCollection.debug) {
-                        if (arguments.length > 1) console.log("Entry is disposed");
-                    }
-                    entry.dispose();
-                    // remove the empty callback reference from the list
-                    var removed = this._callbackEntries.splice(i--, 1); // decrease i because remaining entries have shifted
-                    if (CallbackCollection.debug)
-                        this._oldEntries = this._oldEntries ? this._oldEntries.concat(removed) : removed;
-                    continue;
-                }
-                // if _preCallback is specified, we don't want to limit recursion because that would cause a loss of information.
-                if (entry.recursionCount === 0 || (this._preCallback !== undefined && this._preCallback !== null)) {
-                    entry.recursionCount++; // increase count to signal that we are currently running this callback.
-                    if (this._preCallback !== undefined && this._preCallback !== null)
-                        this._preCallback.apply(this, preCallbackParams);
-                    if (CallbackCollection.debug) {
-                        if (arguments.length > 1) console.log(["callback executed"]);
-                    }
-                    entry.callback.call();
-
-                    entry.recursionCount--; // decrease count because the callback finished.
-                }
-            }
-        }
-        // This flag is now set to true in case this function was called recursively.  This causes the outer call to exit its loop.
-        this._runCallbacksCompleted = true;
-    };
-
-    /**
-     * This function will remove a callback that was previously added.
-     * @method removeCallback
-     * @param {Function} callback The function to remove from the list of callbacks.
-     */
-    function removeCallback(callback) {
-        // if the callback was added as a grouped callback, we need to remove the trigger function
-        GroupedCallbackEntry.removeGroupedCallback(this, callback);
-        // find the matching CallbackEntry, if any
-        for (var outerLoop = 0; outerLoop < 2; outerLoop++) {
-            var entries = outerLoop === 0 ? this._callbackEntries : this._disposeCallbackEntries;
-            for (var index = 0; index < entries.length; index++) {
-                var entry = entries[index];
-                if (entry !== null && entry !== undefined && callback === entry.callback) {
-                    // Remove the callback by setting the function pointer to null.
-                    // This is done instead of removing the entry because we may be looping over the _callbackEntries Array right now.
-                    entry.dispose();
-                }
-            }
-        }
-    };
-
-
-
-    /**
-     * This will increase the delay count by 1.  To decrease the delay count, use resumeCallbacks().
-     * As long as the delay count is greater than zero, effects of triggerCallbacks() will be delayed.
-     * @method delayCallbacks
-     */
-    function delayCallbacks() {
-        this._delayCount++;
-    };
-
-    /**
-     * This will decrease the delay count by one if it is greater than zero.
-     * If triggerCallbacks() was called while the delay count was greater than zero, immediate callbacks will be called now.
-     * @method resumeCallbacks
-     */
-    function resumeCallbacks() {
-        if (this._delayCount > 0)
-            this._delayCount--;
-
-        if (this._delayCount === 0 && this._runCallbacksIsPending)
-            this.triggerCallbacks("resume Callbacks");
-    };
-
-    /**
-     * This will add a callback that will only be called once, when this callback collection is disposed.
-     * @method addDisposeCallback
-     * @param {Object} relevantContext If this is not null, then the callback will be removed when the relevantContext object is disposed via SessionManager.dispose().  This parameter is typically a 'this' pointer.
-     * @param callback {Function} The function to call when this callback collection is disposed.
-     */
-    function addDisposeCallback(relevantContext, callback) {
-        // don't do anything if the dispose callback was already added
-        for (var i = 0; i < this._disposeCallbackEntries.length; i++) {
-            var entry = this._disposeCallbackEntries[i];
-            if (entry.callback === callback)
-                return;
-        }
-
-
-        this._disposeCallbackEntries.push(new CallbackEntry(relevantContext, callback));
-    };
-
-
-    /**
-     * This function will be called automatically when the object is no longer needed, and should not be called directly.
-     * Use disposeObject() instead so parent-child relationships get cleaned up automatically.
-     * @method dispose
-     */
-    function dispose() {
-        // remove all callbacks
-        if (CallbackCollection.debug)
-            this._oldEntries = this._oldEntries ? this._oldEntries.concat(this._callbackEntries) : this._callbackEntries.concat();
-
-        this._callbackEntries.length = 0;
-        this._wasDisposed = true;
-
-        // run & remove dispose callbacks
-        while (this._disposeCallbackEntries.length) {
-            var entry = this._disposeCallbackEntries.shift();
-            if (entry.callback !== null && entry.callback !== undefined && !WeaveAPI.SessionManager.objectWasDisposed(entry.context)) {
-                entry.callback();
-            }
-        }
-    };
-
-
-
-    /**
-     * Adds a callback that will only be called during a scheduled time each frame.  Grouped callbacks use a central trigger list,
-     * meaning that if multiple ICallbackCollections trigger the same grouped callback before the scheduled time, it will behave as
-     * if it were only triggered once.  For this reason, grouped callback functions cannot have any parameters.  Adding a grouped
-     * callback to a ICallbackCollection will undo any previous effects of addImmediateCallback() or addDisposeCallback() made to the
-     * same ICallbackCollection.  The callback function will not be called recursively as a result of it triggering callbacks recursively.
-     * @method addGroupedCallback
-     * @param relevantContext {Object} If this is not null, then the callback will be removed when the relevantContext object is disposed via SessionManager.dispose().  This parameter is typically a 'this' pointer.
-     * @param groupedCallback {Function} The callback function that will only be allowed to run during a scheduled time each frame.  It must not require any parameters.
-     * @param triggerCallbackNow {Boolean} If this is set to true, the callback will be triggered to run during the scheduled time after it is added.
-     */
-    function addGroupedCallback(relevantContext, groupedCallback, triggerCallbackNow) {
-        //set default value for parameters
-        if (triggerCallbackNow === null || triggerCallbackNow === undefined)
-            triggerCallbackNow = false;
-        GroupedCallbackEntry.addGroupedCallback(this, relevantContext, groupedCallback, triggerCallbackNow);
-    };
-
-
-
-    weavecore.CallbackCollection = CallbackCollection;
-    weavecore.ClassUtils.registerClass('weavecore.CallbackCollection', CallbackCollection);
-
-
-    // constructor:
-    /**
-     * Internal Class used in {{#crossLink "CallbackCollection"}}{{/crossLink}}
-     * @class CallbackEntry
-     * @for CallbackCollection
-     * @param {Object} context
-     * @param {Function} callback
-     * @constructor
-     */
-    function CallbackEntry(context, callback) {
-        /**
-         * This is the context in which the callback function is relevant.
-         * When the context is disposed, the callback should not be called anymore.
-         * @public
-         * @property context
-         * @type Object
-         */
-        this.context = context;
-        /**
-         * This is the callback function.
-         * @public
-         * @property callback
-         * @type Function
-         */
-        this.callback = callback;
-        /**
-         * This is the current recursion depth.
-         * If this is greater than zero, it means the function is currently running.
-         * @public
-         * @property recursionCount
-         * @type number
-         */
-        this.recursionCount = 0;
-        /**
-         * This is 0 if the callback was added with alwaysCallLast=false, or 1 for alwaysCallLast=true
-         * @public
-         * @property schedule
-         * @type number
-         */
-        this.schedule = 0;
-
-        /**
-         * This is a stack trace from when the callback was added.
-         * @public
-         * @property addCallback_stackTrace
-         * @type string
-         */
-        this.addCallback_stackTrace;
-        /**
-         * This is a stack trace from when the callback was removed.
-         * @public
-         * @property removeCallback_stackTrace
-         * @type string
-         */
-        this.removeCallback_stackTrace;
-
-        // var p = this.prototype ? this.prototype : this.__proto__;
-        var p = this;
-        p.dispose = weavecore.ClassUtils.bind(this, callbackEntryDispose);
-
-        if (CallbackCollection.debug)
-            this.addCallback_stackTrace = new Error(CallbackEntry.STACK_TRACE_ADD).stack;
-    }
-
-    //Static Properties:
-    /**
-     * Internal Static const properties for Debugging
-     * @private
-     * @static
-     * @property STACK_TRACE_TRIGGER
-     * @readOnly
-     * @default "This is the stack trace from when the callbacks were last triggered."
-     * @type string
-     */
-    Object.defineProperty(CallbackEntry, 'STACK_TRACE_TRIGGER', {
-        value: "This is the stack trace from when the callbacks were last triggered."
-    });
-    /**
-     * Internal Static const properties for Debugging
-     * @private
-     * @static
-     * @property STACK_TRACE_ADD
-     * @readOnly
-     * @default "This is the stack trace from when the callback was added."
-     * @type string
-     */
-    Object.defineProperty(CallbackEntry, 'STACK_TRACE_ADD', {
-        value: "This is the stack trace from when the callback was added."
-    });
-    /**
-     * Internal Static const properties for Debugging
-     * @private
-     * @static
-     * @property STACK_TRACE_REMOVE
-     * @readOnly
-     * @default "This is the stack trace from when the callback was removed."
-     * @type string
-     */
-    Object.defineProperty(CallbackEntry, 'STACK_TRACE_REMOVE', {
-        value: "This is the stack trace from when the callback was removed."
-    });
-
-    /**
-     * Call this when the callback entry is no longer needed.
-     * @method dispose
-     */
-    function callbackEntryDispose() {
-        if (CallbackCollection.debug && this.callback !== null && this.callback !== undefined)
-            this.removeCallback_stackTrace = new Error(CallbackEntry.STACK_TRACE_REMOVE).stack;
-
-        this.context = null;
-        this.callback = null;
-    };
-
-    weavecore.CallbackEntry = CallbackEntry;
-
-
-    // constructor:
-    /**
-     * Internal Class used in {{#crossLink "CallbackCollection"}}{{/crossLink}}
-     * @class GroupedCallbackEntry
-     * @extends CallbackEntry
-     * @for CallbackCollection
-     * @param {Function} groupedCallback
-     * @constructor
-     */
-    function GroupedCallbackEntry(groupedCallback) {
-
-        CallbackEntry.call(this, [], groupedCallback);
-
-        // var p = this.prototype ? this.prototype : this.__proto__;
-        var p = this;
-        p.trigger = weavecore.ClassUtils.bind(this, trigger);
-        p.handleGroupedCallback = weavecore.ClassUtils.bind(this, handleGroupedCallback);
-        /**
-         * If true, the callback was triggered this frame.
-         * @public
-         * @property triggered
-         * @type Boolean
-         * @default false
-         */
-        this.triggered = false;
-
-        /**
-         * If true, the callback was triggered again from another grouped callback.
-         * @public
-         * @property triggeredAgain
-         * @type Boolean
-         * @default false
-         */
-        this.triggeredAgain = false;
-
-
-        if (!GroupedCallbackEntry._initialized) {
-            WeaveAPI.StageUtils.addEventCallback("tick", null, GroupedCallbackEntry._handleGroupedCallbacks);
-            GroupedCallbackEntry._initialized = true;
-        }
-    }
-
-    //Static Properties:
-    /**
-     * True while handling grouped callbacks.
-     * @private
-     * @static
-     * @property _handlingGroupedCallbacks
-     * @default false
-     * @type Boolean
-     */
-    GroupedCallbackEntry._handlingGroupedCallbacks = false;
-
-    /**
-     * True while handling grouped callbacks called recursively from other grouped callbacks.
-     * @private
-     * @static
-     * @property _handlingRecursiveGroupedCallbacks
-     * @default false
-     * @type Boolean
-     */
-    GroupedCallbackEntry._handlingRecursiveGroupedCallbacks = false;
-
-    /**
-     * This gets set to true when the static _handleGroupedCallbacks() callback has been added as a frame listener.
-     * @private
-     * @static
-     * @property _initialized
-     * @default false
-     * @type Boolean
-     */
-    GroupedCallbackEntry._initialized = false;
-
-    /**
-     * This maps a groupedCallback function to its corresponding GroupedCallbackEntry.
-     * @private
-     * @static
-     * @readOnly
-     * @property _entryLookup
-     * @type Map
-     */
-    Object.defineProperty(GroupedCallbackEntry, '_entryLookup', {
-        value: new Map()
-    });
-
-    /**
-     * This is a list of GroupedCallbackEntry objects in the order they were triggered.
-     * @private
-     * @static
-     * @readOnly
-     * @property _triggeredEntries
-     * @type Array
-     */
-    Object.defineProperty(GroupedCallbackEntry, '_triggeredEntries', {
-        value: []
-    });
-
-    //Static Methods:
-
-    /**
-     * @method addGroupedCallback
-     * @static
-     * @param {CallbackCollection} callbackCollection
-     * @param {Object} relevantContext
-     * @param {Function} groupedCallback
-     * @param {Boolean} triggerCallbackNow
-     */
-    GroupedCallbackEntry.addGroupedCallback = function (callbackCollection, relevantContext, groupedCallback, triggerCallbackNow) {
-        // get (or create) the shared entry for the groupedCallback
-        var entry = GroupedCallbackEntry._entryLookup.get(groupedCallback);
-        if (!entry) {
-            entry = new GroupedCallbackEntry(groupedCallback);
-            GroupedCallbackEntry._entryLookup.set(groupedCallback, entry);
-        }
-
-        // context shouldn't be null because we use it to determine when to clean up the GroupedCallbackEntry.
-        if (relevantContext === null || relevantContext === undefined)
-            relevantContext = callbackCollection;
-
-        // add this context to the list of relevant contexts
-        entry.context.push(relevantContext);
-
-
-        // make sure the actual function is not already added as a callback.
-        callbackCollection.removeCallback(groupedCallback);
-
-        // add the trigger function as a callback
-        // The relevantContext parameter is set to null for entry.trigger so the same callback can be added multiple times to the same
-        // target using different contexts without having the side effect of losing the callback when one of those contexts is disposed.
-        // The entry.trigger function will be removed once all contexts are disposed.
-        // entry.trigger = entry.trigger.bind(entry);
-        callbackCollection.addImmediateCallback(null, entry.trigger, triggerCallbackNow);
-    };
-
-    /**
-     * @method removeGroupedCallback
-     * @static
-     * @param {CallbackCollection} callbackCollection
-     * @param {Function} groupedCallback
-     */
-    GroupedCallbackEntry.removeGroupedCallback = function (callbackCollection, groupedCallback) {
-        // remove the trigger function as a callback
-        var entry = GroupedCallbackEntry._entryLookup.get(groupedCallback);
-        if (entry)
-            callbackCollection.removeCallback(entry.trigger);
-    };
-
-    /**
-     * This function gets called once per frame and allows grouped callbacks to run.
-     * @method _handleGroupedCallbacks
-     * @static
-     * @private
-     */
-    GroupedCallbackEntry._handleGroupedCallbacks = function () {
-        var i;
-        var entry;
-
-        GroupedCallbackEntry._handlingGroupedCallbacks = true; {
-            // Handle grouped callbacks in the order they were triggered,
-            // anticipating that more may be added to the end of the list in the process.
-            // This first pass does not allow grouped callbacks to call each other immediately.
-            for (i = 0; i < GroupedCallbackEntry._triggeredEntries.length; i++) {
-                entry = GroupedCallbackEntry._triggeredEntries[i];
-                entry.handleGroupedCallback();
-            }
-
-            // after all grouped callbacks have been handled once, run those which were triggered recursively and allow them to call other grouped callbacks immediately.
-            GroupedCallbackEntry._handlingRecursiveGroupedCallbacks = true; {
-                // handle grouped callbacks that were triggered recursively
-                for (i = 0; i < GroupedCallbackEntry._triggeredEntries.length; i++) {
-                    entry = GroupedCallbackEntry._triggeredEntries[i];
-                    if (entry.triggeredAgain)
-                        entry.handleGroupedCallback();
-                }
-            }
-            GroupedCallbackEntry._handlingRecursiveGroupedCallbacks = false;
-        }
-        GroupedCallbackEntry._handlingGroupedCallbacks = false;
-
-        // reset for next frame
-        for (i = 0; i < GroupedCallbackEntry._triggeredEntries.length; i++) {
-            entry = GroupedCallbackEntry._triggeredEntries[i];
-            entry.triggered = entry.triggeredAgain = false;
-        }
-        GroupedCallbackEntry._triggeredEntries.length = 0;
-
-    };
-
-    GroupedCallbackEntry.prototype = new CallbackEntry();
-    GroupedCallbackEntry.prototype.constructor = GroupedCallbackEntry;
-
-    var gcP = GroupedCallbackEntry.prototype;
-
-    /**
-     * Marks the entry to be handled later (unless already triggered this frame).
-     * This also takes care of preventing recursion.
-     * @method trigger
-     */
-    function trigger() {
-        // if handling recursive callbacks, call now
-        if (GroupedCallbackEntry._handlingRecursiveGroupedCallbacks) {
-            this.handleGroupedCallback();
-        } else if (!this.triggered) {
-            // not previously triggered
-            GroupedCallbackEntry._triggeredEntries.push(this);
-            this.triggered = true;
-        } else if (GroupedCallbackEntry._handlingGroupedCallbacks) {
-            // triggered recursively - call later
-            this.triggeredAgain = true;
-        }
-    };
-
-
-    /**
-     * Checks the context(s) before calling groupedCallback
-     * @method handleGroupedCallback
-     */
-    //gcP.handleGroupedCallback =
-    function handleGroupedCallback() {
-        if (!this.context)
-            return;
-
-        // first, make sure there is at least one relevant context for this callback.
-        var allContexts = this.context;
-        // remove the contexts that have been disposed.
-        for (var i = 0; i < allContexts.length; i++)
-            if (WeaveAPI.SessionManager.objectWasDisposed(allContexts[i]))
-                allContexts.splice(i--, 1);
-            // if there are no more relevant contexts for this callback, don't run it.
-        if (allContexts.length === 0) {
-            this.dispose();
-            GroupedCallbackEntry._entryLookup.delete(this.callback);
-            return;
-        }
-
-        // avoid immediate recursion
-        if (this.recursionCount === 0) {
-            this.recursionCount++;
-            this.callback();
-            this.recursionCount--;
-        }
-        // avoid delayed recursion
-        this.triggeredAgain = false;
-    };
-
-    weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
-
-}());
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-/**
- * Facilitates the creation of dynamic trees.
- */
-(function () {
-
-
-    WeaveTreeItem.createItems = function (WeaveTreeItem_implementation, items) {
-        var n = 0;
-        while (n !== items.length) {
-            n = items.length;
-            items = [].concat.apply(null, items);
-        }
-
-        return items.map(WeaveTreeItem._mapItems, WeaveTreeItem_implementation).filter(WeaveTreeItem._filterItemsRemoveNullsAndUndefined);
-
-    }
-
-    WeaveTreeItem._mapItems = function (item, i, a) {
-        if (item.constructor === Function) // to identify its a class object
-            return new item();
-        if (item.constructor === String || ((item !== null || item !== undefined) && item.constructor === Object)) {
-            var ItemClass = this || WeaveTreeItem;
-            return new ItemClass(item);
-        }
-        return item;
-
-    }
-
-    WeaveTreeItem._filterItemsRemoveNullsAndUndefined = function (item, i, a) {
-
-        return item !== null && item !== undefined;
-
-    }
-
-    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
-
-    /**
-     * Constructs a new WeaveTreeItem.
-     * @param params An Object containing property values to set on the WeaveTreeItem.
-     *               If params is a String, both <code>label</code> and <code>data</code> will be set to that String.
-     */
-
-    function WeaveTreeItem(params) {
-        //set default values
-        if (params === undefined) params = null;
-        /**
-         * Set this to change the constructor used for initializing child items.
-         * This variable is intentionally uninitialized to avoid overwriting the value set by an extending class in its constructor.
-         */
-        this.childItemClass; // IMPORTANT - no initial value
-        this._recursion = {}; // recursionName -> Boolean
-        this._label = "";
-        this._children = null;
-        this._dependency = null;
-        /**
-         * Cached values that get invalidated when the source triggers callbacks.
-         */
-        this._cache = {};
-
-        /**
-         * Cached values of getCallbackCollection(source).triggerCounter.
-         */
-        this._counter = {};
-
-
-        //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
-
-        /**
-         * This can be set to either a String or a Function.
-         * This property is checked by Flex's default data descriptor.
-         * If this property is not set, the <code>data</code> property will be used as the label.
-         */
-        Object.defineProperty(this, 'label', {
-            get: function () {
-                const id = 'label';
-                if (this.isCached(id))
-                    return this._cache[id];
-
-                var str = this.getString(this._label, id);
-                if (!str && this.data !== null && this.data !== undefined)
-                    str = String(this.data);
-                return this.cache(id, str);
-            },
-            set: function (value) {
-                this._counter['label'] = undefined;
-                this._label = value;
-            },
-            configurable: true
-        });
-
-
-
-
-        Object.defineProperty(this, 'children', {
-            /**
-             * Gets a filtered copy of the child menu items.
-             * When this property is accessed, refresh() will be called except if refresh() is already being called.
-             * This property is checked by Flex's default data descriptor.
-             */
-            get: function () {
-                const id = 'children';
-
-                var items;
-                if (this.isCached(id))
-                    items = this._cache[id];
-                else
-                    items = this.getObject(this._children, id);
-                if (items) {
-                    // overwrite original array to support filling it asynchronously
-                    var iOut = 0;
-                    for (var i = 0; i < items.length; i++) {
-                        var item = WeaveTreeItem._mapItems.call(this.childItemClass, items[i], i, items);
-                        if (item != null)
-                            items[iOut++] = item;
-                    }
-                }
-
-                return this.cache(id, items);
-            },
-            /**
-             * This can be set to either an Array or a Function that returns an Array.
-             * The function can be like function():void or function(item:WeaveTreeItem):void.
-             * The Array can contain either WeaveTreeItems or Objects, each of which will be passed to the WeaveTreeItem constructor.
-             */
-            set: function (value) {
-                this._counter['children'] = undefined;
-                this._children = value;
-            }
-        });
-
-
-        /**
-         * A pointer to the ILinkableObject that created this node.
-         * This is used to determine when to invalidate cached values.
-         */
-        Object.defineProperty(this, 'dependency', {
-            get: function () {
-                if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency)) {
-                    this.dependency = null;
-                }
-                return this._dependency;
-            },
-            set: function (value) {
-                if (this._dependency != value)
-                    this._counter = {};
-                this._dependency = value;
-            }
-        });
-
-        /**
-         * This can be any data associated with this tree item.
-         */
-        this.data = null;
-
-        if (typeof (params) === 'string') {
-            this.label = params;
-            this.data = params;
-        } else
-            for (var key in params)
-                this[key] = params[key];
-    }
-
-
-
-
-
-
-    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
-    var p = WeaveTreeItem.prototype;
-    /**
-     * Computes a Boolean value from various structures
-     * @param param Either a Boolean, and Object like {not: param}, a Function, an ILinkableVariable, or an Array of those objects.
-     * @param recursionName A name used to keep track of recursion.
-     * @return A Boolean value derived from the param, or the param itself if called recursively.
-     */
-    p.getBoolean = function (param, recursionName) {
-        if (!this._recursion[recursionName]) {
-            try {
-                this._recursion[recursionName] = true;
-
-                if (this.isSimpleObject(param, 'not'))
-                    param = !this.getBoolean(param['not'], "not_" + recursionName);
-                if (this.isSimpleObject(param, 'or'))
-                    param = this.getBoolean(param['or'], "or_" + recursionName);
-                if (typeof (param) === "function")
-                    param = this.evalFunction(param);
-                if (param instanceof weavecore.LinkableVariable)
-                    param = param.getSessionState();
-                if (param instanceof Array) {
-                    var breakValue = recursionName.indexOf("or_") === 0;
-                    for (var param in param) {
-                        param = this.getBoolean(param, "item_" + recursionName);
-                        if (param ? breakValue : !breakValue)
-                            break;
-                    }
-                }
-                param = param ? true : false;
-            } finally {
-                this._recursion[recursionName] = false;
-            }
-        }
-        return param;
-    };
-
-    /**
-     * Checks if an object has a single specified property.
-     */
-    p.isSimpleObject = function (object, singlePropertyName) {
-
-
-        var found = false;
-        for (var key in object) {
-            if (found)
-                return false; // two or more properties
-
-            if (key !== singlePropertyName)
-                return false; // not the desired property
-
-            found = true; // found the desired property
-        }
-        return found;
-    };
-
-    /**
-     * Gets a String value from a String or Function.
-     * @param param Either a String or a Function.
-     * @param recursionName A name used to keep track of recursion.
-     * @return A String value derived from the param, or the param itself if called recursively.
-     */
-    p.getString = function (param, recursionName) {
-        if (!this._recursion[recursionName]) {
-            try {
-                this._recursion[recursionName] = true;
-
-                if (typeof (param) === "function")
-                    param = this.evalFunction(param);
-                else
-                    param = param || '';
-            } finally {
-                this._recursion[recursionName] = false;
-            }
-        }
-        return param;
-    };
-
-    /**
-     * Evaluates a function to get an Object or just returns the non-Function Object passed in.
-     * @param param Either an Object or a Function.
-     * @param recursionName A name used to keep track of recursion.
-     * @return An Object derived from the param, or the param itself if called recursively.
-     */
-    p.getObject = function (param, recursionName) {
-        if (!this._recursion[recursionName]) {
-            try {
-                this._recursion[recursionName] = true;
-
-                if (typeof (param) === "function")
-                    param = this.evalFunction.call(this, param);
-            } finally {
-                this._recursion[recursionName] = false;
-            }
-        }
-        return param;
-    };
-
-    /**
-     * First tries calling a function with no parameters.
-     * If an ArgumentError is thrown, the function will called again, passing this WeaveTreeItem as the first parameter.
-     */
-    p.evalFunction = function (func) {
-        try {
-            try {
-                // first try calling the function with no parameters
-                return func();
-            } catch (e) {
-                //To-Docreate Argument error object
-                // and on each function if the argument is required, and if not passed throw that Argument error object
-                // console.log(e);
-                /*if (!(e is ArgumentError))
-				{
-					if (e is Error)
-						trace((e as Error).getStackTrace());
-					throw e;
-				}*/
-            }
-
-            // on ArgumentError, pass in this WeaveTreeItem as the first parameter
-            //console.log('executing after ArgumentError');
-            return func(this);
-
-        } catch (e) {
-            console.error(e);
-        }
-
-    };
-
-    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
-
-    /**
-     * Checks if cached value is valid.
-     * Always returns false if the source property is not set.
-     * @param id A string identifying a property.
-     * @return true if the property value has been cached.
-     */
-    p.isCached = function (id) {
-        if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency))
-            source = null;
-        return this._dependency && this._counter[id] === WeaveAPI.SessionManager.getCallbackCollection(this._dependency).triggerCounter;
-    };
-
-    /**
-     * Retrieves or updates a cached value for a property.
-     * Does not cache the value if the source property is not set.
-     * @param id A string identifying a property.
-     * @param newValue Optional new value to cache for the property.
-     * @return The new or existing value for the property.
-     */
-    p.cache = function (id, newValue) {
-        if (arguments.length === 1)
-            return this._cache[id];
-
-        if (this._source && WeaveAPI.SessionManager.objectWasDisposed(this._source))
-            source = null;
-        if (this._source) {
-            this._counter[id] = WeaveAPI.SessionManager.getCallbackCollection(this._source).triggerCounter;
-            this._cache[id] = newValue;
-        }
-        return newValue;
-    };
-
-
-
-
-
-
-    weavecore.WeaveTreeItem = WeaveTreeItem;
-
-}());
-
-/*
-    Weave (Web-based Analysis and Visualization Environment)
-    Copyright (C) 2008-2011 University of Massachusetts Lowell
-
-    This file is a part of Weave.
-
-    Weave is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License, Version 3,
-    as published by the Free Software Foundation.
-
-    Weave is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with Weave.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-/**
- * This is a wrapper for a 2-dimensional Dictionary.
- *
- * @author adufilie
- * @author sanjay1909
- */
-
-(function () {
-    function Dictionary2D(weakPrimaryKeys, weakSecondaryKeys, defaultType) {
-        weakPrimaryKeys = (weakPrimaryKeys === undefined) ? false : weakPrimaryKeys;
-        weakSecondaryKeys = (weakSecondaryKeys === undefined) ? false : weakSecondaryKeys;
-
-        this.dictionary = weakPrimaryKeys ? new Map() : new Map();
-        this.defaultType = defaultType; // used for creating objects automatically via get()
-        this.weak2 = weakSecondaryKeys // used as a constructor parameter for nested Dictionaries
-    }
-
-    var p = Dictionary2D.prototype;
-
-    /**
-     *
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @return The value in the dictionary.
-     */
-    p.get = function (key1, key2) {
-        var value;
-        var d2 = this.dictionary.get(key1);
-        if (d2)
-            value = d2.get(key2);
-        if (value === undefined && this.defaultType) {
-            value = new this.defaultType();
-            this.set(key1, key2, value);
-        }
-        return value;
-    };
-
-    /**
-     * This will add or replace an entry in the dictionary.
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @param value The value to put into the dictionary.
-     */
-    p.set = function (key1, key2, value) {
-        var d2 = this.dictionary.get(key1);
-        if (d2 === null || d2 === undefined) {
-            d2 = this.weak2 ? new Map() : new Map();
-            this.dictionary.set(key1, d2);
-        }
-        d2.set(key2, value);
-    };
-
-    /**
-     * This removes all values associated with the given primary key.
-     * @param key1 The first dictionary key.
-     */
-    p.removeAllPrimary = function (key1) {
-        this.dictionary.delete(key1);
-    };
-
-    /**
-     * This removes all values associated with the given secondary key.
-     * @param key2 The second dictionary key.
-     */
-    p.removeAllSecondary = function (key2) {
-        for (var key1 of this.dictionary.keys()) {
-            this.dictionary.get(key1).delete(key2);
-        };
-    };
-
-    /**
-     * This removes a value associated with the given primary and secondary keys.
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @return The value that was in the dictionary.
-     */
-    p.remove = function (key1, key2) {
-        var value;
-        var d2 = this.dictionary.get(key1);
-        if (d2) {
-            value = d2.get(key2);
-            d2.delete(key2);
-        }
-
-
-        for (var v2 of d2.values())
-            return value;
-
-        // otherwise, remove it
-        this.dictionary.delete(key1);
-
-        return value;
-    };
-
-    weavecore.Dictionary2D = Dictionary2D;
-}());
-
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-(function () {
-
-    /**
-     * This constructor allows you to specify the three most important flash_proxy functions
-     * and an optional custom flash_proxy::callProperty function.
-     * @param hasProperty function hasProperty(name:*):Boolean
-     * @param getProperty function getProperty(name:*):*
-     * @param setProperty function setProperty(name:*, value:*):void
-     * @param callProperty function callProperty(name:*, ...parameters):*
-     */
-    function ProxyObject(hasProperty, getProperty, setProperty, callProperty) {
-        callProperty = (callProperty === undefined) ? null : callProperty;
-
-        /*Proxy.call(this);
-
-            this._has = handler.hasProperty;
-		this._get = super.flash_proxy::getProperty as Function;
-		this._set = super.flash_proxy::setProperty as Function;
-		this._call = null;
-			if (hasProperty !== null)
-				_has = hasProperty;
-			if (getProperty != null)
-				_get = getProperty;
-			if (setProperty != null)
-				_set = setProperty;
-			if (callProperty != null)
-				_call = callProperty;*/
-    }
-
-    /*override flash_proxy function hasProperty(name:*):Boolean
-    {
-    	return _has.call(this, name);
-    }
-
-    override flash_proxy function getProperty(name:*):*
-    {
-    	return _get.call(this, name);
-    }
-
-    override flash_proxy function setProperty(name:*, value:*):void
-    {
-    	_set.call(this, name, value);
-    }
-
-    override flash_proxy function callProperty(name:*, ...parameters):*
-    {
-    	if (_call == null)
-    		return _get.call(this, name).apply(this, parameters);
-
-    	parameters.unshift(name);
-    	return _call.apply(this, parameters);
-    }*/
-
-    weavecore.ProxyObject = ProxyObject;
-
-}());
-
-/**
- * @module weavecore
- */
-
-// namespace
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
-}
-
-
-(function () {
-    "use strict";
-
-    // constructor:
-    /**
-     * Session manager contains core functions related to session state.
-     * @class SessionManager
-     * @constructor
-     */
-    function SessionManager() {
-
-        //const properties - writable default to false.
-        /**
-         * @private
-         * @readOnly
-         * @property _childToParentMap
-         * @type Map
-         * This maps a child ILinkableObject to a Dictionary, which maps each of its registered parent ILinkableObjects to a value of true if the child should appear in the session state automatically or false if not.
-         */
-        Object.defineProperty(this, "_childToParentMap", {
-            value: new Map()
-        });
-
-        /**
-         * @private
-         * @readOnly
-         * @property _parentToChildMap
-         * @type Map
-         * This maps a parent ILinkableObject to a Dictionary, which maps each of its registered child ILinkableObjects to a value of true if the child should appear in the session state automatically or false if not.
-         */
-        Object.defineProperty(this, "_parentToChildMap", {
-            value: new Map()
-        });
-
-        /**
-         * @private
-         * @readOnly
-         * @property _ownerToChildMap
-         * @type Map
-         * This maps a parent ILinkableObject to a Dictionary, which maps each child ILinkableObject it owns to a value of true.
-         */
-        Object.defineProperty(this, "_ownerToChildMap", {
-            value: new Map()
-        });
-
-        /**
-         * This maps a child ILinkableObject to its registered owner.
-         * @private
-         * @readOnly
-         * @property _childToOwnerMap
-         * @type Map
-         */
-        Object.defineProperty(this, "_childToOwnerMap", {
-            value: new Map()
-        });
-
-        this.debug = false;
-
-        this.linkableObjectToCallbackCollectionMap = new Map();
-        this.debugBusyTasks = false;
-
-        /**
-         * @private
-         * @readOnly
-         * @property _disposedObjectsMap
-         * @type Map
-         */
-        Object.defineProperty(this, "_disposedObjectsMap", {
-            value: new Map()
-        });
-
-        /**
-         * @private
-         * @readOnly
-         * @property _treeCallbacks
-         * @type CallbackCollection
-         */
-        Object.defineProperty(this, "_treeCallbacks", {
-            value: new weavecore.CallbackCollection()
-        });
-
-        /**
-         * @private
-         * @readOnly
-         * @property _classNameToSessionedPropertyNames
-         * @type Object
-         */
-        Object.defineProperty(this, "_classNameToSessionedPropertyNames", {
-            value: {}
-        });
-
-        /**
-         * keeps track of which objects are currently being traversed
-         * @private
-         * @readOnly
-         * @property _getSessionStateIgnoreList
-         * @type Map
-         */
-        Object.defineProperty(this, "_getSessionStateIgnoreList", {
-            value: new Map()
-        });
-
-
-        /**
-         * @private
-         * @readOnly
-         * @property _dTaskStackTrace
-         * @type Map
-         */
-        Object.defineProperty(this, "_dTaskStackTrace", {
-            value: new Map()
-        });
-
-        /**
-         * @private
-         * @readOnly
-         * @property _d2dOwnerTask
-         * @type weavecore.Dictionary2D
-         */
-        Object.defineProperty(this, "_d2dOwnerTask", {
-            value: new weavecore.Dictionary2D(true, false)
-        });
-
-        /**
-         * @private
-         * @readOnly
-         * @property _d2dTaskOwner
-         * @type weavecore.Dictionary2D
-         */
-        Object.defineProperty(this, "_d2dTaskOwner", {
-            value: new weavecore.Dictionary2D(false, true)
-        });
-
-        /**
-         * ILinkableObject -> Boolean
-         * @private
-         * @readOnly
-         * @property _dBusyTraversal
-         * @type Map
-         */
-        Object.defineProperty(this, "_dBusyTraversal", {
-            value: new Map()
-        });
-
-        /**
-         * @private
-         * @readOnly
-         * @property _aBusyTraversal
-         * @type Array
-         */
-        Object.defineProperty(this, "_aBusyTraversal", {
-            value: []
-        });
-
-        /**
-         * ILinkableObject -> int
-         * @private
-         * @readOnly
-         * @property _dUnbusyTriggerCounts
-         * @type Map
-         */
-        Object.defineProperty(this, "_dUnbusyTriggerCounts", {
-            value: new Map()
-        });
-
-        /**
-         * ILinkableObject -> String
-         * @private
-         * @readOnly
-         * @property _dUnbusyStackTraces
-         * @type Map
-         */
-        Object.defineProperty(this, "_dUnbusyStackTraces", {
-            value: new Map()
-        });
-
-        /**
-         * @private
-         * @readOnly
-         * @property _treeCache
-         * @type weavecore.Dictionary2D
-         */
-        Object.defineProperty(this, "_treeCache", {
-            value: new weavecore.Dictionary2D(true, false, weavecore.WeaveTreeItem)
-        });
-
-        /**
-         * This maps destination and source ILinkableObjects to a function like:
-         *     function():void { setSessionState(destination, getSessionState(source), true); }
-         */
-        Object.defineProperty(this, "linkFunctionCache", {
-            value: new weavecore.Dictionary2D(true, true)
-        });
-
-
-        this.__proto__._getTreeItemChildren = this.__proto__._getTreeItemChildren.bind(this);
-
-    }
-
-    var p = SessionManager.prototype;
-
-
-
-    /**
-     * This function tells the SessionManager that the session state of the specified child should appear in the
-     * session state of the specified parent, and the child should be disposed when the parent is disposed.
-     *
-     * There is one other requirement for the child session state to appear in the parent session state -- the child
-     * must be accessible through a public variable of the parent or through an accessor function of the parent.
-     *
-     * This function will add callbacks to the sessioned children that cause the parent callbacks to run.
-     *
-     * If a callback function is given, the callback will be added to the child and cleaned up when the parent is disposed.
-     *
-     * @method registerLinkableChild
-     * @param {Object} linkableParent A parent ILinkableObject that the child will be registered with.
-     * @param {ILinkableObject} linkableChild The child ILinkableObject to register as a child.
-     * @param {Function} callback A callback with no parameters that will be added to the child that will run before the parent callbacks are triggered, or during the next ENTER_FRAME event if a grouped callback is used.
-     * @param {Boolean} useGroupedCallback If this is true, addGroupedCallback() will be used instead of addImmediateCallback().
-     * @return {Object} The linkableChild object that was passed to the function.
-     * @example usage:    const foo = registerLinkableChild(this, someLinkableNumber, handleFooChange);
-     */
-    p.registerLinkableChild = function (linkableParent, linkableChild, callback, useGroupedCallback) {
-        //set default values for parameters
-        if (useGroupedCallback === undefined)
-            useGroupedCallback = false;
-        if (!(linkableParent instanceof weavecore.ILinkableObject)) {
-            if (!linkableParent.sessionable) {
-                console.log("registerLinkableChild(): Parent does not inherit ILinkableObject. or sessionablepropery is not true");
-                return;
-            }
-        }
-
-        if (!(linkableChild instanceof weavecore.ILinkableObject)) {
-            if (!linkableChild.sessionable) {
-                console.log("registerLinkableChild(): child does not inherit ILinkableObject. or sessionablepropery is not true");
-                return;
-            }
-        }
-
-        if (callback !== null && callback !== undefined) {
-            var cc = this.getCallbackCollection.call(this, linkableChild);
-            if (useGroupedCallback)
-                cc.addGroupedCallback(linkableParent, callback);
-            else
-                cc.addImmediateCallback(linkableParent, callback);
-        }
-
-        // if the child doesn't have an owner yet, this parent is the owner of the child
-        // and the child should be disposed when the parent is disposed.
-        // registerDisposableChild() also initializes the required Dictionaries.
-        this.registerDisposableChild(linkableParent, linkableChild);
-
-        if (this._childToParentMap.get(linkableChild).get(linkableParent) === undefined) {
-            // remember this child-parent relationship
-            this._childToParentMap.get(linkableChild).set(linkableParent, true);
-            this._parentToChildMap.get(linkableParent).set(linkableChild, true);
-
-            // make child changes trigger parent callbacks
-            var parentCC = this.getCallbackCollection(linkableParent);
-            parentCC.triggerCallbacks = parentCC.triggerCallbacks.bind(parentCC, "Parent's -triggerCallback");
-            // set alwaysCallLast=true for triggering parent callbacks, so parent will be triggered after all the other child callbacks
-            this.getCallbackCollection(linkableChild).addImmediateCallback(linkableParent, parentCC.triggerCallbacks, false, true); // parent-child relationship
-        }
-
-        this._treeCallbacks.triggerCallbacks("Session Tree: Child Registered");
-
-        return linkableChild;
-    };
-
-    /**
-     * This will register a child of a parent and cause the child to be disposed when the parent is disposed.
-     * Use this function when a child object can be disposed but you do not want to link the callbacks.
-     * The child will be disposed when the parent is disposed.
-     *
-     * @method registerDisposableChild
-     * @example usage:    const foo = registerDisposableChild(this, someLinkableNumber);
-     *
-     * @param {Object} disposableParent A parent disposable object that the child will be registered with.
-     * @param {Object} disposableChild The disposable object to register as a child of the parent.
-     * @return {Object} The linkableChild object that was passed to the function.
-     */
-    p.registerDisposableChild = function (disposableParent, disposableChild) {
-        if (this._ownerToChildMap.get(disposableParent) === undefined) {
-            this._ownerToChildMap.set(disposableParent, new Map());
-            this._parentToChildMap.set(disposableParent, new Map());
-        }
-        // if this child has no owner yet...
-        if (this._childToOwnerMap.get(disposableChild) === undefined) {
-            // make this first parent the owner
-            this._childToOwnerMap.set(disposableChild, disposableParent);
-            this._ownerToChildMap.get(disposableParent).set(disposableChild, true);
-            // initialize the parent dictionary for this child
-            this._childToParentMap.set(disposableChild, new Map());
-        }
-        return disposableChild;
-    };
-
-    /**
-     * Use this function with care.  This will remove child objects from the session state of a parent and
-     * stop the child from triggering the parent callbacks.
-     * @method unregisterLinkableChild
-     * @param {ILinkableChild} parent A parent that the specified child objects were previously registered with.
-     * @param {ILinkableChild} child The child object to unregister from the parent.
-     */
-    p.unregisterLinkableChild = function (parent, child) {
-        if (this._childToParentMap.get(child))
-            this._childToParentMap.get(child).delete(parent);
-        if (this._parentToChildMap.get(parent))
-            this._parentToChildMap.get(parent).delete(child);
-        this.getCallbackCollection(child).removeCallback(this.getCallbackCollection(parent).triggerCallbacks);
-
-        this._treeCallbacks.triggerCallbacks("Session Tree: Child un-Registered");
-    };
-
-
-    /**
-     * This function will add or remove child objects from the session state of a parent.  Use this function
-     * with care because the child will no longer be "sessioned."  The child objects will continue to trigger the
-     * callbacks of the parent object, but they will no longer be considered a part of the parent's session state.
-     * If you are not careful, this will break certain functionalities that depend on the session state of the parent.
-     * @method excludeLinkableChildFromSessionState
-     * @param {ILinkableChild} parent A parent that the specified child objects were previously registered with.
-     * @param {ILinkableChild} child The child object to remove from the session state of the parent.
-     */
-    p.excludeLinkableChildFromSessionState = function (parent, child) {
-        if (parent === null || child === null || parent === undefined || child === undefined) {
-            console.log("SessionManager.excludeLinkableChildFromSessionState(): Parameters cannot be null.");
-            return;
-        }
-        if (this._childToParentMap.get(child) !== undefined && this._childToParentMap.get(child).get(parent))
-            this._childToParentMap.get(child).set(parent, false);
-        if (this._parentToChildMap.get(parent) !== undefined && this._parentToChildMap.get(parent).get(child))
-            this._parentToChildMap.get(parent).set(child, false);
-    };
-
-    /**
-     * @method _getRegisteredChildren
-     * @private
-     * This function will return all the child objects that have been registered with a parent.
-     * @param {ILinkableChild} parent A parent object to get the registered children of.
-     * @return {Array} An Array containing a list of linkable objects that have been registered as children of the specified parent.
-     *         This list includes all children that have been registered, even those that do not appear in the session state.
-     */
-    p._getRegisteredChildren = function (parent) {
-        var result = [];
-        if (this._parentToChildMap.get(parent) !== undefined)
-            for (var child in this._parentToChildMap.get(parent))
-                result.push(child);
-        return result;
-    };
-
-    /**
-     * This function gets the owner of a linkable object.  The owner of an object is defined as its first registered parent.
-     * @method getLinkableOwner
-     * @param {ILinkableObject} child An ILinkableObject that was registered as a child of another ILinkableObject.
-     * @return {ILinkableObject} The owner of the child object (the first parent that was registered with the child), or null if the child has no owner.
-     * See {{#crossLink "SessionManager/getLinkableDescendants:method"}}{{/crossLink}}
-     */
-    p.getLinkableOwner = function (child) {
-        return this._childToOwnerMap.get(child);
-    };
-
-    /**
-     * This function will return all the descendant objects that implement ILinkableObject.
-     * If the filter parameter is specified, the results will contain only those objects that extend or implement the filter class.
-     * @method getLinkableDescendants
-     * @param {ILinkableObject} root A root object to get the descendants of.
-     * @param {Class} filter An optional Class definition which will be used to filter the results.
-     * @return {Array} An Array containing a list of descendant objects.
-     * See {{#crossLink "SessionManager/getLinkableOwner:method"}}{{/crossLink}}
-     */
-    p.getLinkableDescendants = function (root, filter) { //TODO: Port getLinkableDescendants
-        filter = (filter === undefined) ? null : filter;
-        var result = [];
-        if (root)
-            internalGetDescendants.call(this, result, root, filter, new Map(), Number.MAX_VALUE);
-        // don't include root object
-        if (result.length > 0 && result[0] === root)
-            result.shift();
-        return result;
-    };
-
-
-    function internalGetDescendants(output, root, filter, ignoreList, depth) {
-        if (root === null || ignoreList.get(root) !== undefined)
-            return;
-        ignoreList.set(root, true);
-        if (filter === null || root instanceof filter)
-            output.push(root);
-        if (--depth <= 0)
-            return;
-
-        if (this._parentToChildMap.get(root)) {
-            for (var object of this._parentToChildMap.get(root).keys()) {
-                internalGetDescendants.call(this, output, object, filter, ignoreList, depth);
-            }
-        }
-
-    }
-
-    function _getPath(tree, descendant) {
-        if (tree.data === descendant)
-            return [];
-        var children = tree.children;
-        if (children) {
-            for (var i = 0; i < children.length; i++) {
-                var child = children[i];
-                var path = _getPath(child, descendant);
-                if (path) {
-                    path.unshift(child.label);
-                    //console.log('Path returned:', path);
-                    return path;
-                }
-            }
-        }
-        //console.log('null returned');
-        return null;
-    }
-
-    /**
-     * Gets the path of names in the session state tree of the root object.
-     * @param root The root(Ilinkableobject or sessionable) object used to generate a session state tree.
-     * @param child (Ilinkableobject or sessionable) The descendant object to find in the session state tree.
-     * @return {Array}The path from root to descendant, or null if the descendant does not appear in the session state.
-     */
-    p.getPath = function (root, descendant) {
-        if (!descendant)
-            return null;
-        var tree = this.getSessionStateTree(root, null);
-        var path = _getPath(tree, descendant);
-        return path;
-    }
-
-    /**
-     * This function returns a pointer to an ILinkableObject appearing in the session state.
-     * @param root The root object used to find a descendant object.
-     * @param path A sequence of child names used to refer to an object appearing in the session state.
-     *             A child index number may be used in place of a name in the path when its parent object is a LinkableHashMap.
-     * @return A pointer to the object referred to by objectPath.
-     * @see #getPath()
-     */
-    p.getObject = function (root, path) {
-        var object = root;
-        path.forEach(function (propertyName) {
-            if (object === null || this._disposedObjectsMap.get(object))
-                return null;
-            if (object instanceof weavecore.LinkableHashMap) {
-                if (propertyName.constructor === Number)
-                    object = object.getObjects()[propertyName];
-                else
-                    object = object.getObject(String(propertyName));
-            } else if (object instanceof weavecore.LinkableDynamicObject) {
-                // ignore propertyName and always return the internalObject
-                object = object.internalObject;
-            } else {
-                if (this.getLinkablePropertyNames(object).indexOf(propertyName) < 0)
-                    return null;
-                object = object[propertyName];
-            }
-        }.bind(this));
-        return this._disposedObjectsMap.get(object) ? null : object;
-    }
-
-    /**
-     * @method getSessionStateTree
-     * @param {ILinkableObject} root The linkable object to be placed at the root node of the tree.
-     * @param {String} objectName
-     * @param {Object} objectTypeFilter
-     * @return {WeaveTreeItem} A tree of nodes with the properties "label", "object", and "children"
-     */
-    p.getSessionStateTree = function (root, objectName) {
-        var treeItem = this._treeCache.get(root, objectName);
-        if (!treeItem.data) {
-            treeItem.data = root;
-            treeItem.label = objectName;
-            treeItem.children = this._getTreeItemChildren;
-            // dependency is used to determine when to recalculate children array
-            treeItem.dependency = root instanceof weavecore.LinkableHashMap ? root.childListCallbacks : root;
-
-        }
-        if (objectName)
-            treeItem.label = objectName;
-        return treeItem;
-    };
-
-    /**
-     * @method _getTreeItemChildren
-     * @param {WeaveTreeItem} treeItem
-     * @return {Array}
-     */
-    p._getTreeItemChildren = function (treeItem) {
-        if (!treeItem) {
-            //console.warn('Argument Warning: Need treeItem as Argument');
-        }
-        var object = treeItem.data;
-        var children = [];
-        var names = [];
-        var childObject;
-        var subtree;
-        var ignoreList = new Map();
-        if (object instanceof weavecore.LinkableHashMap) {
-            names = object.getNames();
-            var childObjects = object.getObjects();
-            for (var i = 0; i < names.length; i++) {
-                childObject = childObjects[i];
-                if (this._childToParentMap.get(childObject) && this._childToParentMap.get(childObject).get(object)) {
-                    if (ignoreList.get(childObject) !== undefined)
-                        continue;
-                    ignoreList.set(childObject, true);
-                    children.push(this.getSessionStateTree(childObject, names[i]));
-                }
-            }
-        } else {
-            var deprecatedLookup = null;
-            if (object instanceof weavecore.LinkableDynamicObject) {
-                names = object.targetPath ? null : [null];
-            } else if (Object) {
-                names = this.getLinkablePropertyNames(object);
-            }
-            if (names) {
-                for (var i = 0; i < names.length; i++) {
-                    var name = names[i];
-                    if (object instanceof weavecore.LinkableDynamicObject) {
-                        childObject = object.internalObject;
-                    }
-                    if (object[name]) {
-                        childObject = object[name];
-                    }
-                    if (!childObject) {
-                        return;
-                    }
-                    if (this._childToParentMap.get(childObject) && this._childToParentMap.get(childObject).get(object)) {
-                        if (ignoreList.get(childObject) !== undefined) {
-                            return;
-                        }
-                        ignoreList.set(childObject, true);
-                        children.push(this.getSessionStateTree(childObject, name));
-                    }
-
-                }
-            }
-
-
-        }
-        if (children.length === 0)
-            children = null;
-
-        return children;
-    };
-
-    /**
-     * Adds a grouped callback that will be triggered when the session state tree changes.
-     * USE WITH CARE. The groupedCallback should not run computationally-expensive code.
-     * @method addTreeCallback
-     * @param {Object} relevantContext
-     * @param {Function} groupedCallback
-     * @param {Boolean} triggerCallbackNow
-     */
-    p.addTreeCallback = function (relevantContext, groupedCallback, triggerCallbackNow) {
-        if (triggerCallbackNow === undefined) triggerCallbackNow = false;
-        this._treeCallbacks.addGroupedCallback(relevantContext, groupedCallback, triggerCallbackNow);
-    };
-
-    /**
-     * @method removeTreeCallback
-     * @param {Function} groupedCallback
-     */
-    p.removeTreeCallback = function (groupedCallback) {
-        this._treeCallbacks.removeCallback(groupedCallback);
-    };
-
-    /**
-     * This function will copy the session state from one sessioned object to another.
-     * If the two objects are of different types, the behavior of this function is undefined.
-     * @method copySessionState
-     * @param {ILinkableObject} source A sessioned object to copy the session state from.
-     * @param {ILinkableObject} destination A sessioned object to copy the session state to.
-     * see {{#crossLink "SessionManager/getSessionState:method"}}{{/crossLink}}
-     * see {{#crossLink "SessionManager/setSessionState:method"}}{{/crossLink}}
-     */
-    p.copySessionState = function (source, destination) {
-        var sessionState = this.getSessionState(source);
-        this.setSessionState(destination, sessionState, true);
-    };
-
-    /**
-     * @method _applyDiff
-     * @private
-     * @param {Object} base
-     * @param {Object} diff
-     */
-    p._applyDiff = function (base, diff) {
-        if (base === null || base === undefined || typeof (base) !== 'object' || diff === null || diff === undefined || typeof (diff) !== 'object')
-            return diff;
-
-        for (var key in diff)
-            base[key] = this._applyDiff(base[key], diff[key]);
-
-        return base;
-    };
-
-    /**
-     * Sets the session state of an ILinkableObject.
-     * @method setSessionState
-     * @param {ILinkableObject} linkableObject An object containing sessioned properties (sessioned objects may be nested).
-     * @param {Object} newState An object containing the new values for sessioned properties in the sessioned object.
-     * @param {Boolean} removeMissingDynamicObjects If true, this will remove any properties from an ILinkableCompositeObject that do not appear in the session state.
-     * see {{#crossLink "SessionManager/getSessionState:method"}}{{/crossLink}}
-     */
-    p.setSessionState = function (linkableObject, newState, removeMissingDynamicObjects) {
-        if (removeMissingDynamicObjects === undefined) removeMissingDynamicObjects = true;
-        if (linkableObject === null) {
-            console.log("SessionManager.setSessionState(): linkableObject cannot be null.");
-            return;
-        }
-
-        if (linkableObject === undefined) {
-            console.log("SessionManager.setSessionState(): linkableObject cannot be undefined.");
-            return;
-        }
-
-        // special cases: for Explicit and Composite Session Object
-        if (linkableObject instanceof weavecore.LinkableVariable) {
-            var lv = linkableObject;
-            if (removeMissingDynamicObjects === false && newState && newState.constructor.name === 'Object') {
-                lv.setSessionState.call(lv, this._applyDiff.call(this, copyObject(lv.getSessionState(lv)), newState));
-            } else {
-                lv.setSessionState.call(lv, newState);
-            }
-            return;
-        }
-        //linkableHashmap and linkabledynamic object is handled, In As3 version it implements ILinkableCompositeObject
-        // in jS we couldnt do that, thats why linkableObject.setSessionState is used
-        if (linkableObject.setSessionState) {
-            if (newState.constructor.name === "String")
-                newState = [newState];
-
-            if (newState !== null && !(newState instanceof Array)) {
-                var array = [];
-                for (var key in newState)
-                    array.push(weavecore.DynamicState.create(key, null, newState[key]));
-                newState = array;
-            }
-
-            linkableObject.setSessionState(newState, removeMissingDynamicObjects);
-            return;
-        }
-
-        if (newState === null || newState === undefined)
-            return;
-
-        // delay callbacks before setting session state
-        var objectCC = this.getCallbackCollection(linkableObject);
-        objectCC.delayCallbacks();
-
-        // cache property names if necessary
-        var className = (linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME);
-        if (!this._classNameToSessionedPropertyNames[className])
-            this._cacheClassInfo(linkableObject, className);
-
-        // set session state
-        var foundMissingProperty = false;
-        var propertyNames;
-
-        propertyNames = this._classNameToSessionedPropertyNames[className];
-
-        for (var i = 0; i < propertyNames.length; i++) {
-            var name = propertyNames[i];
-            if (!newState.hasOwnProperty(name)) {
-                if (removeMissingDynamicObjects && linkableObject.handleMissingSessionStateProperty)
-                    foundMissingProperty = true;
-                continue;
-            }
-
-            var property = null;
-            try {
-                property = linkableObject[name];
-            } catch (e) {
-                console.log('SessionManager.setSessionState(): Unable to get property "' + name + '" of class "' + linkableObject.constructor.name + '"', e);
-            }
-
-            if (property === null)
-                continue;
-
-            this.setSessionState(property, newState[name], removeMissingDynamicObjects);
-        }
-
-        // TODO: handle properties appearing in session state that do not appear in the linkableObject
-        /*if (linkableObject instanceof ILinkableObjectWithNewProperties)
-				for (name in newState)
-					if (!deprecatedLookup.hasOwnProperty(name))
-						linkableObject.handleMissingSessionStateProperty(newState, name);*/
-
-        // handle properties missing from absolute session state
-        if (foundMissingProperty)
-            propertyNames.forEach(function (name) {
-                if (!newState.hasOwnProperty(name))
-                    if (linkableObject.handleMissingSessionStateProperty) {
-                        linkableObject.handleMissingSessionStateProperty(newState, name);
-                    } else {
-                        console.log('implement handleMissingSessionStateProperty in ' + linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME);
-                    }
-
-            });
-
-        // resume callbacks after setting session state
-        objectCC.resumeCallbacks();
-
-    };
-
-    /**
-     * Gets the session state of an ILinkableObject.
-     * @method getSessionState
-     * @param {IlinkableObject} linkableObject An object containing sessioned properties (sessioned objects may be nested).
-     * @return {Object} An object containing the values from the sessioned properties.
-     * see {{#crossLink "SessionManager/setSessionState:method"}}{{/crossLink}}
-     */
-    p.getSessionState = function (linkableObject) {
-        if (linkableObject === null) {
-            console.log("SessionManager.getSessionState(): linkableObject cannot be null.");
-            return null;
-        }
-
-        if (linkableObject === undefined) {
-            console.log("SessionManager.getSessionState(): linkableObject cannot be undefined.");
-            return null;
-        }
-
-        var result = null;
-
-        // special cases (explicit session state)
-        if (linkableObject instanceof weavecore.LinkableVariable) {
-            // in As3, when we try to set undefined it will get ignored , where as JS its get accepted
-            // we want result to be null not repalced with undefined to avoid undesire results, while generating log entries
-            result = linkableObject.getSessionState();
-            result = result === undefined ? null : result;
-        }
-        //linkableHashmap is handled, In As3 version it implements ILinkableCompositeObject
-        // in jS we couldnt do that, thats why linkableObject.setSessionState is used
-        else if (linkableObject instanceof weavecore.ILinkableCompositeObject || linkableObject.getSessionState) {
-            // in As3, when we try to set undefined it will get ignored , where as JS its get accepted
-            // we want result to be null not repalced with undefined to avoid undesire results, while generating log entries
-            result = linkableObject.getSessionState();
-            result = result === undefined ? null : result;
-        } else if (linkableObject.sessionable) { //sessionbale variable creation is must as there is no interface concept in JS
-            // implicit session state
-            // first pass: get property names
-            // cache property names if necessary
-            //var className = linkableObject.constructor.name; // we can't use constructor.name as minified verisons have different names
-            var className = linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME;
-
-            if (!this._classNameToSessionedPropertyNames[className])
-                this._cacheClassInfo(linkableObject, className);
-
-            var propertyNames = this._classNameToSessionedPropertyNames[className];
-            var resultNames = [];
-            var resultProperties = [];
-            var property = null;
-            var i;
-            for (i = 0; i < propertyNames.length; i++) {
-                var name = propertyNames[i];
-
-                try {
-                    property = null; // must set this to null first because accessing the property may fail
-                    property = linkableObject[name];
-                } catch (e) {
-                    console.log('Unable to get property "' + name + '" of class "' + linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME + '"');
-                }
-
-                // first pass: set result[name] to the ILinkableObject
-                if (property !== null && !this._getSessionStateIgnoreList.get(property)) {
-                    // skip this property if it should not appear in the session state under the parent.
-                    if (this._childToParentMap.get(property) === undefined || !this._childToParentMap.get(property).get(linkableObject))
-                        continue;
-                    // avoid infinite recursion in implicit session states
-                    this._getSessionStateIgnoreList.set(property, true);
-                    resultNames.push(name);
-                    resultProperties.push(property);
-                } else {
-                    if (property !== null)
-                        console.log("ignoring duplicate object:", name, property);
-                }
-
-            }
-
-            // special case if there are no child objects -- return null
-            if (resultNames.length > 0) {
-                // second pass: get values from property names
-                result = {};
-                for (i = 0; i < resultNames.length; i++) {
-                    var value = this.getSessionState(resultProperties[i]);
-                    property = resultProperties[i];
-                    // do not include objects that have a null implicit session state (no child objects)
-                    if (value === null && !(property instanceof weavecore.LinkableVariable) && !(property instanceof weavecore.ILinkableCompositeObject) && !(property.getSessionState))
-                        continue;
-                    result[resultNames[i]] = value;
-
-                }
-            }
-        }
-
-        this._getSessionStateIgnoreList.set(linkableObject, undefined);
-
-        return result;
-    };
-
-
-    /**
-     * @method _cacheClassInfo
-     * @private
-     * @param {ILinkableObject} linkableObject
-     * @param {String} className
-     */
-    p._cacheClassInfo = function (linkableObject, className) {
-        // linkable property names
-        var propertyNames = Object.getOwnPropertyNames(linkableObject);
-        var sessionedPublicProperties = propertyNames.filter(function (propName) {
-            if (propName.charAt(0) === '_')
-                return false; //Private properties are ignored
-            else {
-                var isSessionable = false;
-                if (linkableObject[propName] instanceof weavecore.ILinkableObject || (linkableObject[propName] && linkableObject[propName].sessionable)) {
-                    isSessionable = true
-                }
-            }
-            return isSessionable;
-        });
-
-        this._classNameToSessionedPropertyNames[className] = sessionedPublicProperties.sort();
-    };
-
-    /**
-     * This function gets a list of sessioned property names so accessor functions for non-sessioned properties do not have to be called.
-     * @method getLinkablePropertyNames
-     * @param {ILinkableObject} linkableObject An object containing sessioned properties.
-     * @param {Boolean} filtered If set to true, filters out deprecated, null, and excluded properties.
-     * @return {Array} An Array containing the names of the sessioned properties of that object class.
-     */
-    p.getLinkablePropertyNames = function (linkableObject, filtered) {
-        if (filtered === undefined) //default parameter value
-            filtered = false;
-
-        if (linkableObject === null) {
-            console.log("SessionManager.getLinkablePropertyNames(): linkableObject cannot be null.");
-            return [];
-        }
-
-        if (linkableObject === undefined) {
-            console.log("SessionManager.getLinkablePropertyNames(): linkableObject cannot be undefined.");
-            return [];
-        }
-
-        var className = linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME;
-        var propertyNames = this._classNameToSessionedPropertyNames[className];
-        if (propertyNames === null || propertyNames === undefined) {
-            this._cacheClassInfo(linkableObject, className);
-            propertyNames = this._classNameToSessionedPropertyNames[className];
-        }
-
-        if (filtered) {
-            var filteredPropNames = propertyNames.filter(function (propName) {
-                var property = linkableObject[propName];
-                if (property === null || property === undefined)
-                    return false;
-                if (this._childToParentMap.get(property) === undefined || !this._childToParentMap.get(property).get(linkableObject))
-                    return false;
-
-                return true;
-            }.bind(this));
-            return filteredPropNames;
-        }
-        return propertyNames;
-    };
-
-
-    function disposeBusyTaskPointers(disposedObject) {
-        this._d2dOwnerTask.removeAllPrimary(disposedObject);
-        this._d2dTaskOwner.removeAllSecondary(disposedObject);
-    }
-
-    /**
-     * Returns a mapping from owner debugId to an Array of debugIds for its busy tasks.
-     */
-    p.debugBusyObjects = function () {
-        var result = {};
-        this._d2dOwnerTask.dictionary.forEach(function (value, owner) {
-            var tasks = [];
-            var taskDictionary = this._d2dOwnerTask.dictionary.get(owner);
-            taskDictionary.forEach(function (value, task) {
-                tasks.push(WeaveAPI.debugId(task));
-            }, taskDictionary);
-            result[WeaveAPI.debugId(owner)] = tasks;
-
-        }, this._d2dOwnerTask.dictionary);
-
-        return result;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    p.assignBusyTask = function (taskToken, busyObject) {
-        if (this.debugBusyTasks)
-            this._dTaskStackTrace.set(taskToken, new Error("Stack trace when task was last assigned").getStackTrace());
-
-        // stop if already assigned
-        var test = this._d2dTaskOwner.dictionary.get(taskToken);
-        if (test && test.get(busyObject))
-            return;
-
-        if (taskToken instanceof weavecore.CustomPromise && !WeaveAPI.ProgressIndicator.hasTask(taskToken))
-            taskToken.addResponder({
-                result: unassignAsyncToken.bind(this),
-                fault: unassignAsyncToken.bind(this),
-                token: taskToken
-            });
-
-        this._d2dOwnerTask.set(busyObject, taskToken, true);
-        this._d2dTaskOwner.set(taskToken, busyObject, true);
-    }
-
-
-
-    function unassignAsyncToken(resposne, token) {
-        this.unassignBusyTask(token);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    p.unassignBusyTask = function (taskToken) {
-        if (WeaveAPI.ProgressIndicator.hasTask(taskToken)) {
-            WeaveAPI.ProgressIndicator.removeTask(taskToken);
-            return;
-        }
-
-        var dOwner = this._d2dTaskOwner.dictionary.get(taskToken);
-        if (!dOwner)
-            return;
-
-        this._d2dTaskOwner.dictionary.delete(taskToken);
-
-
-        nextOwner: for (var owner of dOwner.keys()) {
-            var dTask = this._d2dOwnerTask.dictionary.get(owner);
-            dTask.delete(taskToken);
-
-            // if there are other tasks, continue to next owner
-            for (var task of dTask.keys())
-                continue nextOwner;
-
-            // when there are no more tasks, check later to see if callbacks trigger
-            this._dUnbusyTriggerCounts.set(owner, WeaveAPI.SessionManager.getCallbackCollection(owner).triggerCounter);
-            // immediate priority because we want to trigger as soon as possible
-            WeaveAPI.StageUtils.startTask(null, unbusyTrigger.bind(this), WeaveAPI.TASK_PRIORITY_IMMEDIATE);
-
-            if (this.debugBusyTasks) {
-                var stackTrace = new Error("Stack trace when last task was unassigned").getStackTrace();
-                this._dUnbusyStackTraces.set(owner, {
-                    assigned: _dTaskStackTrace[taskToken],
-                    unassigned: stackTrace,
-                    token: taskToken
-                });
-            }
-        }
-    }
-
-    /**
-     * Called the frame after an owner's last busy task is unassigned.
-     * Triggers callbacks if they have not been triggered since then.
-     */
-    function unbusyTrigger(stopTime) {
-        var owner;
-        do {
-            if (new Date().getTime() > stopTime)
-                return 0;
-
-            owner = null;
-            for (var owner of this._dUnbusyTriggerCounts.keys()) {
-                var triggerCount = this._dUnbusyTriggerCounts.get(owner);
-                this._dUnbusyTriggerCounts.delete(owner); // affects next for loop iteration - mitigated by outer loop
-
-                var cc = WeaveAPI.SessionManager.getCallbackCollection(owner);
-                if (cc instanceof weavecore.CallbackCollection ? cc.wasDisposed : this.objectWasDisposed(owner))
-                    continue; // already disposed
-
-                if (cc.triggerCounter !== triggerCount)
-                    continue; // already triggered
-
-                if (this.linkableObjectIsBusy(owner))
-                    continue; // busy again
-
-                if (this.debugBusyTasks) {
-                    var stackTraces = this._dUnbusyStackTraces.get(owner);
-                    console.log('Triggering callbacks because they have not triggered since owner has becoming unbusy:', WeaveAPI.debugId(owner));
-                    console.log(stackTraces.assigned);
-                    console.log(stackTraces.unassigned);
-                }
-
-                cc.triggerCallbacks();
-            }
-        } while (owner);
-
-        return 1;
-    }
-
-
-    p.linkableObjectIsBusy = function (linkableObject) {
-        var busy = false;
-
-        this._aBusyTraversal[this._aBusyTraversal.length] = linkableObject; // push
-        this._dBusyTraversal.set(linkableObject, true);
-
-        outerLoop: for (var i = 0; i < this._aBusyTraversal.length; i++) {
-            linkableObject = this._aBusyTraversal[i];
-
-            if (linkableObject.isBusy) {
-                if (linkableObject.isBusy()) {
-                    busy = true;
-                    break;
-                }
-                // do not check children
-                continue;
-            }
-
-            // if the object is assigned a task, it's busy
-            for (var task in this._d2dOwnerTask.dictionary.get(linkableObject)) {
-                if (this.debugBusyTasks) {
-                    var stackTrace = this._dTaskStackTrace.get(task);
-                    console.log(stackTrace);
-                }
-                busy = true;
-                break outerLoop;
-            }
-
-            // see if children are busy
-            var dChild = this._parentToChildMap.get(linkableObject);
-            for (var child in dChild) {
-                // queue all the children that haven't been queued yet
-                if (!this._dBusyTraversal.get(child)) {
-                    this._aBusyTraversal[this._aBusyTraversal.length] = child; // push
-                    this._dBusyTraversal.set(child, true);
-                }
-            }
-        }
-
-        // reset traversal dictionary for next time
-        for (var i = 0; i < this._aBusyTraversal.length; i++) {
-            var linkableObject = this._aBusyTraversal[i];
-            this._dBusyTraversal.set(linkableObject, false);
-        }
-
-        this._aBusyTraversal.length = 0;
-
-        return busy;
-
-    }
-
-    /**
-     * This function gets the CallbackCollection associated with an ILinkableObject.
-     * If there is no CallbackCollection defined for the object, one will be created.
-     * This CallbackCollection is used for reporting changes in the session state
-     * @method getCallbackCollection
-     * @param {ILinkableObject} linkableObject An ILinkableObject to get the associated ICallbackCollection for.
-     * @return {CallbackCollection} The CallbackCollection associated with the given object.
-     */
-    p.getCallbackCollection = function (linkableObject) {
-        if (linkableObject === null || linkableObject === undefined)
-            return null;
-        if (linkableObject instanceof weavecore.CallbackCollection)
-            return linkableObject;
-
-        var objectCC = this.linkableObjectToCallbackCollectionMap.get(linkableObject);
-        if (objectCC === null || objectCC === undefined) {
-            objectCC = this.registerDisposableChild(linkableObject, new weavecore.CallbackCollection());
-            if (weavecore.CallbackCollection.debug)
-                objectCC._linkableObject = linkableObject;
-            this.linkableObjectToCallbackCollectionMap.set(linkableObject, objectCC);
-        }
-
-        return objectCC;
-    };
-
-
-    /**
-     * This function checks if an object has been disposed by the SessionManager.
-     * @method objectWasDisposed
-     * @param {Object} object An object to check.
-     * @return {Boolean} A value of true if disposeObject() was called for the specified object.
-     * see {{#crossLink "SessionManager/disposeObject:method"}}{{/crossLink}}
-     */
-    p.objectWasDisposed = function (object) {
-        if (object === undefined)
-            return true; // added by sanjay:
-        if (object === null) //null means :Object parameter is null i.e Object has no parameters
-            return false;
-        if (object instanceof weavecore.ILinkableObject || object.sessionable) {
-            var cc = this.getCallbackCollection(object);
-            if (cc)
-                return cc.wasDisposed;
-        }
-        return this._disposedObjectsMap.get(object) !== undefined;
-    };
-
-
-    /**
-     * This function should be called when an ILinkableObject  is no longer needed.
-     * @method disposeObject
-     * @param {Object} object An ILinkableObject  to clean up.
-     * see {{#crossLink "SessionManager/objectWasDisposed:method"}}{{/crossLink}}
-     */
-    p.disposeObject = function (object) {
-        if (object !== null && object !== undefined && !this._disposedObjectsMap.get(object)) {
-            this._disposedObjectsMap.set(object, true);
-
-            //  clean up pointers to busy tasks
-            disposeBusyTaskPointers.call(this, object);
-
-            try {
-                // if the object implements IDisposableObject, call its dispose() function now
-                //if (object instanceof IDisposableObject)
-                //	{
-                //	object.dispose();
-                //	}
-                if (object.dispose && object.dispose.constructor === Function) {
-                    // call dispose() anyway if it exists, because it is common to forget to implement IDisposableObject.
-                    object.dispose();
-                }
-            } catch (e) {
-                console.log(e);
-            }
-
-            var linkableObject = object;
-            if (linkableObject) {
-                // dispose the callback collection corresponding to the object.
-                // this removes all callbacks, including the one that triggers parent callbacks.
-                var objectCC = this.getCallbackCollection(linkableObject);
-                if (objectCC !== linkableObject)
-                    this.disposeObject(objectCC);
-            }
-
-            // unregister from parents
-            if (this._childToParentMap.get(object) !== undefined) {
-                // remove the parent-to-child mappings
-                for (var parent in this._childToParentMap.get(object))
-                    if (this._parentToChildMap.get(parent) !== undefined)
-                        this._parentToChildMap.get(parent).delete(object);
-                    // remove child-to-parent mapping
-                this._childToParentMap.delete(object);
-            }
-
-            // unregister from owner
-            var owner = this._childToOwnerMap.get(object);
-            if (owner !== null || owner !== undefined) {
-                if (this._ownerToChildMap.get(owner) !== undefined)
-                    this._ownerToChildMap.get(owner).delete(object);
-                this._childToOwnerMap.delete(object);
-            }
-
-            // if the object is an ILinkableVariable, unlink it from all bindable properties that were previously linked
-            //if (linkableObject instanceof LinkableVariable)
-            //for (var bindableParent:* in _watcherMap[linkableObject])
-            //for (var bindablePropertyName:String in _watcherMap[linkableObject][bindableParent])
-            //unlinkBindableProperty(linkableObject as ILinkableVariable, bindableParent, bindablePropertyName);
-
-            // unlink this object from all other linkable objects
-            if (this.linkFunctionCache.dictionary.get(linkableObject)) {
-                var otherObjectKeys = this.linkFunctionCache.dictionary.get(linkableObject).keys();
-                for (var i = 0; i < otherObjectKeys.length; i++) {
-                    var otherObject = otherObjectKeys[i];
-                    this.unlinkSessionState(linkableObject, otherObject);
-                }
-            }
-
-
-            // dispose all registered children that this object owns
-            var children = this._ownerToChildMap.get(object);
-            if (children !== null && children !== undefined) {
-                // clear the pointers to the child dictionaries for this object
-                this._ownerToChildMap.delete(object);
-                this._parentToChildMap.delete(object);
-                // dispose the children this object owned
-                for (var child in children)
-                    this.disposeObject(child);
-            }
-
-            this._treeCallbacks.triggerCallbacks("Session Tree: Object Disposed");
-        }
-    };
-
-
-    /**
-     * This function computes the diff of two session states.
-     * @method computeDiff
-     * @param {Object} oldState The source session state.
-     * @param {Object} newState The destination session state.
-     * @return {Object} A patch that generates the destination session state when applied to the source session state, or undefined if the two states are equivalent.
-     * see {{#crossLink "SessionManager/combineDiff:method"}}{{/crossLink}}
-     */
-    p.computeDiff = function (oldState, newState) {
-        var type = typeof (oldState); // the type of null is 'object'
-        var diffValue;
-
-        // special case if types differ
-        if (typeof (newState) !== type)
-            return copyObject(newState); // make copies of non-primitives
-
-
-        if (type === 'number') {
-            if (isNaN(oldState) && isNaN(newState))
-                return undefined; // no diff
-
-            if (oldState !== newState)
-                return newState;
-
-            return undefined; // no diff
-        } else if (oldState === null || oldState === undefined || newState === null || newState === undefined || type !== 'object') // other primitive value
-        {
-            if (oldState !== newState) // no type-casting
-                return copyObject(newState);
-
-            return undefined; // no diff
-        } else if (oldState.constructor === Array && newState.constructor === Array) {
-            // If neither is a dynamic state array, don't compare them as such.
-            if (!weavecore.DynamicState.isDynamicStateArray(oldState) && !weavecore.DynamicState.isDynamicStateArray(newState)) {
-                if (weavecore.StandardLib.compare(oldState, newState) === 0)
-                    return undefined; // no diff
-                return copyObject(newState);
-            }
-
-            // create an array of new DynamicState objects for all new names followed by missing old names
-            var i;
-            var typedState;
-            var changeDetected = false;
-
-            // create oldLookup
-            var oldLookup = {};
-            var objectName;
-            var className;
-            var sessionState;
-            for (i = 0; i < oldState.length; i++) {
-                // assume everthing is typed session state
-                //note: there is no error checking here for typedState
-                typedState = oldState[i];
-                objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
-                // use '' instead of null to avoid "null"
-                oldLookup[objectName || ''] = typedState;
-            }
-            if (oldState.length !== newState.length)
-                changeDetected = true;
-
-            // create new Array with new DynamicState objects
-            var result = [];
-            for (i = 0; i < newState.length; i++) {
-                // assume everthing is typed session state
-                //note: there is no error checking here for typedState
-                typedState = newState[i];
-                objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
-                className = typedState[weavecore.DynamicState.CLASS_NAME];
-                sessionState = typedState[weavecore.DynamicState.SESSION_STATE];
-                var oldTypedState = oldLookup[objectName || ''];
-                delete oldLookup[objectName || '']; // remove it from the lookup because it's already been handled
-
-                // If the object specified in newState does not exist in oldState, we don't need to do anything further.
-                // If the class is the same as before, then we can save a diff instead of the entire session state.
-                // If the class changed, we can't save only a diff -- we need to keep the entire session state.
-                // Replace the sessionState in the new DynamicState object with the diff.
-                if (oldTypedState !== undefined && oldTypedState !== null && oldTypedState[weavecore.DynamicState.CLASS_NAME] === className) {
-                    className = null; // no change
-                    diffValue = this.computeDiff(oldTypedState[weavecore.DynamicState.SESSION_STATE], sessionState);
-                    if (diffValue === undefined) { // important not to check null -as nul reperests object there has no value
-                        // Since the class name is the same and the session state is the same,
-                        // we only need to specify that this name is still present.
-                        result.push(objectName);
-
-                        if (!changeDetected && oldState[i][weavecore.DynamicState.OBJECT_NAME] != objectName)
-                            changeDetected = true;
-
-                        continue;
-                    }
-                    sessionState = diffValue;
-                } else {
-                    sessionState = copyObject(sessionState);
-                }
-
-                // save in new array and remove from lookup
-                result.push(weavecore.DynamicState.create(objectName || null, className, sessionState)); // convert empty string to null
-                changeDetected = true;
-            }
-
-            // Anything remaining in the lookup does not appear in newState.
-            // Add DynamicState entries with an invalid className ("delete") to convey that each of these objects should be removed.
-            for (objectName in oldLookup) {
-                result.push(weavecore.DynamicState.create(objectName || null, SessionManager.DIFF_DELETE)); // convert empty string to null
-                changeDetected = true;
-            }
-
-            if (changeDetected)
-                return result;
-
-            return undefined; // no diff
-        } else // nested object
-        {
-            var diff; // start with no diff
-
-            // find old properties that changed value
-            for (var oldName in oldState) {
-                diffValue = this.computeDiff(oldState[oldName], newState[oldName]);
-                if (diffValue !== undefined) {
-                    if (!diff)
-                        diff = {};
-                    diff[oldName] = diffValue;
-                }
-            }
-
-            // find new properties
-            for (var newName in newState) {
-                if (oldState[newName] === undefined) {
-                    if (!diff)
-                        diff = {};
-                    diff[newName] = copyObject(newState[newName]);
-                }
-            }
-
-            return diff;
-        }
-    };
-
-    /**
-     * This modifies an existing diff to include an additional diff.
-     * @method combineDiff
-     * @param {Object} baseDiff The base diff which will be modified to include an additional diff.
-     * @param {Object} diffToAdd The diff to add to the base diff.  This diff will not be modified.
-     * @return {Object} The modified baseDiff, or a new diff object if baseDiff is a primitive value.
-     * see {{#crossLink "SessionManager/computeDiff:method"}}{{/crossLink}}
-     */
-    p.combineDiff = function (baseDiff, diffToAdd) {
-        var baseType = typeof (baseDiff); // the type of null is 'object'
-        var diffType = typeof (diffToAdd);
-
-        // special cases
-        if (baseDiff === null || baseDiff === undefined || diffToAdd === null || diffToAdd === undefined || baseType !== diffType || baseType !== 'object') {
-            if (diffType === 'object') // not a primitive, so make a copy
-                baseDiff = copyObject(diffToAdd); //TODO: find better solution for array copy(currently Shallow copy)
-            else
-                baseDiff = diffToAdd;
-        } else if (Array.isArray(baseDiff) && Array.isArray(diffToAdd)) {
-            var i;
-
-            // If either of the arrays look like DynamicState arrays, treat as such
-            if (weavecore.DynamicState.isDynamicStateArray(baseDiff) || weavecore.DynamicState.isDynamicStateArray(diffToAdd)) {
-                var typedState;
-                var objectName;
-
-                // create lookup: objectName -> old diff entry
-                // temporarily turn baseDiff into an Array of object names
-                var baseLookup = {};
-                for (i = 0; i < baseDiff.length; i++) {
-                    typedState = baseDiff[i];
-                    // note: no error checking for typedState
-                    if (typeof typedState === 'string' || typedState instanceof String || typedState === null || typedState === undefined)
-                        objectName = typedState;
-                    else
-                        objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
-                    baseLookup[objectName] = typedState;
-                    // temporarily turn baseDiff into an Array of object names
-                    baseDiff[i] = objectName;
-                }
-                // apply each typedState diff appearing in diffToAdd
-                for (i = 0; i < diffToAdd.length; i++) {
-                    typedState = diffToAdd[i];
-                    // note: no error checking for typedState
-                    if (typeof typedState === 'string' || typedState instanceof String || typedState === null || typedState === undefined)
-                        objectName = typedState;
-                    else
-                        objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
-
-                    // adjust names list so this name appears at the end
-                    if (baseLookup.hasOwnProperty(objectName)) {
-                        for (var j = baseDiff.indexOf(objectName); j < baseDiff.length - 1; j++)
-                            baseDiff[j] = baseDiff[j + 1];
-                        baseDiff[baseDiff.length - 1] = objectName;
-                    } else {
-                        baseDiff.push(objectName);
-                    }
-
-                    // apply diff
-                    var oldTypedState = baseLookup[objectName];
-                    if (typeof oldTypedState === 'string' || oldTypedState instanceof String || oldTypedState === null || oldTypedState === undefined) {
-                        baseLookup[objectName] = copyObject(typedState); // avoid unnecessary function call overhead
-                    } else if (!(typeof typedState === 'string' || typedState instanceof String || typedState === null || typedState === undefined)) // update dynamic state
-                    {
-                        var className = typedState[weavecore.DynamicState.CLASS_NAME];
-                        // if new className is different and not null, start with a fresh typedState diff
-                        if (className && className != oldTypedState[weavecore.DynamicState.CLASS_NAME]) {
-                            baseLookup[objectName] = copyObject(typedState); //TODO: Temp solution for Array Copy
-                        } else // className hasn't changed, so combine the diffs
-                        {
-                            oldTypedState[weavecore.DynamicState.SESSION_STATE] = this.combineDiff(oldTypedState[weavecore.DynamicState.SESSION_STATE], typedState[weavecore.DynamicState.SESSION_STATE]);
-                        }
-                    }
-                }
-                // change baseDiff back from names to typed states
-                for (i = 0; i < baseDiff.length; i++)
-                    baseDiff[i] = baseLookup[baseDiff[i]];
-            } else // not typed session state
-            {
-                // overwrite old Array with new Array's values
-                i = baseDiff.length = diffToAdd.length;
-                while (i--) {
-                    var value = diffToAdd[i];
-                    if (value === null || value === undefined || typeof value !== 'object')
-                        baseDiff[i] = value; // avoid function call overhead
-                    else
-                        baseDiff[i] = this.combineDiff(baseDiff[i], value);
-                }
-            }
-        } else // nested object
-        {
-            for (var newName in diffToAdd)
-                baseDiff[newName] = this.combineDiff(baseDiff[newName], diffToAdd[newName]);
-        }
-
-        return baseDiff;
-    };
-
-    function copyObject(object) {
-        if (object === null || typeof object != 'object') // primitive value
-            return object;
-        else { // make copies of non-primitives
-            var jsonString = JSON.stringify(object);
-            var copy = JSON.parse(jsonString);
-            return copy;
-        }
-        //return Object.getPrototypeOf(Object.create(object)).slice(0)
-    }
-
-    /**************************************
-     * linking sessioned objects together
-     **************************************/
-
-
-
-    /**
-     * @inheritDoc
-     */
-    p.linkSessionState = function (primary, secondary) {
-            if (primary === null || primary === undefined || secondary === null || secondary === undefined) {
-                console.error("SessionManager.linkSessionState(): Parameters to this function cannot be null.");
-                return;
-            }
-            if (primary == secondary) {
-                console.error("Warning! Attempt to link session state of an object with itself");
-                return;
-            }
-            if (this.linkFunctionCache.get(primary, secondary) instanceof Function)
-                return; // already linked
-
-            if (weavecore.CallbackCollection.debug)
-                var stackTrace = new Error().getStackTrace();
-
-            var setPrimary = function () {
-                WeaveAPI.SessionManager.setSessionState(primary, WeaveAPI.SessionManager.getSessionState(secondary), true);
-            };
-            var setSecondary = function () {
-                WeaveAPI.SessionManager.setSessionState(secondary, WeaveAPI.SessionManager.getSessionState(primary), true);
-            };
-
-            this.linkFunctionCache.set(primary, secondary, setPrimary);
-            this.linkFunctionCache.set(secondary, primary, setSecondary);
-
-            // when secondary changes, copy from secondary to primary
-            WeaveAPI.SessionManager.getCallbackCollection(secondary).addImmediateCallback(primary, setPrimary);
-            // when primary changes, copy from primary to secondary
-            WeaveAPI.SessionManager.getCallbackCollection(primary).addImmediateCallback(secondary, setSecondary, true); // copy from primary now
-        }
-        /**
-         * @inheritDoc
-         */
-    p.unlinkSessionState = function (first, second) {
-        if (first === null || first === undefined || second === null || second === undefined) {
-            console.error("SessionManager.unlinkSessionState(): Parameters to this function cannot be null.");
-            return;
-        }
-
-        var setFirst = this.linkFunctionCache.remove(first, second);
-        var setSecond = this.linkFunctionCache.remove(second, first);
-
-        WeaveAPI.SessionManager.getCallbackCollection(second).removeCallback(setFirst);
-        WeaveAPI.SessionManager.getCallbackCollection(first).removeCallback(setSecond);
-    }
-
-    /**
-     * @public
-     * @property  DIFF_DELETE
-     * @static
-     * @readOnly
-     * @type String
-     * @default "delete"
-     */
-    Object.defineProperty(SessionManager, 'DIFF_DELETE', {
-        value: "delete"
-    });
-
-    weavecore.SessionManager = SessionManager;
-
-    // namespace
-    if (typeof window === 'undefined') {
-        this.WeaveAPI = this.WeaveAPI || {};
-        this.WeaveAPI.SessionManager = new SessionManager();
-    } else {
-        window.WeaveAPI = window.WeaveAPI || {};
-        window.WeaveAPI.SessionManager = new SessionManager();
-    }
-
-}());
-
-if (typeof window === 'undefined') {
-    this.WeaveAPI = this.WeaveAPI || {};
-    this.weavecore = this.weavecore || {};
-} else {
-    window.WeaveAPI = window.WeaveAPI || {};
-    window.weavecore = window.weavecore || {};
-}
-
-(function () {
-
-    function ErrorManager() {
-        weavecore.ILinkableObject.call(this);
-        this._errors = [];
-        Object.defineProperty(this, 'errors', {
-            get: function () {
-                return this._errors;
-            }
-        });
-
-    }
-
-    ErrorManager.prototype = new weavecore.ILinkableObject();
-    ErrorManager.prototype.constructor = ErrorManager;
-    var p = ErrorManager.prototype;
-
-    p.reportError = function (error, faultMessage, faultContent) {
-        faultMessage = (faultMessage === undefined) ? null : faultMessage;
-        faultContent = (faultContent === undefined) ? null : faultContent;
-
-        if (typeof (error) === 'string') {
-            error = new Error(error);
-        }
-
-        this._errors.push(error);
-        WeaveAPI.SessionManager.getCallbackCollection(this).triggerCallbacks();
-
-    }
-
-    weavecore.ErrorManager = ErrorManager;
-    weavecore.ClassUtils.registerClass('weavecore.ErrorManager', ErrorManager);
-    WeaveAPI.ErrorManager = new ErrorManager();
-
-}());
-
-if (typeof window === 'undefined') {
-    this.WeaveAPI = this.WeaveAPI || {};
-    this.weavecore = this.weavecore || {};
-} else {
-    window.WeaveAPI = window.WeaveAPI || {};
-    window.weavecore = window.weavecore || {};
-}
-
-(function () {
-
-    function EditorManager() {
-        weavecore.ILinkableObject.call(this);
-        Object.defineProperties(this, {
-            '_editorLookup': {
-                value: new Map()
-            },
-            'labels': {
-                value: new Map()
-            }
-        });
-
-    }
-
-    EditorManager.prototype = new weavecore.ILinkableObject();
-    EditorManager.prototype.constructor = EditorManager;
-    var p = EditorManager.prototype;
-
-
-
-    /**
-     * @inheritDoc
-     */
-    p.getEditorClass = function (linkableObjectOrClass) {
-        var editorClass = this._editorLookup.get(linkableObjectOrClass);
-        editorClass = (editorClass && weavecore.Compiler.isClass(editorClass)) ? editorClass : null;
-        if (editorClass)
-            return editorClass;
-
-        /*var classQName = linkableObjectOrClass as String || getQualifiedClassName(linkableObjectOrClass);
-        var superClasses: Array = ClassUtils.getClassExtendsList(classQName);
-        superClasses.unshift(classQName);
-        for (var i: int = 0; i < superClasses.length; i++) {
-            classQName = superClasses[i];
-            var classDef: Class = ClassUtils.getClassDefinition(classQName);
-            editorClass = _editorLookup[classDef] as Class
-            if (editorClass)
-                return editorClass;
-        }*/
-        return null;
-    }
-
-
-
-    /**
-     * @inheritDoc
-     */
-    p.getNewEditor = function (obj) {
-        var Editor = this.getEditorClass(obj);
-        if (Editor) {
-            var editor = WeaveAPI.SessionManager.registerDisposableChild(obj, new Editor()); // when the object goes away, make the editor go away
-            editor.setTarget(obj);
-            return editor;
-        }
-        return null;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    p.setLabel = function (object, label) {
-        this._labels.set(object, label);
-        WeaveAPI.SessionManager.getCallbackCollection(this).triggerCallbacks();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    p.getLabel = function (object) {
-        return this._labels.get(object);
-    }
-
-
-    weavecore.EditorManager = EditorManager;
-    weavecore.ClassUtils.registerClass('weavecore.EditorManager', EditorManager);
-    WeaveAPI.EditorManager = new EditorManager();
-
-}());
-
 if (typeof window === 'undefined') {
     //this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -10428,6 +7734,3151 @@ if (typeof window === 'undefined') {
 
 }());
 
+/**
+ * @module weavecore
+ */
+
+//namesapce
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+(function () {
+    "use strict";
+
+    // constructor
+    /**
+     * Utility Class to create Dynamic state objects with three properties: objectName, className, sessionState
+     * @class DynamicState
+     */
+    function DynamicState() {
+        throw "DynamicState cannot be instantiated.";
+    }
+
+    // Static Public Const Properties
+    /**
+     * The name of the property containing the name assigned to the object when the session state is generated.
+     * @static
+     * @public
+     * @property OBJECT_NAME
+     * @readOnly
+     * @default "objectName"
+     * @type String
+     */
+    Object.defineProperty(DynamicState, 'OBJECT_NAME', {
+        value: "objectName"
+    });
+
+    /**
+     * The name of the property containing the qualified class name of the original object providing the session state.
+     * @static
+     * @public
+     * @property CLASS_NAME
+     * @readOnly
+     * @default "className"
+     * @type String
+     */
+    Object.defineProperty(DynamicState, 'CLASS_NAME', {
+        value: "className"
+    });
+
+    /**
+     * The name of the property containing the session state for an object of the type specified by className.
+     * @static
+     * @public
+     * @property SESSION_STATE
+     * @readOnly
+     * @default "sessionState"
+     * @type String
+     */
+    Object.defineProperty(DynamicState, 'SESSION_STATE', {
+        value: "sessionState"
+    });
+
+    /**
+     * The name of the property used to make isDynamicState() return false in order to bypass special diff logic for dynamic state arrays.
+     * @static
+     * @public
+     * @property BYPASS_DIFF
+     * @readOnly
+     * @default "bypassDiff"
+     * @type String
+     */
+    Object.defineProperty(DynamicState, 'BYPASS_DIFF', {
+        value: "bypassDiff"
+    });
+
+    //static Public Methods
+    /**
+     * Creates an Object having three properties: objectName, className, sessionState
+     * @method create
+     * @static
+     * @param {String} objectName The name assigned to the object when the session state is generated.
+     * @param {String} className The qualified class name of the original object providing the session state.
+     * @param {Object} sessionState The session state for an object of the type specified by className.
+     */
+    DynamicState.create = function (objectName, className, sessionState) {
+        var obj = {};
+        // convert empty strings ("") to null
+        obj[DynamicState.OBJECT_NAME] = objectName || null;
+        obj[DynamicState.CLASS_NAME] = className || null;
+        obj[DynamicState.SESSION_STATE] = sessionState;
+        return obj;
+    };
+
+    /**
+     * This function can be used to detect dynamic state objects within nested, untyped session state objects.
+     * This function will check if the given object has the three properties of a dynamic state object.
+     * @method isDynamicState
+     * @static
+     * @param {Object} object An object to check.
+     * @return {Boolean} true if the object has all three properties and no extras.
+     */
+    DynamicState.isDynamicState = function (object, handleBypassDiff) {
+        handleBypassDiff = (handleBypassDiff === undefined ? false : handleBypassDiff);
+        var matchCount = 0;
+        for (var name in object) {
+            if (name === DynamicState.OBJECT_NAME || name === DynamicState.CLASS_NAME || name === DynamicState.SESSION_STATE)
+                matchCount++;
+            else if (handleBypassDiff && name === DynamicState.BYPASS_DIFF)
+                continue;
+            else
+                return false;
+        }
+        return (matchCount == 3); // must match all three properties with no extras
+    };
+
+    /**
+     * This function checks whether or not a session state is an Array containing at least one
+     * object that looks like a DynamicState and has no other non-String items.
+     * @method isDynamicStateArray
+     * @static
+     * @param {Object} state
+     * @return {Boolean} A value of true if the Array looks like a dynamic session state or diff.
+     */
+    DynamicState.isDynamicStateArray = function (state, handleBypassDiff) {
+        handleBypassDiff = (handleBypassDiff === undefined ? false : handleBypassDiff);
+        if (!Array.isArray(state))
+            return false;
+        var result = false;
+        for (var i = 0; i < state.length; i++) {
+            var item = state[i];
+            if (typeof item == 'string' || item instanceof String)
+                continue; // dynamic state diffs can contain String values.
+            if (DynamicState.isDynamicState(item, handleBypassDiff))
+                result = true;
+            else
+                return false;
+        }
+        return result;
+    };
+
+    /**
+     * Alters a session state object to bypass special diff logic for dynamic state arrays.
+     * It does so by adding the "bypassDiff" property to any part for which isDynamicState(part) returns true.
+     * @method alterSessionStateToBypassDiff
+     * @static
+     * @param {Object} state
+     * @return {Boolean} A value of true if the Array looks like a dynamic session state or diff.
+     */
+    DynamicState.alterSessionStateToBypassDiff = function (object) {
+        if (DynamicState.isDynamicState(object)) {
+            object[DynamicState.BYPASS_DIFF] = true;
+            object = object[DynamicState.SESSION_STATE];
+        }
+        // in JS String (for Name in Object ) will return index number of all characters and Length as Properties of string
+        // so this flag is required
+        if (Object.hasOwnProperty(object) && object.constructor.name !== 'String') {
+            for (var name in object)
+                DynamicState.alterSessionStateToBypassDiff(object[name]);
+        }
+
+
+    };
+
+    weavecore.DynamicState = DynamicState;
+
+}());
+
+/**
+ * @module weavecore
+ */
+
+//namesapce
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+(function () {
+
+
+    //Static Properties:
+    /**
+     * Internal Static const properties for Debugging
+     * @private
+     * @static
+     * @property STACK_TRACE_TRIGGER
+     * @readOnly
+     * @default "This is the stack trace from when the callbacks were last triggered."
+     * @type string
+     */
+    Object.defineProperty(CallbackEntry, 'STACK_TRACE_TRIGGER', {
+        value: "This is the stack trace from when the callbacks were last triggered."
+    });
+    /**
+     * Internal Static const properties for Debugging
+     * @private
+     * @static
+     * @property STACK_TRACE_ADD
+     * @readOnly
+     * @default "This is the stack trace from when the callback was added."
+     * @type string
+     */
+    Object.defineProperty(CallbackEntry, 'STACK_TRACE_ADD', {
+        value: "This is the stack trace from when the callback was added."
+    });
+    /**
+     * Internal Static const properties for Debugging
+     * @private
+     * @static
+     * @property STACK_TRACE_REMOVE
+     * @readOnly
+     * @default "This is the stack trace from when the callback was removed."
+     * @type string
+     */
+    Object.defineProperty(CallbackEntry, 'STACK_TRACE_REMOVE', {
+        value: "This is the stack trace from when the callback was removed."
+    });
+
+
+    // constructor:
+    /**
+     * Internal Class used in {{#crossLink "CallbackCollection"}}{{/crossLink}}
+     * @class CallbackEntry
+     * @for CallbackCollection
+     * @param {Object} context
+     * @param {Function} callback
+     * @constructor
+     */
+    function CallbackEntry(context, callback) {
+        this.context = context;
+        this.callback = callback;
+        if (context)
+            WeaveAPI.disposableChild(context, this);
+        if (weavecore.CallbackCollection.debug)
+            this.addCallback_stackTrace = new Error(CallbackEntry.STACK_TRACE_ADD);
+
+    }
+
+
+    var p = CallbackEntry.prototype;
+
+    /**
+     * @export
+     * @type {Object}
+     */
+    p.context = null;
+
+
+    /**
+     * @export
+     * @type {Function}
+     */
+    p.callback = null;
+
+
+    /**
+     * @export
+     * @type {number}
+     */
+    p.recursionCount = 0;
+
+
+    /**
+     * @export
+     * @type {number}
+     */
+    p.schedule = 0;
+
+
+    /**
+     * @export
+     * @type {Error}
+     */
+    p.addCallback_stackTrace = null;
+
+
+    /**
+     * @export
+     * @type {Error}
+     */
+    p.removeCallback_stackTrace = null;
+
+
+    /**
+     * Call this when the callback entry is no longer needed.
+     * @method dispose
+     */
+    p.dispose = function () {
+        if (weavecore.CallbackCollection.debug && this.callback !== null && this.callback !== undefined)
+            this.removeCallback_stackTrace = new Error(CallbackEntry.STACK_TRACE_REMOVE).stack;
+
+        this.context = null;
+        this.callback = null;
+    };
+
+
+    weavecore.CallbackEntry = CallbackEntry;
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'CallbackEntry',
+            qName: 'weavecore.CallbackEntry'
+        }],
+        interfaces: [weavecore.IDisposableObject]
+    };
+
+
+}())
+/**
+ * @module weavecore
+ */
+
+//namesapce
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+(function () {
+
+    //Static Properties:
+    /**
+     * True while handling grouped callbacks.
+     * @private
+     * @static
+     * @property _handlingGroupedCallbacks
+     * @default false
+     * @type Boolean
+     */
+    GroupedCallbackEntry._handlingGroupedCallbacks = false;
+
+    /**
+     * True while handling grouped callbacks called recursively from other grouped callbacks.
+     * @private
+     * @static
+     * @property _handlingRecursiveGroupedCallbacks
+     * @default false
+     * @type Boolean
+     */
+    GroupedCallbackEntry._handlingRecursiveGroupedCallbacks = false;
+
+    /**
+     * This gets set to true when the static _handleGroupedCallbacks() callback has been added as a frame listener.
+     * @private
+     * @static
+     * @property _initialized
+     * @default false
+     * @type Boolean
+     */
+    GroupedCallbackEntry._initialized = false;
+
+    /**
+     * This maps a groupedCallback function to its corresponding GroupedCallbackEntry.
+     * @private
+     * @static
+     * @readOnly
+     * @property _entryLookup
+     * @type Map
+     */
+    Object.defineProperty(GroupedCallbackEntry, '_entryLookup', {
+        value: new Map()
+    });
+
+    /**
+     * This is a list of GroupedCallbackEntry objects in the order they were triggered.
+     * @private
+     * @static
+     * @readOnly
+     * @property _triggeredEntries
+     * @type Array
+     */
+    Object.defineProperty(GroupedCallbackEntry, '_triggeredEntries', {
+        value: []
+    });
+
+    /**
+     * @private
+     * @const
+     * @type {Object}
+     */
+    GroupedCallbackEntry.CONTEXT_PLACEHOLDER = {};
+
+
+
+    //Static Methods:
+
+    /**
+     * @method addGroupedCallback
+     * @static
+     * @param {CallbackCollection} callbackCollection
+     * @param {Object} relevantContext
+     * @param {Function} groupedCallback
+     * @param {Boolean} triggerCallbackNow
+     */
+    GroupedCallbackEntry.addGroupedCallback = function (callbackCollection, relevantContext, groupedCallback, triggerCallbackNow, delayWhileBusy) {
+        // context shouldn't be null because we use it to determine when to clean up the GroupedCallbackEntry.
+        if (relevantContext === null || relevantContext === undefined)
+            relevantContext = GroupedCallbackEntry.CONTEXT_PLACEHOLDER;
+        // get (or create) the shared entry for the groupedCallback
+        callbackCollection.removeCallback(groupedCallback, relevantContext);
+        var entry = GroupedCallbackEntry._entryLookup.get(groupedCallback);
+        if (!entry) {
+            entry = new GroupedCallbackEntry(relevantContext, groupedCallback);
+            GroupedCallbackEntry._entryLookup.set(groupedCallback, entry);
+        }
+
+
+        entry.targets.push(callbackCollection);
+        if (delayWhileBusy)
+            entry.delayWhileBusy = true;
+
+
+
+        callbackCollection.addImmediateCallback(relevantContext, entry.trigger, triggerCallbackNow);
+    };
+
+    /**
+     * @method removeGroupedCallback
+     * @static
+     * @param {CallbackCollection} callbackCollection
+     * @param {Function} groupedCallback
+     */
+    GroupedCallbackEntry.removeGroupedCallback = function (callbackCollection, groupedCallback) {
+        // remove the trigger function as a callback
+        var entry = GroupedCallbackEntry._entryLookup.get(groupedCallback);
+        if (entry)
+            callbackCollection.removeCallback(entry.trigger, callbackCollection);
+    };
+
+    /**
+     * This function gets called once per frame and allows grouped callbacks to run.
+     * @method _handleGroupedCallbacks
+     * @static
+     * @private
+     */
+    GroupedCallbackEntry._handleGroupedCallbacks = function () {
+        var i;
+        var entry;
+
+        GroupedCallbackEntry._handlingGroupedCallbacks = true;
+        // Handle grouped callbacks in the order they were triggered,
+        // anticipating that more may be added to the end of the list in the process.
+        // This first pass does not allow grouped callbacks to call each other immediately.
+        for (i = 0; i < GroupedCallbackEntry._triggeredEntries.length; i++) {
+            entry = GroupedCallbackEntry._triggeredEntries[i];
+            entry.handleGroupedCallback();
+        }
+
+        // after all grouped callbacks have been handled once, run those which were triggered recursively and allow them to call other grouped callbacks immediately.
+        GroupedCallbackEntry._handlingRecursiveGroupedCallbacks = true;
+        // handle grouped callbacks that were triggered recursively
+        for (i = 0; i < GroupedCallbackEntry._triggeredEntries.length; i++) {
+            entry = GroupedCallbackEntry._triggeredEntries[i];
+            if (entry.triggeredAgain)
+                entry.handleGroupedCallback();
+        }
+
+        GroupedCallbackEntry._handlingRecursiveGroupedCallbacks = false;
+        GroupedCallbackEntry._handlingGroupedCallbacks = false;
+
+        // reset for next frame
+        for (i = 0; i < GroupedCallbackEntry._triggeredEntries.length; i++) {
+            entry = GroupedCallbackEntry._triggeredEntries[i];
+            entry.triggered = entry.triggeredAgain = false;
+        }
+        GroupedCallbackEntry._triggeredEntries.length = 0;
+
+    };
+    // constructor:
+    /**
+     * Internal Class used in {{#crossLink "CallbackCollection"}}{{/crossLink}}
+     * @class GroupedCallbackEntry
+     * @extends CallbackEntry
+     * @for CallbackCollection
+     * @param {Function} groupedCallback
+     * @constructor
+     */
+    function GroupedCallbackEntry(context, groupedCallback) {
+        this.targets = [];
+        GroupedCallbackEntry.base(this, 'constructor', context, groupedCallback);
+        this.trigger = goog.bind(trigger, this);
+        if (!GroupedCallbackEntry._initialized) {
+            WeaveAPI.StageUtils.addEventCallback("tick", null, GroupedCallbackEntry._handleGroupedCallbacks);
+            GroupedCallbackEntry._initialized = true;
+        }
+    }
+    goog.inherits(GroupedCallbackEntry, weavecore.CallbackEntry);
+
+
+    var p = GroupedCallbackEntry.prototype;
+
+    /**
+     * @export
+     * @type {boolean}
+     */
+    p.triggered = false;
+
+
+    /**
+     * @export
+     * @type {boolean}
+     */
+    p.triggeredAgain = false;
+
+
+    /**
+     * @export
+     * @type {boolean}
+     */
+    p.delayWhileBusy = false;
+
+
+    /**
+     * @export
+     * @type {Array}
+     */
+    p.targets;
+
+    /**
+     * Marks the entry to be handled later (unless already triggered this frame).
+     * This also takes care of preventing recursion.
+     * @method trigger
+     */
+    function trigger() {
+        // if handling recursive callbacks, call now
+        if (GroupedCallbackEntry._handlingRecursiveGroupedCallbacks) {
+            this.handleGroupedCallback();
+        } else if (!this.triggered) {
+            // not previously triggered
+            GroupedCallbackEntry._triggeredEntries.push(this);
+            this.triggered = true;
+        } else if (GroupedCallbackEntry._handlingGroupedCallbacks) {
+            // triggered recursively - call later
+            this.triggeredAgain = true;
+        }
+    };
+
+
+    /**
+     * Checks the context(s) before calling groupedCallback
+     * @method handleGroupedCallback
+     */
+    p.handleGroupedCallback = function () {
+        if (!this.context)
+            return;
+
+        // first, make sure there is at least one relevant context for this callback.
+        var allContexts = this.context;
+        // remove the contexts that have been disposed.
+        for (var i = 0; i < allContexts.length; i++)
+            if (WeaveAPI.SessionManager.objectWasDisposed(allContexts[i]))
+                allContexts.splice(i--, 1);
+            // if there are no more relevant contexts for this callback, don't run it.
+        if (allContexts.length === 0) {
+            this.dispose();
+            GroupedCallbackEntry._entryLookup.delete(this.callback);
+            return;
+        }
+
+        // avoid immediate recursion
+        if (this.recursionCount === 0) {
+            this.recursionCount++;
+            this.callback();
+            this.recursionCount--;
+        }
+        // avoid delayed recursion
+        this.triggeredAgain = false;
+    };
+
+
+    /**
+     * @export
+     * @override
+     */
+    p.dispose = function () {
+        for (var i = 0; i < this.targets.length; i++) {
+            var target = this.targets[i];
+            GroupedCallbackEntry.removeGroupedCallback(target, this.context, this.callback);
+        }
+
+        GroupedCallbackEntry.base(this, 'dispose');
+    };
+
+    weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
+
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'GroupedCallbackEntry',
+            qName: 'weavecore.GroupedCallbackEntry'
+        }]
+    };
+
+
+
+
+}());
+/**
+ * @module weavecore
+ */
+
+//namesapce
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+
+(function () {
+    "use strict";
+
+    // Static Public Const Properties
+    /**
+     * The name of the property containing the name assigned to the object when the session state is generated.
+     * @static
+     * @public
+     * @property DEFAULT_TRIGGER_COUNT
+     * @readOnly
+     * @default 1
+     * @type number
+     */
+    Object.defineProperty(CallbackCollection, 'DEFAULT_TRIGGER_COUNT', {
+        value: 1
+    });
+
+
+
+    // constructor:
+    /**
+     * This class manages a list of callback functions.
+     * If specified, the preCallback function will be called immediately before running each
+     * callback using the parameters passed to _runCallbacksImmediately(). This means if there
+     * are five callbacks added, preCallback() gets called five times whenever
+     * _runCallbacksImmediately() is called.  An example usage of this is to make sure a relevant
+     * variable is set to the appropriate value while each callback is running.  The preCallback
+     * function will not be called before grouped callbacks.
+     * @class CallbackCollection
+     * @param {Function} preCallback An optional function to call before each immediate callback.
+     * @constructor
+     */
+
+    function CallbackCollection(preCallback) {
+        preCallback = typeof preCallback !== 'undefined' ? preCallback : null;
+
+        this._callbackEntries = [];
+        this._triggerCounter = CallbackCollection.DEFAULT_TRIGGER_COUNT;
+        this._disposeCallbackEntries = [];
+        this._preCallback = preCallback;
+
+        this.triggerCallbacks = goog.bind(triggerCallbacks, this);
+    }
+
+
+
+
+    // Prototypes
+    var p = CallbackCollection.prototype;
+
+    Object.defineProperties(p, {
+        /** @export */
+        triggerCounter: {
+            get: function () {
+                return this._triggerCounter;
+            }
+        },
+        /** @export */
+        callbacksAreDelayed: {
+            get: function () {
+                return this._delayCount > 0;
+            }
+        },
+        /** @export */
+        wasDisposed: {
+            get: function () {
+                return this._wasDisposed;
+            }
+        }
+    });
+
+    /**
+     * @export
+     * @type {weavecore.ILinkableObject}
+     */
+    p._linkableObject;
+
+
+    /**
+     * @private
+     * @type {string}
+     */
+    p._lastTriggerStackTrace;
+
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._oldEntries;
+
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._callbackEntries;
+
+
+    /**
+     * @protected
+     * @type {Function}
+     */
+    p._preCallback = null;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._delayCount = 0;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._runCallbacksIsPending = false;
+
+
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._triggerCounter;
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._runCallbacksCompleted;
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._disposeCallbackEntries;
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._wasDisposed = false;
+
+    // public methods:
+    /**
+     * This adds the given function as a callback.  The function must not require any parameters.
+     * The callback function will not be called recursively as a result of it triggering callbacks recursively.
+     * @method addImmediateCallback
+     * @param {Object} relevantContext If this is not null, then the callback will be removed when the relevantContext object is disposed via SessionManager.dispose().  This parameter is typically a 'this' pointer.
+     * @param {Function} callback The function to call when callbacks are triggered.
+     * @param {Boolean} runCallbackNow If this is set to true, the callback will be run immediately after it is added.
+     * @param {Boolean} alwaysCallLast If this is set to true, the callback will be always be called after any callbacks that were added with alwaysCallLast=false.  Use this to establish the desired child-to-parent triggering order.
+     */
+    p.addImmediateCallback = function (relevantContext, callback, runCallbackNow, alwaysCallLast) {
+
+        // set default value for parameters
+        runCallbackNow = typeof runCallbackNow !== 'undefined' ? runCallbackNow : false;
+        alwaysCallLast = typeof alwaysCallLast !== 'undefined' ? alwaysCallLast : false;
+
+        if (callback === null || callback === undefined)
+            return;
+
+        // remove the callback if it was previously added
+        this.removeCallback(callback);
+
+        var entry = new weavecore.CallbackEntry(relevantContext, callback);
+        if (alwaysCallLast) // this will run the callback in second round of callback entries
+            entry.schedule = 1; //mostly parent.triggercallback are called last.
+        this._callbackEntries.push(entry);
+
+        if (runCallbackNow) {
+            // increase the recursion count while the function is running
+            entry.recursionCount++;
+            callback.apply(relevantContext || callback['this']);
+            entry.recursionCount--;
+        }
+    };
+
+    /**
+     * This will trigger every callback function to be called with their saved arguments.
+     * If the delay count is greater than zero, the callbacks will not be called immediately.
+     * @method triggerCallbacks
+     */
+    function triggerCallbacks() {
+        if (CallbackCollection.debug) {
+            this._lastTriggerStackTrace = new Error(CallbackCollection.STACK_TRACE_TRIGGER).stack;
+        }
+
+        if (this._delayCount > 0) {
+            // we still want to increase the counter even if callbacks are delayed
+            this._triggerCounter++;
+            this._runCallbacksIsPending = true;
+            return;
+        }
+        this._runCallbacksImmediately();
+    };
+
+
+    /**
+     * This function runs callbacks immediately, ignoring any delays.
+     * The preCallback function will be called with the specified preCallbackParams arguments.
+     * @method _runCallbacksImmediately
+     * @param preCallbackParams The arguments to pass to the preCallback function given in the constructor.
+     * @protected
+     * @final
+     */
+    p._runCallbacksImmediately = function () {
+        var preCallbackParams = Array.prototype.slice.call(arguments, 0);
+        //increase the counter immediately
+        this._triggerCounter++;
+        this._runCallbacksIsPending = false;
+
+        // This flag is set to false before running the callbacks.  When it becomes true, the loop exits.
+        this._runCallbacksCompleted = false;
+
+        for (var schedule = 0; schedule < 2; schedule++) {
+            // run the callbacks in the order they were added
+            for (var i = 0; i < this._callbackEntries.length; i++) {
+                // If this flag is set to true, it means a recursive call has finished running callbacks.
+                // If _preCallback is specified, we don't want to exit the loop because that cause a loss of information.
+                if (this._runCallbacksCompleted && (this._preCallback === undefined || this._preCallback === null))
+                    break;
+
+                var entry = this._callbackEntries[i];
+
+                // if we haven't reached the matching schedule yet, skip this callback
+                if (entry.schedule != schedule)
+                    continue;
+                // Remove the entry if the context was disposed by SessionManager.
+                var shouldRemoveEntry;
+                if (entry.callback === null || entry.callback === undefined)
+                    shouldRemoveEntry = true;
+                else if (weavecore.ClassUtils.is(entry.context, CallbackCollection)) // special case
+                    shouldRemoveEntry = entry.context.wasDisposed;
+                else
+                    shouldRemoveEntry = WeaveAPI.wasDisposed(entry.context);
+                if (shouldRemoveEntry) {
+                    if (CallbackCollection.debug) {
+                        if (arguments.length > 1) console.log("Entry is disposed");
+                    }
+                    entry.dispose();
+                    // remove the empty callback reference from the list
+                    var removed = this._callbackEntries.splice(i--, 1); // decrease i because remaining entries have shifted
+                    if (CallbackCollection.debug)
+                        this._oldEntries = this._oldEntries ? this._oldEntries.concat(removed) : removed;
+                    continue;
+                }
+                // if _preCallback is specified, we don't want to limit recursion because that would cause a loss of information.
+                if (entry.recursionCount === 0 || (this._preCallback !== undefined && this._preCallback !== null)) {
+                    entry.recursionCount++; // increase count to signal that we are currently running this callback.
+                    if (this._preCallback !== undefined && this._preCallback !== null)
+                        this._preCallback.apply(this, preCallbackParams);
+                    if (CallbackCollection.debug) {
+                        if (arguments.length > 1) console.log(["callback executed"]);
+                    }
+                    entry.callback.apply(entry.context || entry.callback['this']);
+
+                    entry.recursionCount--; // decrease count because the callback finished.
+                }
+            }
+        }
+        // This flag is now set to true in case this function was called recursively.  This causes the outer call to exit its loop.
+        this._runCallbacksCompleted = true;
+    };
+
+    /**
+     * This function will remove a callback that was previously added.
+     * @method removeCallback
+     * @param {Function} callback The function to remove from the list of callbacks.
+     */
+    p.removeCallback = function (callback, relevantContext) {
+        // if the callback was added as a grouped callback, we need to remove the trigger function
+        weavecore.GroupedCallbackEntry.removeGroupedCallback(this, relevantContext, callback);
+        // find the matching CallbackEntry, if any
+        for (var outerLoop = 0; outerLoop < 2; outerLoop++) {
+            var entries = outerLoop === 0 ? this._callbackEntries : this._disposeCallbackEntries;
+            for (var index = 0; index < entries.length; index++) {
+                var entry = entries[index];
+                // if (entry !== null && entry !== undefined && callback === entry.callback && entry.context === relevantContext) {
+                if (entry !== null && entry !== undefined && callback === entry.callback) {
+                    // Remove the callback by setting the function pointer to null.
+                    // This is done instead of removing the entry because we may be looping over the _callbackEntries Array right now.
+                    entry.dispose();
+                }
+            }
+        }
+    };
+
+
+
+    /**
+     * This will increase the delay count by 1.  To decrease the delay count, use resumeCallbacks().
+     * As long as the delay count is greater than zero, effects of triggerCallbacks() will be delayed.
+     * @method delayCallbacks
+     */
+    p.delayCallbacks = function () {
+        this._delayCount++;
+    };
+
+    /**
+     * This will decrease the delay count by one if it is greater than zero.
+     * If triggerCallbacks() was called while the delay count was greater than zero, immediate callbacks will be called now.
+     * @method resumeCallbacks
+     */
+    p.resumeCallbacks = function () {
+        if (this._delayCount > 0)
+            this._delayCount--;
+
+        if (this._delayCount === 0 && this._runCallbacksIsPending)
+            this.triggerCallbacks("resume Callbacks");
+    };
+
+    /**
+     * This will add a callback that will only be called once, when this callback collection is disposed.
+     * @method addDisposeCallback
+     * @param {Object} relevantContext If this is not null, then the callback will be removed when the relevantContext object is disposed via SessionManager.dispose().  This parameter is typically a 'this' pointer.
+     * @param callback {Function} The function to call when this callback collection is disposed.
+     */
+    p.addDisposeCallback = function (relevantContext, callback) {
+        // don't do anything if the dispose callback was already added
+        for (var i = 0; i < this._disposeCallbackEntries.length; i++) {
+            var entry = this._disposeCallbackEntries[i];
+            if (entry.callback === callback && entry.context === relevantContext)
+                return;
+        }
+
+
+        this._disposeCallbackEntries.push(new weavecore.CallbackEntry(relevantContext, callback));
+    };
+
+
+    /**
+     * This function will be called automatically when the object is no longer needed, and should not be called directly.
+     * Use disposeObject() instead so parent-child relationships get cleaned up automatically.
+     * @method dispose
+     */
+    p.dispose = function () {
+        // remove all callbacks
+        if (CallbackCollection.debug)
+            this._oldEntries = this._oldEntries ? this._oldEntries.concat(this._callbackEntries) : this._callbackEntries.concat();
+
+        this._callbackEntries.forEach(function (entry) {
+            entry.dispose();
+        });
+
+        this._callbackEntries.length = 0;
+        this._wasDisposed = true;
+
+        // run & remove dispose callbacks
+        while (this._disposeCallbackEntries.length) {
+            var entry = this._disposeCallbackEntries.shift();
+            if (entry.callback !== null && entry.callback !== undefined && !WeaveAPI.wasDisposed(entry.context)) {
+                entry.callback.apply(entry.context || entry.callback['this']);
+            }
+        }
+    };
+
+
+
+    /**
+     * Adds a callback that will only be called during a scheduled time each frame.  Grouped callbacks use a central trigger list,
+     * meaning that if multiple ICallbackCollections trigger the same grouped callback before the scheduled time, it will behave as
+     * if it were only triggered once.  For this reason, grouped callback functions cannot have any parameters.  Adding a grouped
+     * callback to a ICallbackCollection will undo any previous effects of addImmediateCallback() or addDisposeCallback() made to the
+     * same ICallbackCollection.  The callback function will not be called recursively as a result of it triggering callbacks recursively.
+     * @method addGroupedCallback
+     * @param relevantContext {Object} If this is not null, then the callback will be removed when the relevantContext object is disposed via SessionManager.dispose().  This parameter is typically a 'this' pointer.
+     * @param groupedCallback {Function} The callback function that will only be allowed to run during a scheduled time each frame.  It must not require any parameters.
+     * @param triggerCallbackNow {Boolean} If this is set to true, the callback will be triggered to run during the scheduled time after it is added.
+     */
+    p.addGroupedCallback = function (relevantContext, groupedCallback, triggerCallbackNow, delayWhileBusy) {
+        //set default value for parameters
+        triggerCallbackNow = typeof triggerCallbackNow !== 'undefined' ? triggerCallbackNow : false;
+        delayWhileBusy = typeof delayWhileBusy !== 'undefined' ? delayWhileBusy : true;
+        weavecore.GroupedCallbackEntry.addGroupedCallback(this, relevantContext, groupedCallback, triggerCallbackNow, delayWhileBusy);
+    };
+
+
+
+    weavecore.CallbackCollection = CallbackCollection;
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'CallbackCollection',
+            qName: 'weavecore.CallbackCollection'
+        }],
+        interfaces: [weavecore.ICallbackCollection, weavecore.IDisposableObject]
+    };
+
+}());
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+/**
+ * Facilitates the creation of dynamic trees.
+ */
+(function () {
+
+
+    WeaveTreeItem.createItems = function (WeaveTreeItem_implementation, items) {
+        var n = 0;
+        while (n !== items.length) {
+            n = items.length;
+            items = [].concat.apply(null, items);
+        }
+
+        return items.map(WeaveTreeItem._mapItems, WeaveTreeItem_implementation).filter(WeaveTreeItem._filterItemsRemoveNullsAndUndefined);
+
+    }
+
+    WeaveTreeItem._mapItems = function (item, i, a) {
+        if (item.constructor === Function) // to identify its a class object
+            return new item();
+        if (item.constructor === String || ((item !== null || item !== undefined) && item.constructor === Object)) {
+            var ItemClass = this || WeaveTreeItem;
+            return new ItemClass(item);
+        }
+        return item;
+
+    }
+
+    WeaveTreeItem._filterItemsRemoveNullsAndUndefined = function (item, i, a) {
+
+        return item !== null && item !== undefined;
+
+    }
+
+    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
+
+    /**
+     * Constructs a new WeaveTreeItem.
+     * @param params An Object containing property values to set on the WeaveTreeItem.
+     *               If params is a String, both <code>label</code> and <code>data</code> will be set to that String.
+     */
+
+    function WeaveTreeItem(params) {
+        //set default values
+        if (params === undefined) params = null;
+        /**
+         * Set this to change the constructor used for initializing child items.
+         * This variable is intentionally uninitialized to avoid overwriting the value set by an extending class in its constructor.
+         */
+        this.childItemClass; // IMPORTANT - no initial value
+        this._recursion = {}; // recursionName -> Boolean
+        this._label = "";
+        this._children = null;
+        this._dependency = null;
+        /**
+         * Cached values that get invalidated when the source triggers callbacks.
+         */
+        this._cache = {};
+
+        /**
+         * Cached values of getCallbackCollection(source).triggerCounter.
+         */
+        this._counter = {};
+
+
+        //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
+
+        /**
+         * This can be set to either a String or a Function.
+         * This property is checked by Flex's default data descriptor.
+         * If this property is not set, the <code>data</code> property will be used as the label.
+         */
+        Object.defineProperty(this, 'label', {
+            get: function () {
+                const id = 'label';
+                if (this.isCached(id))
+                    return this._cache[id];
+
+                var str = this.getString(this._label, id);
+                if (!str && this.data !== null && this.data !== undefined)
+                    str = String(this.data);
+                return this.cache(id, str);
+            },
+            set: function (value) {
+                this._counter['label'] = undefined;
+                this._label = value;
+            },
+            configurable: true
+        });
+
+
+
+
+        Object.defineProperty(this, 'children', {
+            /**
+             * Gets a filtered copy of the child menu items.
+             * When this property is accessed, refresh() will be called except if refresh() is already being called.
+             * This property is checked by Flex's default data descriptor.
+             */
+            get: function () {
+                const id = 'children';
+
+                var items;
+                if (this.isCached(id))
+                    items = this._cache[id];
+                else
+                    items = this.getObject(this._children, id);
+                if (items) {
+                    // overwrite original array to support filling it asynchronously
+                    var iOut = 0;
+                    for (var i = 0; i < items.length; i++) {
+                        var item = WeaveTreeItem._mapItems.call(this.childItemClass, items[i], i, items);
+                        if (item != null)
+                            items[iOut++] = item;
+                    }
+                }
+
+                return this.cache(id, items);
+            },
+            /**
+             * This can be set to either an Array or a Function that returns an Array.
+             * The function can be like function():void or function(item:WeaveTreeItem):void.
+             * The Array can contain either WeaveTreeItems or Objects, each of which will be passed to the WeaveTreeItem constructor.
+             */
+            set: function (value) {
+                this._counter['children'] = undefined;
+                this._children = value;
+            }
+        });
+
+
+        /**
+         * A pointer to the ILinkableObject that created this node.
+         * This is used to determine when to invalidate cached values.
+         */
+        Object.defineProperty(this, 'dependency', {
+            get: function () {
+                if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency)) {
+                    this.dependency = null;
+                }
+                return this._dependency;
+            },
+            set: function (value) {
+                if (this._dependency != value)
+                    this._counter = {};
+                this._dependency = value;
+            }
+        });
+
+        /**
+         * This can be any data associated with this tree item.
+         */
+        this.data = null;
+
+        if (typeof (params) === 'string') {
+            this.label = params;
+            this.data = params;
+        } else
+            for (var key in params)
+                this[key] = params[key];
+    }
+
+
+
+
+
+
+    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
+    var p = WeaveTreeItem.prototype;
+    /**
+     * Computes a Boolean value from various structures
+     * @param param Either a Boolean, and Object like {not: param}, a Function, an ILinkableVariable, or an Array of those objects.
+     * @param recursionName A name used to keep track of recursion.
+     * @return A Boolean value derived from the param, or the param itself if called recursively.
+     */
+    p.getBoolean = function (param, recursionName) {
+        if (!this._recursion[recursionName]) {
+            try {
+                this._recursion[recursionName] = true;
+
+                if (this.isSimpleObject(param, 'not'))
+                    param = !this.getBoolean(param['not'], "not_" + recursionName);
+                if (this.isSimpleObject(param, 'or'))
+                    param = this.getBoolean(param['or'], "or_" + recursionName);
+                if (typeof (param) === "function")
+                    param = this.evalFunction(param);
+                if (param instanceof weavecore.LinkableVariable)
+                    param = param.getSessionState();
+                if (param instanceof Array) {
+                    var breakValue = recursionName.indexOf("or_") === 0;
+                    for (var param in param) {
+                        param = this.getBoolean(param, "item_" + recursionName);
+                        if (param ? breakValue : !breakValue)
+                            break;
+                    }
+                }
+                param = param ? true : false;
+            } finally {
+                this._recursion[recursionName] = false;
+            }
+        }
+        return param;
+    };
+
+    /**
+     * Checks if an object has a single specified property.
+     */
+    p.isSimpleObject = function (object, singlePropertyName) {
+
+
+        var found = false;
+        for (var key in object) {
+            if (found)
+                return false; // two or more properties
+
+            if (key !== singlePropertyName)
+                return false; // not the desired property
+
+            found = true; // found the desired property
+        }
+        return found;
+    };
+
+    /**
+     * Gets a String value from a String or Function.
+     * @param param Either a String or a Function.
+     * @param recursionName A name used to keep track of recursion.
+     * @return A String value derived from the param, or the param itself if called recursively.
+     */
+    p.getString = function (param, recursionName) {
+        if (!this._recursion[recursionName]) {
+            try {
+                this._recursion[recursionName] = true;
+
+                if (typeof (param) === "function")
+                    param = this.evalFunction(param);
+                else
+                    param = param || '';
+            } finally {
+                this._recursion[recursionName] = false;
+            }
+        }
+        return param;
+    };
+
+    /**
+     * Evaluates a function to get an Object or just returns the non-Function Object passed in.
+     * @param param Either an Object or a Function.
+     * @param recursionName A name used to keep track of recursion.
+     * @return An Object derived from the param, or the param itself if called recursively.
+     */
+    p.getObject = function (param, recursionName) {
+        if (!this._recursion[recursionName]) {
+            try {
+                this._recursion[recursionName] = true;
+
+                if (typeof (param) === "function")
+                    param = this.evalFunction.call(this, param);
+            } finally {
+                this._recursion[recursionName] = false;
+            }
+        }
+        return param;
+    };
+
+    /**
+     * First tries calling a function with no parameters.
+     * If an ArgumentError is thrown, the function will called again, passing this WeaveTreeItem as the first parameter.
+     */
+    p.evalFunction = function (func) {
+        try {
+            try {
+                // first try calling the function with no parameters
+                return func();
+            } catch (e) {
+                //To-Docreate Argument error object
+                // and on each function if the argument is required, and if not passed throw that Argument error object
+                // console.log(e);
+                /*if (!(e is ArgumentError))
+				{
+					if (e is Error)
+						trace((e as Error).getStackTrace());
+					throw e;
+				}*/
+            }
+
+            // on ArgumentError, pass in this WeaveTreeItem as the first parameter
+            //console.log('executing after ArgumentError');
+            return func(this);
+
+        } catch (e) {
+            console.error(e);
+        }
+
+    };
+
+    //----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----//----
+
+    /**
+     * Checks if cached value is valid.
+     * Always returns false if the source property is not set.
+     * @param id A string identifying a property.
+     * @return true if the property value has been cached.
+     */
+    p.isCached = function (id) {
+        if (this._dependency && WeaveAPI.SessionManager.objectWasDisposed(this._dependency))
+            source = null;
+        return this._dependency && this._counter[id] === WeaveAPI.SessionManager.getCallbackCollection(this._dependency).triggerCounter;
+    };
+
+    /**
+     * Retrieves or updates a cached value for a property.
+     * Does not cache the value if the source property is not set.
+     * @param id A string identifying a property.
+     * @param newValue Optional new value to cache for the property.
+     * @return The new or existing value for the property.
+     */
+    p.cache = function (id, newValue) {
+        if (arguments.length === 1)
+            return this._cache[id];
+
+        if (this._source && WeaveAPI.SessionManager.objectWasDisposed(this._source))
+            source = null;
+        if (this._source) {
+            this._counter[id] = WeaveAPI.SessionManager.getCallbackCollection(this._source).triggerCounter;
+            this._cache[id] = newValue;
+        }
+        return newValue;
+    };
+
+
+
+
+
+
+    weavecore.WeaveTreeItem = WeaveTreeItem;
+
+}());
+
+/*
+    Weave (Web-based Analysis and Visualization Environment)
+    Copyright (C) 2008-2011 University of Massachusetts Lowell
+
+    This file is a part of Weave.
+
+    Weave is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License, Version 3,
+    as published by the Free Software Foundation.
+
+    Weave is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Weave.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+/**
+ * This is a wrapper for a 2-dimensional Dictionary.
+ *
+ * @author adufilie
+ * @author sanjay1909
+ */
+
+(function () {
+    function Dictionary2D(weakPrimaryKeys, weakSecondaryKeys, defaultType) {
+        weakPrimaryKeys = (weakPrimaryKeys === undefined) ? false : weakPrimaryKeys;
+        weakSecondaryKeys = (weakSecondaryKeys === undefined) ? false : weakSecondaryKeys;
+
+        this.dictionary = weakPrimaryKeys ? new Map() : new Map();
+        this.defaultType = defaultType; // used for creating objects automatically via get()
+        this.weak2 = weakSecondaryKeys // used as a constructor parameter for nested Dictionaries
+    }
+
+    var p = Dictionary2D.prototype;
+
+    /**
+     *
+     * @param key1 The first dictionary key.
+     * @param key2 The second dictionary key.
+     * @return The value in the dictionary.
+     */
+    p.get = function (key1, key2) {
+        var value;
+        var d2 = this.dictionary.get(key1);
+        if (d2)
+            value = d2.get(key2);
+        if (value === undefined && this.defaultType) {
+            value = new this.defaultType();
+            this.set(key1, key2, value);
+        }
+        return value;
+    };
+
+    /**
+     * This will add or replace an entry in the dictionary.
+     * @param key1 The first dictionary key.
+     * @param key2 The second dictionary key.
+     * @param value The value to put into the dictionary.
+     */
+    p.set = function (key1, key2, value) {
+        var d2 = this.dictionary.get(key1);
+        if (d2 === null || d2 === undefined) {
+            d2 = this.weak2 ? new Map() : new Map();
+            this.dictionary.set(key1, d2);
+        }
+        d2.set(key2, value);
+    };
+
+    /**
+     * This removes all values associated with the given primary key.
+     * @param key1 The first dictionary key.
+     */
+    p.removeAllPrimary = function (key1) {
+        this.dictionary.delete(key1);
+    };
+
+    /**
+     * This removes all values associated with the given secondary key.
+     * @param key2 The second dictionary key.
+     */
+    p.removeAllSecondary = function (key2) {
+        for (var key1 of this.dictionary.keys()) {
+            this.dictionary.get(key1).delete(key2);
+        };
+    };
+
+    /**
+     * This removes a value associated with the given primary and secondary keys.
+     * @param key1 The first dictionary key.
+     * @param key2 The second dictionary key.
+     * @return The value that was in the dictionary.
+     */
+    p.remove = function (key1, key2) {
+        var value;
+        var d2 = this.dictionary.get(key1);
+        if (d2) {
+            value = d2.get(key2);
+            d2.delete(key2);
+        }
+
+
+        for (var v2 of d2.values())
+            return value;
+
+        // otherwise, remove it
+        this.dictionary.delete(key1);
+
+        return value;
+    };
+
+    weavecore.Dictionary2D = Dictionary2D;
+}());
+
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+(function () {
+
+    /**
+     * This constructor allows you to specify the three most important flash_proxy functions
+     * and an optional custom flash_proxy::callProperty function.
+     * @param hasProperty function hasProperty(name:*):Boolean
+     * @param getProperty function getProperty(name:*):*
+     * @param setProperty function setProperty(name:*, value:*):void
+     * @param callProperty function callProperty(name:*, ...parameters):*
+     */
+    function ProxyObject(hasProperty, getProperty, setProperty, callProperty) {
+        callProperty = (callProperty === undefined) ? null : callProperty;
+
+        /*Proxy.call(this);
+
+            this._has = handler.hasProperty;
+		this._get = super.flash_proxy::getProperty as Function;
+		this._set = super.flash_proxy::setProperty as Function;
+		this._call = null;
+			if (hasProperty !== null)
+				_has = hasProperty;
+			if (getProperty != null)
+				_get = getProperty;
+			if (setProperty != null)
+				_set = setProperty;
+			if (callProperty != null)
+				_call = callProperty;*/
+    }
+
+    /*override flash_proxy function hasProperty(name:*):Boolean
+    {
+    	return _has.call(this, name);
+    }
+
+    override flash_proxy function getProperty(name:*):*
+    {
+    	return _get.call(this, name);
+    }
+
+    override flash_proxy function setProperty(name:*, value:*):void
+    {
+    	_set.call(this, name, value);
+    }
+
+    override flash_proxy function callProperty(name:*, ...parameters):*
+    {
+    	if (_call == null)
+    		return _get.call(this, name).apply(this, parameters);
+
+    	parameters.unshift(name);
+    	return _call.apply(this, parameters);
+    }*/
+
+    weavecore.ProxyObject = ProxyObject;
+
+}());
+
+/**
+ * @module weavecore
+ */
+
+// namespace
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+
+(function () {
+    "use strict";
+
+    // constructor:
+    /**
+     * Session manager contains core functions related to session state.
+     * @class SessionManager
+     * @constructor
+     */
+    function SessionManager() {
+
+        this._getTreeItemChildren = goog.bind(_getTreeItemChildren, this);
+
+    }
+
+    var p = SessionManager.prototype;
+
+    /**
+     * @export
+     * @type {boolean}
+     */
+    p.debugBusyTasks = false;
+
+    p.linkableObjectToCallbackCollectionMap = new Map();
+
+    p.debug = false;
+
+    Object.defineProperties(p, {
+        "_childToParentMap": {
+            value: new Map()
+        },
+        "_parentToChildMap": {
+            value: new Map()
+        },
+        "_ownerToChildMap": {
+            value: new Map()
+        },
+        "_childToOwnerMap": {
+            value: new Map()
+        },
+        "_disposedObjectsMap": {
+            value: new Map()
+        },
+        "_treeCallbacks": {
+            value: new weavecore.CallbackCollection()
+        },
+        "_classNameToSessionedPropertyNames": {
+            value: {}
+        },
+        "_getSessionStateIgnoreList": {
+            value: new Map()
+        },
+        "_dTaskStackTrace": {
+            value: new Map()
+        },
+        "_d2dOwnerTask": {
+            value: new weavecore.Dictionary2D(true, false)
+        },
+        "_d2dTaskOwner": {
+            value: new weavecore.Dictionary2D(false, true)
+        },
+        "_dBusyTraversal": {
+            value: new Map()
+        },
+        "_aBusyTraversal": {
+            value: []
+        },
+        "_dUnbusyTriggerCounts": {
+            value: new Map()
+        },
+        "_dUnbusyStackTraces": {
+            value: new Map()
+        },
+        "_treeCache": {
+            value: new weavecore.Dictionary2D(true, false, weavecore.WeaveTreeItem)
+        },
+        "linkFunctionCache": {
+            value: new weavecore.Dictionary2D(true, true)
+        }
+
+    });
+
+
+    /**
+     * @inheritDoc
+     * @export
+     * @param {Object} linkableParent
+     * @param {Object} linkableChildType
+     * @param {Function=} callback
+     * @param {boolean=} useGroupedCallback
+     * @return {*}
+     */
+    p.newLinkableChild = function (linkableParent, linkableChildType, callback, useGroupedCallback) {
+        callback = typeof callback !== 'undefined' ? callback : null;
+        useGroupedCallback = typeof useGroupedCallback !== 'undefined' ? useGroupedCallback : false;
+        if (!WeaveAPI.isLinkable(linkableParent))
+            throw new Error("newLinkableChild(): Parent does not implement ILinkableObject.");
+        if (!linkableChildType)
+            throw new Error("newLinkableChild(): Child type parameter cannot be null.");
+        if (!WeaveAPI.isLinkable(linkableChildType)) {
+            var childQName = WeaveAPI.className(linkableChildType);
+            if (WeaveAPI.getDefinition(childQName))
+                throw new Error("newLinkableChild(): Child class does not implement ILinkableObject.");
+            else
+                throw new Error("newLinkableChild(): Child class inaccessible via qualified class name: " + childQName);
+        }
+        var linkableChild = new linkableChildType();
+        return this.registerLinkableChild(linkableParent, linkableChild, callback, useGroupedCallback);
+    };
+
+    /**
+     * This function tells the SessionManager that the session state of the specified child should appear in the
+     * session state of the specified parent, and the child should be disposed when the parent is disposed.
+     *
+     * There is one other requirement for the child session state to appear in the parent session state -- the child
+     * must be accessible through a public variable of the parent or through an accessor function of the parent.
+     *
+     * This function will add callbacks to the sessioned children that cause the parent callbacks to run.
+     *
+     * If a callback function is given, the callback will be added to the child and cleaned up when the parent is disposed.
+     *
+     * @method registerLinkableChild
+     * @param {Object} linkableParent A parent ILinkableObject that the child will be registered with.
+     * @param {ILinkableObject} linkableChild The child ILinkableObject to register as a child.
+     * @param {Function} callback A callback with no parameters that will be added to the child that will run before the parent callbacks are triggered, or during the next ENTER_FRAME event if a grouped callback is used.
+     * @param {Boolean} useGroupedCallback If this is true, addGroupedCallback() will be used instead of addImmediateCallback().
+     * @return {Object} The linkableChild object that was passed to the function.
+     * @example usage:    const foo = registerLinkableChild(this, someLinkableNumber, handleFooChange);
+     */
+    p.registerLinkableChild = function (linkableParent, linkableChild, callback, useGroupedCallback) {
+        //set default values for parameters
+        callback = typeof callback !== 'undefined' ? callback : null;
+        useGroupedCallback = typeof useGroupedCallback !== 'undefined' ? useGroupedCallback : false;
+        if (!WeaveAPI.isLinkable(linkableParent))
+            throw new Error("registerLinkableChild(): Parent does not implement ILinkableObject.");
+        if (!WeaveAPI.isLinkable(linkableChild))
+            throw new Error("registerLinkableChild(): Child parameter cannot be null.");
+        if (linkableParent === linkableChild)
+            throw new Error("registerLinkableChild(): Invalid attempt to register sessioned property having itself as its parent");
+
+        if (callback !== null && callback !== undefined) {
+            var cc = this.getCallbackCollection(linkableChild);
+            if (useGroupedCallback)
+                cc.addGroupedCallback(linkableParent, callback);
+            else
+                cc.addImmediateCallback(linkableParent, callback);
+        }
+
+        // if the child doesn't have an owner yet, this parent is the owner of the child
+        // and the child should be disposed when the parent is disposed.
+        // registerDisposableChild() also initializes the required Dictionaries.
+        this.registerDisposableChild(linkableParent, linkableChild);
+
+        if (this._childToParentMap.get(linkableChild).get(linkableParent) === undefined) {
+            // remember this child-parent relationship
+            this._childToParentMap.get(linkableChild).set(linkableParent, true);
+            this._parentToChildMap.get(linkableParent).set(linkableChild, true);
+
+            // make child changes trigger parent callbacks
+            var parentCC = this.getCallbackCollection(linkableParent);
+            // set alwaysCallLast=true for triggering parent callbacks, so parent will be triggered after all the other child callbacks
+            this.getCallbackCollection(linkableChild).addImmediateCallback(linkableParent, parentCC.triggerCallbacks, false, true); // parent-child relationship
+        }
+
+        this._treeCallbacks.triggerCallbacks("Session Tree: Child Registered");
+
+        return linkableChild;
+    };
+
+    /**
+     * @inheritDoc
+     * @export
+     * @param {Object} disposableParent
+     * @param {Object} disposableChildType
+     * @return {*}
+     */
+    p.newDisposableChild = function (disposableParent, disposableChildType) {
+        return this.registerDisposableChild(disposableParent, new disposableChildType());
+    };
+
+    /**
+     * This will register a child of a parent and cause the child to be disposed when the parent is disposed.
+     * Use this function when a child object can be disposed but you do not want to link the callbacks.
+     * The child will be disposed when the parent is disposed.
+     *
+     * @method registerDisposableChild
+     * @example usage:    const foo = registerDisposableChild(this, someLinkableNumber);
+     *
+     * @param {Object} disposableParent A parent disposable object that the child will be registered with.
+     * @param {Object} disposableChild The disposable object to register as a child of the parent.
+     * @return {Object} The linkableChild object that was passed to the function.
+     */
+    p.registerDisposableChild = function (disposableParent, disposableChild) {
+        if (this._ownerToChildMap.get(disposableParent) === undefined) {
+            this._ownerToChildMap.set(disposableParent, new Map());
+            this._parentToChildMap.set(disposableParent, new Map());
+        }
+        // if this child has no owner yet...
+        if (this._childToOwnerMap.get(disposableChild) === undefined) {
+            // make this first parent the owner
+            this._childToOwnerMap.set(disposableChild, disposableParent);
+            this._ownerToChildMap.get(disposableParent).set(disposableChild, true);
+            // initialize the parent dictionary for this child
+            this._childToParentMap.set(disposableChild, new Map());
+        }
+        return disposableChild;
+    };
+
+    /**
+     * Use this function with care.  This will remove child objects from the session state of a parent and
+     * stop the child from triggering the parent callbacks.
+     * @method unregisterLinkableChild
+     * @param {ILinkableChild} parent A parent that the specified child objects were previously registered with.
+     * @param {ILinkableChild} child The child object to unregister from the parent.
+     */
+    p.unregisterLinkableChild = function (parent, child) {
+        if (this._childToParentMap.get(child))
+            this._childToParentMap.get(child).delete(parent);
+        if (this._parentToChildMap.get(parent))
+            this._parentToChildMap.get(parent).delete(child);
+        var parentCC = this.getCallbackCollection(parent);
+        this.getCallbackCollection(child).removeCallback(parentCC.triggerCallbacks, parentCC);
+
+        this._treeCallbacks.triggerCallbacks("Session Tree: Child un-Registered");
+    };
+
+
+    /**
+     * This function will add or remove child objects from the session state of a parent.  Use this function
+     * with care because the child will no longer be "sessioned."  The child objects will continue to trigger the
+     * callbacks of the parent object, but they will no longer be considered a part of the parent's session state.
+     * If you are not careful, this will break certain functionalities that depend on the session state of the parent.
+     * @method excludeLinkableChildFromSessionState
+     * @param {ILinkableChild} parent A parent that the specified child objects were previously registered with.
+     * @param {ILinkableChild} child The child object to remove from the session state of the parent.
+     */
+    p.excludeLinkableChildFromSessionState = function (parent, child) {
+        if (parent === null || child === null || parent === undefined || child === undefined) {
+            console.log("SessionManager.excludeLinkableChildFromSessionState(): Parameters cannot be null.");
+            return;
+        }
+        if (this._childToParentMap.get(child) !== undefined && this._childToParentMap.get(child).get(parent))
+            this._childToParentMap.get(child).set(parent, false);
+        if (this._parentToChildMap.get(parent) !== undefined && this._parentToChildMap.get(parent).get(child))
+            this._parentToChildMap.get(parent).set(child, false);
+    };
+
+    /**
+     * @method _getRegisteredChildren
+     * @private
+     * This function will return all the child objects that have been registered with a parent.
+     * @param {ILinkableChild} parent A parent object to get the registered children of.
+     * @return {Array} An Array containing a list of linkable objects that have been registered as children of the specified parent.
+     *         This list includes all children that have been registered, even those that do not appear in the session state.
+     */
+    p._getRegisteredChildren = function (parent) {
+        var result = [];
+        if (this._parentToChildMap.get(parent) !== undefined)
+            for (var child in this._parentToChildMap.get(parent))
+                result.push(child);
+        return result;
+    };
+
+    /**
+     * This function gets the owner of a linkable object.  The owner of an object is defined as its first registered parent.
+     * @method getLinkableOwner
+     * @param {ILinkableObject} child An ILinkableObject that was registered as a child of another ILinkableObject.
+     * @return {ILinkableObject} The owner of the child object (the first parent that was registered with the child), or null if the child has no owner.
+     * See {{#crossLink "SessionManager/getLinkableDescendants:method"}}{{/crossLink}}
+     */
+    p.getLinkableOwner = function (child) {
+        return this._childToOwnerMap.get(child);
+    };
+
+    /**
+     * This function will return all the descendant objects that implement ILinkableObject.
+     * If the filter parameter is specified, the results will contain only those objects that extend or implement the filter class.
+     * @method getLinkableDescendants
+     * @param {ILinkableObject} root A root object to get the descendants of.
+     * @param {Class} filter An optional Class definition which will be used to filter the results.
+     * @return {Array} An Array containing a list of descendant objects.
+     * See {{#crossLink "SessionManager/getLinkableOwner:method"}}{{/crossLink}}
+     */
+    p.getLinkableDescendants = function (root, filter) { //TODO: Port getLinkableDescendants
+        filter = (filter === undefined) ? null : filter;
+        var result = [];
+        if (root)
+            internalGetDescendants.call(this, result, root, filter, new Map(), Number.MAX_VALUE);
+        // don't include root object
+        if (result.length > 0 && result[0] === root)
+            result.shift();
+        return result;
+    };
+
+
+    function internalGetDescendants(output, root, filter, ignoreList, depth) {
+        if (root === null || ignoreList.get(root) !== undefined)
+            return;
+        ignoreList.set(root, true);
+        if (filter === null || root instanceof filter)
+            output.push(root);
+        if (--depth <= 0)
+            return;
+
+        if (this._parentToChildMap.get(root)) {
+            for (var object of this._parentToChildMap.get(root).keys()) {
+                internalGetDescendants.call(this, output, object, filter, ignoreList, depth);
+            }
+        }
+
+    }
+
+    function _getPath(tree, descendant) {
+        if (tree.data === descendant)
+            return [];
+        var children = tree.children;
+        if (children) {
+            for (var i = 0; i < children.length; i++) {
+                var child = children[i];
+                var path = _getPath(child, descendant);
+                if (path) {
+                    path.unshift(child.label);
+                    //console.log('Path returned:', path);
+                    return path;
+                }
+            }
+        }
+        //console.log('null returned');
+        return null;
+    }
+
+    /**
+     * Gets the path of names in the session state tree of the root object.
+     * @param root The root(Ilinkableobject or sessionable) object used to generate a session state tree.
+     * @param child (Ilinkableobject or sessionable) The descendant object to find in the session state tree.
+     * @return {Array}The path from root to descendant, or null if the descendant does not appear in the session state.
+     */
+    p.getPath = function (root, descendant) {
+        if (!descendant)
+            return null;
+        var tree = this.getSessionStateTree(root, null);
+        var path = _getPath(tree, descendant);
+        return path;
+    }
+
+    /**
+     * This function returns a pointer to an ILinkableObject appearing in the session state.
+     * @param root The root object used to find a descendant object.
+     * @param path A sequence of child names used to refer to an object appearing in the session state.
+     *             A child index number may be used in place of a name in the path when its parent object is a LinkableHashMap.
+     * @return A pointer to the object referred to by objectPath.
+     * @see #getPath()
+     */
+    p.getObject = function (root, path) {
+        var object = root;
+        path.forEach(function (propertyName) {
+            if (object === null || this._disposedObjectsMap.get(object))
+                return null;
+            if (object instanceof weavecore.LinkableHashMap) {
+                if (propertyName.constructor === Number)
+                    object = object.getObjects()[propertyName];
+                else
+                    object = object.getObject(String(propertyName));
+            } else if (object instanceof weavecore.LinkableDynamicObject) {
+                // ignore propertyName and always return the internalObject
+                object = object.internalObject;
+            } else {
+                if (this.getLinkablePropertyNames(object).indexOf(propertyName) < 0)
+                    return null;
+                object = object[propertyName];
+            }
+        }.bind(this));
+        return this._disposedObjectsMap.get(object) ? null : object;
+    }
+
+    /**
+     * @method getSessionStateTree
+     * @param {ILinkableObject} root The linkable object to be placed at the root node of the tree.
+     * @param {String} objectName
+     * @param {Object} objectTypeFilter
+     * @return {WeaveTreeItem} A tree of nodes with the properties "label", "object", and "children"
+     */
+    p.getSessionStateTree = function (root, objectName) {
+        var treeItem = this._treeCache.get(root, objectName);
+        if (!treeItem.data) {
+            treeItem.data = root;
+            treeItem.label = objectName;
+            treeItem.children = this._getTreeItemChildren;
+            // dependency is used to determine when to recalculate children array
+            treeItem.dependency = root instanceof weavecore.LinkableHashMap ? root.childListCallbacks : root;
+
+        }
+        if (objectName)
+            treeItem.label = objectName;
+        return treeItem;
+    };
+
+    /**
+     * @method _getTreeItemChildren
+     * @param {WeaveTreeItem} treeItem
+     * @return {Array}
+     */
+    function _getTreeItemChildren(treeItem) {
+        if (!treeItem) {
+            //console.warn('Argument Warning: Need treeItem as Argument');
+        }
+        var object = treeItem.data;
+        var children = [];
+        var names = [];
+        var childObject;
+        var subtree;
+        var ignoreList = new Map();
+        if (object instanceof weavecore.LinkableHashMap) {
+            names = object.getNames();
+            var childObjects = object.getObjects();
+            for (var i = 0; i < names.length; i++) {
+                childObject = childObjects[i];
+                if (this._childToParentMap.get(childObject) && this._childToParentMap.get(childObject).get(object)) {
+                    if (ignoreList.get(childObject) !== undefined)
+                        continue;
+                    ignoreList.set(childObject, true);
+                    children.push(this.getSessionStateTree(childObject, names[i]));
+                }
+            }
+        } else {
+            var deprecatedLookup = null;
+            if (object instanceof weavecore.LinkableDynamicObject) {
+                names = object.targetPath ? null : [null];
+            } else if (Object) {
+                names = this.getLinkablePropertyNames(object);
+            }
+            if (names) {
+                for (var i = 0; i < names.length; i++) {
+                    var name = names[i];
+                    if (object instanceof weavecore.LinkableDynamicObject) {
+                        childObject = object.internalObject;
+                    }
+                    if (object[name]) {
+                        childObject = object[name];
+                    }
+                    if (!childObject) {
+                        return;
+                    }
+                    if (this._childToParentMap.get(childObject) && this._childToParentMap.get(childObject).get(object)) {
+                        if (ignoreList.get(childObject) !== undefined) {
+                            return;
+                        }
+                        ignoreList.set(childObject, true);
+                        children.push(this.getSessionStateTree(childObject, name));
+                    }
+
+                }
+            }
+
+
+        }
+        if (children.length === 0)
+            children = null;
+
+        return children;
+    };
+
+    /**
+     * Adds a grouped callback that will be triggered when the session state tree changes.
+     * USE WITH CARE. The groupedCallback should not run computationally-expensive code.
+     * @method addTreeCallback
+     * @param {Object} relevantContext
+     * @param {Function} groupedCallback
+     * @param {Boolean} triggerCallbackNow
+     */
+    p.addTreeCallback = function (relevantContext, groupedCallback, triggerCallbackNow) {
+        if (triggerCallbackNow === undefined) triggerCallbackNow = false;
+        this._treeCallbacks.addGroupedCallback(relevantContext, groupedCallback, triggerCallbackNow);
+    };
+
+    /**
+     * @method removeTreeCallback
+     * @param {Function} groupedCallback
+     */
+    p.removeTreeCallback = function (groupedCallback) {
+        this._treeCallbacks.removeCallback(groupedCallback, this._treeCallbacks);
+    };
+
+    /**
+     * This function will copy the session state from one sessioned object to another.
+     * If the two objects are of different types, the behavior of this function is undefined.
+     * @method copySessionState
+     * @param {ILinkableObject} source A sessioned object to copy the session state from.
+     * @param {ILinkableObject} destination A sessioned object to copy the session state to.
+     * see {{#crossLink "SessionManager/getSessionState:method"}}{{/crossLink}}
+     * see {{#crossLink "SessionManager/setSessionState:method"}}{{/crossLink}}
+     */
+    p.copySessionState = function (source, destination) {
+        var sessionState = this.getSessionState(source);
+        this.setSessionState(destination, sessionState, true);
+    };
+
+    /**
+     * @method _applyDiff
+     * @private
+     * @param {Object} base
+     * @param {Object} diff
+     */
+    p._applyDiff = function (base, diff) {
+        if (base === null || base === undefined || typeof (base) !== 'object' || diff === null || diff === undefined || typeof (diff) !== 'object')
+            return diff;
+
+        for (var key in diff)
+            base[key] = this._applyDiff(base[key], diff[key]);
+
+        return base;
+    };
+
+    /**
+     * Sets the session state of an ILinkableObject.
+     * @method setSessionState
+     * @param {ILinkableObject} linkableObject An object containing sessioned properties (sessioned objects may be nested).
+     * @param {Object} newState An object containing the new values for sessioned properties in the sessioned object.
+     * @param {Boolean} removeMissingDynamicObjects If true, this will remove any properties from an ILinkableCompositeObject that do not appear in the session state.
+     * see {{#crossLink "SessionManager/getSessionState:method"}}{{/crossLink}}
+     */
+    p.setSessionState = function (linkableObject, newState, removeMissingDynamicObjects) {
+        if (removeMissingDynamicObjects === undefined) removeMissingDynamicObjects = true;
+        if (linkableObject === null) {
+            console.log("SessionManager.setSessionState(): linkableObject cannot be null.");
+            return;
+        }
+
+        if (linkableObject === undefined) {
+            console.log("SessionManager.setSessionState(): linkableObject cannot be undefined.");
+            return;
+        }
+
+        // special cases: for Explicit and Composite Session Object
+        if (linkableObject instanceof weavecore.LinkableVariable) {
+            var lv = linkableObject;
+            if (removeMissingDynamicObjects === false && newState && newState.constructor.name === 'Object') {
+                lv.setSessionState.call(lv, this._applyDiff.call(this, copyObject(lv.getSessionState(lv)), newState));
+            } else {
+                lv.setSessionState.call(lv, newState);
+            }
+            return;
+        }
+        //linkableHashmap and linkabledynamic object is handled, In As3 version it implements ILinkableCompositeObject
+        // in jS we couldnt do that, thats why linkableObject.setSessionState is used
+        if (linkableObject.setSessionState) {
+            if (newState.constructor.name === "String")
+                newState = [newState];
+
+            if (newState !== null && !(newState instanceof Array)) {
+                var array = [];
+                for (var key in newState)
+                    array.push(weavecore.DynamicState.create(key, null, newState[key]));
+                newState = array;
+            }
+
+            linkableObject.setSessionState(newState, removeMissingDynamicObjects);
+            return;
+        }
+
+        if (newState === null || newState === undefined)
+            return;
+
+        // delay callbacks before setting session state
+        var objectCC = this.getCallbackCollection(linkableObject);
+        objectCC.delayCallbacks();
+
+        // cache property names if necessary
+        var className = (linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME);
+        if (!this._classNameToSessionedPropertyNames[className])
+            this._cacheClassInfo(linkableObject, className);
+
+        // set session state
+        var foundMissingProperty = false;
+        var propertyNames;
+
+        propertyNames = this._classNameToSessionedPropertyNames[className];
+
+        for (var i = 0; i < propertyNames.length; i++) {
+            var name = propertyNames[i];
+            if (!newState.hasOwnProperty(name)) {
+                if (removeMissingDynamicObjects && linkableObject.handleMissingSessionStateProperty)
+                    foundMissingProperty = true;
+                continue;
+            }
+
+            var property = null;
+            try {
+                property = linkableObject[name];
+            } catch (e) {
+                console.log('SessionManager.setSessionState(): Unable to get property "' + name + '" of class "' + linkableObject.constructor.name + '"', e);
+            }
+
+            if (property === null)
+                continue;
+
+            this.setSessionState(property, newState[name], removeMissingDynamicObjects);
+        }
+
+        // TODO: handle properties appearing in session state that do not appear in the linkableObject
+        /*if (linkableObject instanceof ILinkableObjectWithNewProperties)
+				for (name in newState)
+					if (!deprecatedLookup.hasOwnProperty(name))
+						linkableObject.handleMissingSessionStateProperty(newState, name);*/
+
+        // handle properties missing from absolute session state
+        if (foundMissingProperty)
+            propertyNames.forEach(function (name) {
+                if (!newState.hasOwnProperty(name))
+                    if (linkableObject.handleMissingSessionStateProperty) {
+                        linkableObject.handleMissingSessionStateProperty(newState, name);
+                    } else {
+                        console.log('implement handleMissingSessionStateProperty in ' + linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME);
+                    }
+
+            });
+
+        // resume callbacks after setting session state
+        objectCC.resumeCallbacks();
+
+    };
+
+    /**
+     * Gets the session state of an ILinkableObject.
+     * @method getSessionState
+     * @param {IlinkableObject} linkableObject An object containing sessioned properties (sessioned objects may be nested).
+     * @return {Object} An object containing the values from the sessioned properties.
+     * see {{#crossLink "SessionManager/setSessionState:method"}}{{/crossLink}}
+     */
+    p.getSessionState = function (linkableObject) {
+        if (linkableObject === null) {
+            console.log("SessionManager.getSessionState(): linkableObject cannot be null.");
+            return null;
+        }
+
+        if (linkableObject === undefined) {
+            console.log("SessionManager.getSessionState(): linkableObject cannot be undefined.");
+            return null;
+        }
+
+        var result = null;
+
+        // special cases (explicit session state)
+        if (weavecore.ClassUtils.is(linkableObject, weavecore.LinkableVariable)) {
+            // in As3, when we try to set undefined it will get ignored , where as JS its get accepted
+            // we want result to be null not repalced with undefined to avoid undesire results, while generating log entries
+            result = linkableObject.getSessionState();
+            result = result === undefined ? null : result;
+        }
+        //linkableHashmap is handled, In As3 version it implements ILinkableCompositeObject
+        // in jS we couldnt do that, thats why linkableObject.setSessionState is used
+        else if (weavecore.ClassUtils.is(linkableObject, weavecore.ILinkableCompositeObject) || linkableObject.getSessionState) {
+            // in As3, when we try to set undefined it will get ignored , where as JS its get accepted
+            // we want result to be null not repalced with undefined to avoid undesire results, while generating log entries
+            result = linkableObject.getSessionState();
+            result = result === undefined ? null : result;
+        } else { //sessionbale variable creation is must as there is no interface concept in JS
+            // implicit session state
+            // first pass: get property names
+            // cache property names if necessary
+            //var className = linkableObject.constructor.name; // we can't use constructor.name as minified verisons have different names
+            var className = WeaveAPI.className(linkableObject);
+
+            if (!this._classNameToSessionedPropertyNames[className])
+                this._cacheClassInfo(linkableObject, className);
+
+            var propertyNames = this._classNameToSessionedPropertyNames[className];
+            var resultNames = [];
+            var resultProperties = [];
+            var property = null;
+            var i;
+            for (i = 0; i < propertyNames.length; i++) {
+                var name = propertyNames[i];
+
+                try {
+                    property = null; // must set this to null first because accessing the property may fail
+                    property = linkableObject[name];
+                } catch (e) {
+                    console.log('Unable to get property "' + name + '" of class "' + linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME + '"');
+                }
+
+                // first pass: set result[name] to the ILinkableObject
+                if (property !== null && !this._getSessionStateIgnoreList.get(property)) {
+                    // skip this property if it should not appear in the session state under the parent.
+                    if (this._childToParentMap.get(property) === undefined || !this._childToParentMap.get(property).get(linkableObject))
+                        continue;
+                    // avoid infinite recursion in implicit session states
+                    this._getSessionStateIgnoreList.set(property, true);
+                    resultNames.push(name);
+                    resultProperties.push(property);
+                } else {
+                    if (property !== null)
+                        console.log("ignoring duplicate object:", name, property);
+                }
+
+            }
+
+            // special case if there are no child objects -- return null
+            if (resultNames.length > 0) {
+                // second pass: get values from property names
+                result = {};
+                for (i = 0; i < resultNames.length; i++) {
+                    var value = this.getSessionState(resultProperties[i]);
+                    property = resultProperties[i];
+                    // do not include objects that have a null implicit session state (no child objects)
+                    if (value === null && !(property instanceof weavecore.LinkableVariable) && !(property instanceof weavecore.ILinkableCompositeObject) && !(property.getSessionState))
+                        continue;
+                    result[resultNames[i]] = value;
+
+                }
+            }
+        }
+
+        this._getSessionStateIgnoreList.set(linkableObject, undefined);
+
+        return result;
+    };
+
+
+    /**
+     * @method _cacheClassInfo
+     * @private
+     * @param {ILinkableObject} linkableObject
+     * @param {String} className
+     */
+    p._cacheClassInfo = function (linkableObject, className) {
+        // linkable property names
+        var propertyNames = Object.getOwnPropertyNames(linkableObject);
+        var sessionedPublicProperties = propertyNames.filter(function (propName) {
+            if (propName.charAt(0) === '_')
+                return false; //Private properties are ignored
+            else {
+                var isSessionable = false;
+                if (weavecore.ClassUtils.is(linkableObject[propName], weavecore.ILinkableObject)) {
+                    isSessionable = true
+                }
+            }
+            return isSessionable;
+        });
+
+        this._classNameToSessionedPropertyNames[className] = sessionedPublicProperties.sort();
+    };
+
+    /**
+     * This function gets a list of sessioned property names so accessor functions for non-sessioned properties do not have to be called.
+     * @method getLinkablePropertyNames
+     * @param {ILinkableObject} linkableObject An object containing sessioned properties.
+     * @param {Boolean} filtered If set to true, filters out deprecated, null, and excluded properties.
+     * @return {Array} An Array containing the names of the sessioned properties of that object class.
+     */
+    p.getLinkablePropertyNames = function (linkableObject, filtered) {
+        if (filtered === undefined) //default parameter value
+            filtered = false;
+
+        if (linkableObject === null) {
+            console.log("SessionManager.getLinkablePropertyNames(): linkableObject cannot be null.");
+            return [];
+        }
+
+        if (linkableObject === undefined) {
+            console.log("SessionManager.getLinkablePropertyNames(): linkableObject cannot be undefined.");
+            return [];
+        }
+
+        var className = linkableObject.constructor.NS + '.' + linkableObject.constructor.CLASS_NAME;
+        var propertyNames = this._classNameToSessionedPropertyNames[className];
+        if (propertyNames === null || propertyNames === undefined) {
+            this._cacheClassInfo(linkableObject, className);
+            propertyNames = this._classNameToSessionedPropertyNames[className];
+        }
+
+        if (filtered) {
+            var filteredPropNames = propertyNames.filter(function (propName) {
+                var property = linkableObject[propName];
+                if (property === null || property === undefined)
+                    return false;
+                if (this._childToParentMap.get(property) === undefined || !this._childToParentMap.get(property).get(linkableObject))
+                    return false;
+
+                return true;
+            }.bind(this));
+            return filteredPropNames;
+        }
+        return propertyNames;
+    };
+
+
+    function disposeBusyTaskPointers(disposedObject) {
+        this._d2dOwnerTask.removeAllPrimary(disposedObject);
+        this._d2dTaskOwner.removeAllSecondary(disposedObject);
+    }
+
+    /**
+     * Returns a mapping from owner debugId to an Array of debugIds for its busy tasks.
+     */
+    p.debugBusyObjects = function () {
+        var result = {};
+        this._d2dOwnerTask.dictionary.forEach(function (value, owner) {
+            var tasks = [];
+            var taskDictionary = this._d2dOwnerTask.dictionary.get(owner);
+            taskDictionary.forEach(function (value, task) {
+                tasks.push(WeaveAPI.debugId(task));
+            }, taskDictionary);
+            result[WeaveAPI.debugId(owner)] = tasks;
+
+        }, this._d2dOwnerTask.dictionary);
+
+        return result;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    p.assignBusyTask = function (taskToken, busyObject) {
+        if (this.debugBusyTasks)
+            this._dTaskStackTrace.set(taskToken, new Error("Stack trace when task was last assigned").getStackTrace());
+
+        // stop if already assigned
+        var test = this._d2dTaskOwner.dictionary.get(taskToken);
+        if (test && test.get(busyObject))
+            return;
+
+        if (taskToken instanceof weavecore.CustomPromise && !WeaveAPI.ProgressIndicator.hasTask(taskToken))
+            taskToken.addResponder({
+                result: unassignAsyncToken,
+                fault: unassignAsyncToken,
+                token: taskToken
+            });
+
+        this._d2dOwnerTask.set(busyObject, taskToken, true);
+        this._d2dTaskOwner.set(taskToken, busyObject, true);
+    }
+
+
+
+    function unassignAsyncToken(resposne, token) {
+        this.unassignBusyTask(token);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    p.unassignBusyTask = function (taskToken) {
+        if (WeaveAPI.ProgressIndicator.hasTask(taskToken)) {
+            WeaveAPI.ProgressIndicator.removeTask(taskToken);
+            return;
+        }
+
+        var dOwner = this._d2dTaskOwner.dictionary.get(taskToken);
+        if (!dOwner)
+            return;
+
+        this._d2dTaskOwner.dictionary.delete(taskToken);
+
+
+        nextOwner: for (var owner of dOwner.keys()) {
+            var dTask = this._d2dOwnerTask.dictionary.get(owner);
+            dTask.delete(taskToken);
+
+            // if there are other tasks, continue to next owner
+            for (var task of dTask.keys())
+                continue nextOwner;
+
+            // when there are no more tasks, check later to see if callbacks trigger
+            this._dUnbusyTriggerCounts.set(owner, WeaveAPI.SessionManager.getCallbackCollection(owner).triggerCounter);
+            // immediate priority because we want to trigger as soon as possible
+            WeaveAPI.StageUtils.startTask(null, unbusyTrigger, WeaveAPI.TASK_PRIORITY_IMMEDIATE);
+
+            if (this.debugBusyTasks) {
+                var stackTrace = new Error("Stack trace when last task was unassigned").getStackTrace();
+                this._dUnbusyStackTraces.set(owner, {
+                    assigned: _dTaskStackTrace[taskToken],
+                    unassigned: stackTrace,
+                    token: taskToken
+                });
+            }
+        }
+    }
+
+    /**
+     * Called the frame after an owner's last busy task is unassigned.
+     * Triggers callbacks if they have not been triggered since then.
+     */
+    function unbusyTrigger(stopTime) {
+        var owner;
+        do {
+            if (new Date().getTime() > stopTime)
+                return 0;
+
+            owner = null;
+            for (var owner of this._dUnbusyTriggerCounts.keys()) {
+                var triggerCount = this._dUnbusyTriggerCounts.get(owner);
+                this._dUnbusyTriggerCounts.delete(owner); // affects next for loop iteration - mitigated by outer loop
+
+                var cc = WeaveAPI.SessionManager.getCallbackCollection(owner);
+                if (cc instanceof weavecore.CallbackCollection ? cc.wasDisposed : this.objectWasDisposed(owner))
+                    continue; // already disposed
+
+                if (cc.triggerCounter !== triggerCount)
+                    continue; // already triggered
+
+                if (this.linkableObjectIsBusy(owner))
+                    continue; // busy again
+
+                if (this.debugBusyTasks) {
+                    var stackTraces = this._dUnbusyStackTraces.get(owner);
+                    console.log('Triggering callbacks because they have not triggered since owner has becoming unbusy:', WeaveAPI.debugId(owner));
+                    console.log(stackTraces.assigned);
+                    console.log(stackTraces.unassigned);
+                }
+
+                cc.triggerCallbacks();
+            }
+        } while (owner);
+
+        return 1;
+    }
+
+
+    p.linkableObjectIsBusy = function (linkableObject) {
+        var busy = false;
+
+        this._aBusyTraversal[this._aBusyTraversal.length] = linkableObject; // push
+        this._dBusyTraversal.set(linkableObject, true);
+
+        outerLoop: for (var i = 0; i < this._aBusyTraversal.length; i++) {
+            linkableObject = this._aBusyTraversal[i];
+
+            if (linkableObject.isBusy) {
+                if (linkableObject.isBusy()) {
+                    busy = true;
+                    break;
+                }
+                // do not check children
+                continue;
+            }
+
+            // if the object is assigned a task, it's busy
+            for (var task in this._d2dOwnerTask.dictionary.get(linkableObject)) {
+                if (this.debugBusyTasks) {
+                    var stackTrace = this._dTaskStackTrace.get(task);
+                    console.log(stackTrace);
+                }
+                busy = true;
+                break outerLoop;
+            }
+
+            // see if children are busy
+            var dChild = this._parentToChildMap.get(linkableObject);
+            for (var child in dChild) {
+                // queue all the children that haven't been queued yet
+                if (!this._dBusyTraversal.get(child)) {
+                    this._aBusyTraversal[this._aBusyTraversal.length] = child; // push
+                    this._dBusyTraversal.set(child, true);
+                }
+            }
+        }
+
+        // reset traversal dictionary for next time
+        for (var i = 0; i < this._aBusyTraversal.length; i++) {
+            var linkableObject = this._aBusyTraversal[i];
+            this._dBusyTraversal.set(linkableObject, false);
+        }
+
+        this._aBusyTraversal.length = 0;
+
+        return busy;
+
+    }
+
+    /**
+     * This function gets the CallbackCollection associated with an ILinkableObject.
+     * If there is no CallbackCollection defined for the object, one will be created.
+     * This CallbackCollection is used for reporting changes in the session state
+     * @method getCallbackCollection
+     * @param {ILinkableObject} linkableObject An ILinkableObject to get the associated ICallbackCollection for.
+     * @return {CallbackCollection} The CallbackCollection associated with the given object.
+     */
+    p.getCallbackCollection = function (linkableObject) {
+        if (linkableObject === null || linkableObject === undefined)
+            return null;
+        if (linkableObject instanceof weavecore.CallbackCollection)
+            return linkableObject;
+
+        var objectCC = this.linkableObjectToCallbackCollectionMap.get(linkableObject);
+        if (objectCC === null || objectCC === undefined) {
+            objectCC = this.registerDisposableChild(linkableObject, new weavecore.CallbackCollection());
+            if (weavecore.CallbackCollection.debug)
+                objectCC._linkableObject = linkableObject;
+            this.linkableObjectToCallbackCollectionMap.set(linkableObject, objectCC);
+        }
+
+        return objectCC;
+    };
+
+
+    /**
+     * This function checks if an object has been disposed by the SessionManager.
+     * @method objectWasDisposed
+     * @param {Object} object An object to check.
+     * @return {Boolean} A value of true if disposeObject() was called for the specified object.
+     * see {{#crossLink "SessionManager/disposeObject:method"}}{{/crossLink}}
+     */
+    p.objectWasDisposed = function (object) {
+        if (object === undefined)
+            return true; // added by sanjay:
+        if (object === null) //null means :Object parameter is null i.e Object has no parameters
+            return false;
+        if (weavecore.ClassUtils.is(object, weavecore.ILinkableObject)) {
+            var cc = this.getCallbackCollection(object);
+            if (cc)
+                return cc.wasDisposed;
+        }
+        return this._disposedObjectsMap.get(object) !== undefined;
+    };
+
+
+    /**
+     * This function should be called when an ILinkableObject  is no longer needed.
+     * @method disposeObject
+     * @param {Object} object An ILinkableObject  to clean up.
+     * see {{#crossLink "SessionManager/objectWasDisposed:method"}}{{/crossLink}}
+     */
+    p.disposeObject = function (object) {
+        if (object !== null && object !== undefined && !this._disposedObjectsMap.get(object)) {
+            this._disposedObjectsMap.set(object, true);
+
+            //  clean up pointers to busy tasks
+            disposeBusyTaskPointers.call(this, object);
+
+            try {
+                // if the object implements IDisposableObject, call its dispose() function now
+                //if (object instanceof IDisposableObject)
+                //	{
+                //	object.dispose();
+                //	}
+                if (object.dispose && object.dispose.constructor === Function) {
+                    // call dispose() anyway if it exists, because it is common to forget to implement IDisposableObject.
+                    object.dispose();
+                }
+            } catch (e) {
+                console.log(e);
+            }
+
+            var linkableObject = object;
+            if (linkableObject) {
+                // dispose the callback collection corresponding to the object.
+                // this removes all callbacks, including the one that triggers parent callbacks.
+                var objectCC = this.getCallbackCollection(linkableObject);
+                if (objectCC !== linkableObject)
+                    this.disposeObject(objectCC);
+            }
+
+            // unregister from parents
+            if (this._childToParentMap.get(object) !== undefined) {
+                // remove the parent-to-child mappings
+                for (var parent in this._childToParentMap.get(object))
+                    if (this._parentToChildMap.get(parent) !== undefined)
+                        this._parentToChildMap.get(parent).delete(object);
+                    // remove child-to-parent mapping
+                this._childToParentMap.delete(object);
+            }
+
+            // unregister from owner
+            var owner = this._childToOwnerMap.get(object);
+            if (owner !== null || owner !== undefined) {
+                if (this._ownerToChildMap.get(owner) !== undefined)
+                    this._ownerToChildMap.get(owner).delete(object);
+                this._childToOwnerMap.delete(object);
+            }
+
+            // if the object is an ILinkableVariable, unlink it from all bindable properties that were previously linked
+            //if (linkableObject instanceof LinkableVariable)
+            //for (var bindableParent:* in _watcherMap[linkableObject])
+            //for (var bindablePropertyName:String in _watcherMap[linkableObject][bindableParent])
+            //unlinkBindableProperty(linkableObject as ILinkableVariable, bindableParent, bindablePropertyName);
+
+            // unlink this object from all other linkable objects
+            if (this.linkFunctionCache.dictionary.get(linkableObject)) {
+                var otherObjectKeys = this.linkFunctionCache.dictionary.get(linkableObject).keys();
+                for (var i = 0; i < otherObjectKeys.length; i++) {
+                    var otherObject = otherObjectKeys[i];
+                    this.unlinkSessionState(linkableObject, otherObject);
+                }
+            }
+
+
+            // dispose all registered children that this object owns
+            var children = this._ownerToChildMap.get(object);
+            if (children !== null && children !== undefined) {
+                // clear the pointers to the child dictionaries for this object
+                this._ownerToChildMap.delete(object);
+                this._parentToChildMap.delete(object);
+                // dispose the children this object owned
+                for (var child in children)
+                    this.disposeObject(child);
+            }
+
+            this._treeCallbacks.triggerCallbacks("Session Tree: Object Disposed");
+        }
+    };
+
+
+    /**
+     * This function computes the diff of two session states.
+     * @method computeDiff
+     * @param {Object} oldState The source session state.
+     * @param {Object} newState The destination session state.
+     * @return {Object} A patch that generates the destination session state when applied to the source session state, or undefined if the two states are equivalent.
+     * see {{#crossLink "SessionManager/combineDiff:method"}}{{/crossLink}}
+     */
+    p.computeDiff = function (oldState, newState) {
+        var type = typeof (oldState); // the type of null is 'object'
+        var diffValue;
+
+        // special case if types differ
+        if (typeof (newState) !== type)
+            return copyObject(newState); // make copies of non-primitives
+
+
+        if (type === 'number') {
+            if (isNaN(oldState) && isNaN(newState))
+                return undefined; // no diff
+
+            if (oldState !== newState)
+                return newState;
+
+            return undefined; // no diff
+        } else if (oldState === null || oldState === undefined || newState === null || newState === undefined || type !== 'object') // other primitive value
+        {
+            if (oldState !== newState) // no type-casting
+                return copyObject(newState);
+
+            return undefined; // no diff
+        } else if (oldState.constructor === Array && newState.constructor === Array) {
+            // If neither is a dynamic state array, don't compare them as such.
+            if (!weavecore.DynamicState.isDynamicStateArray(oldState) && !weavecore.DynamicState.isDynamicStateArray(newState)) {
+                if (weavecore.StandardLib.compare(oldState, newState) === 0)
+                    return undefined; // no diff
+                return copyObject(newState);
+            }
+
+            // create an array of new DynamicState objects for all new names followed by missing old names
+            var i;
+            var typedState;
+            var changeDetected = false;
+
+            // create oldLookup
+            var oldLookup = {};
+            var objectName;
+            var className;
+            var sessionState;
+            for (i = 0; i < oldState.length; i++) {
+                // assume everthing is typed session state
+                //note: there is no error checking here for typedState
+                typedState = oldState[i];
+                objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
+                // use '' instead of null to avoid "null"
+                oldLookup[objectName || ''] = typedState;
+            }
+            if (oldState.length !== newState.length)
+                changeDetected = true;
+
+            // create new Array with new DynamicState objects
+            var result = [];
+            for (i = 0; i < newState.length; i++) {
+                // assume everthing is typed session state
+                //note: there is no error checking here for typedState
+                typedState = newState[i];
+                objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
+                className = typedState[weavecore.DynamicState.CLASS_NAME];
+                sessionState = typedState[weavecore.DynamicState.SESSION_STATE];
+                var oldTypedState = oldLookup[objectName || ''];
+                delete oldLookup[objectName || '']; // remove it from the lookup because it's already been handled
+
+                // If the object specified in newState does not exist in oldState, we don't need to do anything further.
+                // If the class is the same as before, then we can save a diff instead of the entire session state.
+                // If the class changed, we can't save only a diff -- we need to keep the entire session state.
+                // Replace the sessionState in the new DynamicState object with the diff.
+                if (oldTypedState !== undefined && oldTypedState !== null && oldTypedState[weavecore.DynamicState.CLASS_NAME] === className) {
+                    className = null; // no change
+                    diffValue = this.computeDiff(oldTypedState[weavecore.DynamicState.SESSION_STATE], sessionState);
+                    if (diffValue === undefined) { // important not to check null -as nul reperests object there has no value
+                        // Since the class name is the same and the session state is the same,
+                        // we only need to specify that this name is still present.
+                        result.push(objectName);
+
+                        if (!changeDetected && oldState[i][weavecore.DynamicState.OBJECT_NAME] != objectName)
+                            changeDetected = true;
+
+                        continue;
+                    }
+                    sessionState = diffValue;
+                } else {
+                    sessionState = copyObject(sessionState);
+                }
+
+                // save in new array and remove from lookup
+                result.push(weavecore.DynamicState.create(objectName || null, className, sessionState)); // convert empty string to null
+                changeDetected = true;
+            }
+
+            // Anything remaining in the lookup does not appear in newState.
+            // Add DynamicState entries with an invalid className ("delete") to convey that each of these objects should be removed.
+            for (objectName in oldLookup) {
+                result.push(weavecore.DynamicState.create(objectName || null, SessionManager.DIFF_DELETE)); // convert empty string to null
+                changeDetected = true;
+            }
+
+            if (changeDetected)
+                return result;
+
+            return undefined; // no diff
+        } else // nested object
+        {
+            var diff; // start with no diff
+
+            // find old properties that changed value
+            for (var oldName in oldState) {
+                diffValue = this.computeDiff(oldState[oldName], newState[oldName]);
+                if (diffValue !== undefined) {
+                    if (!diff)
+                        diff = {};
+                    diff[oldName] = diffValue;
+                }
+            }
+
+            // find new properties
+            for (var newName in newState) {
+                if (oldState[newName] === undefined) {
+                    if (!diff)
+                        diff = {};
+                    diff[newName] = copyObject(newState[newName]);
+                }
+            }
+
+            return diff;
+        }
+    };
+
+    /**
+     * This modifies an existing diff to include an additional diff.
+     * @method combineDiff
+     * @param {Object} baseDiff The base diff which will be modified to include an additional diff.
+     * @param {Object} diffToAdd The diff to add to the base diff.  This diff will not be modified.
+     * @return {Object} The modified baseDiff, or a new diff object if baseDiff is a primitive value.
+     * see {{#crossLink "SessionManager/computeDiff:method"}}{{/crossLink}}
+     */
+    p.combineDiff = function (baseDiff, diffToAdd) {
+        var baseType = typeof (baseDiff); // the type of null is 'object'
+        var diffType = typeof (diffToAdd);
+
+        // special cases
+        if (baseDiff === null || baseDiff === undefined || diffToAdd === null || diffToAdd === undefined || baseType !== diffType || baseType !== 'object') {
+            if (diffType === 'object') // not a primitive, so make a copy
+                baseDiff = copyObject(diffToAdd); //TODO: find better solution for array copy(currently Shallow copy)
+            else
+                baseDiff = diffToAdd;
+        } else if (Array.isArray(baseDiff) && Array.isArray(diffToAdd)) {
+            var i;
+
+            // If either of the arrays look like DynamicState arrays, treat as such
+            if (weavecore.DynamicState.isDynamicStateArray(baseDiff) || weavecore.DynamicState.isDynamicStateArray(diffToAdd)) {
+                var typedState;
+                var objectName;
+
+                // create lookup: objectName -> old diff entry
+                // temporarily turn baseDiff into an Array of object names
+                var baseLookup = {};
+                for (i = 0; i < baseDiff.length; i++) {
+                    typedState = baseDiff[i];
+                    // note: no error checking for typedState
+                    if (typeof typedState === 'string' || typedState instanceof String || typedState === null || typedState === undefined)
+                        objectName = typedState;
+                    else
+                        objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
+                    baseLookup[objectName] = typedState;
+                    // temporarily turn baseDiff into an Array of object names
+                    baseDiff[i] = objectName;
+                }
+                // apply each typedState diff appearing in diffToAdd
+                for (i = 0; i < diffToAdd.length; i++) {
+                    typedState = diffToAdd[i];
+                    // note: no error checking for typedState
+                    if (typeof typedState === 'string' || typedState instanceof String || typedState === null || typedState === undefined)
+                        objectName = typedState;
+                    else
+                        objectName = typedState[weavecore.DynamicState.OBJECT_NAME];
+
+                    // adjust names list so this name appears at the end
+                    if (baseLookup.hasOwnProperty(objectName)) {
+                        for (var j = baseDiff.indexOf(objectName); j < baseDiff.length - 1; j++)
+                            baseDiff[j] = baseDiff[j + 1];
+                        baseDiff[baseDiff.length - 1] = objectName;
+                    } else {
+                        baseDiff.push(objectName);
+                    }
+
+                    // apply diff
+                    var oldTypedState = baseLookup[objectName];
+                    if (typeof oldTypedState === 'string' || oldTypedState instanceof String || oldTypedState === null || oldTypedState === undefined) {
+                        baseLookup[objectName] = copyObject(typedState); // avoid unnecessary function call overhead
+                    } else if (!(typeof typedState === 'string' || typedState instanceof String || typedState === null || typedState === undefined)) // update dynamic state
+                    {
+                        var className = typedState[weavecore.DynamicState.CLASS_NAME];
+                        // if new className is different and not null, start with a fresh typedState diff
+                        if (className && className != oldTypedState[weavecore.DynamicState.CLASS_NAME]) {
+                            baseLookup[objectName] = copyObject(typedState); //TODO: Temp solution for Array Copy
+                        } else // className hasn't changed, so combine the diffs
+                        {
+                            oldTypedState[weavecore.DynamicState.SESSION_STATE] = this.combineDiff(oldTypedState[weavecore.DynamicState.SESSION_STATE], typedState[weavecore.DynamicState.SESSION_STATE]);
+                        }
+                    }
+                }
+                // change baseDiff back from names to typed states
+                for (i = 0; i < baseDiff.length; i++)
+                    baseDiff[i] = baseLookup[baseDiff[i]];
+            } else // not typed session state
+            {
+                // overwrite old Array with new Array's values
+                i = baseDiff.length = diffToAdd.length;
+                while (i--) {
+                    var value = diffToAdd[i];
+                    if (value === null || value === undefined || typeof value !== 'object')
+                        baseDiff[i] = value; // avoid function call overhead
+                    else
+                        baseDiff[i] = this.combineDiff(baseDiff[i], value);
+                }
+            }
+        } else // nested object
+        {
+            for (var newName in diffToAdd)
+                baseDiff[newName] = this.combineDiff(baseDiff[newName], diffToAdd[newName]);
+        }
+
+        return baseDiff;
+    };
+
+    function copyObject(object) {
+        if (object === null || typeof object != 'object') // primitive value
+            return object;
+        else { // make copies of non-primitives
+            var jsonString = JSON.stringify(object);
+            var copy = JSON.parse(jsonString);
+            return copy;
+        }
+        //return Object.getPrototypeOf(Object.create(object)).slice(0)
+    }
+
+    /**************************************
+     * linking sessioned objects together
+     **************************************/
+
+
+
+    /**
+     * @inheritDoc
+     */
+    p.linkSessionState = function (primary, secondary) {
+            if (primary === null || primary === undefined || secondary === null || secondary === undefined) {
+                console.error("SessionManager.linkSessionState(): Parameters to this function cannot be null.");
+                return;
+            }
+            if (primary == secondary) {
+                console.error("Warning! Attempt to link session state of an object with itself");
+                return;
+            }
+            if (this.linkFunctionCache.get(primary, secondary) instanceof Function)
+                return; // already linked
+
+            if (weavecore.CallbackCollection.debug)
+                var stackTrace = new Error().getStackTrace();
+
+            var setPrimary = function () {
+                WeaveAPI.SessionManager.setSessionState(primary, WeaveAPI.SessionManager.getSessionState(secondary), true);
+            };
+            var setSecondary = function () {
+                WeaveAPI.SessionManager.setSessionState(secondary, WeaveAPI.SessionManager.getSessionState(primary), true);
+            };
+
+            this.linkFunctionCache.set(primary, secondary, setPrimary);
+            this.linkFunctionCache.set(secondary, primary, setSecondary);
+
+            // when secondary changes, copy from secondary to primary
+            WeaveAPI.SessionManager.getCallbackCollection(secondary).addImmediateCallback(primary, setPrimary);
+            // when primary changes, copy from primary to secondary
+            WeaveAPI.SessionManager.getCallbackCollection(primary).addImmediateCallback(secondary, setSecondary, true); // copy from primary now
+        }
+        /**
+         * @inheritDoc
+         */
+    p.unlinkSessionState = function (first, second) {
+        if (first === null || first === undefined || second === null || second === undefined) {
+            console.error("SessionManager.unlinkSessionState(): Parameters to this function cannot be null.");
+            return;
+        }
+
+        var setFirst = this.linkFunctionCache.remove(first, second);
+        var setSecond = this.linkFunctionCache.remove(second, first);
+
+        WeaveAPI.SessionManager.getCallbackCollection(second).removeCallback(setFirst, WeaveAPI.SessionManager.getCallbackCollection(second));
+        WeaveAPI.SessionManager.getCallbackCollection(first).removeCallback(setSecond, WeaveAPI.SessionManager.getCallbackCollection(first));
+    }
+
+    /**
+     * @public
+     * @property  DIFF_DELETE
+     * @static
+     * @readOnly
+     * @type String
+     * @default "delete"
+     */
+    Object.defineProperty(SessionManager, 'DIFF_DELETE', {
+        value: "delete"
+    });
+
+    weavecore.SessionManager = SessionManager;
+
+    // namespace
+    if (typeof window === 'undefined') {
+        this.WeaveAPI = this.WeaveAPI || {};
+        this.WeaveAPI.SessionManager = new SessionManager();
+    } else {
+        window.WeaveAPI = window.WeaveAPI || {};
+        window.WeaveAPI.SessionManager = new SessionManager();
+    }
+
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'SessionManager',
+            qName: 'weavecore.SessionManager'
+        }],
+        interfaces: [weavecore.ISessionManager]
+    };
+
+
+}());
+if (typeof window === 'undefined') {
+    this.WeaveAPI = this.WeaveAPI || {};
+    this.weavecore = this.weavecore || {};
+} else {
+    window.WeaveAPI = window.WeaveAPI || {};
+    window.weavecore = window.weavecore || {};
+}
+
+(function () {
+
+    function ErrorManager() {
+        weavecore.ILinkableObject.call(this);
+        this._errors = [];
+        Object.defineProperty(this, 'errors', {
+            get: function () {
+                return this._errors;
+            }
+        });
+
+        var p = this;
+        p.reportError = weavecore.ClassUtils.bind(this, reportError);
+
+    }
+
+    ErrorManager.prototype = new weavecore.ILinkableObject();
+    ErrorManager.prototype.constructor = ErrorManager;
+    var p = ErrorManager.prototype;
+
+    function reportError(error, faultMessage, faultContent) {
+        faultMessage = (faultMessage === undefined) ? null : faultMessage;
+        faultContent = (faultContent === undefined) ? null : faultContent;
+
+        if (typeof (error) === 'string') {
+            error = new Error(error);
+        }
+
+        this._errors.push(error);
+        WeaveAPI.SessionManager.getCallbackCollection(this).triggerCallbacks();
+
+    }
+
+    weavecore.ErrorManager = ErrorManager;
+    weavecore.ClassUtils.registerClass('weavecore.ErrorManager', ErrorManager);
+    WeaveAPI.ErrorManager = new ErrorManager();
+
+}());
+if (typeof window === 'undefined') {
+    this.WeaveAPI = this.WeaveAPI || {};
+    this.weavecore = this.weavecore || {};
+} else {
+    window.WeaveAPI = window.WeaveAPI || {};
+    window.weavecore = window.weavecore || {};
+}
+
+(function () {
+
+    function EditorManager() {
+        weavecore.ILinkableObject.call(this);
+        Object.defineProperties(this, {
+            '_editorLookup': {
+                value: new Map()
+            },
+            'labels': {
+                value: new Map()
+            }
+        });
+
+
+        var p = this;
+        p.getEditorClass = weavecore.ClassUtils.bind(this, getEditorClass);
+        p.getNewEditor = weavecore.ClassUtils.bind(this, getNewEditor);
+        p.setLabel = weavecore.ClassUtils.bind(this, setLabel);
+        p.getLabel = weavecore.ClassUtils.bind(this, getLabel);
+
+    }
+
+    EditorManager.prototype = new weavecore.ILinkableObject();
+    EditorManager.prototype.constructor = EditorManager;
+    //var p = EditorManager.prototype;
+
+
+
+    /**
+     * @inheritDoc
+     */
+    function getEditorClass(linkableObjectOrClass) {
+        var editorClass = this._editorLookup.get(linkableObjectOrClass);
+        editorClass = (editorClass && weavecore.Compiler.isClass(editorClass)) ? editorClass : null;
+        if (editorClass)
+            return editorClass;
+
+        /*var classQName = linkableObjectOrClass as String || getQualifiedClassName(linkableObjectOrClass);
+        var superClasses: Array = ClassUtils.getClassExtendsList(classQName);
+        superClasses.unshift(classQName);
+        for (var i: int = 0; i < superClasses.length; i++) {
+            classQName = superClasses[i];
+            var classDef: Class = ClassUtils.getClassDefinition(classQName);
+            editorClass = _editorLookup[classDef] as Class
+            if (editorClass)
+                return editorClass;
+        }*/
+        return null;
+    }
+
+
+
+    /**
+     * @inheritDoc
+     */
+    function getNewEditor(obj) {
+        var Editor = this.getEditorClass(obj);
+        if (Editor) {
+            var editor = WeaveAPI.SessionManager.registerDisposableChild(obj, new Editor()); // when the object goes away, make the editor go away
+            editor.setTarget(obj);
+            return editor;
+        }
+        return null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    function setLabel(object, label) {
+        this._labels.set(object, label);
+        WeaveAPI.SessionManager.getCallbackCollection(this).triggerCallbacks();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    function getLabel(object) {
+        return this._labels.get(object);
+    }
+
+
+    weavecore.EditorManager = EditorManager;
+    weavecore.ClassUtils.registerClass('weavecore.EditorManager', EditorManager);
+    WeaveAPI.EditorManager = new EditorManager();
+
+}());
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -10455,6 +10906,214 @@ Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_NORMAL', {
 Object.defineProperty(WeaveAPI, 'TASK_PRIORITY_LOW', {
     value: 3
 });
+
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.newDisposableChild() and WeaveAPI.SessionManager.registerDisposableChild()
+ * @see weavecore.ISessionManager#newDisposableChild()
+ * @see weavecore.ISessionManager#registerDisposableChild()
+ * @export
+ * @param {Object} disposableParent
+ * @param {Object} disposableChildOrType
+ * @return {*}
+ */
+WeaveAPI.disposableChild = function (disposableParent, disposableChildOrType) {
+    if (weavecore.ClassUtils.isClass(disposableChildOrType))
+        return WeaveAPI.SessionManager.newDisposableChild(disposableParent, disposableChildOrType);
+    return WeaveAPI.SessionManager.registerDisposableChild(disposableParent, disposableChildOrType);
+};
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.newLinkableChild() and WeaveAPI.SessionManager.registerLinkableChild()
+ * @see weavecore.ISessionManager#newLinkableChild()
+ * @see weavecore.ISessionManager#registerLinkableChild()
+ * @export
+ * @param {Object} linkableParent
+ * @param {Object} linkableChildOrType
+ * @param {Function=} callback
+ * @param {boolean=} useGroupedCallback
+ * @return {*}
+ */
+WeaveAPI.linkableChild = function (linkableParent, linkableChildOrType, callback, useGroupedCallback) {
+    callback = typeof callback !== 'undefined' ? callback : null;
+    useGroupedCallback = typeof useGroupedCallback !== 'undefined' ? useGroupedCallback : false;
+    if (weavecore.ClassUtils.isClass(linkableChildOrType))
+        return WeaveAPI.SessionManager.newLinkableChild(linkableParent, linkableChildOrType, callback, useGroupedCallback);
+    return WeaveAPI.SessionManager.registerLinkableChild(linkableParent, linkableChildOrType, callback, useGroupedCallback);
+};
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.getSessionState()
+ * @copy weavecore.ISessionManager#getSessionState()
+ * @export
+ * @param {weavecore.ILinkableObject} linkableObject
+ * @return {Object}
+ */
+WeaveAPI.getState = function (linkableObject) {
+    return WeaveAPI.SessionManager.getSessionState(linkableObject);
+};
+
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.setSessionState()
+ * @copy weavecore.ISessionManager#setSessionState()
+ * @export
+ * @param {weavecore.ILinkableObject} linkableObject
+ * @param {Object} newState
+ * @param {boolean=} removeMissingDynamicObjects
+ */
+WeaveAPI.setState = function (linkableObject, newState, removeMissingDynamicObjects) {
+    removeMissingDynamicObjects = typeof removeMissingDynamicObjects !== 'undefined' ? removeMissingDynamicObjects : true;
+    WeaveAPI.SessionManager.setSessionState(linkableObject, newState, removeMissingDynamicObjects);
+};
+
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.copySessionState()
+ * @copy weavecore.ISessionManager#copySessionState()
+ * @export
+ * @param {weavecore.ILinkableObject} source
+ * @param {weavecore.ILinkableObject} destination
+ */
+WeaveAPI.copyState = function (source, destination) {
+    WeaveAPI.SessionManager.copySessionState(source, destination);
+};
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.linkSessionState()
+ * @copy weave.api.core.ISessionManager#linkSessionState()
+ * @export
+ * @param {weavejs.api.core.ILinkableObject} primary
+ * @param {weavejs.api.core.ILinkableObject} secondary
+ */
+WeaveAPI.linkState = function (primary, secondary) {
+    WeaveAPI.SessionManager.linkSessionState(primary, secondary);
+};
+
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.unlinkSessionState()
+ * @copy weavecore.ISessionManager#unlinkSessionState()
+ * @export
+ * @param {weavecore.ILinkableObject} first
+ * @param {weavecore.ILinkableObject} second
+ */
+WeaveAPI.unlinkState = function (first, second) {
+    WeaveAPI.SessionManager.unlinkSessionState(first, second);
+};
+
+/**
+ * Checks if an object or class implements ILinkableObject
+ * @export
+ * @param {Object} objectOrClass
+ * @return {boolean}
+ */
+WeaveAPI.isLinkable = function (objectOrClass) {
+    if (weavecore.ClassUtils.is(objectOrClass, weavecore.ILinkableObject))
+        return true;
+    return objectOrClass && WeaveAPI.isLinkable(objectOrClass.prototype);
+};
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.disposeObject()
+ * @copy weavecore.ISessionManager#disposeObject()
+ * @export
+ * @param {Object} object
+ */
+WeaveAPI.dispose = function (object) {
+    WeaveAPI.SessionManager.disposeObject(object);
+};
+
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.objectWasDisposed()
+ * @copy weavecore.ISessionManager#objectWasDisposed()
+ * @export
+ * @param {Object} object
+ * @return {boolean}
+ */
+WeaveAPI.wasDisposed = function (object) {
+    return WeaveAPI.SessionManager.objectWasDisposed(object);
+};
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.getCallbackCollection()
+ * @copy weavecore.ISessionManager#getCallbackCollection()
+ * @export
+ * @param {weavecore.ILinkableObject} linkableObject
+ * @return {weavecore.ICallbackCollection}
+ */
+WeaveAPI.getCallbacks = function (linkableObject) {
+    return WeaveAPI.SessionManager.getCallbackCollection(linkableObject);
+};
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.getLinkableOwner()
+ * @copy weave.api.core.ISessionManager#getLinkableOwner()
+ * @export
+ * @param {weavejs.api.core.ILinkableObject} child
+ * @return {weavejs.api.core.ILinkableObject}
+ */
+WeaveAPI.getOwner = function (child) {
+    return WeaveAPI.SessionManager.getLinkableOwner(child);
+};
+
+/**
+ * Shortcut for WeaveAPI.SessionManager.getPath()
+ * @copy weave.api.core.ISessionManager#getPath()
+ * @export
+ * @param {weavejs.api.core.ILinkableObject} root
+ * @param {weavejs.api.core.ILinkableObject} descendant
+ * @return {Array}
+ */
+WeaveAPI.findPath = function (root, descendant) {
+    return WeaveAPI.SessionManager.getPath(root, descendant);
+};
+
+/**
+ * @export
+ * @const
+ * @type {Array}
+ */
+WeaveAPI.defaultPackages = ['weavecore'];
+
+/**
+ * Gets the qualified class name from a class definition or an object instance.
+ * @export
+ * @param {Object} def
+ * @return {string}
+ */
+WeaveAPI.className = function (def) {
+    if (!def)
+        return null;
+    if (!def.prototype)
+        def = def.constructor;
+    if (def.prototype && def.prototype.CLASS_INFO)
+        return def.prototype.CLASS_INFO.names[0].qName;
+    return def.name;
+};
+
+/**
+ * @export
+ * @param {string} name
+ * @return {*}
+ */
+WeaveAPI.getDefinition = function (name) {
+    var arr = name.split('.');
+    if (arr.length === 2) {
+        var package = arr[0];
+        var className = arr[1];
+        return window[package][className];
+    }
+
+    for (var i = 0; i < WeaveAPI.defaultPackages.length; i++) {
+        var pkg = WeaveAPI.defaultPackages[i];
+        if (window[pkg][name]) {
+            return window[pkg][name];
+        }
+    }
+    return null;
+};
 
 
 WeaveAPI._pathLookup = new Map();
@@ -10523,7 +11182,6 @@ WeaveAPI._needsReviving = function (key, value) {
         'weave[JSON_EXTENSIONS].push({"description": "ILinkableObject/WeavePath", "replacer": replacer, "reviver": reviver});'
     );
 };*/
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -10616,20 +11274,22 @@ if (typeof window === 'undefined') {
 
 
     function URLRequestUtils(defaultValue, taskDescription) {
-        /**
-         * A mapping of URL Strings to CustomXMLHttpRequest.
-         * This mapping is necessary for cached requests to return the active request.
-         */
-        Object.defineProperty(this, '_requestURLToLoader', {
-            value: {}
-        });
 
-        this._localFiles = {};
-        this._baseURL;
 
     }
 
     var p = URLRequestUtils.prototype;
+
+    /**
+     * A mapping of URL Strings to CustomXMLHttpRequest.
+     * This mapping is necessary for cached requests to return the active request.
+     */
+    Object.defineProperty(p, '_requestURLToLoader', {
+        value: {}
+    });
+
+    p._localFiles = {};
+    p._baseURL;
 
     /**
      * This will set the base URL for use with relative URL requests.
@@ -11178,7 +11838,6 @@ if (typeof window === 'undefined') {
     weavecore.CustomPromise = CustomPromise;
 
 }());
-
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     // this.weavecore = this.weavecore || {};
@@ -11762,20 +12421,6 @@ if (typeof window === 'undefined') {
     function WeavePromise(relevantContext, resolver) {
         resolver = (resolver === undefined) ? null : resolver;
 
-
-        this._rootPromise;
-        this.relevantContext;
-        this._result;
-        this._error;
-        Object.defineProperty(this, '_handlers', {
-            value: []
-        });
-        Object.defineProperty(this, '_dependencies', {
-            value: []
-        });
-
-
-
         if (relevantContext instanceof WeavePromise) {
             // this is a child promise
             this._rootPromise = relevantContext._rootPromise;
@@ -11805,6 +12450,17 @@ if (typeof window === 'undefined') {
     }
 
     var p = WeavePromise.prototype;
+
+    p._rootPromise;
+    p.relevantContext;
+    p._result;
+    p._error;
+    Object.defineProperty(p, '_handlers', {
+        value: []
+    });
+    Object.defineProperty(p, '_dependencies', {
+        value: []
+    });
 
     p.setResult = function (result) {
         if (WeaveAPI.SessionManager.objectWasDisposed(this.relevantContext)) {
@@ -11945,6 +12601,12 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.WeavePromise = WeavePromise;
+    p.CLASS_INFO = {
+        names: [{
+            name: 'WeavePromise',
+            qName: 'weavecore.WeavePromise'
+        }]
+    };
 
 }());
 
@@ -11953,13 +12615,17 @@ if (typeof window === 'undefined') {
         this.next = next;
         this.onFulfilled = onFulfilled;
         this.onRejected = onRejected;
-        /**
-         * Used as a flag to indicate whether or not this handler has been called
-         */
-        this.wasCalled = false;
     }
 
     var p = Handler.prototype;
+
+    p.next;
+    p.onFulfilled;
+    p.onRejected;
+    /**
+     * Used as a flag to indicate whether or not this handler has been called
+     */
+    p.wasCalled = false;
 
     p.onResult = function (result) {
         this.wasCalled = true;
@@ -11980,17 +12646,28 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.Handler = Handler;
+
+    p.CLASS_INFO = {
+        names: [{
+            name: 'Handler',
+            qName: 'weavecore.Handler'
+        }]
+    };
+
+
 }());
 
 
 (function () {
     function AsyncToken() {
-        Object.defineProperty(this, 'responders', {
-            value: []
-        });
+
     }
 
     var p = AsyncToken.prototype;
+
+    Object.defineProperty(p, 'responders', {
+        value: []
+    });
 
     p.addResponder = function (responder) {
         this.responders.push(responder);
@@ -12009,6 +12686,12 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.AsyncToken = AsyncToken;
+    p.CLASS_INFO = {
+        names: [{
+            name: 'AsyncToken',
+            qName: 'weavecore.AsyncToken'
+        }]
+    };
 
 }());
 
@@ -12021,10 +12704,19 @@ if (typeof window === 'undefined') {
         this.token = token;
 
     }
+    var p = AsyncResponder.prototype;
+    p.result;
+    p.fault;
+    p.token;
     weavecore.AsyncResponder = AsyncResponder;
+    p.CLASS_INFO = {
+        names: [{
+            name: 'AsyncResponder',
+            qName: 'weavecore.AsyncResponder'
+        }]
+    };
 
 }());
-
 /**
  * @module WeaveAPI
  */
@@ -12113,25 +12805,7 @@ WeaveAPI.detectLinkableObjectChange = function () {
     return changeDetected;
 }
 
-// namespace
-
-if (!this.weavecore)
-    this.weavecore = {};
-
-if (!this.WeaveAPI)
-    this.WeaveAPI = {};
-
-/**
- * This allows you to add callbacks that will be called when an event occurs on the stage.
- *
- * WARNING: These callbacks will trigger on every mouse and keyboard event that occurs on the stage.
- *          Developers should not add any callbacks that run computationally expensive code.
- *
- * @author adufilie
- * @author sanjay1909
- */
 (function () {
-
     // Internal class constructor
 
     Object.defineProperty(EventCallbackCollection, 'eventTypes', {
@@ -12139,19 +12813,22 @@ if (!this.WeaveAPI)
     });
 
     function EventCallbackCollection(eventManager, eventType) {
-        this.__proto__.setEvent = this.__proto__.setEvent.bind(this);
-        weavecore.CallbackCollection.call(this, this.setEvent);
-        this.__proto__._tickerListener = this.__proto__._tickerListener.bind(this);
+        EventCallbackCollection.base(this, 'constructor', this.setEvent);
         this._eventManager = eventManager;
         this._eventType = eventType;
 
+        this._tickerListener = goog.bind(_tickerListener, this);
+
     }
 
-    EventCallbackCollection.prototype = new weavecore.CallbackCollection();
-    EventCallbackCollection.prototype.constructor = EventCallbackCollection;
+    goog.inherits(EventCallbackCollection, weavecore.CallbackCollection);
+
+
 
     var p = EventCallbackCollection.prototype;
 
+    p._eventManager;
+    p._eventType;
     /**
      * This is the _preCallback
      */
@@ -12195,7 +12872,7 @@ if (!this.WeaveAPI)
         });
     };
 
-    p._tickerListener = function (event) {
+    function _tickerListener(event) {
         this._eventManager.eventTime = new Date().getTime();
         if (this._eventType === "tick") {
             if (this._eventManager.userActivity > 0 && !this._eventManager.mouseButtonDown)
@@ -12212,11 +12889,100 @@ if (!this.WeaveAPI)
 
     weavecore.EventCallbackCollection = EventCallbackCollection;
 
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'EventCallbackCollection',
+            qName: 'weavecore.EventCallbackCollection'
+        }]
+    };
+
+}())
+// namespace
+
+if (!this.weavecore)
+    this.weavecore = {};
+
+if (!this.WeaveAPI)
+    this.WeaveAPI = {};
+
+/**
+ * This allows you to add callbacks that will be called when an event occurs on the stage.
+ *
+ * WARNING: These callbacks will trigger on every mouse and keyboard event that occurs on the stage.
+ *          Developers should not add any callbacks that run computationally expensive code.
+ *
+ * @author adufilie
+ * @author sanjay1909
+ */
+(function () {
+
+    function EventManager() {
+
+
+
+        // create a new callback collection for each type of event
+        for (var j = 0; j < weavecore.EventCallbackCollection.eventTypes.length; j++) {
+            var type = weavecore.EventCallbackCollection.eventTypes[j];
+            this.callbackCollections[type] = new weavecore.EventCallbackCollection(this, type);
+            // this.callbackCollections[type] = WeaveAPI.SessionManager.registerDisposableChild(WeaveAPI.globalHashMap, new weavecore.EventCallbackCollection(this, type));
+        }
+
+        //add event listeners
+        for (var eventtype in this.callbackCollections) {
+            this.callbackCollections[eventtype].listenToStage();
+        }
+    }
+    var ep = EventManager.prototype;
+
+    ep.userActivity = 0; // greater than 0 when there was user activity since the last frame.
+    ep.event = null;
+    ep.eventTime = 0;
+    ep.shiftKey = false;
+    ep.altKey = false;
+    ep.ctrlKey = false;
+    ep.mouseButtonDown = false;
+
+    ep.currentFrameStartTime = new Date().getTime(); // ep is the result of getTimer() on the last ENTER_FRAME event.
+    ep.previousFrameElapsedTime = 0; // this is the amount of time it took to process the previous frame.
+    ep.pointClicked = false;
+    ep.deactivated = true; // true when application is deactivated
+    ep.useDeactivatedFrameRate = false;
+
+    ep.triggeredThrottledMouseThisFrame = false; // set to false on enterFrame, set to true on throttled mouse move
+    ep.nextThrottledMouseMoveTime = 0; // time threshold before triggering throttled mouse move again
+    ep.throttledMouseMoveInterval = 100; // time threshold before triggering throttled mouse move again
+
+    Object.defineProperty(ep, 'callbackCollections', {
+        value: {}
+    });
+
+
+    weavecore.EventManager = EventManager;
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    ep.CLASS_INFO = {
+        names: [{
+            name: 'EventManager',
+            qName: 'weavecore.EventManager'
+        }]
+    };
+
+
     StageUtils.debug_async_time = false;
     StageUtils.debug_async_stack = false;
     StageUtils.debug_delayTasks = false; // set this to true to delay async tasks
     StageUtils.debug_callLater = false; // set this to true to delay async tasks
-
+    StageUtils._time;
+    StageUtils._times = [];
 
     /**
      * This will generate an iterative task function that is the combination of a list of tasks to be completed in order.
@@ -12259,64 +13025,63 @@ if (!this.WeaveAPI)
 
     //constructor
     function StageUtils() {
-
-        this.averageFrameTime = 0;
-
-        Object.defineProperties(this, {
-            eventManager: {
-                value: new EventManager()
-            },
-            frameTimes: {
-                value: []
-            },
-            _stackTraceMap: {
-                value: new Map()
-            },
-            _taskElapsedTime: {
-                value: new Map()
-            },
-            _taskStartTime: {
-                value: new Map()
-            },
-
-        });
-
-        Object.defineProperty(this, 'currentFrameElapsedTime', {
-            get: function () {
-                return getTimer() - this.eventManager.currentFrameStartTime;
-            }
-        });
-        this._currentTaskStopTime = 0;
-
-        /**
-         * This is an Array of "callLater queues", each being an Array of function invocations to be done later.
-         * The Arrays get populated by callLater().
-         * There are four nested Arrays corresponding to the four priorities (0, 1, 2, 3) defined by static constants in WeaveAPI.
-         */
-        Object.defineProperties(this, {
-            _priorityCallLaterQueues: {
-                value: [[], [], [], []]
-            },
-            _priorityAllocatedTimes: {
-                value: [Number.MAX_VALUE, 300, 200, 100]
-            }
-        });
-        this._activePriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE + 1; // task priority that is currently being processed
-        this._activePriorityElapsedTime = 0;
-        this._deactivatedMaxComputationTimePerFrame = 1000;
-        this._nextCallLaterPriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE; // private variable to control the priority of the next callLater() internally
-
-        this.__proto__._iterateTask = this.__proto__._iterateTask.bind(this);
-        this.__proto__._handleCallLater = this.__proto__._handleCallLater.bind(this);
+        this._handleCallLater = goog.bind(_handleCallLater, this);
         this.addEventCallback("tick", null, this._handleCallLater);
-        this.maxComputationTimePerFrame = 100;
-        this.maxComputationTimePerFrame_noActivity = 250;
-
-        this._debugTaskTimes = new Map();
-
     }
 
     var suP = StageUtils.prototype;
+
+
+    suP.averageFrameTime = 0;
+
+    Object.defineProperties(suP, {
+        eventManager: {
+            value: new EventManager()
+        },
+        frameTimes: {
+            value: []
+        },
+        _stackTraceMap: {
+            value: new Map()
+        },
+        _taskElapsedTime: {
+            value: new Map()
+        },
+        _taskStartTime: {
+            value: new Map()
+        },
+
+    });
+
+    Object.defineProperty(suP, 'currentFrameElapsedTime', {
+        get: function () {
+            return getTimer() - this.eventManager.currentFrameStartTime;
+        }
+    });
+    suP._currentTaskStopTime = 0;
+
+    /**
+     * This is an Array of "callLater queues", each being an Array of function invocations to be done later.
+     * The Arrays get populated by callLater().
+     * There are four nested Arrays corresponding to the four priorities (0, 1, 2, 3) defined by static constants in WeaveAPI.
+     */
+    Object.defineProperties(suP, {
+        _priorityCallLaterQueues: {
+            value: [[], [], [], []]
+        },
+        _priorityAllocatedTimes: {
+            value: [Number.MAX_VALUE, 300, 200, 100]
+        }
+    });
+    suP._activePriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE + 1; // task priority that is currently being processed
+    suP._activePriorityElapsedTime = 0;
+    suP._deactivatedMaxComputationTimePerFrame = 1000;
+    suP._nextCallLaterPriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE; // private variable to control the priority of the next callLater() internally
+
+    suP.maxComputationTimePerFrame = 100;
+    suP.maxComputationTimePerFrame_noActivity = 250;
+
+    suP._debugTaskTimes = new Map();
     suP.getMaxComputationTimePerFrame = function () {
         return this.maxComputationTimePerFrame;
     };
@@ -12334,8 +13099,7 @@ if (!this.WeaveAPI)
         this._priorityAllocatedTimes[priority] = Math.max(milliseconds, 5);
     };
 
-    StageUtils._time;
-    StageUtils._times = [];
+
 
     suP.callLater = function (relevantContext, method, parameters) {
         if (method === null || method === undefined) {
@@ -12350,7 +13114,7 @@ if (!this.WeaveAPI)
             this._stackTraceMap.set(args, new Error("This is the stack trace from when callLater() was called.").getStackTrace());
     };
 
-    suP._handleCallLater = function () {
+    function _handleCallLater() {
         if (this.maxComputationTimePerFrame === 0)
             this.maxComputationTimePerFrame = 100;
 
@@ -12670,50 +13434,16 @@ if (!this.WeaveAPI)
     weavecore.StageUtils = StageUtils;
     WeaveAPI.StageUtils = new StageUtils();
 
-
-    function EventManager() {
-        Object.defineProperty(this, 'callbackCollections', {
-            value: {}
-        });
-        this.userActivity = 0; // greater than 0 when there was user activity since the last frame.
-        this.event = null;
-        this.eventTime = 0;
-        this.shiftKey = false;
-        this.altKey = false;
-        this.ctrlKey = false;
-        this.mouseButtonDown = false;
-
-        this.currentFrameStartTime = new Date().getTime(); // this is the result of getTimer() on the last ENTER_FRAME event.
-        this.previousFrameElapsedTime = 0; // this is the amount of time it took to process the previous frame.
-        this.pointClicked = false;
-        this.deactivated = true; // true when application is deactivated
-        this.useDeactivatedFrameRate = false;
-
-        this.triggeredThrottledMouseThisFrame = false; // set to false on enterFrame, set to true on throttled mouse move
-        this.nextThrottledMouseMoveTime = 0; // time threshold before triggering throttled mouse move again
-        this.throttledMouseMoveInterval = 100; // time threshold before triggering throttled mouse move again
-
-        // create a new callback collection for each type of event
-        for (var j = 0; j < EventCallbackCollection.eventTypes.length; j++) {
-            var type = EventCallbackCollection.eventTypes[j];
-            this.callbackCollections[type] = new EventCallbackCollection(this, type);
-            // this.callbackCollections[type] = WeaveAPI.SessionManager.registerDisposableChild(WeaveAPI.globalHashMap, new EventCallbackCollection(this, type));
-        }
-
-        //add event listeners
-        for (var eventtype in this.callbackCollections) {
-            this.callbackCollections[eventtype].listenToStage();
-        }
-        this.event;
-    }
-
-
-    weavecore.EventManager = EventManager;
+    suP.CLASS_INFO = {
+        names: [{
+            name: 'StageUtils',
+            qName: 'weavecore.StageUtils'
+        }]
+    };
 
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -12729,42 +13459,7 @@ if (typeof window === 'undefined') {
 
 (function () {
 
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableVariable, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableVariable, 'CLASS_NAME', {
-        value: 'LinkableVariable'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableVariable, 'SESSIONABLE', {
-        value: true
-    });
 
     /**
      * If a defaultValue is specified, callbacks will be triggered in a later frame unless they have already been triggered before then.
@@ -12776,71 +13471,101 @@ if (typeof window === 'undefined') {
      */
 
     function LinkableVariable(sessionStateType, verifier, defaultValue, defaultValueTriggersCallbacks) {
-        if (sessionStateType === undefined) sessionStateType = null;
-        if (verifier === undefined) verifier = null;
-        if (defaultValueTriggersCallbacks === undefined) defaultValueTriggersCallbacks = true;
+        sessionStateType = typeof sessionStateType !== 'undefined' ? sessionStateType : null;
+        verifier = typeof verifier !== 'undefined' ? verifier : null;
+        defaultValueTriggersCallbacks = typeof defaultValueTriggersCallbacks !== 'undefined' ? defaultValueTriggersCallbacks : true;
 
-        weavecore.CallbackCollection.call(this);
+        LinkableVariable.base(this, 'constructor');
 
-        /**
-         * This function is used to prevent the session state from having unwanted values.
-         * Function signature should be  function(value:*):Boolean
-         * @private
-         * @property _verifier
-         * @type function
-         */
+        if (sessionStateType != Object) {
+            this._sessionStateType = sessionStateType;
+            this._primitiveType = this._sessionStateType == String || this._sessionStateType == Number || this._sessionStateType == Boolean;
+        }
         this._verifier = verifier;
 
-        /**
-         * This is true if the session state has been set at least once.
-         */
-        this._sessionStateWasSet = false;
-
-        /**
-         * This is true if the _sessionStateType is a primitive type.
-         */
-        this._primitiveType = false;
-
-        /**
-         * Type restriction passed in to the constructor.
-         */
-        this._sessionStateType = null;
-
-        /**
-         * Cannot be modified externally because it is not returned by getSessionState()
-         */
-        this._sessionStateInternal = undefined;
-
-        /**
-         * Available externally via getSessionState()
-         */
-        this._sessionStateExternal = undefined;
-
-        this._locked = false;
-
-        Object.defineProperty(this, 'locked', {
-            get: function () {
-                return this._locked;
-            }
-        });
-
-        if (sessionStateType !== Object) {
-            this._sessionStateType = sessionStateType;
-            this._primitiveType = this._sessionStateType === "string" || this._sessionStateType === "number" || this._sessionStateType === "boolean";
-        }
         if (defaultValue !== undefined) {
             this.setSessionState(defaultValue);
 
             // If callbacks were triggered, make sure callbacks are triggered again one frame later when
             // it is possible for other classes to have a pointer to this object and retrieve the value.
             if (defaultValueTriggersCallbacks && this._triggerCounter > weavecore.CallbackCollection.DEFAULT_TRIGGER_COUNT)
-                WeaveAPI.StageUtils.callLater(this, _defaultValueTrigger.bind(this));
+                WeaveAPI.StageUtils.callLater(this, this._defaultValueTrigger);
         }
-
-
     }
 
-    function _defaultValueTrigger() {
+    goog.inherits(LinkableVariable, weavecore.CallbackCollection);
+
+    var p = LinkableVariable.prototype;
+
+
+
+    Object.defineProperties(p, {
+        /** @export */
+        locked: {
+            get: /** @this {weavecore.LinkableVariable} */ function () {
+                return this._locked;
+            }
+        },
+        /** @export */
+        state: {
+            get: /** @this {weavecore.LinkableVariable} */ function () {
+                return this._sessionStateExternal;
+            },
+            set: /** @this {weavecore.LinkableVariable} */ function (value) {
+                this.setSessionState(value);
+            }
+        }
+    });
+
+    /**
+     * @protected
+     * @type {Function}
+     */
+    p._verifier = null;
+
+
+    /**
+     * @protected
+     * @type {boolean}
+     */
+    p._sessionStateWasSet = false;
+
+
+    /**
+     * @protected
+     * @type {boolean}
+     */
+    p._primitiveType = false;
+
+
+    /**
+     * @protected
+     * @type {Object}
+     */
+    p._sessionStateType = null;
+
+
+    /**
+     * @protected
+     * @type {*}
+     */
+    p._sessionStateInternal = undefined;
+
+
+    /**
+     * @protected
+     * @type {*}
+     */
+    p._sessionStateExternal = undefined;
+
+
+    /**
+     * @protected
+     * @type {boolean}
+     */
+    p._locked = false;
+
+    p._defaultValueTrigger = function () {
         // unless callbacks were triggered again since the default value was set, trigger callbacks now
         if (!this._wasDisposed && this._triggerCounter === weavecore.CallbackCollection.DEFAULT_TRIGGER_COUNT + 1)
             this.triggerCallbacks();
@@ -12852,14 +13577,11 @@ if (typeof window === 'undefined') {
      * @param value The value to verify.
      * @return A value of true if the value is accepted by this linkable variable.
      */
-    function verifyValue(value) {
+    p.verifyValue = function (value) {
         return this._verifier === null || this._verifier === undefined || this._verifier(value);
     }
 
-    LinkableVariable.prototype = new weavecore.CallbackCollection();
-    LinkableVariable.prototype.constructor = LinkableVariable;
 
-    var p = LinkableVariable.prototype;
 
     /**
      * The type restriction passed in to the constructor.
@@ -12877,8 +13599,8 @@ if (typeof window === 'undefined') {
             return;
 
         // cast value now in case it is not the appropriate type
-        if (this._sessionStateType !== null && this._sessionStateType !== undefined)
-            value = value;
+        /*if (this._sessionStateType !== null && this._sessionStateType !== undefined)
+            value = value;*/
 
         // stop if verifier says it's not an accepted value
         if (this._verifier !== null && this._verifier !== undefined && !this._verifier(value))
@@ -12937,13 +13659,14 @@ if (typeof window === 'undefined') {
         if (this._primitiveType)
             return this._sessionStateInternal === otherSessionState;
 
-        return weavecore.StandardLib.compare(this._sessionStateInternal, otherSessionState, objectCompare.bind(this)) === 0;
+        return weavecore.StandardLib.compare(this._sessionStateInternal, otherSessionState, objectCompare) === 0;
     };
 
     function objectCompare(a, b) {
         if (weavecore.DynamicState.isDynamicState(a, true) && weavecore.DynamicState.isDynamicState(b, true) && a[weavecore.DynamicState.CLASS_NAME] === b[weavecore.DynamicState.CLASS_NAME] && a[weavecore.DynamicState.OBJECT_NAME] === b[weavecore.DynamicState.OBJECT_NAME]) {
             return weavecore.StandardLib.compare(a[weavecore.DynamicState.SESSION_STATE], b[weavecore.DynamicState.SESSION_STATE], objectCompare);
         }
+        return NaN;
 
     }
 
@@ -12965,15 +13688,27 @@ if (typeof window === 'undefined') {
 
 
     p.dispose = function () {
-        weavecore.CallbackCollection.prototype.dispose.call(this);
+        LinkableVariable.base(this, 'dispose');
         this.setSessionState(null);
     };
 
     weavecore.LinkableVariable = LinkableVariable;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableVariable', LinkableVariable);
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableVariable',
+            qName: 'weavecore.LinkableVariable'
+        }],
+        interfaces: [weavecore.ILinkableVariable, weavecore.ICallbackCollection, weavecore.IDisposableObject]
+    };
+
 
 }());
-
 /**
  * @module weavecore
  */
@@ -12987,42 +13722,6 @@ if (typeof window === 'undefined') {
 
 (function () {
     "use strict";
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(UntypedLinkableVariable, 'NS', {
-        value: 'weavecore'
-    });
-
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(UntypedLinkableVariable, 'CLASS_NAME', {
-        value: 'UntypedLinkableVariable'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(UntypedLinkableVariable, 'SESSIONABLE', {
-        value: true
-    });
 
     // constructor:
     /**
@@ -13034,29 +13733,35 @@ if (typeof window === 'undefined') {
         if (defaultValue === undefined) defaultValue = null;
         if (verifier === undefined) verifier = null;
         if (defaultValueTriggersCallbacks === undefined) defaultValueTriggersCallbacks = true;
-        weavecore.LinkableVariable.call(this, null, verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
-        Object.defineProperty(this, 'value', {
-            get: function () {
-                return this._sessionStateExternal;
-            },
-            set: function (value) {
-                this.setSessionState(value);
-            }
-        });
+        LinkableVariable.base(this, 'constructor', null, verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
+
 
 
     }
+    goog.inherits(UntypedLinkableVariable, weavecore.LinkableVariable)
 
-    UntypedLinkableVariable.prototype = new weavecore.LinkableVariable();
-    UntypedLinkableVariable.prototype.constructor = UntypedLinkableVariable;
 
     var p = UntypedLinkableVariable.prototype;
 
+    Object.defineProperty(p, 'value', {
+        get: function () {
+            return this._sessionStateExternal;
+        },
+        set: function (value) {
+            this.setSessionState(value);
+        }
+    });
+
     weavecore.UntypedLinkableVariable = UntypedLinkableVariable;
-    weavecore.ClassUtils.registerClass('weavecore.UntypedLinkableVariable', UntypedLinkableVariable);
+
+    p.CLASS_INFO = {
+        names: [{
+            name: 'UntypedLinkableVariable',
+            qName: 'weavecore.UntypedLinkableVariable'
+        }]
+    };
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -13069,68 +13774,37 @@ if (typeof window === 'undefined') {
  * @author sanjay1909
  */
 (function () {
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableNumber, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableNumber, 'CLASS_NAME', {
-        value: 'LinkableNumber'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableNumber, 'SESSIONABLE', {
-        value: true
-    });
 
     function LinkableNumber(defaultValue, verifier, defaultValueTriggersCallbacks) {
         // set default values for Parameters
-        if (defaultValue === undefined) defaultValue = NaN;
-        if (verifier === undefined) verifier = null;
-        if (defaultValueTriggersCallbacks === undefined) defaultValueTriggersCallbacks = true;
+        defaultValue = typeof defaultValue !== 'undefined' ? defaultValue : NaN;
+        verifier = typeof verifier !== 'undefined' ? verifier : null;
+        defaultValueTriggersCallbacks = typeof defaultValueTriggersCallbacks !== 'undefined' ? defaultValueTriggersCallbacks : true;
+        LinkableNumber.base(this, 'constructor', Number, verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
 
         // Note: Calling  weavecore.LinkableVariable.call() will set all the default values for member variables defined in the super class,
         // which means we can't set _sessionStateInternal = NaN here.
-        weavecore.LinkableVariable.call(this, "number", verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
+        //weavecore.LinkableVariable.call(this, "number", verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
 
-        Object.defineProperty(this, 'value', {
-            get: function () {
-                return this._sessionStateExternal;
-            },
-            set: function (val) {
-                this.setSessionState(val);
-            }
-        });
+
 
     }
 
-    LinkableNumber.prototype = new weavecore.LinkableVariable();
-    LinkableNumber.prototype.constructor = LinkableNumber;
+    goog.inherits(LinkableNumber, weavecore.LinkableVariable);
 
     var p = LinkableNumber.prototype;
+
+    Object.defineProperties(p, {
+        value: {
+            get: function () {
+                return this._sessionStateExternal;
+            },
+            set: function (value) {
+                this.setSessionState(value);
+            }
+        }
+    });
 
     // override is important to avoid sending undefiend value
     // getSessionState usally called from Sessionmanager, main purpose is to create log entries..
@@ -13145,7 +13819,7 @@ if (typeof window === 'undefined') {
             if (val === null || val === '' || val === undefined) val = NaN;
             else val = Number(val);
         }
-        weavecore.LinkableVariable.prototype.setSessionState.call(this, val);
+        LinkableNumber.base(this, 'setSessionState', val);
     };
 
     p.sessionStateEquals = function (otherSessionState) {
@@ -13158,10 +13832,20 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableNumber = LinkableNumber;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableNumber', LinkableNumber);
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableNumber',
+            qName: 'weavecore.LinkableNumber'
+        }]
+    };
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -13174,80 +13858,52 @@ if (typeof window === 'undefined') {
  * @author sanjay1909
  */
 (function () {
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableBoolean, 'NS', {
-        value: 'weavecore'
-    });
 
-
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableBoolean, 'CLASS_NAME', {
-        value: 'LinkableBoolean'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableBoolean, 'SESSIONABLE', {
-        value: true
-    });
 
     function LinkableBoolean(defaultValue, verifier, defaultValueTriggersCallbacks) {
-        // set default values for Parameters
-        if (verifier === undefined) verifier = null;
-        if (defaultValueTriggersCallbacks === undefined) defaultValueTriggersCallbacks = true;
-
-        weavecore.LinkableVariable.call(this, "boolean", verifier, defaultValue, defaultValueTriggersCallbacks);
-
-        Object.defineProperty(this, 'value', {
-            get: function () {
-                return this._sessionStateExternal;
-            },
-            set: function (val) {
-                this.setSessionState(val);
-            }
-        });
-
+        defaultValue = typeof defaultValue !== 'undefined' ? defaultValue : undefined;
+        verifier = typeof verifier !== 'undefined' ? verifier : null;
+        defaultValueTriggersCallbacks = typeof defaultValueTriggersCallbacks !== 'undefined' ? defaultValueTriggersCallbacks : true;
+        LinkableBoolean.base(this, 'constructor', Boolean, verifier, defaultValue, defaultValueTriggersCallbacks);
     }
 
-    LinkableBoolean.prototype = new weavecore.LinkableVariable();
-    LinkableBoolean.prototype.constructor = LinkableBoolean;
+    goog.inherits(LinkableBoolean, weavecore.LinkableVariable);
 
     var p = LinkableBoolean.prototype;
 
+    Object.defineProperties(p, {
+        value: {
+            get: function () {
+                return this._sessionStateExternal;
+            },
+            set: function (value) {
+                this.setSessionState(value);
+            }
+        }
+    });
 
     p.setSessionState = function (val) {
         if (typeof (val) === "string") {
             val = weavecore.ObjectUtil.stringCompare(val, "true", true) === 0;
         }
-        weavecore.LinkableVariable.prototype.setSessionState.call(this, val ? true : false);
+        LinkableBoolean.base(this, 'setSessionState', val ? true : false);
     };
 
     weavecore.LinkableBoolean = LinkableBoolean;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableBoolean', LinkableBoolean);
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableBoolean',
+            qName: 'weavecore.LinkableBoolean'
+        }]
+    };
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -13260,81 +13916,54 @@ if (typeof window === 'undefined') {
  * @author sanjay1909
  */
 (function () {
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableString, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableString, 'CLASS_NAME', {
-        value: 'LinkableString'
-    });
-
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableString, 'SESSIONABLE', {
-        value: true
-    });
 
     function LinkableString(defaultValue, verifier, defaultValueTriggersCallbacks) {
         // set default values for Parameters
 
-        if (defaultValue === undefined) defaultValue = null;
-        if (verifier === undefined) verifier = null;
-        if (defaultValueTriggersCallbacks === undefined) defaultValueTriggersCallbacks = true;
-
-
-        weavecore.LinkableVariable.call(this, "string", verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
-
-        Object.defineProperty(this, 'value', {
-            get: function () {
-                return this._sessionStateExternal;
-            },
-            set: function (val) {
-                this.setSessionState(val);
-            }
-        });
+        defaultValue = typeof defaultValue !== 'undefined' ? defaultValue : null;
+        verifier = typeof verifier !== 'undefined' ? verifier : null;
+        defaultValueTriggersCallbacks = typeof defaultValueTriggersCallbacks !== 'undefined' ? defaultValueTriggersCallbacks : true;
+        LinkableString.base(this, 'constructor', String, verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
 
     }
 
-    LinkableString.prototype = new weavecore.LinkableVariable();
-    LinkableString.prototype.constructor = LinkableString;
+    goog.inherits(LinkableString, weavecore.LinkableVariable);
 
     var p = LinkableString.prototype;
+
+    Object.defineProperties(p, {
+        value: {
+            get: function () {
+                return this._sessionStateExternal;
+            },
+            set: function (value) {
+                this.setSessionState(value);
+            }
+        }
+    });
 
     p.setSessionState = function (val) {
         if (val !== null)
             val = String(val);
-        weavecore.LinkableVariable.prototype.setSessionState.call(this, val);
+        LinkableString.base(this, 'setSessionState', val);
     };
 
     weavecore.LinkableString = LinkableString;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableString', LinkableString);
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableString',
+            qName: 'weavecore.LinkableString'
+        }]
+    };
 
 }());
-
 /**
  * @module weavecore
  */
@@ -13349,42 +13978,7 @@ if (typeof window === 'undefined') {
 (function () {
     "use strict";
 
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ChildListCallbackInterface, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ChildListCallbackInterface, 'CLASS_NAME', {
-        value: 'ChildListCallbackInterface'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ChildListCallbackInterface, 'SESSIONABLE', {
-        value: true
-    });
 
     // constructor:
     /**
@@ -13395,101 +13989,104 @@ if (typeof window === 'undefined') {
      * @constructor
      */
     function ChildListCallbackInterface() {
+        this._setCallbackVariables = goog.bind(_setCallbackVariables, this);
 
-        // specify the preCallback function in super() so list callback
-        // variables will be set before each change callback.
-        weavecore.CallbackCollection.call(this, this._setCallbackVariables);
-        /**
-         * returned by public getter
-         * @private
-         * @property _lastNameAdded
-         * @default null
-         * @type String
-         **/
-        this._lastNameAdded = null;
-        /**
-         * returned by public getter
-         * @private
-         * @property _lastObjectAdded
-         * @default null
-         * @type ILinkableObject
-         **/
-        this._lastObjectAdded = null;
-        /**
-         * returned by public getter
-         * @private
-         * @property _lastNameRemoved
-         * @default null
-         * @type String
-         **/
-        this._lastNameRemoved = null;
-        /**
-         * returned by public getter
-         * @private
-         * @property _lastObjectRemoved
-         * @default null
-         * @type ILinkableObject
-         **/
-        this._lastObjectRemoved = null;
+        ChildListCallbackInterface.base(this, 'constructor', this._setCallbackVariables)
 
-        /**
-         * This is the name of the object that was added prior to running callbacks.
-         * @public
-         * @property lastNameAdded
-         * @readOnly
-         * @type String
-         */
-        Object.defineProperty(this, 'lastNameAdded', {
-            get: function () {
-                return this._lastNameAdded;
-            }
-        });
 
-        /**
-         * This is the object that was added prior to running callbacks.
-         * @public
-         * @property lastObjectAdded
-         * @readOnly
-         * @type ILinkableObject
-         */
-        Object.defineProperty(this, 'lastObjectAdded', {
-            get: function () {
-                return this._lastObjectAdded;
-            }
-        });
 
-        /**
-         * This is the name of the object that was removed prior to running callbacks.
-         * @public
-         * @property lastNameRemoved
-         * @readOnly
-         * @type String
-         */
-        Object.defineProperty(this, 'lastNameRemoved', {
-            get: function () {
-                return this._lastNameRemoved;
-            }
-        });
-
-        /**
-         * This is the object that was removed prior to running callbacks.
-         * @public
-         * @property lastObjectRemoved
-         * @readOnly
-         * @type ILinkableObject
-         */
-        Object.defineProperty(this, 'lastObjectRemoved', {
-            get: function () {
-                return this._lastObjectRemoved;
-            }
-        });
 
     }
 
-    ChildListCallbackInterface.prototype = new weavecore.CallbackCollection();
-    ChildListCallbackInterface.prototype.constructor = ChildListCallbackInterface;
+
+    goog.inherits(ChildListCallbackInterface, weavecore.CallbackCollection);
 
     var p = ChildListCallbackInterface.prototype;
+
+    /**
+     * returned by public getter
+     * @private
+     * @property _lastNameAdded
+     * @default null
+     * @type String
+     **/
+    p._lastNameAdded = null;
+    /**
+     * returned by public getter
+     * @private
+     * @property _lastObjectAdded
+     * @default null
+     * @type ILinkableObject
+     **/
+    p._lastObjectAdded = null;
+    /**
+     * returned by public getter
+     * @private
+     * @property _lastNameRemoved
+     * @default null
+     * @type String
+     **/
+    p._lastNameRemoved = null;
+    /**
+     * returned by public getter
+     * @private
+     * @property _lastObjectRemoved
+     * @default null
+     * @type ILinkableObject
+     **/
+    p._lastObjectRemoved = null;
+
+    /**
+     * This is the name of the object that was added prior to running callbacks.
+     * @public
+     * @property lastNameAdded
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(p, 'lastNameAdded', {
+        get: function () {
+            return this._lastNameAdded;
+        }
+    });
+
+    /**
+     * This is the object that was added prior to running callbacks.
+     * @public
+     * @property lastObjectAdded
+     * @readOnly
+     * @type ILinkableObject
+     */
+    Object.defineProperty(p, 'lastObjectAdded', {
+        get: function () {
+            return this._lastObjectAdded;
+        }
+    });
+
+    /**
+     * This is the name of the object that was removed prior to running callbacks.
+     * @public
+     * @property lastNameRemoved
+     * @readOnly
+     * @type String
+     */
+    Object.defineProperty(p, 'lastNameRemoved', {
+        get: function () {
+            return this._lastNameRemoved;
+        }
+    });
+
+    /**
+     * This is the object that was removed prior to running callbacks.
+     * @public
+     * @property lastObjectRemoved
+     * @readOnly
+     * @type ILinkableObject
+     */
+    Object.defineProperty(p, 'lastObjectRemoved', {
+        get: function () {
+            return this._lastObjectRemoved;
+        }
+    });
     /**
      * This function will set the list callback variables:
      *     lastNameAdded, lastObjectAdded, lastNameRemoved, lastObjectRemoved, childListChanged
@@ -13499,7 +14096,7 @@ if (typeof window === 'undefined') {
      * @param {ILinkableObject} objectAdded This is the object that was just added to the hash map.
      * @param {ILinkableObject} objectRemoved This is the object that was just removed from the hash map.
      */
-    p._setCallbackVariables = function (name, objectAdded, objectRemoved) {
+    function _setCallbackVariables(name, objectAdded, objectRemoved) {
         this._lastNameAdded = objectAdded ? name : null;
         this._lastObjectAdded = objectAdded;
         this._lastNameRemoved = objectRemoved ? name : null;
@@ -13522,16 +14119,28 @@ if (typeof window === 'undefined') {
         this._runCallbacksImmediately(name, objectAdded, objectRemoved);
 
         // restore previous values (in case an external JavaScript popup caused us to interrupt something else)
-        this._setCallbackVariables.call(this, _name, _added, _removed);
+        this._setCallbackVariables(_name, _added, _removed);
     };
 
 
 
     weavecore.ChildListCallbackInterface = ChildListCallbackInterface;
-    weavecore.ClassUtils.registerClass('weavecore.ChildListCallbackInterface', ChildListCallbackInterface);
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'ChildListCallbackInterface',
+            qName: 'weavecore.ChildListCallbackInterface'
+        }],
+        interfaces: [weavecore.IChildListCallbackInterface]
+    };
+
 
 }());
-
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -13546,79 +14155,48 @@ if (typeof window === 'undefined') {
  * @author sanjay1909
  */
 (function () {
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ProgressIndicator, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ProgressIndicator, 'CLASS_NAME', {
-        value: 'ProgressIndicator'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(ProgressIndicator, 'SESSIONABLE', {
-        value: true
-    });
 
 
     Object.defineProperty(ProgressIndicator, 'debug', {
         value: false
     });
 
-    function ProgressIndicator() {
-
-        weavecore.ILinkableObject.call(this);
-
-        this._taskCount = 0;
-        this._maxTaskCount = 0;
-        Object.defineProperties(this, {
-            '_progress': {
-                value: new Map()
-            },
-            '_description': {
-                value: new Map()
-            },
-            '_stackTrace': {
-                value: new Map()
-            }
-        });
-
-    }
-
-    ProgressIndicator.prototype = new weavecore.ILinkableObject();
-    ProgressIndicator.prototype.constructor = ProgressIndicator;
+    function ProgressIndicator() {}
 
     var p = ProgressIndicator.prototype;
 
+    /**
+     * @private
+     * @type {number}
+     */
+    p._taskCount = 0;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._maxTaskCount = 0;
+
+
+    Object.defineProperties(p, {
+        '_progress': {
+            value: new Map()
+        },
+        '_description': {
+            value: new Map()
+        },
+        '_stackTrace': {
+            value: new Map()
+        }
+    });
     /**
      * For debugging, returns debugIds for active tasks.
      */
     p.debugTasks = function () {
         var result = [];
-        for(var task of this._progress.keys()){
+        for (var task of this._progress.keys()) {
             result.push(WeaveAPI.debugID(task));
         };
 
@@ -13627,7 +14205,7 @@ if (typeof window === 'undefined') {
 
     p.getDescriptions = function () {
         var result = [];
-        for(var task of this._progress.keys()) {
+        for (var task of this._progress.keys()) {
             var desc = this._description.get(task) || "Unnamed task";
             if (desc)
                 result.push(WeaveAPI.debugId(task) + " (" + (100 * this._progress.get(task)) + "%) " + desc);
@@ -13737,7 +14315,7 @@ if (typeof window === 'undefined') {
     p.getNormalizedProgress = function () {
         // add up the percentages
         var sum = 0;
-        for(var task of this._progress.keys()){
+        for (var task of this._progress.keys()) {
             var stackTrace = this._stackTrace.get(task); // check this when debugging
             var progress = this._progress.get(task);
             if (isFinite(progress))
@@ -13751,11 +14329,23 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.ProgressIndicator = ProgressIndicator;
-    weavecore.ClassUtils.registerClass('weavecore.ProgressIndicator', ProgressIndicator);
     WeaveAPI.ProgressIndicator = new ProgressIndicator();
 
-}());
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'ProgressIndicator',
+            qName: 'weavecore.ProgressIndicator'
+        }],
+        interfaces: [weavecore.IProgressIndicator]
+    };
 
+
+}());
 /**
  * @module weavecore
  */
@@ -13770,42 +14360,7 @@ if (typeof window === 'undefined') {
 (function () {
     "use strict";
 
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableWatcher, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableWatcher, 'CLASS_NAME', {
-        value: 'LinkableWatcher'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableWatcher, 'SESSIONABLE', {
-        value: true
-    });
 
     // constructor:
     /**
@@ -13822,59 +14377,24 @@ if (typeof window === 'undefined') {
      * @param {Function} groupedCallback A function to add as a grouped callback.
      */
     function LinkableWatcher(typeRestriction, immediateCallback, groupedCallback) {
-        if (typeRestriction === undefined) typeRestriction = null;
-        if (immediateCallback === undefined) immediateCallback = null;
-        if (groupedCallback === undefined) groupedCallback = null;
+        typeRestriction = typeof typeRestriction !== 'undefined' ? typeRestriction : null;
+        immediateCallback = typeof immediateCallback !== 'undefined' ? immediateCallback : null;
+        groupedCallback = typeof groupedCallback !== 'undefined' ? groupedCallback : null;
 
-        //weavecore.ILinkableObject.call(this);
 
-        Object.defineProperty(this, 'sessionable', {
-            value: true
-        });
 
         this._typeRestriction = typeRestriction;
 
         if (immediateCallback !== null && immediateCallback !== undefined)
-            WeaveAPI.SessionManager.getCallbackCollection(this).addImmediateCallback(null, immediateCallback);
+            WeaveAPI.getCallbacks(this).addImmediateCallback(null, immediateCallback);
 
         if (groupedCallback !== null && groupedCallback !== undefined)
-            WeaveAPI.SessionManager.getCallbackCollection(this).addGroupedCallback(null, groupedCallback);
+            WeaveAPI.getCallbacks(this).addGroupedCallback(null, groupedCallback);
 
-        this._target; // the current target or ancestor of the to-be-target
-        this._foundTarget = true; // false when _target is not the desired target
-        this._targetPath; // the path that is being watched
         this._pathDependencies = new weavecore.Dictionary2D(true, false); // Maps an ILinkableDynamicObject to its previous internalObject.
 
-        Object.defineProperty(this, 'targetPath', {
-            /**
-             * This is the path that is currently being watched for linkable object targets.
-             */
-            get: function () {
-                return this._targetPath ? this._targetPath.concat() : null;
-            },
-            /**
-             * This will set a path which should be watched for new targets.
-             * Callbacks will be triggered immediately if the path changes or points to a new target.
-             */
-            set: this._setTargetPath,
-            configurable: true
-        });
 
-        Object.defineProperty(this, 'target', {
-            /**
-             * This is the linkable object currently being watched.
-             * Setting this will unset the targetPath.
-             */
-            get: function () {
-                return this._foundTarget ? this._target : null;
-            },
-            set: this._setTarget,
-            configurable: true
-        });
 
-        this.__proto__._handleTargetTrigger = this.__proto__._handleTargetTrigger.bind(this);
-        this.__proto__._handleTargetDispose = this.__proto__._handleTargetDispose.bind(this);
-        this.__proto__._handlePathDependencies = this.__proto__._handlePathDependencies.bind(this);
 
     }
 
@@ -13884,8 +14404,79 @@ if (typeof window === 'undefined') {
     var p = LinkableWatcher.prototype;
 
 
+    Object.defineProperties(p, {
+        /** @export */
+        target: {
+            get: function () {
+                return this._foundTarget ? this._target : null;
+            },
+            set: function (newTarget) {
+                var cc = WeaveAPI.getCallbacks(this);
+                cc.delayCallbacks();
+                this.targetPath = null;
+                this.internalSetTarget(newTarget);
+                cc.resumeCallbacks();
+            }
+        },
+        /** @export */
+        targetPath: {
+            get: function () {
+                return this._targetPath ? this._targetPath.concat() : null;
+            },
+            set: function (path) {
+                if (path && path.length == 0)
+                    path = null;
+                if (weavecore.StandardLib.compare(this._targetPath, path) != 0) {
+                    var cc = WeaveAPI.getCallbacks(this);
+                    cc.delayCallbacks();
+                    this.resetPathDependencies();
+                    this._targetPath = path;
+                    this.handlePath();
+                    cc.triggerCallbacks();
+                    cc.resumeCallbacks();
+                }
+            }
+        }
+    });
+
+
+    /**
+     * @protected
+     * @type {Object}
+     */
+    p._typeRestriction;
+
+
+    /**
+     * @private
+     * @type {weavejs.api.core.ILinkableObject}
+     */
+    p._target;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._foundTarget = true;
+
+
+    /**
+     * @protected
+     * @type {Array}
+     */
+    p._targetPath;
+
+
+    /**
+     * @private
+     * @type {weavejs.utils.Dictionary2D}
+     */
+    p._pathDependencies;
+
+
     // overridable setter function for 'targetPath'
-    p._setTarget = function (newTarget) {
+    /*p._setTarget = function (newTarget) {
         var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
         cc.delayCallbacks();
         this.targetPath = null;
@@ -13910,7 +14501,7 @@ if (typeof window === 'undefined') {
 
             cc.resumeCallbacks.call(cc);
         }
-    }
+    }*/
 
     /**
      * This sets the new target to be watched without resetting targetPath.
@@ -13924,17 +14515,16 @@ if (typeof window === 'undefined') {
         if (this._target === newTarget)
             return;
 
-        var sm = WeaveAPI.SessionManager;
 
         // unlink from old target
         if (this._target) {
-            sm.getCallbackCollection(this._target).removeCallback(this._handleTargetTrigger);
-            sm.getCallbackCollection(this._target).removeCallback(this._handleTargetDispose);
+            WeaveAPI.getCallbacks(this._target).removeCallback(this._handleTargetTrigger, this);
+            WeaveAPI.getCallbacks(this._target).removeCallback(this._handleTargetDispose, this);
             // if we own the previous target, dispose it
-            if (sm.getLinkableOwner(this._target) === this)
-                sm.disposeObject(this._target);
+            if (WeaveAPI.getOwner(this._target) === this)
+                WeaveAPI.dispose(this._target);
             else
-                sm.unregisterLinkableChild(this, this._target);
+                WeaveAPI.SessionManager.unregisterLinkableChild(this, this._target);
         }
 
         this._target = newTarget;
@@ -13942,44 +14532,42 @@ if (typeof window === 'undefined') {
         // link to new target
         if (this._target) {
             // we want to register the target as a linkable child (for busy status)
-            sm.registerLinkableChild(this, this._target);
-            // we don't want the target triggering our callbacks directly
-            sm.getCallbackCollection(this._target).removeCallback(sm.getCallbackCollection(this).triggerCallbacks);
-            //this._handleTargetTrigger = this._handleTargetTrigger.bind(this);
-            //this.__proto__._handleTargetTrigger = this.__proto__._handleTargetTrigger.bind(this);
-            sm.getCallbackCollection(this._target).addImmediateCallback(this, this._handleTargetTrigger, false, true);
+            WeaveAPI.linkableChild(this, this._target);
+            //we don't want the target triggering our callbacks directly
+            var cc = WeaveAPI.getCallbacks(this);
+            WeaveAPI.getCallbacks(this._target).removeCallback(cc.triggerCallbacks, cc);
+            WeaveAPI.getCallbacks(this._target).addImmediateCallback(this, this._handleTargetTrigger, false, true);
             // we need to know when the target is disposed
-            //this.__proto__._handleTargetDispose = this.__proto__._handleTargetDispose.bind(this);
-            sm.getCallbackCollection(this._target).addDisposeCallback(this, this._handleTargetDispose);
+            WeaveAPI.getCallbacks(this._target).addDisposeCallback(this, this._handleTargetDispose);
         }
 
         if (this._foundTarget)
-            this._handleTargetTrigger.call(this);
+            this._handleTargetTrigger();
     };
 
 
     p._handleTargetTrigger = function () {
         if (this._foundTarget) {
-            var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
-            cc.triggerCallbacks.call(cc);
+            //var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
+            WeaveAPI.getCallbacks(this).triggerCallbacks();
         } else
-            handlePath.call(this);
+            this.handlePath();
     };
 
 
 
     p._handleTargetDispose = function () {
         if (this._targetPath) {
-            handlePath.call(this);
+            this.handlePath();
         } else {
             this._target = null;
-            var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
-            cc.triggerCallbacks.call(cc);
+            //var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
+            WeaveAPI.getCallbacks(this).triggerCallbacks();
 
         }
     };
 
-    function handlePath() {
+    p.handlePath = function () {
         if (!this._targetPath) {
             this._foundTarget = true;
             this.internalSetTarget(null);
@@ -13992,7 +14580,7 @@ if (typeof window === 'undefined') {
         var subPath = [];
         for (var name of this._targetPath) {
             if (weavecore.ClassUtils.is(node, weavecore.ILinkableCompositeObject))
-                addPathDependency.call(this, node, name);
+                this.addPathDependency(node, name);
 
             subPath[0] = name;
             var child = sm.getObject(node, subPath);
@@ -14017,8 +14605,8 @@ if (typeof window === 'undefined') {
 
                 // must trigger here when we lose the target because internalSetTarget() won't trigger when _foundTarget is false
                 if (lostTarget) {
-                    var cc = sm.getCallbackCollection(this)
-                    cc.triggerCallbacks.call(cc);
+                    //var cc = sm.getCallbackCollection(this)
+                    WeaveAPI.getCallbacks(this).triggerCallbacks();
                 }
 
                 return;
@@ -14026,11 +14614,11 @@ if (typeof window === 'undefined') {
         }
 
         // we found a desired target if there is no type restriction or the object fits the restriction
-        this._foundTarget = !this._typeRestriction || node instanceof this._typeRestriction;
+        this._foundTarget = !this._typeRestriction || weavecore.ClassUtils.is(node, this._typeRestriction);
         this.internalSetTarget(node);
     };
 
-    function addPathDependency(parent, pathElement) {
+    p.addPathDependency = function (parent, pathElement) {
         // if parent is an ILinkableHashMap and pathElement is a String, we don't need to add the dependency
         var lhm = (parent && parent instanceof weavecore.LinkableHashMap) ? parent : null;
         if (lhm && typeof pathElement === "string")
@@ -14043,7 +14631,7 @@ if (typeof window === 'undefined') {
         if (!this._pathDependencies.get(parent, pathElement)) {
             var child = WeaveAPI.SessionManager.getObject(parent, [pathElement]);
             this._pathDependencies.set(parent, pathElement, child);
-            var dependencyCallbacks = getDependencyCallbacks(parent);
+            var dependencyCallbacks = this.getDependencyCallbacks(parent);
             //this.__proto__._handlePathDependencies = this.__proto__._handlePathDependencies.bind(this);
             dependencyCallbacks.addImmediateCallback(this, this._handlePathDependencies);
             dependencyCallbacks.addDisposeCallback(this, this._handlePathDependencies);
@@ -14051,7 +14639,7 @@ if (typeof window === 'undefined') {
 
     };
 
-    function getDependencyCallbacks(parent) {
+    p.getDependencyCallbacks = function (parent) {
         var lhm = (parent && parent instanceof weavecore.LinkableHashMap) ? parent : null;
         if (lhm)
             return lhm.childListCallbacks;
@@ -14066,8 +14654,8 @@ if (typeof window === 'undefined') {
                 var oldChild = this._pathDependencies.get(parent, pathElement);
                 var newChild = sm.getObject(parent, [pathElement]);
                 if (sm.objectWasDisposed(parent) || oldChild !== newChild) {
-                    resetPathDependencies.call(this);
-                    handlePath.call(this);
+                    this.resetPathDependencies();
+                    this.handlePath();
                     return;
                 }
             }
@@ -14075,9 +14663,9 @@ if (typeof window === 'undefined') {
 
     };
 
-    function resetPathDependencies() {
+    p.resetPathDependencies = function () {
         for (var parent of this._pathDependencies.dictionary.keys())
-            getDependencyCallbacks(parent).removeCallback(this._handlePathDependencies);
+            this.getDependencyCallbacks(parent).removeCallback(this._handlePathDependencies, this);
         this._pathDependencies = new weavecore.Dictionary2D(true, false);
     };
 
@@ -14089,7 +14677,22 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableWatcher = LinkableWatcher;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableWatcher', LinkableWatcher);
+    //weavecore.ClassUtils.registerClass('weavecore.LinkableWatcher', LinkableWatcher);
+
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableWatcher',
+            qName: 'weavecore.LinkableWatcher'
+        }],
+        interfaces: [weavecore.ILinkableObject, weavecore.IDisposableObject]
+    };
+
 
     /*
 			// JavaScript test code for path dependency case
@@ -14124,7 +14727,6 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
-
 /**
  * @module weavecore
  */
@@ -14139,42 +14741,7 @@ if (typeof window === 'undefined') {
 (function () {
     "use strict";
 
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableHashMap, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableHashMap, 'CLASS_NAME', {
-        value: 'LinkableHashMap'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableHashMap, 'SESSIONABLE', {
-        value: true
-    });
 
 
     // constructor:
@@ -14187,129 +14754,66 @@ if (typeof window === 'undefined') {
      * @param {Class} typeRestriction If specified, this will limit the type of objects that can be added to this LinkableHashMap.
      */
     function LinkableHashMap(typeRestriction) {
-        if (typeRestriction === undefined) typeRestriction = null;
+        typeRestriction = typeof typeRestriction !== 'undefined' ? typeRestriction : null;
+        LinkableHashMap.base(this, 'constructor', typeRestriction);
 
-        weavecore.CallbackCollection.call(this);
+        Object.defineProperties(this, {
+            '_orderedNames': {
+                value: []
+            },
+            '_nameToObjectMap': {
+                value: {}
+            },
+            '_objectToNameMap': {
+                value: new Map()
+            },
+            '_nameIsLocked': {
+                value: {}
+            },
+            '_previousNameMap': {
+                value: {}
+            }
 
-        /**
-         * restricts the type of object that can be stored
-         * @private
-         * @property _typeRestriction
-         * @type Class
-         */
-        this._typeRestriction;
-        /**
-         * qualified class name of _typeRestriction
-         * @private
-         * @property _typeRestrictionClassName
-         * @type String
-         */
-        this._typeRestrictionClassName;
+        });
+
+        this._childListCallbacks = WeaveAPI.linkableChild(this, weavecore.ChildListCallbackInterface);
+
 
         if (typeRestriction !== null && typeRestriction !== undefined) {
             this._typeRestriction = typeRestriction;
             this._typeRestrictionClassName = typeRestriction.name;
         }
+    }
 
-        /**
-         * @private
-         * @readOnly
-         * @property _childListCallbacks
-         * @type ChildListCallbackInterface
-         */
-        Object.defineProperty(this, '_childListCallbacks', {
-            value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.ChildListCallbackInterface())
-        });
+    goog.inherits(LinkableHashMap, weavecore.CallbackCollection);
 
-        /**
-         * an ordered list of names appearing in _nameToObjectMap
-         * @private
-         * @readOnly
-         * @property _orderedNames
-         * @type Array
-         */
-        Object.defineProperty(this, '_orderedNames', {
-            value: []
-        });
 
-        /**
-         * maps an identifying name to an object
-         * @private
-         * @readOnly
-         * @property _nameToObjectMap
-         * @type Object
-         */
-        Object.defineProperty(this, '_nameToObjectMap', {
-            value: {}
-        });
+    var p = LinkableHashMap.prototype;
 
-        /**
-         * maps an object to an identifying name
-         * @private
-         * @readOnly
-         * @property _objectToNameMap
-         * @type Map
-         */
-        Object.defineProperty(this, '_objectToNameMap', {
-            value: new Map()
-        });
-
-        /**
-         * maps an identifying name to a value of true if that name is locked.
-         * @private
-         * @readOnly
-         * @property _nameIsLocked
-         * @type Object
-         */
-        Object.defineProperty(this, '_nameIsLocked', {
-            value: {}
-        });
-
-        /**
-         * maps a previously used name to a value of true.  used when generating unique names.
-         * @private
-         * @readOnly
-         * @property _previousNameMap
-         * @type Object
-         */
-        Object.defineProperty(this, '_previousNameMap', {
-            value: {}
-        });
-
-        /**
-         * The child type restriction, or null if there is none.
-         * @public
-         * @readOnly
-         * @property typeRestriction
-         * @type Class
-         */
-        Object.defineProperty(this, 'typeRestriction', {
+    Object.defineProperties(p, {
+        /** @export */
+        typeRestriction: {
             get: function () {
                 return this._typeRestriction;
             }
-        });
-
-        /**
-         * This is an interface for adding and removing callbacks that will get triggered immediately
-         * when the list of child objects changes.
-         * @public
-         * @readOnly
-         * @property childListCallbacks
-         * @type ChildListCallbackInterface
-         */
-        Object.defineProperty(this, 'childListCallbacks', {
+        },
+        /** @export */
+        childListCallbacks: {
             get: function () {
                 return this._childListCallbacks;
             }
-        });
+        }
+    });
 
 
-    }
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._childListCallbacks;
+    p._typeRestriction;
 
-    LinkableHashMap.prototype = new weavecore.CallbackCollection();
-    LinkableHashMap.prototype.constructor = LinkableHashMap;
-
-    var p = LinkableHashMap.prototype;
+    p._typeRestrictionClassName;
 
     /**
      * This function returns an ordered list of names in the hash map.
@@ -14319,11 +14823,11 @@ if (typeof window === 'undefined') {
      */
     p.getNames = function (filter) {
         // set default value for parameter
-        if (filter === undefined) filter = null;
+        filter = typeof filter !== 'undefined' ? filter : null;
         var result = [];
         for (var i = 0; i < this._orderedNames.length; i++) {
             var name = this._orderedNames[i];
-            if (filter === null || this._nameToObjectMap[name] instanceof filter)
+            if (filter === null || filter === undefined || weavecore.ClassUtils.is(this._nameToObjectMap[name], filter))
                 result.push(name);
         }
         return result;
@@ -14337,12 +14841,12 @@ if (typeof window === 'undefined') {
      */
     p.getObjects = function (filter) {
         // set default value for parameter
-        if (filter === undefined) filter = null;
+        filter = typeof filter !== 'undefined' ? filter : null;
         var result = [];
         for (var i = 0; i < this._orderedNames.length; i++) {
             var name = this._orderedNames[i];
             var object = this._nameToObjectMap[name];
-            if (filter === null || filter === undefined || object instanceof filter)
+            if (filter === null || filter === undefined || weavecore.ClassUtils.is(object, filter))
                 result.push(object);
         }
         return result;
@@ -14423,8 +14927,8 @@ if (typeof window === 'undefined') {
      * @return {Object} The object under the requested name of the requested type, or null if an error occurred.
      */
     p.requestObject = function (name, classDef, lockObject) {
-        var className = classDef ? classDef.NS + '.' + (classDef.CLASS_NAME ? classDef.CLASS_NAME : classDef.name) : null;
-        var result = this._initObjectByClassName.call(this, name, className, lockObject);
+        var className = classDef ? WeaveAPI.className(classDef) : null;
+        var result = this._initObjectByClassName(name, className, lockObject);
         return classDef ? result : null;
     };
 
@@ -14443,13 +14947,13 @@ if (typeof window === 'undefined') {
 
         this.delayCallbacks(); // make sure callbacks only trigger once
         var classDef = objectToCopy.constructor; //ClassUtils.getClassDefinition(className);
-        var sessionState = WeaveAPI.SessionManager.getSessionState(objectToCopy);
+        var sessionState = WeaveAPI.getState(objectToCopy);
         //  if the name refers to the same object, remove the existing object so it can be replaced with a new one.
         if (name === this.getName(objectToCopy))
             this.removeObject(name);
-        var object = requestObject(name, classDef, false);
+        var object = this.requestObject(name, classDef, false);
         if (object !== null && object !== undefined)
-            WeaveAPI.SessionManager.setSessionState(object, sessionState);
+            WeaveAPI.setState(object, sessionState);
         this.resumeCallbacks();
 
         return object;
@@ -14492,23 +14996,18 @@ if (typeof window === 'undefined') {
      * @return {ILinkableObject} The object associated with the given name, or null if an error occurred.
      */
     p._initObjectByClassName = function (name, className, lockObject) {
+        lockObject = typeof lockObject !== 'undefined' ? lockObject : false;
         if (className) {
             // if no name is specified, generate a unique one now.
             if (!name)
                 name = this.generateUniqueName(className);
-            if (className !== "delete") // to-do Add Support for class Utils - delete is temp solution
-            {
-                // If this name is not associated with an object of the specified type,
-                // associate the name with a new object of the specified type.
-                //console.log(className);
-                var classDef = eval(className);
-                //var classDef = window['weavecore'][className]; //TODO:remove hardcoded weavecore with namespace
+            var classDef = WeaveAPI.getDefinition(className);
+            if (WeaveAPI.isLinkable(classDef) && (this._typeRestriction === null || this._typeRestriction === undefined || weavecore.ClassUtils.is(classDef.prototype, this._typeRestriction))) {
                 var object = this._nameToObjectMap[name];
                 if (!object || object.constructor !== classDef)
-                    this._createAndSaveNewObject.call(this, name, classDef, lockObject);
+                    this._createAndSaveNewObject(name, classDef, lockObject);
                 else if (lockObject)
                     this._lockObject(name);
-
             } else {
                 this.removeObject(name);
             }
@@ -14534,7 +15033,7 @@ if (typeof window === 'undefined') {
         // create a new object
         var object = new classDef();
         // register the object as a child of this LinkableHashMap
-        WeaveAPI.SessionManager.registerLinkableChild(this, object);
+        WeaveAPI.linkableChild(this, object);
         // save the name-object mappings
         this._nameToObjectMap[name] = object;
         this._objectToNameMap.set(object, name);
@@ -14585,7 +15084,6 @@ if (typeof window === 'undefined') {
         if (object === null || object === undefined)
             return; // do nothing if the name isn't mapped to an object.
 
-        //console.log(LinkableHashMap, "removeObject",name,object);
         // remove name & associated object
         delete this._nameToObjectMap[name];
         this._objectToNameMap.delete(object);
@@ -14596,7 +15094,7 @@ if (typeof window === 'undefined') {
         this._childListCallbacks.runCallbacks(name, null, object);
 
         // dispose the object AFTER the callbacks know that the object was removed
-        WeaveAPI.SessionManager.disposeObject(object);
+        WeaveAPI.dispose(object);
     };
 
     /**
@@ -14618,9 +15116,9 @@ if (typeof window === 'undefined') {
      * adds implementaion to {{#crossLink "CallbackCollection/dispose:method"}}{{/crossLink}}
      * @method dispose
      */
-    p.dispose = function dispose() {
+    p.dispose = function () {
 
-        weavecore.CallbackCollection.prototype.dispose.call(this);
+        LinkableHashMap.base(this, 'dispose');;
 
         // first, remove all objects that aren't locked
         this.removeAllObjects();
@@ -14659,8 +15157,8 @@ if (typeof window === 'undefined') {
             var object = this._nameToObjectMap[name];
             result[i] = weavecore.DynamicState.create(
                 name,
-                object.constructor.NS + '.' + object.constructor.CLASS_NAME,
-                WeaveAPI.SessionManager.getSessionState(object)
+                WeaveAPI.className(object),
+                WeaveAPI.getState(object)
             );
         }
         return result;
@@ -14694,7 +15192,7 @@ if (typeof window === 'undefined') {
             // first pass: delay callbacks of all children
             for (var m = 0; m < this._orderedNames.length; m++) {
                 objectName = this._orderedNames[m]
-                callbacks = WeaveAPI.SessionManager.getCallbackCollection(this._nameToObjectMap[objectName]);
+                callbacks = WeaveAPI.getCallbacks(this._nameToObjectMap[objectName]);
                 delayed.push(callbacks)
                 callbacks.delayCallbacks();
             }
@@ -14712,14 +15210,14 @@ if (typeof window === 'undefined') {
                 if (className === null || className === undefined)
                     continue;
                 // initialize object and remember if a new one was just created
-                if (this._nameToObjectMap[objectName] !== this._initObjectByClassName.call(this, objectName, className))
+                if (this._nameToObjectMap[objectName] !== this._initObjectByClassName(objectName, className))
                     newObjects[objectName] = true;
             }
 
             // next pass: delay callbacks of all children (again, because there may be new children)
             for (var n = 0; n < this._orderedNames.length; n++) {
                 objectName = this._orderedNames[n]
-                callbacks = WeaveAPI.SessionManager.getCallbackCollection(this._nameToObjectMap[objectName]);
+                callbacks = WeaveAPI.getCallbacks(this._nameToObjectMap[objectName]);
                 delayed.push(callbacks)
                 callbacks.delayCallbacks();
             }
@@ -14745,7 +15243,7 @@ if (typeof window === 'undefined') {
                 if (object === null || object === undefined)
                     continue;
                 // if object is newly created, we want to apply an absolute session state
-                WeaveAPI.SessionManager.setSessionState(object, typedState[weavecore.DynamicState.SESSION_STATE], newObjects[objectName] || removeMissingDynamicObjects);
+                WeaveAPI.setState(object, typedState[weavecore.DynamicState.SESSION_STATE], newObjects[objectName] || removeMissingDynamicObjects);
                 if (removeMissingDynamicObjects)
                     remainingObjects[objectName] = true;
                 newNameOrder.push(objectName);
@@ -14767,7 +15265,7 @@ if (typeof window === 'undefined') {
 
         for (var k = 0; k < delayed.length; k++) {
             callbacks = delayed[k]
-            if (!WeaveAPI.SessionManager.objectWasDisposed(callbacks))
+            if (!WeaveAPI.wasDisposed(callbacks))
                 callbacks.resumeCallbacks();
         }
 
@@ -14775,8 +15273,20 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableHashMap = LinkableHashMap;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableHashMap', LinkableHashMap);
-    weavecore.ClassUtils.registerImplementation('weavecore.LinkableHashMap', 'weavecore.ILinkableCompositeObject');
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableHashMap',
+            qName: 'weavecore.LinkableHashMap'
+        }],
+        interfaces: [weavecore.ILinkableHashMap]
+    };
+
 
     // namespace
     if (typeof window === 'undefined') {
@@ -14787,7 +15297,6 @@ if (typeof window === 'undefined') {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
-
 /**
  * @module weavecore
  */
@@ -14801,42 +15310,6 @@ if (typeof window === 'undefined') {
 
 (function () {
     "use strict";
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableFunction, 'NS', {
-        value: 'weavecore'
-    });
-
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableFunction, 'CLASS_NAME', {
-        value: 'LinkableFunction'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableFunction, 'SESSIONABLE', {
-        value: true
-    });
 
     /**
      * This is used as a placeholder to prevent re-compiling erroneous code.
@@ -14992,31 +15465,18 @@ if (typeof window === 'undefined') {
      * @param paramNames An Array of parameter names that can be used in the function definition.
      */
     function LinkableFunction(defaultValue, ignoreRuntimeErrors, useThisScope, paramNames) {
-        if (defaultValue === undefined) defaultValue = null;
-        if (ignoreRuntimeErrors === undefined) ignoreRuntimeErrors = false;
-        if (useThisScope === undefined) useThisScope = false;
-        if (paramNames === undefined) paramNames = null;
-        weavecore.LinkableString.call(weavecore.StandardLib.unIndent(defaultValue));
-
-        this._catchErrors = false;
+        efaultValue = typeof defaultValue !== 'undefined' ? defaultValue : null;
+        ignoreRuntimeErrors = typeof ignoreRuntimeErrors !== 'undefined' ? ignoreRuntimeErrors : false;
+        paramNames = typeof paramNames !== 'undefined' ? paramNames : null;
+        LinkableFunction.base(this, 'constructor', weavecore.StandardLib.unIndent(defaultValue));
         this._ignoreRuntimeErrors = ignoreRuntimeErrors;
-        this._useThisScope = useThisScope;
-        this._compiledMethod = null;
-        this._paramNames = paramNames && paramNames.concat();;
-        this._isFunctionDefinition = false;
-        this._triggerCount = 0;
+        this._paramNames = paramNames ? paramNames.concat() : [];
 
-        Object.defineProperty(this, "length", {
-            get: function () { //* This gets the length property of the generated Function.
-                if (this._triggerCount !== this.triggerCounter)
-                    this.validate();
-                return this._compiledMethod.length;
-            }
-        });
+
 
         LinkableFunction.macroLibraries.addImmediateCallback(this, this.triggerCallbacks, false, true);
-        handleMacros = handleMacros.bind(this);
-        WeaveAPI.SessionManager.getCallbackCollection(LinkableFunction.macros).addImmediateCallback(this, handleMacros, false, true);
+
+        WeaveAPI.SessionManager.getCallbackCollection(LinkableFunction.macros).addImmediateCallback(this, this.handleMacros, false, true);
 
 
 
@@ -15024,12 +15484,67 @@ if (typeof window === 'undefined') {
 
     }
 
-    LinkableFunction.prototype = new weavecore.LinkableString();
-    LinkableFunction.prototype.constructor = LinkableFunction;
+    goog.inherits(LinkableFunction, weavecore.LinkableString);
+
 
     var p = LinkableFunction.prototype;
 
-    function handleMacros() {
+
+
+    Object.defineProperties(p, {
+        /** @export */
+        length: {
+            get: function () {
+                if (this._triggerCount != this.triggerCounter)
+                    this.validate();
+                return this._compiledMethod.length;
+            }
+        }
+    });
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._catchErrors = false;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._ignoreRuntimeErrors = false;
+
+
+    /**
+     * @private
+     * @type {Function}
+     */
+    p._compiledMethod = null;
+
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._paramNames = null;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._isFunctionDefinition = false;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._triggerCount = 0;
+
+    p.handleMacros = function () {
         if (WeaveAPI.SessionManager.getLinkableOwner(this) !== LinkableFunction.macros)
             this.triggerCallbacks();
     }
@@ -15040,6 +15555,7 @@ if (typeof window === 'undefined') {
      * This will attempt to compile the function.  An Error will be thrown if this fails.
      */
     p.validate = function () {
+
         if (this._triggerCount !== this.triggerCounter) {
             // if this LinkableFunction is in the macros list, errors should be caught and reported.
             if (LinkableFunction.macros.getName(this))
@@ -15058,11 +15574,11 @@ if (typeof window === 'undefined') {
 
             var object = LinkableFunction._compiler.compileToObject(this.value);
             this._isFunctionDefinition = LinkableFunction._compiler.compiledObjectIsFunctionDefinition(object);
-            this._compiledMethod = LinkableFunction._compiler.compileObjectToFunction(object, LinkableFunction._macroProxy, errorHandler.bind(this), this._useThisScope, this._paramNames);
+            this._compiledMethod = LinkableFunction._compiler.compileObjectToFunction(object, LinkableFunction._macroProxy, this.errorHandler, this._useThisScope, this._paramNames);
         }
     }
 
-    function errorHandler(e) {
+    p.errorHandler = function (e) {
         if (LinkableFunction.debug)
             console.error(e);
 
@@ -15106,10 +15622,21 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.LinkableFunction = LinkableFunction;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableFunction', LinkableFunction);
+
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableFunction',
+            qName: 'weavecore.LinkableFunction'
+        }]
+    };
 
 }());
-
 /**
  * @module weavecore
  */
@@ -15136,65 +15663,104 @@ if (typeof window === 'undefined') {
      */
 
     function LinkablePromise(task, description, validateNow) {
-        description = (description ? description : null);
-        validateNow = (validateNow !== undefined ? validateNow : false);
-
-        weavecore.ILinkableObject.call(this);
-
-        this._lazy = true;
-        this._invalidated = true;
-        this._selfTriggeredCount = 0;
-
-        this._result;
-        this._error;
+        escription = typeof description !== 'undefined' ? description : null;
+        validateNow = typeof validateNow !== 'undefined' ? validateNow : false;
 
         this._task = task;
         this._description = description;
         this._callbackCollection = WeaveAPI.SessionManager.getCallbackCollection(this);
-        this._callbackCollection.addImmediateCallback(null, _immediateCallback.bind(this));
-        this._callbackCollection.addGroupedCallback(null, _groupedCallback.bind(this), validateNow);
+        this._callbackCollection.addImmediateCallback(this, this._immediateCallback);
+        this._callbackCollection.addGroupedCallback(this, this._groupedCallback, validateNow);
         if (validateNow) {
             this._lazy = false;
-            _immediateCallback.call(this);
+            this._immediateCallback();
         }
-
-        /**
-         * The result of calling the invoke function.
-         * When this value is accessed, validate() will be called.
-         * @public
-         * @property result
-         * @readOnly
-         * @type Object
-         */
-        Object.defineProperty(this, 'result', {
-            get: function () {
-                this.validate()
-                return this._result;
-            }
-        });
-
-        /**
-         * The error that occurred calling the invoke function.
-         * When this value is accessed, validate() will be called.
-         * @public
-         * @property error
-         * @readOnly
-         * @type Object
-         */
-        Object.defineProperty(this, 'error', {
-            get: function () {
-                this.validate()
-                return this._error;
-            }
-        });
-
     }
 
-    LinkablePromise.prototype = new weavecore.ILinkableObject();
-    LinkablePromise.prototype.constructor = LinkablePromise;
+
 
     // Prototypes
     var p = LinkablePromise.prototype;
+
+
+
+    /**
+     * @private
+     * @type {Function}
+     */
+    p._task;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._description;
+
+
+    /**
+     * @private
+     * @type {weavejs.api.core.ICallbackCollection}
+     */
+    p._callbackCollection;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._lazy = true;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._invalidated = true;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._jsPromise;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._selfTriggeredCount = 0;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._result;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._error;
+
+
+    Object.defineProperties(p, {
+        result: {
+            get: function () {
+                this.validate();
+                return this._result;
+            }
+        },
+        error: {
+            get: function () {
+                this.validate();
+                return this._error;
+            }
+        }
+    });
 
     p.validate = function () {
         if (!this._lazy)
@@ -15207,7 +15773,7 @@ if (typeof window === 'undefined') {
 
     }
 
-    function _immediateCallback() {
+    p._immediateCallback = function () {
         // stop if self-triggered
         if (this._callbackCollection.triggerCounter === this._selfTriggeredCount)
             return;
@@ -15219,7 +15785,7 @@ if (typeof window === 'undefined') {
         this._error = null;
 
         //  Progress Indicator we are no longer waiting for the async task
-        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        WeaveAPI.ProgressIndicator.removeTask(this._groupedCallback);
 
         // stop if lazy
         if (this._lazy)
@@ -15241,10 +15807,10 @@ if (typeof window === 'undefined') {
             _tmp_description = this._description;
 
         //Progress Indicator mark as busy starting now because we plan to start the task inside _groupedCallback()
-        WeaveAPI.ProgressIndicator.addTask(_groupedCallback, this, _tmp_description);
+        WeaveAPI.ProgressIndicator.addTask(this._groupedCallback, this, _tmp_description);
     }
 
-    function _groupedCallback() {
+    p._groupedCallback = function () {
         try {
             if (this._lazy || !this._invalidated)
                 return;
@@ -15266,28 +15832,28 @@ if (typeof window === 'undefined') {
                     token: invokeResult
                 });
             else if (invokeResult instanceof Promise) {
-                invokeResult.then(_handleResult.bind(this), _handleFault.bind(this));
+                invokeResult.then(this._handleResult, this._handleFault);
             } else {
                 this._result = invokeResult;
-                WeaveAPI.StageUtils.callLater(this, _handleResult.bind(this));
+                WeaveAPI.StageUtils.callLater(this, this._handleResult);
             }
 
 
         } catch (invokeError) {
             this._invalidated = false;
             this._error = invokeError;
-            WeaveAPI.StageUtils.callLater(this, _handleFault.bind(this));
+            WeaveAPI.StageUtils.callLater(this, this._handleFault);
         }
     }
 
-    function _handleResult(result) {
+    p._handleResult = function (result) {
         result = (result === undefined ? null : result);
 
         if (this._invalidated)
             return;
 
         // ProgressIndicator no longer busy
-        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        WeaveAPI.ProgressIndicator.removeTask(this._groupedCallback);
 
         // if there is an result, save the result
         if (result)
@@ -15297,14 +15863,14 @@ if (typeof window === 'undefined') {
         this._callbackCollection.triggerCallbacks();
     }
 
-    function _handleFault(fault) {
+    p._handleFault = function (fault) {
         fault = (fault === undefined ? null : fault);
 
         if (this._invalidated)
             return;
 
         //Progress Indicator no longer busy
-        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        WeaveAPI.ProgressIndicator.removeTask(this._groupedCallback);
 
         // if there is an fault, save the error
         if (fault)
@@ -15335,7 +15901,7 @@ if (typeof window === 'undefined') {
     }
 
     p.dispose = function () {
-        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        WeaveAPI.ProgressIndicator.removeTask(this._groupedCallback);
         this._lazy = true;
         this._invalidated = true;
         this._result = null;
@@ -15343,11 +15909,24 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.LinkablePromise = LinkablePromise;
-    weavecore.ClassUtils.registerClass('weavecore.LinkablePromise', LinkablePromise);
+
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkablePromise',
+            qName: 'weavecore.LinkablePromise'
+        }],
+        interfaces: [weavecore.ILinkableObject, weavecore.IDisposableObject]
+    };
+
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -15360,108 +15939,88 @@ if (typeof window === 'undefined') {
  * @author sanjay1909
  */
 (function () {
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableFile, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableFile, 'CLASS_NAME', {
-        value: 'LinkableFile'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableFile, 'SESSIONABLE', {
-        value: true
-    });
 
     function LinkableFile(defaultValue, taskDescription) {
         // set default values for Parameters
-        if (defaultValue === undefined) defaultValue = null;
-        if (taskDescription === undefined) taskDescription = null;
+        defaultValue = typeof defaultValue !== 'undefined' ? defaultValue : null;
+        taskDescription = typeof taskDescription !== 'undefined' ? taskDescription : null;
 
-        // Note: Calling  weavecore.LinkableVariable.call() will set all the default values for member variables defined in the super class,
-        // which means we can't set _sessionStateInternal = NaN here.
-        weavecore.LinkableVariable.call(this);
-
-        this._contentPromise = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkablePromise(requestContent.bind(this), taskDescription));
-        this._url = WeaveAPI.SessionManager.registerLinkableChild(this._contentPromise, new weavecore.LinkableString(defaultValue));
-
-        Object.defineProperty(this, 'value', {
-            get: function () {
-                return this._url.value;
-            },
-            set: function (new_value) {
-                this._url.value = new_value;
-            }
-
-        });
-
-        Object.defineProperty(this, 'result', {
-            get: function () {
-                return this._contentPromise.result;
-            }
-
-        });
-
-        Object.defineProperty(this, 'error', {
-            get: function () {
-                return this._contentPromise.error;
-            }
-
-        });
+        this.contentPromise = WeaveAPI.linkableChild(this, new weavecore.LinkablePromise(this.requestContent, taskDescription));
+        this.url = WeaveAPI.linkableChild(this.contentPromise, new weavecore.LinkableString(defaultValue));
 
     }
-
-    function requestContent() {
-        if (!this._url.value)
-            return null;
-        return WeaveAPI.URLRequestUtils.getPromise(this._contentPromise, this._url.value, null, null, null, 'binary', true);
-    }
-
-    LinkableFile.prototype = new weavecore.LinkableVariable();
-    LinkableFile.prototype.constructor = LinkableFile;
 
     var p = LinkableFile.prototype;
+    /**
+     * @private
+     * @type {weavecore.LinkablePromise}
+     */
+    p.contentPromise;
+
+
+    /**
+     * @private
+     * @type {weavecore.Linkablestring}
+     */
+    p.url;
+
+
+    Object.defineProperties(p, {
+        result: {
+            get: function () {
+                return this.contentPromise.result;
+            }
+        },
+        error: {
+            get: function () {
+                return this.contentPromise.error;
+            }
+        },
+        value: {
+            get: function () {
+                return this.url.value;
+            },
+            set: function (new_value) {
+                this.url.value = new_value;
+            }
+        }
+    });
+
+    p.requestContent = function () {
+        if (!this.url.value)
+            return null;
+        return WeaveAPI.URLRequestUtils.getPromise(this._contentPromise, this.url.value, null, null, null, 'binary', true);
+    }
 
     p.setSessionState = function (value) {
-        this._url.setSessionState(value);
+        this.url.setSessionState(value);
     }
 
     p.getSessionState = function () {
-        return this._url.getSessionState();
+        return this.url.getSessionState();
     }
 
 
 
 
     weavecore.LinkableFile = LinkableFile;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableFile', LinkableFile);
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.pCLASS_INFO = {
+        names: [{
+            name: 'LinkableFile',
+            qName: 'weavecore.LinkableFile'
+        }],
+        interfaces: [weavecore.ILinkableVariable]
+    };
+
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -15474,87 +16033,35 @@ if (typeof window === 'undefined') {
  * @author sanjay1909
  */
 (function () {
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableTextFormat, 'NS', {
-        value: 'weavecore'
-    });
-
-
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableTextFormat, 'CLASS_NAME', {
-        value: 'LinkableTextFormat'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableTextFormat, 'SESSIONABLE', {
-        value: true
-    });
-
-
 
 
 
     function LinkableTextFormat() {
-
-        weavecore.ILinkableObject.call(this);
-
-        Object.defineProperties(this, {
-            'font': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableString(LinkableTextFormat.DEFAULT_FONT, function (value) {
-                    return value ? true : false;
-                }))
-            },
-            'size': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableNumber(LinkableTextFormat.DEFAULT_SIZE, function (value) {
-                    return value > 2;
-                }))
-            },
-            'color': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableNumber(LinkableTextFormat.DEFAULT_COLOR, isFinite))
-            },
-            'bold': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false))
-            },
-            'italic': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false))
-            },
-            'underline': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false))
-            }
-        });
-
-
-
-
+        this.font = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableString(LinkableTextFormat.DEFAULT_FONT, function (value) {
+            return value ? true : false;
+        }));
+        this.size = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableNumber(LinkableTextFormat.DEFAULT_SIZE, function (value) {
+            return value > 2;
+        }));
+        this.color = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableNumber(LinkableTextFormat.DEFAULT_COLOR, isFinite));
+        this.bold = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false));
+        this.italic = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false));
+        this.underline = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false));
 
     }
 
-    LinkableTextFormat.prototype = new weavecore.ILinkableObject();
-    LinkableTextFormat.prototype.constructor = LinkableTextFormat;
 
     var p = LinkableTextFormat.prototype;
+
+    p.font;
+    p.size;
+    p.color;
+    p.bold;
+    p.italic;
+    p.underline;
+
+
+
 
     /**
      * Copy the properties from a TextFormat object to the linkable properties of this object.
@@ -15582,6 +16089,24 @@ if (typeof window === 'undefined') {
         destination.underline = underline.value;
     }
 
+
+
+
+    weavecore.LinkableTextFormat = LinkableTextFormat;
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableTextFormat',
+            qName: 'weavecore.LinkableTextFormat'
+        }],
+        interfaces: [weavecore.ILinkableObject]
+    };
+
     Object.defineProperties(LinkableTextFormat, {
         'defaultTextFormat': {
             value: new LinkableTextFormat()
@@ -15596,9 +16121,6 @@ if (typeof window === 'undefined') {
             value: "Sophia Nubian"
         }
     });
-
-    weavecore.LinkableTextFormat = LinkableTextFormat;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableTextFormat', LinkableTextFormat);
 
 }());
 
@@ -15622,7 +16144,6 @@ public function bindStyle(relevantContext:Object, destination:UIComponent):void
 		true
 	);
 }*/
-
 /**
  * @module weavecore
  */
@@ -15637,42 +16158,7 @@ if (typeof window === 'undefined') {
 (function () {
     "use strict";
 
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableDynamicObject, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableDynamicObject, 'CLASS_NAME', {
-        value: 'LinkableDynamicObject'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableDynamicObject, 'SESSIONABLE', {
-        value: true
-    });
 
 
     Object.defineProperty(LinkableDynamicObject, 'ARRAY_CLASS_NAME', {
@@ -15691,165 +16177,114 @@ if (typeof window === 'undefined') {
      * @param {Class} typeRestriction If specified, this will limit the type of objects that can be added to this LinkableHashMap.
      */
     function LinkableDynamicObject(typeRestriction) {
-        if (typeRestriction === undefined) typeRestriction = null;
-        // this is a constraint on the type of object that can be linked
-        this._typeRestrictionClassName;
-        //this._typeRestriction = typeRestriction;
-        // when this is true, the linked object cannot be changed
-        this._locked = false;
+        typeRestriction = typeof typeRestriction !== 'undefined' ? typeRestriction : null;
+        this.cc = WeaveAPI.disposableChild(this, weavecore.CallbackCollection);
+        LinkableDynamicObject.base(this, 'constructor', typeRestriction);
+    }
 
-        weavecore.LinkableWatcher.call(this, typeRestriction);
-        if (typeRestriction)
-            this._typeRestrictionClassName = typeRestriction.NS + '.' + typeRestriction.CLASS_NAME;
+    goog.inherits(LinkableDynamicObject, weavecore.LinkableWatcher);
 
-        // the callback collection for this object
-        // private const
-        Object.defineProperty(this, '_cc', {
-            value: WeaveAPI.SessionManager.registerDisposableChild(this, new weavecore.CallbackCollection())
-        });
+    var p = LinkableDynamicObject.prototype;
+
+    /**
+     * @private
+     * @type {weavejs.core.CallbackCollection}
+     */
+    p.cc;
 
 
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._locked = false;
 
-
-        /**
-         * @inheritDoc
-         */
-        Object.defineProperty(this, 'internalObject', {
+    Object.defineProperties(p, {
+        /** @export */
+        internalObject: {
             get: function () {
                 return this.target;
             }
-        });
-
-        // override public
-        Object.defineProperty(this, 'targetPath', {
-
-
-            set: this._setTargetPath,
-            configurable: true
-        });
-
-        // override public
-        Object.defineProperty(this, 'target', {
-
-
-            set: this._setTarget,
-            configurable: true
-        });
-
-
-        Object.defineProperty(this, 'globalName', {
-            /**
-             * This is the name of the linked global object, or null if the internal object is local.
-             */
+        },
+        target: {
+            get: function () {
+                return weavecore.ClassUtils.superGetter(LinkableDynamicObject, this, 'target');
+            },
+            set: function (newTarget) {
+                if (this._locked)
+                    return;
+                if (!newTarget) {
+                    weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', null);
+                    return;
+                }
+                this.cc.delayCallbacks();
+                var path = WeaveAPI.findPath(WeaveAPI.globalHashMap, newTarget);
+                if (path) {
+                    this.targetPath = path;
+                } else {
+                    var owner = WeaveAPI.getOwner(newTarget);
+                    if (owner === this || !owner)
+                        weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', newTarget);
+                    else
+                        weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', null);
+                }
+                this.cc.resumeCallbacks();
+            }
+        },
+        targetPath: {
+            get: function () {
+                return weavecore.ClassUtils.superGetter(LinkableDynamicObject, this, 'targetPath');
+            },
+            set: function (path) {
+                if (this._locked)
+                    return;
+                weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'targetPath', path);
+            }
+        },
+        globalName: {
             get: function () {
                 if (this._targetPath && this._targetPath.length == 1)
                     return this._targetPath[0];
                 return null;
             },
-            /**
-             * This function will change the internalObject if the new globalName is different, unless this object is locked.
-             * If a new global name is given, the session state of the new global object will take precedence.
-             * @param newGlobalName This is the name of the global object to link to, or null to unlink from the current global object.
-             */
             set: function (newGlobalName) {
                 if (this._locked)
                     return;
-
-                // change empty string to null
                 if (!newGlobalName)
                     newGlobalName = null;
-
                 var oldGlobalName = this.globalName;
-                if (oldGlobalName === newGlobalName)
+                if (oldGlobalName == newGlobalName)
                     return;
-
-                this._cc.delayCallbacks();
-
-                if (newGlobalName === null || newGlobalName === undefined) {
-                    // unlink from global object and copy session state into a local object
+                this.cc.delayCallbacks();
+                if (newGlobalName == null) {
                     this.requestLocalObjectCopy(this.internalObject);
                 } else {
-                    // when switcing from a local object to a global one that doesn't exist yet, copy the local object
-                    if (this.target && !this.targetPath && !WeaveAPI.globalHashMap.getObject(newGlobalName))
-                        WeaveAPI.globalHashMap.requestObjectCopy(newGlobalName, this.internalObject);
-
-                    // link to new global name
+                    var root = WeaveAPI.globalHashMap;
+                    if (this.target && !this.targetPath && !root.getObject(newGlobalName))
+                        root.requestObjectCopy(newGlobalName, this.internalObject);
                     this.targetPath = [newGlobalName];
                 }
-
-                this._cc.resumeCallbacks();
+                this.cc.resumeCallbacks();
             }
-        });
-
-        /**
-         * @inheritDoc
-         */
-        Object.defineProperty(this, 'locked', {
+        },
+        locked: {
             get: function () {
                 return this._locked;
             }
-
-        });
-
-        Object.defineProperty(this, 'triggerCounter', {
+        },
+        triggerCounter: {
             get: function () {
-                this._cc.triggerCounter;
+                return this.cc.triggerCounter;
             }
-
-        });
-
-        Object.defineProperty(this, 'callbacksAreDelayed', {
+        },
+        callbacksAreDelayed: {
             get: function () {
-                this._cc.callbacksAreDelayed;
+                return this.cc.callbacksAreDelayed;
             }
-
-        });
-
-    }
-
-    LinkableDynamicObject.prototype = new weavecore.LinkableWatcher();
-    LinkableDynamicObject.prototype.constructor = LinkableDynamicObject;
-
-    var p = LinkableDynamicObject.prototype;
-
-    // overridable setter function for 'target'
-    p._setTarget = function (newTarget) {
-        if (this._locked)
-            return;
-
-        if (!newTarget) {
-            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
-            return;
         }
-
-        this._cc.delayCallbacks();
-
-        // if the target can be found by a path, use the path
-        var sm = WeaveAPI.SessionManager;
-        var path = sm.getPath(WeaveAPI.globalHashMap, newTarget);
-        if (path) {
-            this.targetPath = path;
-        } else {
-            // it's ok to assign a local object that we own or that doesn't have an owner yet
-            // otherwise, unset the target
-            var owner = sm.getLinkableOwner(newTarget);
-            if (owner === this || !owner)
-                weavecore.LinkableWatcher.prototype._setTarget.call(this, newTarget);
-            else
-                weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
-        }
-
-        this._cc.resumeCallbacks();
-    }
+    });
 
 
-    // overridable setter function for 'targetPath'
-    p._setTargetPath = function (path) {
-        if (this._locked)
-            return;
-        weavecore.LinkableWatcher.prototype._setTargetPath.call(this, path);
-
-    }
 
 
     p.lock = function () {
@@ -15866,7 +16301,7 @@ if (typeof window === 'undefined') {
         if (!obj)
             return [];
 
-        var className = obj.constructor.NS + '.' + obj.constructor.CLASS_NAME;
+        var className = WeaveAPI.className(obj);
         var sessionState = obj || WeaveAPI.SessionManager.getSessionState(obj);
         return [weavecore.DynamicState.create(null, className, sessionState)];
     };
@@ -15885,7 +16320,7 @@ if (typeof window === 'undefined') {
 
         try {
             // make sure callbacks only run once
-            this._cc.delayCallbacks();
+            this.cc.delayCallbacks();
 
             // stop if there are no items
             if (!newState.length) {
@@ -15925,16 +16360,16 @@ if (typeof window === 'undefined') {
                 var prevTarget = this.target;
                 // if className is not specified, make no change unless removeMissingDynamicObjects is true
                 if (className || removeMissingDynamicObjects)
-                    setLocalObjectType.call(this, className);
+                    this.setLocalObjectType(className);
                 //TODO:Remove hardcoded NameSpace
                 //var classDef = eval("weavecore." + className);
                 var classDef = window[className];
-                if ((!className && this.target) || (classDef && this.target instanceof classDef))
-                    WeaveAPI.SessionManager.setSessionState(this.target, sessionState, prevTarget !== this.target || removeMissingDynamicObjects);
+                if ((!className && this.target) || (classDef && weavecore.ClassUtils.is(this.target, classDef)))
+                    WeaveAPI.setState(this.target, sessionState, prevTarget !== this.target || removeMissingDynamicObjects);
             }
         } finally {
             // allow callbacks to run once now
-            this._cc.resumeCallbacks();
+            this.cc.resumeCallbacks();
         }
     };
 
@@ -15949,7 +16384,7 @@ if (typeof window === 'undefined') {
         if (newTarget === this || WeaveAPI.SessionManager.getLinkableDescendants(newTarget, LinkableDynamicObject).indexOf(this) >= 0)
             newTarget = null;
 
-        weavecore.LinkableWatcher.prototype.internalSetTarget.call(this, newTarget);
+        LinkableDynamicObject.base(this, 'internalSetTarget', newTarget);
     };
 
 
@@ -15957,27 +16392,25 @@ if (typeof window === 'undefined') {
     //private
     //to-do
     // replace weavecore with ns and figure out best way to deal this
-    function setLocalObjectType(className) {
+    p.setLocalObjectType = function (classDef) {
         // stop if locked
         if (this._locked)
             return;
 
-        this._cc.delayCallbacks();
+        this.cc.delayCallbacks();
 
         this.targetPath = null;
 
-        var classDef = weavecore.ClassUtils.hasClassDefinition(className) ? weavecore.ClassUtils.getClassDefinition(className) : null;
-        classDef = classDef ? classDef : eval(className);
-        if ((classDef.prototype instanceof weavecore.ILinkableObject || classDef.SESSIONABLE) && (this._typeRestriction === null || this._typeRestriction === undefined || weavecore.ClassUtils.classExtends(className, this._typeRestrictionClassName))) {
-
+        if (WeaveAPI.isLinkable(classDef) && (this._typeRestriction == null || weavecore.ClassUtils.is(classDef.prototype, this._typeRestriction))) {
             var obj = this.target;
-            if (!obj || obj.constructor !== classDef || !(obj instanceof classDef))
-                weavecore.LinkableWatcher.prototype._setTarget.call(this, new classDef());
+            if (!obj || obj.constructor !== classDef)
+                weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', new classDef());
         } else {
-            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
+            weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', null);
         }
 
-        this._cc.resumeCallbacks();
+
+        this.cc.resumeCallbacks();
     };
 
     /**
@@ -15986,24 +16419,24 @@ if (typeof window === 'undefined') {
 
 
     p.requestLocalObject = function (objectType, lockObject) {
-        this._cc.delayCallbacks();
+        this.cc.delayCallbacks();
 
         //To-do
         // this will fail if we minify the weavecore, as constructor name wont be same in minified version
         // we nee dot get namespace of that object here too
         // temp solution store  Ns name in the object instance as String
         if (objectType)
-            setLocalObjectType.call(this, objectType.NS + '.' + objectType.CLASS_NAME);
+            this.setLocalObjectType(objectType);
         else
             this.target = null;
 
         if (lockObject)
             this._locked = true;
 
-        this._cc.resumeCallbacks();
+        this.cc.resumeCallbacks();
 
         if (objectType)
-            return (this.target && this.target instanceof objectType) ? this.target : null;
+            return (this.target && weavecore.ClassUtils.is(this.target, objectType)) ? this.target : null;
 
         return this.target;
     };
@@ -16016,18 +16449,18 @@ if (typeof window === 'undefined') {
             return this.requestLocalObject(objectType, lockObject);
 
         if (!this._locked) {
-            this._cc.delayCallbacks();
+            this.cc.delayCallbacks();
 
             this.targetPath = [name];
             WeaveAPI.globalHashMap.requestObject(name, objectType, lockObject);
             if (lockObject)
                 this._locked = true;
 
-            this._cc.resumeCallbacks();
+            this.cc.resumeCallbacks();
         }
 
         if (objectType)
-            return (this.target && this.target instanceof objectType) ? this.target : null;
+            return (this.target && weavecore.ClassUtils.is(this.target, objectType)) ? this.target : null;
 
         return this.target;
     };
@@ -16036,77 +16469,87 @@ if (typeof window === 'undefined') {
      * @inheritDoc
      */
     p.requestLocalObjectCopy = function (objectToCopy) {
-        this._cc.delayCallbacks(); // make sure callbacks only trigger once
+        this.cc.delayCallbacks(); // make sure callbacks only trigger once
         var classDef = objectToCopy ? objectToCopy.constructor : null;
         var object = this.requestLocalObject(classDef, false);
         if (object !== null && object !== undefined && objectToCopy !== null && objectToCopy !== undefined) {
-            var state = WeaveAPI.SessionManager.getSessionState(objectToCopy);
-            WeaveAPI.SessionManager.setSessionState(object, state, true);
+            WeaveAPI.copyState(objectToCopy, object);
         }
-        this._cc.resumeCallbacks();
+        this.cc.resumeCallbacks();
     };
 
 
     p.removeObject = function () {
         if (!this._locked)
-            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
+            weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', null);
     };
 
     p.dispose = function () {
         // explicitly dispose the CallbackCollection before anything else
-        this._cc.dispose();
-        weavecore.LinkableWatcher.prototype.dispose.call(this);
+        this.cc.dispose();
+        LinkableDynamicObject.base(this, 'dispose');
     };
 
     ////////////////////////////////////////////////////////////////////////
     // ICallbackCollection interface included for backwards compatibility
     /** @inheritDoc */
     p.addImmediateCallback = function (relevantContext, callback, runCallbackNow, alwaysCallLast) {
-        runCallbackNow = (runCallbackNow === undefined) ? false : runCallbackNow;
-        alwaysCallLast = (alwaysCallLast === undefined) ? false : alwaysCallLast;
-        this._cc.addImmediateCallback(relevantContext, callback, runCallbackNow, alwaysCallLast);
+        runCallbackNow = typeof runCallbackNow !== 'undefined' ? runCallbackNow : false;
+        alwaysCallLast = typeof alwaysCallLast !== 'undefined' ? alwaysCallLast : false;
+        this.cc.addImmediateCallback(relevantContext, callback, runCallbackNow, alwaysCallLast);
     };
 
     /** @inheritDoc */
-    p.addGroupedCallback = function (relevantContext, groupedCallback, triggerCallbackNow) {
-        triggerCallbackNow = (triggerCallbackNow === undefined) ? false : triggerCallbackNow;
-        this._cc.addGroupedCallback(relevantContext, groupedCallback, triggerCallbackNow);
+    p.addGroupedCallback = function (relevantContext, groupedCallback, triggerCallbackNow, delayWhileBusy) {
+        triggerCallbackNow = typeof triggerCallbackNow !== 'undefined' ? triggerCallbackNow : false;
+        delayWhileBusy = typeof delayWhileBusy !== 'undefined' ? delayWhileBusy : true;
+        this.cc.addGroupedCallback(relevantContext, groupedCallback, triggerCallbackNow, delayWhileBusy);
     };
 
     /** @inheritDoc */
     p.addDisposeCallback = function (relevantContext, callback) {
-        this._cc.addDisposeCallback(relevantContext, callback);
+        this.cc.addDisposeCallback(relevantContext, callback);
     };
 
     /** @inheritDoc */
     p.removeCallback = function (callback) {
-        this._cc.removeCallback(callback);
+        this.cc.removeCallback(callback, this.cc);
     };
 
     /** @inheritDoc */
     /** @inheritDoc */
     p.triggerCallbacks = function () {
-        this._cc.triggerCallbacks();
+        this.cc.triggerCallbacks();
     };
 
     /** @inheritDoc */
     /** @inheritDoc */
     p.delayCallbacks = function () {
-        this._cc.delayCallbacks();
+        this.cc.delayCallbacks();
     };
 
     /** @inheritDoc */
     p.resumeCallbacks = function () {
-        this._cc.resumeCallbacks();
+        this.cc.resumeCallbacks();
     };
 
     weavecore.LinkableDynamicObject = LinkableDynamicObject;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableDynamicObject', LinkableDynamicObject);
-    weavecore.ClassUtils.registerImplementation('weavecore.LinkableDynamicObject', 'weavecore.ILinkableCompositeObject');
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableDynamicObject',
+            qName: 'weavecore.LinkableDynamicObject'
+        }],
+        interfaces: [weavecore.ILinkableDynamicObject, weavecore.ICallbackCollection]
+    };
+
 
 
 }());
-
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -16174,16 +16617,27 @@ if (typeof window === 'undefined') {
 
     function ExternalSessionStateInterface() {
 
-
+        var p = this;
+        p.getSessionState = goog.bind(getSessionState, this);
+        p.setSessionState = goog.bind(setSessionState, this);
+        p.getObjectType = goog.bind(getObjectType, this);
+        p.getChildNames = goog.bind(getChildNames, this);
+        p.setChildNameOrder = goog.bind(setChildNameOrder, this);
+        p.requestObject = goog.bind(requestObject, this);
+        p.removeObject = goog.bind(removeObject, this);
+        p.evaluateExpression = goog.bind(evaluateExpression, this);
+        p.addCallback = goog.bind(addCallback, this);
+        p.removeCallback = goog.bind(removeCallback, this);
+        p.removeAllCallbacks = goog.bind(removeAllCallbacks, this);
 
     }
 
-    var p = ExternalSessionStateInterface.prototype;
+    //var p = ExternalSessionStateInterface.prototype;
 
     /**
      * @inheritDoc
      */
-    p.getSessionState = function (objectPath) {
+    function getSessionState(objectPath) {
         var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
         if (object) {
             var state = WeaveAPI.SessionManager.getSessionState(object);
@@ -16210,7 +16664,7 @@ if (typeof window === 'undefined') {
         }
     }
 
-    p.setSessionState = function (objectPath, newState, removeMissingObjects) {
+    function setSessionState(objectPath, newState, removeMissingObjects) {
         // default parameter values
         removeMissingObjects = (removeMissingObjects === undefined) ? true : removeMissingObjects;
         var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
@@ -16223,7 +16677,7 @@ if (typeof window === 'undefined') {
         return false;
     }
 
-    p.getObjectType = function (objectPath) {
+    function getObjectType(objectPath) {
         var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
         if (object)
             return object.constructor.NS + '.' + object.constructor.CLASS_NAME;
@@ -16232,7 +16686,7 @@ if (typeof window === 'undefined') {
         return null;
     }
 
-    p.getChildNames = function (objectPath) {
+    function getChildNames(objectPath) {
         var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
         if (object) {
             if (object instanceof weavecore.LinkableHashMap)
@@ -16246,7 +16700,7 @@ if (typeof window === 'undefined') {
         return null;
     }
 
-    p.setChildNameOrder = function (hashMapPath, orderedChildNames) {
+    function setChildNameOrder(hashMapPath, orderedChildNames) {
         var hashMap = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, hashMapPath);
         hashMap = (hashMap && hashMap instanceof weavecore.LinkableHashMap) ? hashMap : null;
         if (hashMap) {
@@ -16260,7 +16714,7 @@ if (typeof window === 'undefined') {
         return false;
     }
 
-    p.requestObject = function (objectPath, objectType) {
+    function requestObject(objectPath, objectType) {
         // get class definition
         var classQName = objectType;
         var classDef = weavecore.ClassUtils.getClassDefinition(objectType);
@@ -16305,7 +16759,7 @@ if (typeof window === 'undefined') {
         return false;
     }
 
-    p.removeObject = function (objectPath) {
+    function removeObject(objectPath) {
         if (!objectPath || !objectPath.length) {
             externalError("Cannot remove root object");
             return false;
@@ -16401,7 +16855,7 @@ if (typeof window === 'undefined') {
     /**
      * @inheritDoc
      */
-    p.evaluateExpression = function (scopeObjectPathOrVariableName, expression, variables, staticLibraries, assignVariableName) {
+    function evaluateExpression(scopeObjectPathOrVariableName, expression, variables, staticLibraries, assignVariableName) {
         variables = (variables === undefined) ? null : variables;
         staticLibraries = (staticLibraries === undefined) ? null : staticLibraries;
         assignVariableName = (assignVariableName === undefined) ? null : assignVariableName;
@@ -16429,7 +16883,7 @@ if (typeof window === 'undefined') {
             // passed-in variables take precedence over stored ActionScript weave._variables
             var compiledMethod = ExternalSessionStateInterface._compiler.compileObjectToFunction(
                 compiledObject, [variables, ExternalSessionStateInterface._variables],
-                WeaveAPI.ErrorManager.reportError.bind(WeaveAPI.ErrorManager),
+                WeaveAPI.ErrorManager.reportError,
                 thisObject !== null,
                 null,
                 null,
@@ -16450,7 +16904,7 @@ if (typeof window === 'undefined') {
 
 
 
-    p.addCallback = function (scopeObjectPathOrVariableName, callback, triggerCallbackNow, immediateMode, delayWhileBusy) {
+    function addCallback(scopeObjectPathOrVariableName, callback, triggerCallbackNow, immediateMode, delayWhileBusy) {
         // set default values
         triggerCallbackNow = (triggerCallbackNow === undefined) ? false : triggerCallbackNow;
         immediateMode = (immediateMode === undefined) ? false : immediateMode;
@@ -16508,7 +16962,7 @@ if (typeof window === 'undefined') {
     /**
      * @inheritDoc
      */
-    p.removeCallback = function (objectPathOrVariableName, callback, everywhere) {
+    function removeCallback(objectPathOrVariableName, callback, everywhere) {
         //set parameter's default values
         everywhere = (everywhere === undefined) ? false : everywhere;
         var wrapper = ExternalSessionStateInterface._funcToWrapper.get(callback);
@@ -16543,7 +16997,8 @@ if (typeof window === 'undefined') {
             }
 
             ExternalSessionStateInterface._d2d_callback_target.remove(callback, object);
-            WeaveAPI.SessionManager.getCallbackCollection(object).removeCallback(callback);
+            var cc = WeaveAPI.SessionManager.getCallbackCollection(object);
+            cc.removeCallback(callback,cc);
             return true;
         } catch (e) {
             // unexpected error reported in Weave interface
@@ -16555,12 +17010,13 @@ if (typeof window === 'undefined') {
     /**
      * @inheritDoc
      */
-    p.removeAllCallbacks = function () {
+    function removeAllCallbacks() {
         var keys = ExternalSessionStateInterface._d2d_callback_target.dictionary.keys();
         keys.forEach(function (callback) {
             var targets = ExternalSessionStateInterface._d2d_callback_target.dictionary.get(callback).keys();
             targets.forEach(function (target) {
-                WeaveAPI.SessionManager.getCallbackCollection(target).removeCallback(callback);
+                var targetCC = WeaveAPI.SessionManager.getCallbackCollection(target);
+                targetCC.removeCallback( callback,targetCC);
             });
         });
 
@@ -16588,21 +17044,18 @@ if (typeof window === 'undefined') {
     weavecore.ExternalSessionStateInterface = ExternalSessionStateInterface;
 
 }());
+/**
+ * @module weavecore
+ */
 
+//namesapce
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
     window.weavecore = window.weavecore || {};
 }
 
-/**
- * This class saves the session history of an ILinkableObject.
- *
- * @author adufilie
- * @author sanjay1909
- */
 (function () {
-
     /**
      * This is an entry in the session history log.  It contains both undo and redo session state diffs.
      * The triggerDelay is the time it took for the user to make a change since the last synchronization.
@@ -16621,6 +17074,43 @@ if (typeof window === 'undefined') {
         this.diffDuration = diffDuration; // the length of time in which the diff took place
     }
 
+    var p = LogEntry.prototype;
+
+
+    /**
+     * @export
+     * @type {number}
+     */
+    p.id;
+
+
+    /**
+     * @export
+     * @type {Object}
+     */
+    p.forward;
+
+
+    /**
+     * @export
+     * @type {Object}
+     */
+    p.backward;
+
+
+    /**
+     * @export
+     * @type {number}
+     */
+    p.triggerDelay;
+
+
+    /**
+     * @export
+     * @type {number}
+     */
+    p.diffDuration;
+
     /**
      * This will convert an Array of generic objects to an Array of LogEntry objects.
      * Generic objects are easier to create backwards compatibility for.
@@ -16633,6 +17123,36 @@ if (typeof window === 'undefined') {
         }
         return array;
     };
+    weavecore.LogEntry = LogEntry
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LogEntry',
+            qName: 'weavecore.LogEntry'
+        }]
+    };
+
+}())
+if (typeof window === 'undefined') {
+    this.weavecore = this.weavecore || {};
+} else {
+    window.weavecore = window.weavecore || {};
+}
+
+/**
+ * This class saves the session history of an ILinkableObject.
+ *
+ * @author adufilie
+ * @author sanjay1909
+ */
+(function () {
+
+
 
 
     function getTimer() {
@@ -16640,70 +17160,154 @@ if (typeof window === 'undefined') {
         return start;
     }
 
+    Object.defineProperty(SessionStateLog, 'debug', {
+        value: false,
+        writable: true
+    });
+    Object.defineProperty(SessionStateLog, 'enableHistoryRewrite', {
+        value: true,
+        writable: true
+    });
+
     function SessionStateLog(subject, syncDelay) {
         // set default values
-        if (syncDelay === undefined)
-            syncDelay = 0;
-        this._subject = subject; // the object we are monitoring
-        this._syncDelay = syncDelay; // the number of milliseconds to wait before automatically synchronizing
-        this._prevState = WeaveAPI.SessionManager.getSessionState(this._subject); // remember the initial state
+        syncDelay = typeof syncDelay !== 'undefined' ? syncDelay : 0;
+
+        this._saveDiff = goog.bind(_saveDiff, this);
+        this._groupedCallback = goog.bind(_groupedCallback, this);
+        this._immediateCallback = goog.bind(_immediateCallback, this);
+        this.synchronizeNow = goog.bind(synchronizeNow, this);
 
         /**
          * When this is set to true, changes in the session state of the subject will be automatically logged.
          */
-        SessionStateLog.prototype.enableLogging = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(true), this.synchronizeNow.bind(this));
-
-
-        WeaveAPI.SessionManager.registerDisposableChild(this._subject, this); // make sure this is disposed when _subject is disposed
-
-        var cc = WeaveAPI.SessionManager.getCallbackCollection(this._subject);
-        cc.addImmediateCallback(this, this._immediateCallback.bind(this));
-        cc.addGroupedCallback(this, this._groupedCallback.bind(this));
-
+        this.enableLogging = WeaveAPI.linkableChild(this, new weavecore.LinkableBoolean(true), this.synchronizeNow);
+        this._syncTime = getTimer(); // this is set to getTimer() when synchronization occurs
         this._undoHistory = []; // diffs that can be undone
         this._redoHistory = []; // diffs that can be redone
-        this._nextId = 0; // gets incremented each time a new diff is created
-        this._undoActive = false; // true while an undo operation is active
-        this._redoActive = false; // true while a redo operation is active
+        this._subject = subject; // the object we are monitoring
+        this._syncDelay = syncDelay; // the number of milliseconds to wait before automatically synchronizing
+        this._prevState = WeaveAPI.getState(this._subject); // remember the initial state
 
-        this._syncTime = getTimer(); // this is set to getTimer() when synchronization occurs
-        this._triggerDelay = -1; // this is set to (getTimer() - _syncTime) when immediate callbacks are triggered for the first time since the last synchronization occurred
-        this._saveTime = 0; // this is set to getTimer() + _syncDelay to determine when the next diff should be computed and logged
-        this._savePending = false; // true when a diff should be computed
+        WeaveAPI.disposableChild(this._subject, this); // make sure this is disposed when _subject is disposed
 
-        Object.defineProperty(SessionStateLog, 'debug', {
-            value: false,
-            writable: true
-        });
-        Object.defineProperty(SessionStateLog, 'enableHistoryRewrite', {
-            value: true,
-            writable: true
-        });
+        var cc = WeaveAPI.getCallbacks(this._subject);
+        cc.addImmediateCallback(this, this._immediateCallback);
+        cc.addGroupedCallback(this, this._groupedCallback);
+    }
 
-        /**
-         * @TODO create an interface for the objects in this Array
-         */
-        Object.defineProperty(this, 'undoHistory', {
+
+
+    var p = SessionStateLog.prototype;
+
+
+
+
+    /**
+     * @private
+     * @type {weavecore.ILinkableObject}
+     */
+    p._subject;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._syncDelay;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._prevState = null;
+
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._undoHistory;
+
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._redoHistory;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._nextId = 0;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._undoActive = false;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._redoActive = false;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._syncTime;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._triggerDelay = -1;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._saveTime = 0;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._savePending = false;
+
+
+    /**
+     * @export
+     * @type {weavejs.core.LinkableBoolean}
+     */
+    p.enableLogging;
+
+    Object.defineProperties(p, {
+        'undoHistory': {
             get: function () {
                 return this._undoHistory;
             }
-        });
-
-        /**
-         * @TODO create an interface for the objects in this Array
-         */
-        Object.defineProperty(this, 'redoHistory', {
+        },
+        'redoHistory': {
             get: function () {
                 return this._redoHistory;
             }
-        });
+        }
 
-    }
+    });
 
-    SessionStateLog.prototype = new weavecore.LinkableVariable();
-    SessionStateLog.prototype.constructor = SessionStateLog;
 
-    var p = SessionStateLog.prototype;
 
 
     /**
@@ -16722,8 +17326,8 @@ if (typeof window === 'undefined') {
      * This function will save any pending diff in session state.
      * Use this function only when necessary (for example, when writing a collaboration service that must synchronize).
      */
-    p.synchronizeNow = function () {
-        this._saveDiff.call(this, true);
+    function synchronizeNow() {
+        this._saveDiff(true);
     };
 
 
@@ -16731,7 +17335,7 @@ if (typeof window === 'undefined') {
     /**
      * This gets called as an immediate callback of the subject.
      */
-    p._immediateCallback = function () {
+    function _immediateCallback() {
         if (!this.enableLogging.value)
             return;
 
@@ -16741,7 +17345,7 @@ if (typeof window === 'undefined') {
         // make sure only one call to saveDiff() is pending
         if (!this._savePending) {
             this._savePending = true;
-            this._saveDiff.call(this);
+            this._saveDiff();
         }
 
 
@@ -16755,7 +17359,7 @@ if (typeof window === 'undefined') {
     /**
      * This gets called as a grouped callback of the subject.
      */
-    p._groupedCallback = function () {
+    function _groupedCallback() {
         if (!this.enableLogging.value)
             return;
 
@@ -16776,7 +17380,7 @@ if (typeof window === 'undefined') {
      * This will save a diff in the history, if there is any.
      * @param immediately Set to true if it should be saved immediately, or false if it can wait.
      */
-    p._saveDiff = function (immediately) {
+    function _saveDiff(immediately) {
         //console.log("save difference is called");
         if (immediately === undefined) {
             immediately = false;
@@ -16795,7 +17399,7 @@ if (typeof window === 'undefined') {
         if (!immediately && getTimer() < this._saveTime) {
             // console.log("save difference is Paused");
             // we have to wait until the next frame to save the diff because grouped callbacks haven't finished.
-            WeaveAPI.StageUtils.callLater(this, this._saveDiff.bind(this));
+            WeaveAPI.StageUtils.callLater(this, this._saveDiff);
             return;
         }
 
@@ -16815,14 +17419,14 @@ if (typeof window === 'undefined') {
                 // To prevent new undo history from being added as a result of applying an undo, overwrite first redo entry.
                 // Keep existing delay/duration.
                 oldEntry = this._redoHistory[0];
-                newEntry = new LogEntry(this._nextId++, backwardDiff, forwardDiff, oldEntry.triggerDelay, oldEntry.diffDuration);
+                newEntry = new weavecore.LogEntry(this._nextId++, backwardDiff, forwardDiff, oldEntry.triggerDelay, oldEntry.diffDuration);
                 if (this.enableHistoryRewrite) {
                     this._redoHistory[0] = newEntry;
                 } else if (weavecore.StandardLib.compare(oldEntry.forward, newEntry.forward) !== 0) {
                     this._redoHistory.unshift(newEntry);
                 }
             } else {
-                newEntry = new LogEntry(this._nextId++, forwardDiff, backwardDiff, this._triggerDelay, diffDuration);
+                newEntry = new weavecore.LogEntry(this._nextId++, forwardDiff, backwardDiff, this._triggerDelay, diffDuration);
                 if (this._redoActive) {
                     // To prevent new undo history from being added as a result of applying a redo, overwrite last undo entry.
                     // Keep existing delay/duration.
@@ -17034,8 +17638,8 @@ if (typeof window === 'undefined') {
                 {
                     // note: some states from version 0 may include enableLogging, but here we ignore it					
                     this._prevState = state.currentState;
-                    this._undoHistory = LogEntry.convertGenericObjectsToLogEntries(state.undoHistory, this._syncDelay);
-                    this._redoHistory = LogEntry.convertGenericObjectsToLogEntries(state.redoHistory, this._syncDelay);
+                    this._undoHistory = weavecore.LogEntry.convertGenericObjectsToLogEntries(state.undoHistory, this._syncDelay);
+                    this._redoHistory = weavecore.LogEntry.convertGenericObjectsToLogEntries(state.redoHistory, this._syncDelay);
                     this._nextId = state.nextId;
 
                     break;
@@ -17060,10 +17664,21 @@ if (typeof window === 'undefined') {
         }
     };
     weavecore.SessionStateLog = SessionStateLog;
-    weavecore.ClassUtils.registerClass('weavecore.SessionStateLog', SessionStateLog);
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'SessionStateLog',
+            qName: 'weavecore.SessionStateLog'
+        }],
+        interfaces: [weavecore.ILinkableVariable, weavecore.IDisposableObject]
+    };
+
 
 }());
-
 /* ***** BEGIN LICENSE BLOCK *****
  *
  * This file is part of Weave.
@@ -17684,6 +18299,8 @@ weave.WeavePath.prototype._failMessage = function (methodName, message, path) {
         }
         return value;
     }
+
+    weave[JSON_EXTENSIONS] = [];
 
     weave[JSON_EXTENSIONS].push({
         "description": "ILinkableObject/WeavePath",

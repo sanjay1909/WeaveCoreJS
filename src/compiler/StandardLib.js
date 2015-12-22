@@ -673,4 +673,16 @@ if (typeof window === 'undefined') {
 
 
     weavecore.StandardLib = StandardLib;
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    StandardLib.prototype.CLASS_INFO = {
+        names: [{
+            name: 'StandardLib',
+            qName: 'weavecore.StandardLib'
+        }]
+    };
 }());

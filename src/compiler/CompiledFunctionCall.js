@@ -39,32 +39,7 @@ if (typeof window === 'undefined') {
 
 
 
-        /**
-         * This is used to keep track of which compiled parameter is currently being evaluated.
-         */
-        this.evalIndex;
-        /**
-         * When the function is called as a property of an object, this will store a pointer to the object
-         * so that it can be used as the 'this' parameter in Function.apply().
-         */
-        this.evaluatedHost;
-        /**
-         * When the function is called as a property of an object, this will store the property name in case the host is a Proxy object.
-         */
-        this.evaluatedMethodName;
-        /**
-         * This is used to store the result of evaluating the compiledMethod before evaluating the parameters.
-         */
-        this.evaluatedMethod;
-        /**
-         * This is an Array of constants to use as parameters to the method.
-         * This Array is used to store the results of evaluating the compiledParams Array before calling the method.
-         */
-        this.evaluatedParams;
-        /**
-         * An optional set of original tokens to use in place of this CompiledFunctionCall when decompiling.
-         */
-        this.originalTokens;
+
 
         this.evaluateConstants();
     }
@@ -78,10 +53,44 @@ if (typeof window === 'undefined') {
         return obj;
     }
 
-    CompiledFunctionCall.prototype = new weavecore.ICompiledObject();
-    CompiledFunctionCall.prototype.constructor = CompiledFunctionCall;
 
     var p = CompiledFunctionCall.prototype;
+
+    /**
+     * This is a compiled object that evaluates to a method.
+     */
+    p.compiledMethod;
+    /**
+     * This is an Array of CompiledObjects that must be evaluated before calling the method.
+     */
+    p.compiledParams;
+
+    /**
+     * This is used to keep track of which compiled parameter is currently being evaluated.
+     */
+    p.evalIndex;
+    /**
+     * When the function is called as a property of an object, this will store a pointer to the object
+     * so that it can be used as the 'this' parameter in Function.apply().
+     */
+    p.evaluatedHost;
+    /**
+     * When the function is called as a property of an object, this will store the property name in case the host is a Proxy object.
+     */
+    p.evaluatedMethodName;
+    /**
+     * This is used to store the result of evaluating the compiledMethod before evaluating the parameters.
+     */
+    p.evaluatedMethod;
+    /**
+     * This is an Array of constants to use as parameters to the method.
+     * This Array is used to store the results of evaluating the compiledParams Array before calling the method.
+     */
+    p.evaluatedParams;
+    /**
+     * An optional set of original tokens to use in place of this CompiledFunctionCall when decompiling.
+     */
+    p.originalTokens;
 
     p.evaluateConstants = function () {
         // if name is constant, evaluate it once now
@@ -114,5 +123,18 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.CompiledFunctionCall = CompiledFunctionCall;
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'CompiledFunctionCall',
+            qName: 'weavecore.CompiledFunctionCall'
+        }],
+        interfaces: [weavecore.ICompiledObject]
+    };
 
 }());

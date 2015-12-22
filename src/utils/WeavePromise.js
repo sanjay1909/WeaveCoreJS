@@ -16,20 +16,6 @@ if (typeof window === 'undefined') {
     function WeavePromise(relevantContext, resolver) {
         resolver = (resolver === undefined) ? null : resolver;
 
-
-        this._rootPromise;
-        this.relevantContext;
-        this._result;
-        this._error;
-        Object.defineProperty(this, '_handlers', {
-            value: []
-        });
-        Object.defineProperty(this, '_dependencies', {
-            value: []
-        });
-
-
-
         if (relevantContext instanceof WeavePromise) {
             // this is a child promise
             this._rootPromise = relevantContext._rootPromise;
@@ -59,6 +45,17 @@ if (typeof window === 'undefined') {
     }
 
     var p = WeavePromise.prototype;
+
+    p._rootPromise;
+    p.relevantContext;
+    p._result;
+    p._error;
+    Object.defineProperty(p, '_handlers', {
+        value: []
+    });
+    Object.defineProperty(p, '_dependencies', {
+        value: []
+    });
 
     p.setResult = function (result) {
         if (WeaveAPI.SessionManager.objectWasDisposed(this.relevantContext)) {
@@ -199,6 +196,12 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.WeavePromise = WeavePromise;
+    p.CLASS_INFO = {
+        names: [{
+            name: 'WeavePromise',
+            qName: 'weavecore.WeavePromise'
+        }]
+    };
 
 }());
 
@@ -207,13 +210,17 @@ if (typeof window === 'undefined') {
         this.next = next;
         this.onFulfilled = onFulfilled;
         this.onRejected = onRejected;
-        /**
-         * Used as a flag to indicate whether or not this handler has been called
-         */
-        this.wasCalled = false;
     }
 
     var p = Handler.prototype;
+
+    p.next;
+    p.onFulfilled;
+    p.onRejected;
+    /**
+     * Used as a flag to indicate whether or not this handler has been called
+     */
+    p.wasCalled = false;
 
     p.onResult = function (result) {
         this.wasCalled = true;
@@ -234,17 +241,28 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.Handler = Handler;
+
+    p.CLASS_INFO = {
+        names: [{
+            name: 'Handler',
+            qName: 'weavecore.Handler'
+        }]
+    };
+
+
 }());
 
 
 (function () {
     function AsyncToken() {
-        Object.defineProperty(this, 'responders', {
-            value: []
-        });
+
     }
 
     var p = AsyncToken.prototype;
+
+    Object.defineProperty(p, 'responders', {
+        value: []
+    });
 
     p.addResponder = function (responder) {
         this.responders.push(responder);
@@ -263,6 +281,12 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.AsyncToken = AsyncToken;
+    p.CLASS_INFO = {
+        names: [{
+            name: 'AsyncToken',
+            qName: 'weavecore.AsyncToken'
+        }]
+    };
 
 }());
 
@@ -275,6 +299,16 @@ if (typeof window === 'undefined') {
         this.token = token;
 
     }
+    var p = AsyncResponder.prototype;
+    p.result;
+    p.fault;
+    p.token;
     weavecore.AsyncResponder = AsyncResponder;
+    p.CLASS_INFO = {
+        names: [{
+            name: 'AsyncResponder',
+            qName: 'weavecore.AsyncResponder'
+        }]
+    };
 
 }());

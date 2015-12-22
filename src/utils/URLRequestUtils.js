@@ -37,20 +37,22 @@ if (typeof window === 'undefined') {
 
 
     function URLRequestUtils(defaultValue, taskDescription) {
-        /**
-         * A mapping of URL Strings to CustomXMLHttpRequest.
-         * This mapping is necessary for cached requests to return the active request.
-         */
-        Object.defineProperty(this, '_requestURLToLoader', {
-            value: {}
-        });
 
-        this._localFiles = {};
-        this._baseURL;
 
     }
 
     var p = URLRequestUtils.prototype;
+
+    /**
+     * A mapping of URL Strings to CustomXMLHttpRequest.
+     * This mapping is necessary for cached requests to return the active request.
+     */
+    Object.defineProperty(p, '_requestURLToLoader', {
+        value: {}
+    });
+
+    p._localFiles = {};
+    p._baseURL;
 
     /**
      * This will set the base URL for use with relative URL requests.

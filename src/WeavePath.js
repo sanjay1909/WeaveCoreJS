@@ -619,6 +619,8 @@ weave.WeavePath.prototype._failMessage = function (methodName, message, path) {
         return value;
     }
 
+    weave[JSON_EXTENSIONS] = [];
+
     weave[JSON_EXTENSIONS].push({
         "description": "ILinkableObject/WeavePath",
         "replacer": replacer,

@@ -21,9 +21,23 @@ if (typeof window === 'undefined') {
 
     }
 
-    CompiledConstant.prototype = new weavecore.ICompiledObject();
-    CompiledConstant.prototype.constructor = CompiledConstant;
+    var p = CompiledConstant.prototype;
+    p.name;
+    p.value;
 
     weavecore.CompiledConstant = CompiledConstant;
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'CompiledConstant',
+            qName: 'weavecore.CompiledConstant'
+        }],
+        interfaces: [weavecore.ICompiledObject]
+    };
 
 }());

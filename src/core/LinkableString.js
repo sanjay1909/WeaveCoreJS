@@ -10,77 +10,51 @@ if (typeof window === 'undefined') {
  * @author sanjay1909
  */
 (function () {
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableString, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableString, 'CLASS_NAME', {
-        value: 'LinkableString'
-    });
-
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableString, 'SESSIONABLE', {
-        value: true
-    });
 
     function LinkableString(defaultValue, verifier, defaultValueTriggersCallbacks) {
         // set default values for Parameters
 
-        if (defaultValue === undefined) defaultValue = null;
-        if (verifier === undefined) verifier = null;
-        if (defaultValueTriggersCallbacks === undefined) defaultValueTriggersCallbacks = true;
-
-
-        weavecore.LinkableVariable.call(this, "string", verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
-
-        Object.defineProperty(this, 'value', {
-            get: function () {
-                return this._sessionStateExternal;
-            },
-            set: function (val) {
-                this.setSessionState(val);
-            }
-        });
+        defaultValue = typeof defaultValue !== 'undefined' ? defaultValue : null;
+        verifier = typeof verifier !== 'undefined' ? verifier : null;
+        defaultValueTriggersCallbacks = typeof defaultValueTriggersCallbacks !== 'undefined' ? defaultValueTriggersCallbacks : true;
+        LinkableString.base(this, 'constructor', String, verifier, arguments.length ? defaultValue : undefined, defaultValueTriggersCallbacks);
 
     }
 
-    LinkableString.prototype = new weavecore.LinkableVariable();
-    LinkableString.prototype.constructor = LinkableString;
+    goog.inherits(LinkableString, weavecore.LinkableVariable);
 
     var p = LinkableString.prototype;
+
+    Object.defineProperties(p, {
+        value: {
+            get: function () {
+                return this._sessionStateExternal;
+            },
+            set: function (value) {
+                this.setSessionState(value);
+            }
+        }
+    });
 
     p.setSessionState = function (val) {
         if (val !== null)
             val = String(val);
-        weavecore.LinkableVariable.prototype.setSessionState.call(this, val);
+        LinkableString.base(this, 'setSessionState', val);
     };
 
     weavecore.LinkableString = LinkableString;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableString', LinkableString);
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableString',
+            qName: 'weavecore.LinkableString'
+        }]
+    };
 
 }());

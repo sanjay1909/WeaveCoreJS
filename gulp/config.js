@@ -10,6 +10,17 @@ var pkg = require('../package');
 
 //used both for Source reference and Order reference
 var buildOrder = [
+                    api + '/ILinkableObject.js',
+                    api + '/IDisposableObject.js',
+                    api + '/ILinkableVariable.js',
+                    api + '/IProgressIndicator.js',
+                    api + '/ISessionManager.js',
+                    api + '/ILinkableCompositeObject.js',
+                    api + '/ILinkableDynamicObject.js',
+                    api + '/ILinkableHashMap.js',
+                    api + '/ICallbackCollection.js',
+                    api + '/IChildListCallbackInterface.js',
+
                     utils + '/ClassUtils.js',
                     utils + '/ArraySortOn.js',
                     utils + '/WeakReference.js',
@@ -23,11 +34,12 @@ var buildOrder = [
                     compiler + '/CompiledFunctionCall.js',
                     compiler + '/Compiler.js',
 
+                    src + '/JavaScript.js',
 
 
                     core + '/DynamicState.js',
-                    core + '/ILinkableObject.js',
-                    core + '/ILinkableCompositeObject.js',
+                    core + '/CallbackEntry.js',
+                    core + '/GroupedCallbackEntry.js',
                     core + '/CallbackCollection.js',
                     primitive + '/WeaveTreeItem.js',
                     primitive + '/Dictionary2D.js',
@@ -36,8 +48,9 @@ var buildOrder = [
                     core + '/ErrorManager.js',
                     core + '/EditorManager.js',
 
-                    src + '/JavaScript.js',
                     src + '/WeaveAPI.js',
+
+
 
                     utils + '/URLUtil.js',
                     utils + '/URLRequestUtils.js',
@@ -49,6 +62,7 @@ var buildOrder = [
                     api + '/debugId.js',
                     api + '/detectLinkableObjectChange.js',
 
+                    core + '/EventCallbackCollection.js',
                     core + '/StageUtils.js',
 
                     core + '/LinkableVariable.js',
@@ -70,6 +84,7 @@ var buildOrder = [
                     core + '/LinkableDynamicObject.js',
 
                     core + '/ExternalSessionStateInterface.js',
+                    core + '/LogEntry.js',
                     core + '/SessionStateLog.js',
 
                     'src/WeavePath.js'

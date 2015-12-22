@@ -24,65 +24,104 @@ if (typeof window === 'undefined') {
      */
 
     function LinkablePromise(task, description, validateNow) {
-        description = (description ? description : null);
-        validateNow = (validateNow !== undefined ? validateNow : false);
-
-        weavecore.ILinkableObject.call(this);
-
-        this._lazy = true;
-        this._invalidated = true;
-        this._selfTriggeredCount = 0;
-
-        this._result;
-        this._error;
+        escription = typeof description !== 'undefined' ? description : null;
+        validateNow = typeof validateNow !== 'undefined' ? validateNow : false;
 
         this._task = task;
         this._description = description;
         this._callbackCollection = WeaveAPI.SessionManager.getCallbackCollection(this);
-        this._callbackCollection.addImmediateCallback(null, _immediateCallback.bind(this));
-        this._callbackCollection.addGroupedCallback(null, _groupedCallback.bind(this), validateNow);
+        this._callbackCollection.addImmediateCallback(this, this._immediateCallback);
+        this._callbackCollection.addGroupedCallback(this, this._groupedCallback, validateNow);
         if (validateNow) {
             this._lazy = false;
-            _immediateCallback.call(this);
+            this._immediateCallback();
         }
-
-        /**
-         * The result of calling the invoke function.
-         * When this value is accessed, validate() will be called.
-         * @public
-         * @property result
-         * @readOnly
-         * @type Object
-         */
-        Object.defineProperty(this, 'result', {
-            get: function () {
-                this.validate()
-                return this._result;
-            }
-        });
-
-        /**
-         * The error that occurred calling the invoke function.
-         * When this value is accessed, validate() will be called.
-         * @public
-         * @property error
-         * @readOnly
-         * @type Object
-         */
-        Object.defineProperty(this, 'error', {
-            get: function () {
-                this.validate()
-                return this._error;
-            }
-        });
-
     }
 
-    LinkablePromise.prototype = new weavecore.ILinkableObject();
-    LinkablePromise.prototype.constructor = LinkablePromise;
+
 
     // Prototypes
     var p = LinkablePromise.prototype;
+
+
+
+    /**
+     * @private
+     * @type {Function}
+     */
+    p._task;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._description;
+
+
+    /**
+     * @private
+     * @type {weavejs.api.core.ICallbackCollection}
+     */
+    p._callbackCollection;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._lazy = true;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._invalidated = true;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._jsPromise;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._selfTriggeredCount = 0;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._result;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._error;
+
+
+    Object.defineProperties(p, {
+        result: {
+            get: function () {
+                this.validate();
+                return this._result;
+            }
+        },
+        error: {
+            get: function () {
+                this.validate();
+                return this._error;
+            }
+        }
+    });
 
     p.validate = function () {
         if (!this._lazy)
@@ -95,7 +134,7 @@ if (typeof window === 'undefined') {
 
     }
 
-    function _immediateCallback() {
+    p._immediateCallback = function () {
         // stop if self-triggered
         if (this._callbackCollection.triggerCounter === this._selfTriggeredCount)
             return;
@@ -107,7 +146,7 @@ if (typeof window === 'undefined') {
         this._error = null;
 
         //  Progress Indicator we are no longer waiting for the async task
-        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        WeaveAPI.ProgressIndicator.removeTask(this._groupedCallback);
 
         // stop if lazy
         if (this._lazy)
@@ -129,10 +168,10 @@ if (typeof window === 'undefined') {
             _tmp_description = this._description;
 
         //Progress Indicator mark as busy starting now because we plan to start the task inside _groupedCallback()
-        WeaveAPI.ProgressIndicator.addTask(_groupedCallback, this, _tmp_description);
+        WeaveAPI.ProgressIndicator.addTask(this._groupedCallback, this, _tmp_description);
     }
 
-    function _groupedCallback() {
+    p._groupedCallback = function () {
         try {
             if (this._lazy || !this._invalidated)
                 return;
@@ -154,28 +193,28 @@ if (typeof window === 'undefined') {
                     token: invokeResult
                 });
             else if (invokeResult instanceof Promise) {
-                invokeResult.then(_handleResult.bind(this), _handleFault.bind(this));
+                invokeResult.then(this._handleResult, this._handleFault);
             } else {
                 this._result = invokeResult;
-                WeaveAPI.StageUtils.callLater(this, _handleResult.bind(this));
+                WeaveAPI.StageUtils.callLater(this, this._handleResult);
             }
 
 
         } catch (invokeError) {
             this._invalidated = false;
             this._error = invokeError;
-            WeaveAPI.StageUtils.callLater(this, _handleFault.bind(this));
+            WeaveAPI.StageUtils.callLater(this, this._handleFault);
         }
     }
 
-    function _handleResult(result) {
+    p._handleResult = function (result) {
         result = (result === undefined ? null : result);
 
         if (this._invalidated)
             return;
 
         // ProgressIndicator no longer busy
-        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        WeaveAPI.ProgressIndicator.removeTask(this._groupedCallback);
 
         // if there is an result, save the result
         if (result)
@@ -185,14 +224,14 @@ if (typeof window === 'undefined') {
         this._callbackCollection.triggerCallbacks();
     }
 
-    function _handleFault(fault) {
+    p._handleFault = function (fault) {
         fault = (fault === undefined ? null : fault);
 
         if (this._invalidated)
             return;
 
         //Progress Indicator no longer busy
-        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        WeaveAPI.ProgressIndicator.removeTask(this._groupedCallback);
 
         // if there is an fault, save the error
         if (fault)
@@ -223,7 +262,7 @@ if (typeof window === 'undefined') {
     }
 
     p.dispose = function () {
-        WeaveAPI.ProgressIndicator.removeTask(_groupedCallback);
+        WeaveAPI.ProgressIndicator.removeTask(this._groupedCallback);
         this._lazy = true;
         this._invalidated = true;
         this._result = null;
@@ -231,7 +270,21 @@ if (typeof window === 'undefined') {
     }
 
     weavecore.LinkablePromise = LinkablePromise;
-    weavecore.ClassUtils.registerClass('weavecore.LinkablePromise', LinkablePromise);
+
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkablePromise',
+            qName: 'weavecore.LinkablePromise'
+        }],
+        interfaces: [weavecore.ILinkableObject, weavecore.IDisposableObject]
+    };
+
 
 
 }());

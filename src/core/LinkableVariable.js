@@ -13,42 +13,7 @@ if (typeof window === 'undefined') {
 
 (function () {
 
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableVariable, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableVariable, 'CLASS_NAME', {
-        value: 'LinkableVariable'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableVariable, 'SESSIONABLE', {
-        value: true
-    });
 
     /**
      * If a defaultValue is specified, callbacks will be triggered in a later frame unless they have already been triggered before then.
@@ -60,71 +25,101 @@ if (typeof window === 'undefined') {
      */
 
     function LinkableVariable(sessionStateType, verifier, defaultValue, defaultValueTriggersCallbacks) {
-        if (sessionStateType === undefined) sessionStateType = null;
-        if (verifier === undefined) verifier = null;
-        if (defaultValueTriggersCallbacks === undefined) defaultValueTriggersCallbacks = true;
+        sessionStateType = typeof sessionStateType !== 'undefined' ? sessionStateType : null;
+        verifier = typeof verifier !== 'undefined' ? verifier : null;
+        defaultValueTriggersCallbacks = typeof defaultValueTriggersCallbacks !== 'undefined' ? defaultValueTriggersCallbacks : true;
 
-        weavecore.CallbackCollection.call(this);
+        LinkableVariable.base(this, 'constructor');
 
-        /**
-         * This function is used to prevent the session state from having unwanted values.
-         * Function signature should be  function(value:*):Boolean
-         * @private
-         * @property _verifier
-         * @type function
-         */
+        if (sessionStateType != Object) {
+            this._sessionStateType = sessionStateType;
+            this._primitiveType = this._sessionStateType == String || this._sessionStateType == Number || this._sessionStateType == Boolean;
+        }
         this._verifier = verifier;
 
-        /**
-         * This is true if the session state has been set at least once.
-         */
-        this._sessionStateWasSet = false;
-
-        /**
-         * This is true if the _sessionStateType is a primitive type.
-         */
-        this._primitiveType = false;
-
-        /**
-         * Type restriction passed in to the constructor.
-         */
-        this._sessionStateType = null;
-
-        /**
-         * Cannot be modified externally because it is not returned by getSessionState()
-         */
-        this._sessionStateInternal = undefined;
-
-        /**
-         * Available externally via getSessionState()
-         */
-        this._sessionStateExternal = undefined;
-
-        this._locked = false;
-
-        Object.defineProperty(this, 'locked', {
-            get: function () {
-                return this._locked;
-            }
-        });
-
-        if (sessionStateType !== Object) {
-            this._sessionStateType = sessionStateType;
-            this._primitiveType = this._sessionStateType === "string" || this._sessionStateType === "number" || this._sessionStateType === "boolean";
-        }
         if (defaultValue !== undefined) {
             this.setSessionState(defaultValue);
 
             // If callbacks were triggered, make sure callbacks are triggered again one frame later when
             // it is possible for other classes to have a pointer to this object and retrieve the value.
             if (defaultValueTriggersCallbacks && this._triggerCounter > weavecore.CallbackCollection.DEFAULT_TRIGGER_COUNT)
-                WeaveAPI.StageUtils.callLater(this, _defaultValueTrigger.bind(this));
+                WeaveAPI.StageUtils.callLater(this, this._defaultValueTrigger);
         }
-
-
     }
 
-    function _defaultValueTrigger() {
+    goog.inherits(LinkableVariable, weavecore.CallbackCollection);
+
+    var p = LinkableVariable.prototype;
+
+
+
+    Object.defineProperties(p, {
+        /** @export */
+        locked: {
+            get: /** @this {weavecore.LinkableVariable} */ function () {
+                return this._locked;
+            }
+        },
+        /** @export */
+        state: {
+            get: /** @this {weavecore.LinkableVariable} */ function () {
+                return this._sessionStateExternal;
+            },
+            set: /** @this {weavecore.LinkableVariable} */ function (value) {
+                this.setSessionState(value);
+            }
+        }
+    });
+
+    /**
+     * @protected
+     * @type {Function}
+     */
+    p._verifier = null;
+
+
+    /**
+     * @protected
+     * @type {boolean}
+     */
+    p._sessionStateWasSet = false;
+
+
+    /**
+     * @protected
+     * @type {boolean}
+     */
+    p._primitiveType = false;
+
+
+    /**
+     * @protected
+     * @type {Object}
+     */
+    p._sessionStateType = null;
+
+
+    /**
+     * @protected
+     * @type {*}
+     */
+    p._sessionStateInternal = undefined;
+
+
+    /**
+     * @protected
+     * @type {*}
+     */
+    p._sessionStateExternal = undefined;
+
+
+    /**
+     * @protected
+     * @type {boolean}
+     */
+    p._locked = false;
+
+    p._defaultValueTrigger = function () {
         // unless callbacks were triggered again since the default value was set, trigger callbacks now
         if (!this._wasDisposed && this._triggerCounter === weavecore.CallbackCollection.DEFAULT_TRIGGER_COUNT + 1)
             this.triggerCallbacks();
@@ -136,14 +131,11 @@ if (typeof window === 'undefined') {
      * @param value The value to verify.
      * @return A value of true if the value is accepted by this linkable variable.
      */
-    function verifyValue(value) {
+    p.verifyValue = function (value) {
         return this._verifier === null || this._verifier === undefined || this._verifier(value);
     }
 
-    LinkableVariable.prototype = new weavecore.CallbackCollection();
-    LinkableVariable.prototype.constructor = LinkableVariable;
 
-    var p = LinkableVariable.prototype;
 
     /**
      * The type restriction passed in to the constructor.
@@ -161,8 +153,8 @@ if (typeof window === 'undefined') {
             return;
 
         // cast value now in case it is not the appropriate type
-        if (this._sessionStateType !== null && this._sessionStateType !== undefined)
-            value = value;
+        /*if (this._sessionStateType !== null && this._sessionStateType !== undefined)
+            value = value;*/
 
         // stop if verifier says it's not an accepted value
         if (this._verifier !== null && this._verifier !== undefined && !this._verifier(value))
@@ -221,13 +213,14 @@ if (typeof window === 'undefined') {
         if (this._primitiveType)
             return this._sessionStateInternal === otherSessionState;
 
-        return weavecore.StandardLib.compare(this._sessionStateInternal, otherSessionState, objectCompare.bind(this)) === 0;
+        return weavecore.StandardLib.compare(this._sessionStateInternal, otherSessionState, objectCompare) === 0;
     };
 
     function objectCompare(a, b) {
         if (weavecore.DynamicState.isDynamicState(a, true) && weavecore.DynamicState.isDynamicState(b, true) && a[weavecore.DynamicState.CLASS_NAME] === b[weavecore.DynamicState.CLASS_NAME] && a[weavecore.DynamicState.OBJECT_NAME] === b[weavecore.DynamicState.OBJECT_NAME]) {
             return weavecore.StandardLib.compare(a[weavecore.DynamicState.SESSION_STATE], b[weavecore.DynamicState.SESSION_STATE], objectCompare);
         }
+        return NaN;
 
     }
 
@@ -249,11 +242,24 @@ if (typeof window === 'undefined') {
 
 
     p.dispose = function () {
-        weavecore.CallbackCollection.prototype.dispose.call(this);
+        LinkableVariable.base(this, 'dispose');
         this.setSessionState(null);
     };
 
     weavecore.LinkableVariable = LinkableVariable;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableVariable', LinkableVariable);
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableVariable',
+            qName: 'weavecore.LinkableVariable'
+        }],
+        interfaces: [weavecore.ILinkableVariable, weavecore.ICallbackCollection, weavecore.IDisposableObject]
+    };
+
 
 }());

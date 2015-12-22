@@ -315,95 +315,6 @@ if (typeof window === 'undefined') {
     Compiler._staticInstance = null;
 
 
-    //constructor
-    function Compiler(includeDefaultLibraries) {
-        //private
-        Object.defineProperty(this, 'JUMP_LOOKUP', {
-            value: new Map() // Function -> true
-        });
-        Object.defineProperty(this, 'LOOP_LOOKUP', {
-            value: new Map() // Function -> true
-        });
-        Object.defineProperty(this, 'BRANCH_LOOKUP', {
-            value: new Map() // // Function -> Boolean, for short-circuiting
-        });
-        Object.defineProperty(this, 'ASSIGN_OP_LOOKUP', {
-            value: new Map() // Function -> true
-        });
-        Object.defineProperty(this, 'PURE_OP_LOOKUP', {
-            value: new Map() // Function -> true
-        });
-        Object.defineProperty(this, 'MAX_OPERATOR_LENGTH', {
-            value: 4
-        });
-
-
-        /**
-         * This is a list of objects and/or classes containing functions and constants supported by the compiler.
-         */
-        Object.defineProperty(this, 'libraries', {
-            value: []
-        });
-
-
-        /**
-         * This object maps the name of a predefined constant to its value.
-         */
-
-        this.constants = null;
-        /**
-         * This object maps the name of a global symbol to its value.
-         */
-
-        this.globals = null;
-        /**
-         * This object maps an operator like "*" to a Function or a valie of true if there is no function.
-         */
-
-        this.operators = null;
-        /**
-         * A pure operator is one that always gives the same result when invoked with the same parameters.
-         * This object maps a pure operator like "+" to its corresponding function.
-         */
-
-        this.pureOperators = null;
-        /**
-         * This object maps an assignment operator like "=" to its corresponding function.
-         * This object is used  quick lookup to see if an operator is an assignment operator.
-         */
-
-        this.assignmentOperators = null;
-        /**
-         * This is a two-dimensional Array of operator symbols arranged in the order they should be evaluated.
-         * Each nested Array is a group of operators that should be evaluated in the same pass.
-         */
-
-        this.orderedOperators = null;
-        /**
-         * This is an Array of all the unary operator symbols.
-         */
-
-        this.unaryOperatorSymbols = null;
-
-        /**
-         * This is used to temporarily store the host of the property that was accessed by the last call to the '.' operator.
-         */
-        this._propertyHost = null;
-        /**
-         * This is used to temporarily store the property name that was accessed by the last call to the '.' operator.
-         */
-        this._propertyName = null;
-        /**
-         * Set this to true to enable trace statements for debugging.
-         */
-        this.debug = false;
-
-        initialize.call(this);
-        if (includeDefaultLibraries)
-            includeLibraries(Math, weavecore.StandardLib);
-        //includeLibraries(Math, StringUtil, weavecore.StandardLib, Dictionary);
-    }
-
     /**
      * Attempts to compile an expression as a constant, then returns the constant value.
      * @param constantExpression
@@ -566,7 +477,101 @@ if (typeof window === 'undefined') {
 
     }
 
+
+    //constructor
+    function Compiler(includeDefaultLibraries) {
+        //private
+
+
+        initialize.call(this);
+        if (includeDefaultLibraries)
+            includeLibraries(Math, weavecore.StandardLib);
+        //includeLibraries(Math, StringUtil, weavecore.StandardLib, Dictionary);
+    }
+
     var p = Compiler.prototype;
+
+    Object.defineProperty(p, 'JUMP_LOOKUP', {
+        value: new Map() // Function -> true
+    });
+    Object.defineProperty(p, 'LOOP_LOOKUP', {
+        value: new Map() // Function -> true
+    });
+    Object.defineProperty(p, 'BRANCH_LOOKUP', {
+        value: new Map() // // Function -> Boolean, for short-circuiting
+    });
+    Object.defineProperty(p, 'ASSIGN_OP_LOOKUP', {
+        value: new Map() // Function -> true
+    });
+    Object.defineProperty(p, 'PURE_OP_LOOKUP', {
+        value: new Map() // Function -> true
+    });
+    Object.defineProperty(p, 'MAX_OPERATOR_LENGTH', {
+        value: 4
+    });
+
+
+    /**
+     * This is a list of objects and/or classes containing functions and constants supported by the compiler.
+     */
+    Object.defineProperty(p, 'libraries', {
+        value: []
+    });
+
+
+    /**
+     * This object maps the name of a predefined constant to its value.
+     */
+
+    p.constants = null;
+    /**
+     * This object maps the name of a global symbol to its value.
+     */
+
+    p.globals = null;
+    /**
+     * This object maps an operator like "*" to a Function or a valie of true if there is no function.
+     */
+
+    p.operators = null;
+    /**
+     * A pure operator is one that always gives the same result when invoked with the same parameters.
+     * This object maps a pure operator like "+" to its corresponding function.
+     */
+
+    p.pureOperators = null;
+    /**
+     * This object maps an assignment operator like "=" to its corresponding function.
+     * This object is used  quick lookup to see if an operator is an assignment operator.
+     */
+
+    p.assignmentOperators = null;
+    /**
+     * This is a two-dimensional Array of operator symbols arranged in the order they should be evaluated.
+     * Each nested Array is a group of operators that should be evaluated in the same pass.
+     */
+
+    p.orderedOperators = null;
+    /**
+     * This is an Array of all the unary operator symbols.
+     */
+
+    p.unaryOperatorSymbols = null;
+
+    /**
+     * This is used to temporarily store the host of the property that was accessed by the last call to the '.' operator.
+     */
+    p._propertyHost = null;
+    /**
+     * This is used to temporarily store the property name that was accessed by the last call to the '.' operator.
+     */
+    p._propertyName = null;
+    /**
+     * Set this to true to enable trace statements for debugging.
+     */
+    p.debug = false;
+
+
 
 
     /**
@@ -1900,7 +1905,7 @@ if (typeof window === 'undefined') {
             return wrapperFunction.call(this);
         }
 
-        return wrapperFunction.bind(this);
+        return wrapperFunction;
     }
 
     /**
@@ -3099,4 +3104,11 @@ if (typeof window === 'undefined') {
 
 
     weavecore.Compiler = Compiler;
+    p.CLASS_INFO = {
+        names: [{
+            name: 'Compiler',
+            qName: 'weavecore.Compiler'
+        }]
+    };
+
 }(this));

@@ -19,18 +19,25 @@ if (typeof window === 'undefined') {
             }
         });
 
+
+        var p = this;
+        p.getEditorClass = weavecore.ClassUtils.bind(this, getEditorClass);
+        p.getNewEditor = weavecore.ClassUtils.bind(this, getNewEditor);
+        p.setLabel = weavecore.ClassUtils.bind(this, setLabel);
+        p.getLabel = weavecore.ClassUtils.bind(this, getLabel);
+
     }
 
     EditorManager.prototype = new weavecore.ILinkableObject();
     EditorManager.prototype.constructor = EditorManager;
-    var p = EditorManager.prototype;
+    //var p = EditorManager.prototype;
 
 
 
     /**
      * @inheritDoc
      */
-    p.getEditorClass = function (linkableObjectOrClass) {
+    function getEditorClass(linkableObjectOrClass) {
         var editorClass = this._editorLookup.get(linkableObjectOrClass);
         editorClass = (editorClass && weavecore.Compiler.isClass(editorClass)) ? editorClass : null;
         if (editorClass)
@@ -54,7 +61,7 @@ if (typeof window === 'undefined') {
     /**
      * @inheritDoc
      */
-    p.getNewEditor = function (obj) {
+    function getNewEditor(obj) {
         var Editor = this.getEditorClass(obj);
         if (Editor) {
             var editor = WeaveAPI.SessionManager.registerDisposableChild(obj, new Editor()); // when the object goes away, make the editor go away
@@ -67,7 +74,7 @@ if (typeof window === 'undefined') {
     /**
      * @inheritDoc
      */
-    p.setLabel = function (object, label) {
+    function setLabel(object, label) {
         this._labels.set(object, label);
         WeaveAPI.SessionManager.getCallbackCollection(this).triggerCallbacks();
     }
@@ -75,7 +82,7 @@ if (typeof window === 'undefined') {
     /**
      * @inheritDoc
      */
-    p.getLabel = function (object) {
+    function getLabel(object) {
         return this._labels.get(object);
     }
 

@@ -10,87 +10,35 @@ if (typeof window === 'undefined') {
  * @author sanjay1909
  */
 (function () {
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableTextFormat, 'NS', {
-        value: 'weavecore'
-    });
-
-
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableTextFormat, 'CLASS_NAME', {
-        value: 'LinkableTextFormat'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableTextFormat, 'SESSIONABLE', {
-        value: true
-    });
-
-
 
 
 
     function LinkableTextFormat() {
-
-        weavecore.ILinkableObject.call(this);
-
-        Object.defineProperties(this, {
-            'font': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableString(LinkableTextFormat.DEFAULT_FONT, function (value) {
-                    return value ? true : false;
-                }))
-            },
-            'size': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableNumber(LinkableTextFormat.DEFAULT_SIZE, function (value) {
-                    return value > 2;
-                }))
-            },
-            'color': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableNumber(LinkableTextFormat.DEFAULT_COLOR, isFinite))
-            },
-            'bold': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false))
-            },
-            'italic': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false))
-            },
-            'underline': {
-                value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false))
-            }
-        });
-
-
-
-
+        this.font = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableString(LinkableTextFormat.DEFAULT_FONT, function (value) {
+            return value ? true : false;
+        }));
+        this.size = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableNumber(LinkableTextFormat.DEFAULT_SIZE, function (value) {
+            return value > 2;
+        }));
+        this.color = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableNumber(LinkableTextFormat.DEFAULT_COLOR, isFinite));
+        this.bold = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false));
+        this.italic = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false));
+        this.underline = WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.LinkableBoolean(false));
 
     }
 
-    LinkableTextFormat.prototype = new weavecore.ILinkableObject();
-    LinkableTextFormat.prototype.constructor = LinkableTextFormat;
 
     var p = LinkableTextFormat.prototype;
+
+    p.font;
+    p.size;
+    p.color;
+    p.bold;
+    p.italic;
+    p.underline;
+
+
+
 
     /**
      * Copy the properties from a TextFormat object to the linkable properties of this object.
@@ -118,6 +66,24 @@ if (typeof window === 'undefined') {
         destination.underline = underline.value;
     }
 
+
+
+
+    weavecore.LinkableTextFormat = LinkableTextFormat;
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableTextFormat',
+            qName: 'weavecore.LinkableTextFormat'
+        }],
+        interfaces: [weavecore.ILinkableObject]
+    };
+
     Object.defineProperties(LinkableTextFormat, {
         'defaultTextFormat': {
             value: new LinkableTextFormat()
@@ -132,9 +98,6 @@ if (typeof window === 'undefined') {
             value: "Sophia Nubian"
         }
     });
-
-    weavecore.LinkableTextFormat = LinkableTextFormat;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableTextFormat', LinkableTextFormat);
 
 }());
 

@@ -12,42 +12,7 @@ if (typeof window === 'undefined') {
 (function () {
     "use strict";
 
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableWatcher, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableWatcher, 'CLASS_NAME', {
-        value: 'LinkableWatcher'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableWatcher, 'SESSIONABLE', {
-        value: true
-    });
 
     // constructor:
     /**
@@ -64,59 +29,24 @@ if (typeof window === 'undefined') {
      * @param {Function} groupedCallback A function to add as a grouped callback.
      */
     function LinkableWatcher(typeRestriction, immediateCallback, groupedCallback) {
-        if (typeRestriction === undefined) typeRestriction = null;
-        if (immediateCallback === undefined) immediateCallback = null;
-        if (groupedCallback === undefined) groupedCallback = null;
+        typeRestriction = typeof typeRestriction !== 'undefined' ? typeRestriction : null;
+        immediateCallback = typeof immediateCallback !== 'undefined' ? immediateCallback : null;
+        groupedCallback = typeof groupedCallback !== 'undefined' ? groupedCallback : null;
 
-        //weavecore.ILinkableObject.call(this);
 
-        Object.defineProperty(this, 'sessionable', {
-            value: true
-        });
 
         this._typeRestriction = typeRestriction;
 
         if (immediateCallback !== null && immediateCallback !== undefined)
-            WeaveAPI.SessionManager.getCallbackCollection(this).addImmediateCallback(null, immediateCallback);
+            WeaveAPI.getCallbacks(this).addImmediateCallback(null, immediateCallback);
 
         if (groupedCallback !== null && groupedCallback !== undefined)
-            WeaveAPI.SessionManager.getCallbackCollection(this).addGroupedCallback(null, groupedCallback);
+            WeaveAPI.getCallbacks(this).addGroupedCallback(null, groupedCallback);
 
-        this._target; // the current target or ancestor of the to-be-target
-        this._foundTarget = true; // false when _target is not the desired target
-        this._targetPath; // the path that is being watched
         this._pathDependencies = new weavecore.Dictionary2D(true, false); // Maps an ILinkableDynamicObject to its previous internalObject.
 
-        Object.defineProperty(this, 'targetPath', {
-            /**
-             * This is the path that is currently being watched for linkable object targets.
-             */
-            get: function () {
-                return this._targetPath ? this._targetPath.concat() : null;
-            },
-            /**
-             * This will set a path which should be watched for new targets.
-             * Callbacks will be triggered immediately if the path changes or points to a new target.
-             */
-            set: this._setTargetPath,
-            configurable: true
-        });
 
-        Object.defineProperty(this, 'target', {
-            /**
-             * This is the linkable object currently being watched.
-             * Setting this will unset the targetPath.
-             */
-            get: function () {
-                return this._foundTarget ? this._target : null;
-            },
-            set: this._setTarget,
-            configurable: true
-        });
 
-        this.__proto__._handleTargetTrigger = this.__proto__._handleTargetTrigger.bind(this);
-        this.__proto__._handleTargetDispose = this.__proto__._handleTargetDispose.bind(this);
-        this.__proto__._handlePathDependencies = this.__proto__._handlePathDependencies.bind(this);
 
     }
 
@@ -126,8 +56,79 @@ if (typeof window === 'undefined') {
     var p = LinkableWatcher.prototype;
 
 
+    Object.defineProperties(p, {
+        /** @export */
+        target: {
+            get: function () {
+                return this._foundTarget ? this._target : null;
+            },
+            set: function (newTarget) {
+                var cc = WeaveAPI.getCallbacks(this);
+                cc.delayCallbacks();
+                this.targetPath = null;
+                this.internalSetTarget(newTarget);
+                cc.resumeCallbacks();
+            }
+        },
+        /** @export */
+        targetPath: {
+            get: function () {
+                return this._targetPath ? this._targetPath.concat() : null;
+            },
+            set: function (path) {
+                if (path && path.length == 0)
+                    path = null;
+                if (weavecore.StandardLib.compare(this._targetPath, path) != 0) {
+                    var cc = WeaveAPI.getCallbacks(this);
+                    cc.delayCallbacks();
+                    this.resetPathDependencies();
+                    this._targetPath = path;
+                    this.handlePath();
+                    cc.triggerCallbacks();
+                    cc.resumeCallbacks();
+                }
+            }
+        }
+    });
+
+
+    /**
+     * @protected
+     * @type {Object}
+     */
+    p._typeRestriction;
+
+
+    /**
+     * @private
+     * @type {weavejs.api.core.ILinkableObject}
+     */
+    p._target;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._foundTarget = true;
+
+
+    /**
+     * @protected
+     * @type {Array}
+     */
+    p._targetPath;
+
+
+    /**
+     * @private
+     * @type {weavejs.utils.Dictionary2D}
+     */
+    p._pathDependencies;
+
+
     // overridable setter function for 'targetPath'
-    p._setTarget = function (newTarget) {
+    /*p._setTarget = function (newTarget) {
         var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
         cc.delayCallbacks();
         this.targetPath = null;
@@ -152,7 +153,7 @@ if (typeof window === 'undefined') {
 
             cc.resumeCallbacks.call(cc);
         }
-    }
+    }*/
 
     /**
      * This sets the new target to be watched without resetting targetPath.
@@ -166,17 +167,16 @@ if (typeof window === 'undefined') {
         if (this._target === newTarget)
             return;
 
-        var sm = WeaveAPI.SessionManager;
 
         // unlink from old target
         if (this._target) {
-            sm.getCallbackCollection(this._target).removeCallback(this._handleTargetTrigger);
-            sm.getCallbackCollection(this._target).removeCallback(this._handleTargetDispose);
+            WeaveAPI.getCallbacks(this._target).removeCallback(this._handleTargetTrigger, this);
+            WeaveAPI.getCallbacks(this._target).removeCallback(this._handleTargetDispose, this);
             // if we own the previous target, dispose it
-            if (sm.getLinkableOwner(this._target) === this)
-                sm.disposeObject(this._target);
+            if (WeaveAPI.getOwner(this._target) === this)
+                WeaveAPI.dispose(this._target);
             else
-                sm.unregisterLinkableChild(this, this._target);
+                WeaveAPI.SessionManager.unregisterLinkableChild(this, this._target);
         }
 
         this._target = newTarget;
@@ -184,44 +184,42 @@ if (typeof window === 'undefined') {
         // link to new target
         if (this._target) {
             // we want to register the target as a linkable child (for busy status)
-            sm.registerLinkableChild(this, this._target);
-            // we don't want the target triggering our callbacks directly
-            sm.getCallbackCollection(this._target).removeCallback(sm.getCallbackCollection(this).triggerCallbacks);
-            //this._handleTargetTrigger = this._handleTargetTrigger.bind(this);
-            //this.__proto__._handleTargetTrigger = this.__proto__._handleTargetTrigger.bind(this);
-            sm.getCallbackCollection(this._target).addImmediateCallback(this, this._handleTargetTrigger, false, true);
+            WeaveAPI.linkableChild(this, this._target);
+            //we don't want the target triggering our callbacks directly
+            var cc = WeaveAPI.getCallbacks(this);
+            WeaveAPI.getCallbacks(this._target).removeCallback(cc.triggerCallbacks, cc);
+            WeaveAPI.getCallbacks(this._target).addImmediateCallback(this, this._handleTargetTrigger, false, true);
             // we need to know when the target is disposed
-            //this.__proto__._handleTargetDispose = this.__proto__._handleTargetDispose.bind(this);
-            sm.getCallbackCollection(this._target).addDisposeCallback(this, this._handleTargetDispose);
+            WeaveAPI.getCallbacks(this._target).addDisposeCallback(this, this._handleTargetDispose);
         }
 
         if (this._foundTarget)
-            this._handleTargetTrigger.call(this);
+            this._handleTargetTrigger();
     };
 
 
     p._handleTargetTrigger = function () {
         if (this._foundTarget) {
-            var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
-            cc.triggerCallbacks.call(cc);
+            //var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
+            WeaveAPI.getCallbacks(this).triggerCallbacks();
         } else
-            handlePath.call(this);
+            this.handlePath();
     };
 
 
 
     p._handleTargetDispose = function () {
         if (this._targetPath) {
-            handlePath.call(this);
+            this.handlePath();
         } else {
             this._target = null;
-            var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
-            cc.triggerCallbacks.call(cc);
+            //var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
+            WeaveAPI.getCallbacks(this).triggerCallbacks();
 
         }
     };
 
-    function handlePath() {
+    p.handlePath = function () {
         if (!this._targetPath) {
             this._foundTarget = true;
             this.internalSetTarget(null);
@@ -234,7 +232,7 @@ if (typeof window === 'undefined') {
         var subPath = [];
         for (var name of this._targetPath) {
             if (weavecore.ClassUtils.is(node, weavecore.ILinkableCompositeObject))
-                addPathDependency.call(this, node, name);
+                this.addPathDependency(node, name);
 
             subPath[0] = name;
             var child = sm.getObject(node, subPath);
@@ -259,8 +257,8 @@ if (typeof window === 'undefined') {
 
                 // must trigger here when we lose the target because internalSetTarget() won't trigger when _foundTarget is false
                 if (lostTarget) {
-                    var cc = sm.getCallbackCollection(this)
-                    cc.triggerCallbacks.call(cc);
+                    //var cc = sm.getCallbackCollection(this)
+                    WeaveAPI.getCallbacks(this).triggerCallbacks();
                 }
 
                 return;
@@ -268,11 +266,11 @@ if (typeof window === 'undefined') {
         }
 
         // we found a desired target if there is no type restriction or the object fits the restriction
-        this._foundTarget = !this._typeRestriction || node instanceof this._typeRestriction;
+        this._foundTarget = !this._typeRestriction || weavecore.ClassUtils.is(node, this._typeRestriction);
         this.internalSetTarget(node);
     };
 
-    function addPathDependency(parent, pathElement) {
+    p.addPathDependency = function (parent, pathElement) {
         // if parent is an ILinkableHashMap and pathElement is a String, we don't need to add the dependency
         var lhm = (parent && parent instanceof weavecore.LinkableHashMap) ? parent : null;
         if (lhm && typeof pathElement === "string")
@@ -285,7 +283,7 @@ if (typeof window === 'undefined') {
         if (!this._pathDependencies.get(parent, pathElement)) {
             var child = WeaveAPI.SessionManager.getObject(parent, [pathElement]);
             this._pathDependencies.set(parent, pathElement, child);
-            var dependencyCallbacks = getDependencyCallbacks(parent);
+            var dependencyCallbacks = this.getDependencyCallbacks(parent);
             //this.__proto__._handlePathDependencies = this.__proto__._handlePathDependencies.bind(this);
             dependencyCallbacks.addImmediateCallback(this, this._handlePathDependencies);
             dependencyCallbacks.addDisposeCallback(this, this._handlePathDependencies);
@@ -293,7 +291,7 @@ if (typeof window === 'undefined') {
 
     };
 
-    function getDependencyCallbacks(parent) {
+    p.getDependencyCallbacks = function (parent) {
         var lhm = (parent && parent instanceof weavecore.LinkableHashMap) ? parent : null;
         if (lhm)
             return lhm.childListCallbacks;
@@ -308,8 +306,8 @@ if (typeof window === 'undefined') {
                 var oldChild = this._pathDependencies.get(parent, pathElement);
                 var newChild = sm.getObject(parent, [pathElement]);
                 if (sm.objectWasDisposed(parent) || oldChild !== newChild) {
-                    resetPathDependencies.call(this);
-                    handlePath.call(this);
+                    this.resetPathDependencies();
+                    this.handlePath();
                     return;
                 }
             }
@@ -317,9 +315,9 @@ if (typeof window === 'undefined') {
 
     };
 
-    function resetPathDependencies() {
+    p.resetPathDependencies = function () {
         for (var parent of this._pathDependencies.dictionary.keys())
-            getDependencyCallbacks(parent).removeCallback(this._handlePathDependencies);
+            this.getDependencyCallbacks(parent).removeCallback(this._handlePathDependencies, this);
         this._pathDependencies = new weavecore.Dictionary2D(true, false);
     };
 
@@ -331,7 +329,22 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableWatcher = LinkableWatcher;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableWatcher', LinkableWatcher);
+    //weavecore.ClassUtils.registerClass('weavecore.LinkableWatcher', LinkableWatcher);
+
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableWatcher',
+            qName: 'weavecore.LinkableWatcher'
+        }],
+        interfaces: [weavecore.ILinkableObject, weavecore.IDisposableObject]
+    };
+
 
     /*
 			// JavaScript test code for path dependency case

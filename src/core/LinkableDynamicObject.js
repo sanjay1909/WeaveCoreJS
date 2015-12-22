@@ -12,42 +12,7 @@ if (typeof window === 'undefined') {
 (function () {
     "use strict";
 
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableDynamicObject, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableDynamicObject, 'CLASS_NAME', {
-        value: 'LinkableDynamicObject'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableDynamicObject, 'SESSIONABLE', {
-        value: true
-    });
 
 
     Object.defineProperty(LinkableDynamicObject, 'ARRAY_CLASS_NAME', {
@@ -66,165 +31,114 @@ if (typeof window === 'undefined') {
      * @param {Class} typeRestriction If specified, this will limit the type of objects that can be added to this LinkableHashMap.
      */
     function LinkableDynamicObject(typeRestriction) {
-        if (typeRestriction === undefined) typeRestriction = null;
-        // this is a constraint on the type of object that can be linked
-        this._typeRestrictionClassName;
-        //this._typeRestriction = typeRestriction;
-        // when this is true, the linked object cannot be changed
-        this._locked = false;
+        typeRestriction = typeof typeRestriction !== 'undefined' ? typeRestriction : null;
+        this.cc = WeaveAPI.disposableChild(this, weavecore.CallbackCollection);
+        LinkableDynamicObject.base(this, 'constructor', typeRestriction);
+    }
 
-        weavecore.LinkableWatcher.call(this, typeRestriction);
-        if (typeRestriction)
-            this._typeRestrictionClassName = typeRestriction.NS + '.' + typeRestriction.CLASS_NAME;
+    goog.inherits(LinkableDynamicObject, weavecore.LinkableWatcher);
 
-        // the callback collection for this object
-        // private const
-        Object.defineProperty(this, '_cc', {
-            value: WeaveAPI.SessionManager.registerDisposableChild(this, new weavecore.CallbackCollection())
-        });
+    var p = LinkableDynamicObject.prototype;
+
+    /**
+     * @private
+     * @type {weavejs.core.CallbackCollection}
+     */
+    p.cc;
 
 
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._locked = false;
 
-
-        /**
-         * @inheritDoc
-         */
-        Object.defineProperty(this, 'internalObject', {
+    Object.defineProperties(p, {
+        /** @export */
+        internalObject: {
             get: function () {
                 return this.target;
             }
-        });
-
-        // override public
-        Object.defineProperty(this, 'targetPath', {
-
-
-            set: this._setTargetPath,
-            configurable: true
-        });
-
-        // override public
-        Object.defineProperty(this, 'target', {
-
-
-            set: this._setTarget,
-            configurable: true
-        });
-
-
-        Object.defineProperty(this, 'globalName', {
-            /**
-             * This is the name of the linked global object, or null if the internal object is local.
-             */
+        },
+        target: {
+            get: function () {
+                return weavecore.ClassUtils.superGetter(LinkableDynamicObject, this, 'target');
+            },
+            set: function (newTarget) {
+                if (this._locked)
+                    return;
+                if (!newTarget) {
+                    weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', null);
+                    return;
+                }
+                this.cc.delayCallbacks();
+                var path = WeaveAPI.findPath(WeaveAPI.globalHashMap, newTarget);
+                if (path) {
+                    this.targetPath = path;
+                } else {
+                    var owner = WeaveAPI.getOwner(newTarget);
+                    if (owner === this || !owner)
+                        weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', newTarget);
+                    else
+                        weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', null);
+                }
+                this.cc.resumeCallbacks();
+            }
+        },
+        targetPath: {
+            get: function () {
+                return weavecore.ClassUtils.superGetter(LinkableDynamicObject, this, 'targetPath');
+            },
+            set: function (path) {
+                if (this._locked)
+                    return;
+                weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'targetPath', path);
+            }
+        },
+        globalName: {
             get: function () {
                 if (this._targetPath && this._targetPath.length == 1)
                     return this._targetPath[0];
                 return null;
             },
-            /**
-             * This function will change the internalObject if the new globalName is different, unless this object is locked.
-             * If a new global name is given, the session state of the new global object will take precedence.
-             * @param newGlobalName This is the name of the global object to link to, or null to unlink from the current global object.
-             */
             set: function (newGlobalName) {
                 if (this._locked)
                     return;
-
-                // change empty string to null
                 if (!newGlobalName)
                     newGlobalName = null;
-
                 var oldGlobalName = this.globalName;
-                if (oldGlobalName === newGlobalName)
+                if (oldGlobalName == newGlobalName)
                     return;
-
-                this._cc.delayCallbacks();
-
-                if (newGlobalName === null || newGlobalName === undefined) {
-                    // unlink from global object and copy session state into a local object
+                this.cc.delayCallbacks();
+                if (newGlobalName == null) {
                     this.requestLocalObjectCopy(this.internalObject);
                 } else {
-                    // when switcing from a local object to a global one that doesn't exist yet, copy the local object
-                    if (this.target && !this.targetPath && !WeaveAPI.globalHashMap.getObject(newGlobalName))
-                        WeaveAPI.globalHashMap.requestObjectCopy(newGlobalName, this.internalObject);
-
-                    // link to new global name
+                    var root = WeaveAPI.globalHashMap;
+                    if (this.target && !this.targetPath && !root.getObject(newGlobalName))
+                        root.requestObjectCopy(newGlobalName, this.internalObject);
                     this.targetPath = [newGlobalName];
                 }
-
-                this._cc.resumeCallbacks();
+                this.cc.resumeCallbacks();
             }
-        });
-
-        /**
-         * @inheritDoc
-         */
-        Object.defineProperty(this, 'locked', {
+        },
+        locked: {
             get: function () {
                 return this._locked;
             }
-
-        });
-
-        Object.defineProperty(this, 'triggerCounter', {
+        },
+        triggerCounter: {
             get: function () {
-                this._cc.triggerCounter;
+                return this.cc.triggerCounter;
             }
-
-        });
-
-        Object.defineProperty(this, 'callbacksAreDelayed', {
+        },
+        callbacksAreDelayed: {
             get: function () {
-                this._cc.callbacksAreDelayed;
+                return this.cc.callbacksAreDelayed;
             }
-
-        });
-
-    }
-
-    LinkableDynamicObject.prototype = new weavecore.LinkableWatcher();
-    LinkableDynamicObject.prototype.constructor = LinkableDynamicObject;
-
-    var p = LinkableDynamicObject.prototype;
-
-    // overridable setter function for 'target'
-    p._setTarget = function (newTarget) {
-        if (this._locked)
-            return;
-
-        if (!newTarget) {
-            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
-            return;
         }
-
-        this._cc.delayCallbacks();
-
-        // if the target can be found by a path, use the path
-        var sm = WeaveAPI.SessionManager;
-        var path = sm.getPath(WeaveAPI.globalHashMap, newTarget);
-        if (path) {
-            this.targetPath = path;
-        } else {
-            // it's ok to assign a local object that we own or that doesn't have an owner yet
-            // otherwise, unset the target
-            var owner = sm.getLinkableOwner(newTarget);
-            if (owner === this || !owner)
-                weavecore.LinkableWatcher.prototype._setTarget.call(this, newTarget);
-            else
-                weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
-        }
-
-        this._cc.resumeCallbacks();
-    }
+    });
 
 
-    // overridable setter function for 'targetPath'
-    p._setTargetPath = function (path) {
-        if (this._locked)
-            return;
-        weavecore.LinkableWatcher.prototype._setTargetPath.call(this, path);
-
-    }
 
 
     p.lock = function () {
@@ -241,7 +155,7 @@ if (typeof window === 'undefined') {
         if (!obj)
             return [];
 
-        var className = obj.constructor.NS + '.' + obj.constructor.CLASS_NAME;
+        var className = WeaveAPI.className(obj);
         var sessionState = obj || WeaveAPI.SessionManager.getSessionState(obj);
         return [weavecore.DynamicState.create(null, className, sessionState)];
     };
@@ -260,7 +174,7 @@ if (typeof window === 'undefined') {
 
         try {
             // make sure callbacks only run once
-            this._cc.delayCallbacks();
+            this.cc.delayCallbacks();
 
             // stop if there are no items
             if (!newState.length) {
@@ -300,16 +214,16 @@ if (typeof window === 'undefined') {
                 var prevTarget = this.target;
                 // if className is not specified, make no change unless removeMissingDynamicObjects is true
                 if (className || removeMissingDynamicObjects)
-                    setLocalObjectType.call(this, className);
+                    this.setLocalObjectType(className);
                 //TODO:Remove hardcoded NameSpace
                 //var classDef = eval("weavecore." + className);
                 var classDef = window[className];
-                if ((!className && this.target) || (classDef && this.target instanceof classDef))
-                    WeaveAPI.SessionManager.setSessionState(this.target, sessionState, prevTarget !== this.target || removeMissingDynamicObjects);
+                if ((!className && this.target) || (classDef && weavecore.ClassUtils.is(this.target, classDef)))
+                    WeaveAPI.setState(this.target, sessionState, prevTarget !== this.target || removeMissingDynamicObjects);
             }
         } finally {
             // allow callbacks to run once now
-            this._cc.resumeCallbacks();
+            this.cc.resumeCallbacks();
         }
     };
 
@@ -324,7 +238,7 @@ if (typeof window === 'undefined') {
         if (newTarget === this || WeaveAPI.SessionManager.getLinkableDescendants(newTarget, LinkableDynamicObject).indexOf(this) >= 0)
             newTarget = null;
 
-        weavecore.LinkableWatcher.prototype.internalSetTarget.call(this, newTarget);
+        LinkableDynamicObject.base(this, 'internalSetTarget', newTarget);
     };
 
 
@@ -332,27 +246,25 @@ if (typeof window === 'undefined') {
     //private
     //to-do
     // replace weavecore with ns and figure out best way to deal this
-    function setLocalObjectType(className) {
+    p.setLocalObjectType = function (classDef) {
         // stop if locked
         if (this._locked)
             return;
 
-        this._cc.delayCallbacks();
+        this.cc.delayCallbacks();
 
         this.targetPath = null;
 
-        var classDef = weavecore.ClassUtils.hasClassDefinition(className) ? weavecore.ClassUtils.getClassDefinition(className) : null;
-        classDef = classDef ? classDef : eval(className);
-        if ((classDef.prototype instanceof weavecore.ILinkableObject || classDef.SESSIONABLE) && (this._typeRestriction === null || this._typeRestriction === undefined || weavecore.ClassUtils.classExtends(className, this._typeRestrictionClassName))) {
-
+        if (WeaveAPI.isLinkable(classDef) && (this._typeRestriction == null || weavecore.ClassUtils.is(classDef.prototype, this._typeRestriction))) {
             var obj = this.target;
-            if (!obj || obj.constructor !== classDef || !(obj instanceof classDef))
-                weavecore.LinkableWatcher.prototype._setTarget.call(this, new classDef());
+            if (!obj || obj.constructor !== classDef)
+                weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', new classDef());
         } else {
-            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
+            weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', null);
         }
 
-        this._cc.resumeCallbacks();
+
+        this.cc.resumeCallbacks();
     };
 
     /**
@@ -361,24 +273,24 @@ if (typeof window === 'undefined') {
 
 
     p.requestLocalObject = function (objectType, lockObject) {
-        this._cc.delayCallbacks();
+        this.cc.delayCallbacks();
 
         //To-do
         // this will fail if we minify the weavecore, as constructor name wont be same in minified version
         // we nee dot get namespace of that object here too
         // temp solution store  Ns name in the object instance as String
         if (objectType)
-            setLocalObjectType.call(this, objectType.NS + '.' + objectType.CLASS_NAME);
+            this.setLocalObjectType(objectType);
         else
             this.target = null;
 
         if (lockObject)
             this._locked = true;
 
-        this._cc.resumeCallbacks();
+        this.cc.resumeCallbacks();
 
         if (objectType)
-            return (this.target && this.target instanceof objectType) ? this.target : null;
+            return (this.target && weavecore.ClassUtils.is(this.target, objectType)) ? this.target : null;
 
         return this.target;
     };
@@ -391,18 +303,18 @@ if (typeof window === 'undefined') {
             return this.requestLocalObject(objectType, lockObject);
 
         if (!this._locked) {
-            this._cc.delayCallbacks();
+            this.cc.delayCallbacks();
 
             this.targetPath = [name];
             WeaveAPI.globalHashMap.requestObject(name, objectType, lockObject);
             if (lockObject)
                 this._locked = true;
 
-            this._cc.resumeCallbacks();
+            this.cc.resumeCallbacks();
         }
 
         if (objectType)
-            return (this.target && this.target instanceof objectType) ? this.target : null;
+            return (this.target && weavecore.ClassUtils.is(this.target, objectType)) ? this.target : null;
 
         return this.target;
     };
@@ -411,73 +323,84 @@ if (typeof window === 'undefined') {
      * @inheritDoc
      */
     p.requestLocalObjectCopy = function (objectToCopy) {
-        this._cc.delayCallbacks(); // make sure callbacks only trigger once
+        this.cc.delayCallbacks(); // make sure callbacks only trigger once
         var classDef = objectToCopy ? objectToCopy.constructor : null;
         var object = this.requestLocalObject(classDef, false);
         if (object !== null && object !== undefined && objectToCopy !== null && objectToCopy !== undefined) {
-            var state = WeaveAPI.SessionManager.getSessionState(objectToCopy);
-            WeaveAPI.SessionManager.setSessionState(object, state, true);
+            WeaveAPI.copyState(objectToCopy, object);
         }
-        this._cc.resumeCallbacks();
+        this.cc.resumeCallbacks();
     };
 
 
     p.removeObject = function () {
         if (!this._locked)
-            weavecore.LinkableWatcher.prototype._setTarget.call(this, null);
+            weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', null);
     };
 
     p.dispose = function () {
         // explicitly dispose the CallbackCollection before anything else
-        this._cc.dispose();
-        weavecore.LinkableWatcher.prototype.dispose.call(this);
+        this.cc.dispose();
+        LinkableDynamicObject.base(this, 'dispose');
     };
 
     ////////////////////////////////////////////////////////////////////////
     // ICallbackCollection interface included for backwards compatibility
     /** @inheritDoc */
     p.addImmediateCallback = function (relevantContext, callback, runCallbackNow, alwaysCallLast) {
-        runCallbackNow = (runCallbackNow === undefined) ? false : runCallbackNow;
-        alwaysCallLast = (alwaysCallLast === undefined) ? false : alwaysCallLast;
-        this._cc.addImmediateCallback(relevantContext, callback, runCallbackNow, alwaysCallLast);
+        runCallbackNow = typeof runCallbackNow !== 'undefined' ? runCallbackNow : false;
+        alwaysCallLast = typeof alwaysCallLast !== 'undefined' ? alwaysCallLast : false;
+        this.cc.addImmediateCallback(relevantContext, callback, runCallbackNow, alwaysCallLast);
     };
 
     /** @inheritDoc */
-    p.addGroupedCallback = function (relevantContext, groupedCallback, triggerCallbackNow) {
-        triggerCallbackNow = (triggerCallbackNow === undefined) ? false : triggerCallbackNow;
-        this._cc.addGroupedCallback(relevantContext, groupedCallback, triggerCallbackNow);
+    p.addGroupedCallback = function (relevantContext, groupedCallback, triggerCallbackNow, delayWhileBusy) {
+        triggerCallbackNow = typeof triggerCallbackNow !== 'undefined' ? triggerCallbackNow : false;
+        delayWhileBusy = typeof delayWhileBusy !== 'undefined' ? delayWhileBusy : true;
+        this.cc.addGroupedCallback(relevantContext, groupedCallback, triggerCallbackNow, delayWhileBusy);
     };
 
     /** @inheritDoc */
     p.addDisposeCallback = function (relevantContext, callback) {
-        this._cc.addDisposeCallback(relevantContext, callback);
+        this.cc.addDisposeCallback(relevantContext, callback);
     };
 
     /** @inheritDoc */
     p.removeCallback = function (callback) {
-        this._cc.removeCallback(callback);
+        this.cc.removeCallback(callback, this.cc);
     };
 
     /** @inheritDoc */
     /** @inheritDoc */
     p.triggerCallbacks = function () {
-        this._cc.triggerCallbacks();
+        this.cc.triggerCallbacks();
     };
 
     /** @inheritDoc */
     /** @inheritDoc */
     p.delayCallbacks = function () {
-        this._cc.delayCallbacks();
+        this.cc.delayCallbacks();
     };
 
     /** @inheritDoc */
     p.resumeCallbacks = function () {
-        this._cc.resumeCallbacks();
+        this.cc.resumeCallbacks();
     };
 
     weavecore.LinkableDynamicObject = LinkableDynamicObject;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableDynamicObject', LinkableDynamicObject);
-    weavecore.ClassUtils.registerImplementation('weavecore.LinkableDynamicObject', 'weavecore.ILinkableCompositeObject');
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableDynamicObject',
+            qName: 'weavecore.LinkableDynamicObject'
+        }],
+        interfaces: [weavecore.ILinkableDynamicObject, weavecore.ICallbackCollection]
+    };
+
 
 
 }());

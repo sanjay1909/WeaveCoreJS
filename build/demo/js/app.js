@@ -21,39 +21,7 @@ if (typeof window === 'undefined') {
  */
 (function () {
 
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @public
-     * @property NS
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(CompositeObject, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * temporary solution to save the className for this class/prototype
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(CompositeObject, 'CLASS_NAME', {
-        value: 'CompositeObject'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(CompositeObject, 'SESSIONABLE', {
-        value: true
-    });
 
 
     function CompositeObject() {
@@ -71,8 +39,6 @@ if (typeof window === 'undefined') {
 
 
 
-    CompositeObject.prototype = new weavecore.ILinkableObject();
-    CompositeObject.prototype.constructor = CompositeObject;
 
     // Prototypes
     var p = CompositeObject.prototype;
@@ -80,7 +46,18 @@ if (typeof window === 'undefined') {
 
 
     weavecore.CompositeObject = CompositeObject;
-    weavecore.ClassUtils.registerClass('weavecore.CompositeObject', CompositeObject);
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'CompositeObject',
+            qName: 'weavecore.CompositeObject'
+        }],
+        interfaces: [weavecore.ILinkableObject]
+    };
 
 }());
 
@@ -119,11 +96,11 @@ var test = {};
         dC.createNewSession = createNewSession;
 
         test.hashMap = WeaveAPI.globalHashMap.requestObject("hashMap", weavecore.LinkableHashMap, false);
-        test.hashMap.addImmediateCallback(WeaveAPI.globalHashMap, function () {
+        test.hashMap.addImmediateCallback(this, function () {
             console.log("hashMap callback", test.hashMap)
         });
-        //test.parent1 = test.hashMap.requestObject("parent1", weavecore.LinkableHashMap, false);
-        //test.parent2 = test.hashMap.requestObject("parent2", weavecore.LinkableHashMap, false);
+
+
 
         dC.labeledslider = {
             'options': {
@@ -138,17 +115,35 @@ var test = {};
         }
 
         test.log = dC.log = new weavecore.SessionStateLog(WeaveAPI.globalHashMap);
-        test.ln = dC.ln = dC.createNewSession("testNum", weavecore.LinkableNumber); // this will cause issue as in session new object is created, tthe reference is changed
+        test.ln = dC.ln = dC.createNewSession("testNum", weavecore.LinkableNumber);
         test.ln2 = dC.ln = dC.createNewSession("testNum2", weavecore.LinkableNumber);
         test.lnPath = WeaveAPI.SessionManager.getPath(WeaveAPI.globalHashMap, test.ln);
         test.lnPath2 = WeaveAPI.SessionManager.getPath(WeaveAPI.globalHashMap, test.ln2);
         test.ldo = dC.ldo = dC.createNewSession("testDO", weavecore.LinkableDynamicObject);
 
-        /*test.co = WeaveAPI.globalHashMap.requestObject("co", weavecore.CompositeObject, false);
+        test.ldo.addImmediateCallback(this, watcherCallback);
 
+        function watcherCallback() {
+            console.log("Linkable watcher callbacks");
+        }
+
+        test.changeTargetPath = function () {
+            if (test.ldo.target) console.log("Callbacks count(Before):", test.ldo.target._callbackEntries.length);
+            test.ldo.targetPath = test.ldo.targetPath === test.lnPath ? test.lnPath2 : test.lnPath;
+            console.log("Callbacks count(after):", test.ldo.target._callbackEntries.length);
+        }
+
+        test.changeTarget = function () {
+            if (test.ldo.target) console.log("Callbacks count(Before):", test.ldo.target._callbackEntries.length);
+            test.ldo.target = test.ldo.target === test.ln ? test.ln2 : test.ln;
+            console.log("Callbacks count(after):", test.ldo.target._callbackEntries.length);
+        }
+
+
+        //********* Composite Object testing
+        test.co = WeaveAPI.globalHashMap.requestObject("co", weavecore.CompositeObject, false);
         var cc = WeaveAPI.SessionManager.getCallbackCollection(test.co);
         cc.addImmediateCallback(this, testing);
-
 
         function testing() {
             if (WeaveAPI.detectLinkableObjectChange(testing, test.co.sessionNumber)) {
@@ -159,12 +154,15 @@ var test = {};
                 console.log("string: ", test.co.sessionString.value);
             }
 
-        }*/
+        }
+
+
+
 
         dC.log.clearHistory();
 
         var cc = WeaveAPI.SessionManager.getCallbackCollection(dC.log);
-        cc.addGroupedCallback({}, dC.updateSliderValues, true);
+        cc.addGroupedCallback(this, dC.updateSliderValues, true);
 
         dC.increment = function () {
             dC.ln.value++;
@@ -194,7 +192,7 @@ var test = {};
             dC.sliderPosition = dC.log._undoHistory.length;
             // since this function is called programatically in next frame in next frame ,
             // and not called by UI event , we need to manually trigger digest cycle.
-            console.log('UpdateSliderValues called')
+            //console.log('UpdateSliderValues called')
             $scope.$apply();
         }
 

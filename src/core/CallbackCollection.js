@@ -27,41 +27,7 @@ if (typeof window === 'undefined') {
         value: 1
     });
 
-    /**
-     * TO-DO:temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(CallbackCollection, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(CallbackCollection, 'CLASS_NAME', {
-        value: 'CallbackCollection'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(CallbackCollection, 'SESSIONABLE', {
-        value: true
-    });
 
     // constructor:
     /**
@@ -78,171 +44,118 @@ if (typeof window === 'undefined') {
      */
 
     function CallbackCollection(preCallback) {
+        preCallback = typeof preCallback !== 'undefined' ? preCallback : null;
 
-        weavecore.ILinkableObject.call(this);
-
-        var p = this;
-        p.addImmediateCallback = weavecore.ClassUtils.bind(this, addImmediateCallback);
-        p.triggerCallbacks = weavecore.ClassUtils.bind(this, triggerCallbacks);
-        p.removeCallback = weavecore.ClassUtils.bind(this, removeCallback);
-        p.delayCallbacks = weavecore.ClassUtils.bind(this, delayCallbacks);
-        p.resumeCallbacks = weavecore.ClassUtils.bind(this, resumeCallbacks);
-        p.addDisposeCallback = weavecore.ClassUtils.bind(this, addDisposeCallback);
-        p.dispose = weavecore.ClassUtils.bind(this, dispose);
-        p.addGroupedCallback = weavecore.ClassUtils.bind(this, addGroupedCallback);
-        p._runCallbacksImmediately = weavecore.ClassUtils.bind(this, _runCallbacksImmediately);
-
-
-
-
-
-        //private properties:
-
-        /**
-         * for debugging only... will be set when debug==true
-         * @private
-         * @property _linkableObject
-         * @type ILinkableObject
-         **/
-        this._linkableObject;
-
-        /**
-         * for debugging only... will be set when debug==true
-         * @private
-         * @property _lastTriggerStackTrace
-         * @type string
-         **/
-        this._lastTriggerStackTrace; //
-        /**
-         * @private
-         * @property _oldEntries
-         * @type Array
-         **/
-        this._oldEntries;
-
-        /**
-         * This is a list of CallbackEntry objects in the order they were created.
-         * @private
-         * @property _callbackEntries
-         * @type Array
-         **/
         this._callbackEntries = [];
-
-        /**
-         * This is the function that gets called immediately before every callback.
-         * @protected
-         * @property _precallback
-         * @type function
-         **/
+        this._triggerCounter = CallbackCollection.DEFAULT_TRIGGER_COUNT;
+        this._disposeCallbackEntries = [];
         this._preCallback = preCallback;
 
-        /**
-         * If this is true, it means triggerCallbacks() has been called while delayed was true.
-         * @private
-         * @property _runCallbacksIsPending
-         * @defaut false
-         * @type boolean
-         **/
-        this._runCallbacksIsPending = false;
+        this.triggerCallbacks = goog.bind(triggerCallbacks, this);
+    }
 
-        /**
-         * This is the number of times delayCallbacks() has been called without a matching call to resumeCallbacks().
-         * While this is greater than zero, effects of triggerCallbacks() will be delayed.
-         * @private
-         * @property _delayCount
-         * @type number
-         * @default 0
-         **/
-        this._delayCount = 0;
 
-        /**
-         * This value keeps track of how many times callbacks were triggered, and is returned by the public triggerCounter accessor function.
-         * The value starts at 1 to simplify code that compares the counter to a previous value.
-         * This allows the previous value to be set to zero so change will be detected the first time the counter is compared.
-         * This fixes potential bugs where the base case of zero is not considered.
-         * @private
-         * @property _runCallbacksIsPending
-         * @type boolean
-         **/
-        this._triggerCounter = CallbackCollection.DEFAULT_TRIGGER_COUNT;
 
-        /**
-         * A list of CallbackEntry objects for when dispose() is called.
-         * @private
-         * @property _disposeCallbackEntries
-         * @type Array
-         */
-        this._disposeCallbackEntries = [];
-        /**
-         * This value is used internally to remember if dispose() was called.
-         * @private
-         * @property _wasDisposed
-         * @type Boolean
-         * @default false
-         */
-        this._wasDisposed = false;
 
-        /**
-         * This flag is used in _runCallbacksImmediately() to detect when a recursive call has completed running all the callbacks.
-         * @private
-         * @property _runCallbacksCompleted
-         * @type Boolean
-         */
-        this._runCallbacksCompleted;
+    // Prototypes
+    var p = CallbackCollection.prototype;
 
-        // public properties:
-        // readonly Properties
-
-        /**
-         * This counter gets incremented at the time that callbacks are triggered and before they are actually called.
-         * It is necessary in some situations to check this counter to determine if cached data should be used.
-         * @public
-         * @property triggerCounter
-         * @readOnly
-         * @type Number
-         */
-        Object.defineProperty(this, 'triggerCounter', {
+    Object.defineProperties(p, {
+        /** @export */
+        triggerCounter: {
             get: function () {
                 return this._triggerCounter;
             }
-        });
-
-        /**
-         * While this is true, it means the delay count is greater than zero and the effects of
-         * triggerCallbacks() are delayed until resumeCallbacks() is called to reduce the delay count.
-         * @public
-         * @property callbacksAreDelayed
-         * @readOnly
-         * @type Boolean
-         */
-        Object.defineProperty(this, 'callbacksAreDelayed', {
+        },
+        /** @export */
+        callbacksAreDelayed: {
             get: function () {
                 return this._delayCount > 0;
             }
-        });
-
-        /**
-         * This flag becomes true after dispose() is called.
-         * @public
-         * @property wasDisposed
-         * @readOnly
-         * @type Boolean
-         */
-        Object.defineProperty(this, 'wasDisposed', {
+        },
+        /** @export */
+        wasDisposed: {
             get: function () {
                 return this._wasDisposed;
             }
-        });
+        }
+    });
+
+    /**
+     * @export
+     * @type {weavecore.ILinkableObject}
+     */
+    p._linkableObject;
+
+
+    /**
+     * @private
+     * @type {string}
+     */
+    p._lastTriggerStackTrace;
+
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._oldEntries;
+
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._callbackEntries;
+
+
+    /**
+     * @protected
+     * @type {Function}
+     */
+    p._preCallback = null;
+
+
+    /**
+     * @private
+     * @type {number}
+     */
+    p._delayCount = 0;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._runCallbacksIsPending = false;
 
 
 
-    }
 
-    CallbackCollection.prototype = new weavecore.ILinkableObject();
-    CallbackCollection.prototype.constructor = CallbackCollection;
+    /**
+     * @private
+     * @type {number}
+     */
+    p._triggerCounter;
 
-    // Prototypes
-    //var p = CallbackCollection.prototype;
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._runCallbacksCompleted;
+
+    /**
+     * @private
+     * @type {Array}
+     */
+    p._disposeCallbackEntries;
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p._wasDisposed = false;
+
     // public methods:
     /**
      * This adds the given function as a callback.  The function must not require any parameters.
@@ -253,21 +166,19 @@ if (typeof window === 'undefined') {
      * @param {Boolean} runCallbackNow If this is set to true, the callback will be run immediately after it is added.
      * @param {Boolean} alwaysCallLast If this is set to true, the callback will be always be called after any callbacks that were added with alwaysCallLast=false.  Use this to establish the desired child-to-parent triggering order.
      */
-    function addImmediateCallback(contextObj, callback, runCallbackNow, alwaysCallLast) {
-        if (callback === null || callback === undefined)
-            return;
+    p.addImmediateCallback = function (relevantContext, callback, runCallbackNow, alwaysCallLast) {
 
         // set default value for parameters
-        if (runCallbackNow === null || runCallbackNow === undefined)
-            runCallbackNow = false;
+        runCallbackNow = typeof runCallbackNow !== 'undefined' ? runCallbackNow : false;
+        alwaysCallLast = typeof alwaysCallLast !== 'undefined' ? alwaysCallLast : false;
 
-        if (alwaysCallLast === null || alwaysCallLast === undefined)
-            alwaysCallLast = false;
+        if (callback === null || callback === undefined)
+            return;
 
         // remove the callback if it was previously added
         this.removeCallback(callback);
 
-        var entry = new CallbackEntry(contextObj, callback);
+        var entry = new weavecore.CallbackEntry(relevantContext, callback);
         if (alwaysCallLast) // this will run the callback in second round of callback entries
             entry.schedule = 1; //mostly parent.triggercallback are called last.
         this._callbackEntries.push(entry);
@@ -275,7 +186,7 @@ if (typeof window === 'undefined') {
         if (runCallbackNow) {
             // increase the recursion count while the function is running
             entry.recursionCount++;
-            callback.call(this);
+            callback.apply(relevantContext || callback['this']);
             entry.recursionCount--;
         }
     };
@@ -286,20 +197,13 @@ if (typeof window === 'undefined') {
      * @method triggerCallbacks
      */
     function triggerCallbacks() {
-
         if (CallbackCollection.debug) {
-            if (arguments)
-                console.log("triggerCallbacks", arguments);
-            else
-                console.log("triggerCallbacks", this);
-
             this._lastTriggerStackTrace = new Error(CallbackCollection.STACK_TRACE_TRIGGER).stack;
         }
 
         if (this._delayCount > 0) {
             // we still want to increase the counter even if callbacks are delayed
             this._triggerCounter++;
-            if (CallbackCollection.debug) console.log("triggerCallbacks: _runCallbacksIsPending ->true", this._delayCount, this._triggerCounter);
             this._runCallbacksIsPending = true;
             return;
         }
@@ -315,11 +219,8 @@ if (typeof window === 'undefined') {
      * @protected
      * @final
      */
-    function _runCallbacksImmediately() {
-        if (CallbackCollection.debug) {
-            if (arguments.length > 1) console.log("_runCallbacksImmediately: ", arguments);
-        }
-        var preCallbackParams = arguments;
+    p._runCallbacksImmediately = function () {
+        var preCallbackParams = Array.prototype.slice.call(arguments, 0);
         //increase the counter immediately
         this._triggerCounter++;
         this._runCallbacksIsPending = false;
@@ -344,10 +245,10 @@ if (typeof window === 'undefined') {
                 var shouldRemoveEntry;
                 if (entry.callback === null || entry.callback === undefined)
                     shouldRemoveEntry = true;
-                else if (entry.context instanceof CallbackCollection) // special case
+                else if (weavecore.ClassUtils.is(entry.context, CallbackCollection)) // special case
                     shouldRemoveEntry = entry.context.wasDisposed;
                 else
-                    shouldRemoveEntry = WeaveAPI.SessionManager.objectWasDisposed(entry.context);
+                    shouldRemoveEntry = WeaveAPI.wasDisposed(entry.context);
                 if (shouldRemoveEntry) {
                     if (CallbackCollection.debug) {
                         if (arguments.length > 1) console.log("Entry is disposed");
@@ -367,7 +268,7 @@ if (typeof window === 'undefined') {
                     if (CallbackCollection.debug) {
                         if (arguments.length > 1) console.log(["callback executed"]);
                     }
-                    entry.callback.call();
+                    entry.callback.apply(entry.context || entry.callback['this']);
 
                     entry.recursionCount--; // decrease count because the callback finished.
                 }
@@ -382,14 +283,15 @@ if (typeof window === 'undefined') {
      * @method removeCallback
      * @param {Function} callback The function to remove from the list of callbacks.
      */
-    function removeCallback(callback) {
+    p.removeCallback = function (callback, relevantContext) {
         // if the callback was added as a grouped callback, we need to remove the trigger function
-        GroupedCallbackEntry.removeGroupedCallback(this, callback);
+        weavecore.GroupedCallbackEntry.removeGroupedCallback(this, relevantContext, callback);
         // find the matching CallbackEntry, if any
         for (var outerLoop = 0; outerLoop < 2; outerLoop++) {
             var entries = outerLoop === 0 ? this._callbackEntries : this._disposeCallbackEntries;
             for (var index = 0; index < entries.length; index++) {
                 var entry = entries[index];
+                // if (entry !== null && entry !== undefined && callback === entry.callback && entry.context === relevantContext) {
                 if (entry !== null && entry !== undefined && callback === entry.callback) {
                     // Remove the callback by setting the function pointer to null.
                     // This is done instead of removing the entry because we may be looping over the _callbackEntries Array right now.
@@ -406,7 +308,7 @@ if (typeof window === 'undefined') {
      * As long as the delay count is greater than zero, effects of triggerCallbacks() will be delayed.
      * @method delayCallbacks
      */
-    function delayCallbacks() {
+    p.delayCallbacks = function () {
         this._delayCount++;
     };
 
@@ -415,7 +317,7 @@ if (typeof window === 'undefined') {
      * If triggerCallbacks() was called while the delay count was greater than zero, immediate callbacks will be called now.
      * @method resumeCallbacks
      */
-    function resumeCallbacks() {
+    p.resumeCallbacks = function () {
         if (this._delayCount > 0)
             this._delayCount--;
 
@@ -429,16 +331,16 @@ if (typeof window === 'undefined') {
      * @param {Object} relevantContext If this is not null, then the callback will be removed when the relevantContext object is disposed via SessionManager.dispose().  This parameter is typically a 'this' pointer.
      * @param callback {Function} The function to call when this callback collection is disposed.
      */
-    function addDisposeCallback(relevantContext, callback) {
+    p.addDisposeCallback = function (relevantContext, callback) {
         // don't do anything if the dispose callback was already added
         for (var i = 0; i < this._disposeCallbackEntries.length; i++) {
             var entry = this._disposeCallbackEntries[i];
-            if (entry.callback === callback)
+            if (entry.callback === callback && entry.context === relevantContext)
                 return;
         }
 
 
-        this._disposeCallbackEntries.push(new CallbackEntry(relevantContext, callback));
+        this._disposeCallbackEntries.push(new weavecore.CallbackEntry(relevantContext, callback));
     };
 
 
@@ -447,10 +349,14 @@ if (typeof window === 'undefined') {
      * Use disposeObject() instead so parent-child relationships get cleaned up automatically.
      * @method dispose
      */
-    function dispose() {
+    p.dispose = function () {
         // remove all callbacks
         if (CallbackCollection.debug)
             this._oldEntries = this._oldEntries ? this._oldEntries.concat(this._callbackEntries) : this._callbackEntries.concat();
+
+        this._callbackEntries.forEach(function (entry) {
+            entry.dispose();
+        });
 
         this._callbackEntries.length = 0;
         this._wasDisposed = true;
@@ -458,8 +364,8 @@ if (typeof window === 'undefined') {
         // run & remove dispose callbacks
         while (this._disposeCallbackEntries.length) {
             var entry = this._disposeCallbackEntries.shift();
-            if (entry.callback !== null && entry.callback !== undefined && !WeaveAPI.SessionManager.objectWasDisposed(entry.context)) {
-                entry.callback();
+            if (entry.callback !== null && entry.callback !== undefined && !WeaveAPI.wasDisposed(entry.context)) {
+                entry.callback.apply(entry.context || entry.callback['this']);
             }
         }
     };
@@ -477,381 +383,28 @@ if (typeof window === 'undefined') {
      * @param groupedCallback {Function} The callback function that will only be allowed to run during a scheduled time each frame.  It must not require any parameters.
      * @param triggerCallbackNow {Boolean} If this is set to true, the callback will be triggered to run during the scheduled time after it is added.
      */
-    function addGroupedCallback(relevantContext, groupedCallback, triggerCallbackNow) {
+    p.addGroupedCallback = function (relevantContext, groupedCallback, triggerCallbackNow, delayWhileBusy) {
         //set default value for parameters
-        if (triggerCallbackNow === null || triggerCallbackNow === undefined)
-            triggerCallbackNow = false;
-        GroupedCallbackEntry.addGroupedCallback(this, relevantContext, groupedCallback, triggerCallbackNow);
+        triggerCallbackNow = typeof triggerCallbackNow !== 'undefined' ? triggerCallbackNow : false;
+        delayWhileBusy = typeof delayWhileBusy !== 'undefined' ? delayWhileBusy : true;
+        weavecore.GroupedCallbackEntry.addGroupedCallback(this, relevantContext, groupedCallback, triggerCallbackNow, delayWhileBusy);
     };
 
 
 
     weavecore.CallbackCollection = CallbackCollection;
-    weavecore.ClassUtils.registerClass('weavecore.CallbackCollection', CallbackCollection);
-
-
-    // constructor:
-    /**
-     * Internal Class used in {{#crossLink "CallbackCollection"}}{{/crossLink}}
-     * @class CallbackEntry
-     * @for CallbackCollection
-     * @param {Object} context
-     * @param {Function} callback
-     * @constructor
-     */
-    function CallbackEntry(context, callback) {
-        /**
-         * This is the context in which the callback function is relevant.
-         * When the context is disposed, the callback should not be called anymore.
-         * @public
-         * @property context
-         * @type Object
-         */
-        this.context = context;
-        /**
-         * This is the callback function.
-         * @public
-         * @property callback
-         * @type Function
-         */
-        this.callback = callback;
-        /**
-         * This is the current recursion depth.
-         * If this is greater than zero, it means the function is currently running.
-         * @public
-         * @property recursionCount
-         * @type number
-         */
-        this.recursionCount = 0;
-        /**
-         * This is 0 if the callback was added with alwaysCallLast=false, or 1 for alwaysCallLast=true
-         * @public
-         * @property schedule
-         * @type number
-         */
-        this.schedule = 0;
-
-        /**
-         * This is a stack trace from when the callback was added.
-         * @public
-         * @property addCallback_stackTrace
-         * @type string
-         */
-        this.addCallback_stackTrace;
-        /**
-         * This is a stack trace from when the callback was removed.
-         * @public
-         * @property removeCallback_stackTrace
-         * @type string
-         */
-        this.removeCallback_stackTrace;
-
-        // var p = this.prototype ? this.prototype : this.__proto__;
-        var p = this;
-        p.dispose = weavecore.ClassUtils.bind(this, callbackEntryDispose);
-
-        if (CallbackCollection.debug)
-            this.addCallback_stackTrace = new Error(CallbackEntry.STACK_TRACE_ADD).stack;
-    }
-
-    //Static Properties:
-    /**
-     * Internal Static const properties for Debugging
-     * @private
-     * @static
-     * @property STACK_TRACE_TRIGGER
-     * @readOnly
-     * @default "This is the stack trace from when the callbacks were last triggered."
-     * @type string
-     */
-    Object.defineProperty(CallbackEntry, 'STACK_TRACE_TRIGGER', {
-        value: "This is the stack trace from when the callbacks were last triggered."
-    });
-    /**
-     * Internal Static const properties for Debugging
-     * @private
-     * @static
-     * @property STACK_TRACE_ADD
-     * @readOnly
-     * @default "This is the stack trace from when the callback was added."
-     * @type string
-     */
-    Object.defineProperty(CallbackEntry, 'STACK_TRACE_ADD', {
-        value: "This is the stack trace from when the callback was added."
-    });
-    /**
-     * Internal Static const properties for Debugging
-     * @private
-     * @static
-     * @property STACK_TRACE_REMOVE
-     * @readOnly
-     * @default "This is the stack trace from when the callback was removed."
-     * @type string
-     */
-    Object.defineProperty(CallbackEntry, 'STACK_TRACE_REMOVE', {
-        value: "This is the stack trace from when the callback was removed."
-    });
 
     /**
-     * Call this when the callback entry is no longer needed.
-     * @method dispose
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
      */
-    function callbackEntryDispose() {
-        if (CallbackCollection.debug && this.callback !== null && this.callback !== undefined)
-            this.removeCallback_stackTrace = new Error(CallbackEntry.STACK_TRACE_REMOVE).stack;
-
-        this.context = null;
-        this.callback = null;
+    p.CLASS_INFO = {
+        names: [{
+            name: 'CallbackCollection',
+            qName: 'weavecore.CallbackCollection'
+        }],
+        interfaces: [weavecore.ICallbackCollection, weavecore.IDisposableObject]
     };
-
-    weavecore.CallbackEntry = CallbackEntry;
-
-
-    // constructor:
-    /**
-     * Internal Class used in {{#crossLink "CallbackCollection"}}{{/crossLink}}
-     * @class GroupedCallbackEntry
-     * @extends CallbackEntry
-     * @for CallbackCollection
-     * @param {Function} groupedCallback
-     * @constructor
-     */
-    function GroupedCallbackEntry(groupedCallback) {
-
-        CallbackEntry.call(this, [], groupedCallback);
-
-        // var p = this.prototype ? this.prototype : this.__proto__;
-        var p = this;
-        p.trigger = weavecore.ClassUtils.bind(this, trigger);
-        p.handleGroupedCallback = weavecore.ClassUtils.bind(this, handleGroupedCallback);
-        /**
-         * If true, the callback was triggered this frame.
-         * @public
-         * @property triggered
-         * @type Boolean
-         * @default false
-         */
-        this.triggered = false;
-
-        /**
-         * If true, the callback was triggered again from another grouped callback.
-         * @public
-         * @property triggeredAgain
-         * @type Boolean
-         * @default false
-         */
-        this.triggeredAgain = false;
-
-
-        if (!GroupedCallbackEntry._initialized) {
-            WeaveAPI.StageUtils.addEventCallback("tick", null, GroupedCallbackEntry._handleGroupedCallbacks);
-            GroupedCallbackEntry._initialized = true;
-        }
-    }
-
-    //Static Properties:
-    /**
-     * True while handling grouped callbacks.
-     * @private
-     * @static
-     * @property _handlingGroupedCallbacks
-     * @default false
-     * @type Boolean
-     */
-    GroupedCallbackEntry._handlingGroupedCallbacks = false;
-
-    /**
-     * True while handling grouped callbacks called recursively from other grouped callbacks.
-     * @private
-     * @static
-     * @property _handlingRecursiveGroupedCallbacks
-     * @default false
-     * @type Boolean
-     */
-    GroupedCallbackEntry._handlingRecursiveGroupedCallbacks = false;
-
-    /**
-     * This gets set to true when the static _handleGroupedCallbacks() callback has been added as a frame listener.
-     * @private
-     * @static
-     * @property _initialized
-     * @default false
-     * @type Boolean
-     */
-    GroupedCallbackEntry._initialized = false;
-
-    /**
-     * This maps a groupedCallback function to its corresponding GroupedCallbackEntry.
-     * @private
-     * @static
-     * @readOnly
-     * @property _entryLookup
-     * @type Map
-     */
-    Object.defineProperty(GroupedCallbackEntry, '_entryLookup', {
-        value: new Map()
-    });
-
-    /**
-     * This is a list of GroupedCallbackEntry objects in the order they were triggered.
-     * @private
-     * @static
-     * @readOnly
-     * @property _triggeredEntries
-     * @type Array
-     */
-    Object.defineProperty(GroupedCallbackEntry, '_triggeredEntries', {
-        value: []
-    });
-
-    //Static Methods:
-
-    /**
-     * @method addGroupedCallback
-     * @static
-     * @param {CallbackCollection} callbackCollection
-     * @param {Object} relevantContext
-     * @param {Function} groupedCallback
-     * @param {Boolean} triggerCallbackNow
-     */
-    GroupedCallbackEntry.addGroupedCallback = function (callbackCollection, relevantContext, groupedCallback, triggerCallbackNow) {
-        // get (or create) the shared entry for the groupedCallback
-        var entry = GroupedCallbackEntry._entryLookup.get(groupedCallback);
-        if (!entry) {
-            entry = new GroupedCallbackEntry(groupedCallback);
-            GroupedCallbackEntry._entryLookup.set(groupedCallback, entry);
-        }
-
-        // context shouldn't be null because we use it to determine when to clean up the GroupedCallbackEntry.
-        if (relevantContext === null || relevantContext === undefined)
-            relevantContext = callbackCollection;
-
-        // add this context to the list of relevant contexts
-        entry.context.push(relevantContext);
-
-
-        // make sure the actual function is not already added as a callback.
-        callbackCollection.removeCallback(groupedCallback);
-
-        // add the trigger function as a callback
-        // The relevantContext parameter is set to null for entry.trigger so the same callback can be added multiple times to the same
-        // target using different contexts without having the side effect of losing the callback when one of those contexts is disposed.
-        // The entry.trigger function will be removed once all contexts are disposed.
-        // entry.trigger = entry.trigger.bind(entry);
-        callbackCollection.addImmediateCallback(null, entry.trigger, triggerCallbackNow);
-    };
-
-    /**
-     * @method removeGroupedCallback
-     * @static
-     * @param {CallbackCollection} callbackCollection
-     * @param {Function} groupedCallback
-     */
-    GroupedCallbackEntry.removeGroupedCallback = function (callbackCollection, groupedCallback) {
-        // remove the trigger function as a callback
-        var entry = GroupedCallbackEntry._entryLookup.get(groupedCallback);
-        if (entry)
-            callbackCollection.removeCallback(entry.trigger);
-    };
-
-    /**
-     * This function gets called once per frame and allows grouped callbacks to run.
-     * @method _handleGroupedCallbacks
-     * @static
-     * @private
-     */
-    GroupedCallbackEntry._handleGroupedCallbacks = function () {
-        var i;
-        var entry;
-
-        GroupedCallbackEntry._handlingGroupedCallbacks = true; {
-            // Handle grouped callbacks in the order they were triggered,
-            // anticipating that more may be added to the end of the list in the process.
-            // This first pass does not allow grouped callbacks to call each other immediately.
-            for (i = 0; i < GroupedCallbackEntry._triggeredEntries.length; i++) {
-                entry = GroupedCallbackEntry._triggeredEntries[i];
-                entry.handleGroupedCallback();
-            }
-
-            // after all grouped callbacks have been handled once, run those which were triggered recursively and allow them to call other grouped callbacks immediately.
-            GroupedCallbackEntry._handlingRecursiveGroupedCallbacks = true; {
-                // handle grouped callbacks that were triggered recursively
-                for (i = 0; i < GroupedCallbackEntry._triggeredEntries.length; i++) {
-                    entry = GroupedCallbackEntry._triggeredEntries[i];
-                    if (entry.triggeredAgain)
-                        entry.handleGroupedCallback();
-                }
-            }
-            GroupedCallbackEntry._handlingRecursiveGroupedCallbacks = false;
-        }
-        GroupedCallbackEntry._handlingGroupedCallbacks = false;
-
-        // reset for next frame
-        for (i = 0; i < GroupedCallbackEntry._triggeredEntries.length; i++) {
-            entry = GroupedCallbackEntry._triggeredEntries[i];
-            entry.triggered = entry.triggeredAgain = false;
-        }
-        GroupedCallbackEntry._triggeredEntries.length = 0;
-
-    };
-
-    GroupedCallbackEntry.prototype = new CallbackEntry();
-    GroupedCallbackEntry.prototype.constructor = GroupedCallbackEntry;
-
-    var gcP = GroupedCallbackEntry.prototype;
-
-    /**
-     * Marks the entry to be handled later (unless already triggered this frame).
-     * This also takes care of preventing recursion.
-     * @method trigger
-     */
-    function trigger() {
-        // if handling recursive callbacks, call now
-        if (GroupedCallbackEntry._handlingRecursiveGroupedCallbacks) {
-            this.handleGroupedCallback();
-        } else if (!this.triggered) {
-            // not previously triggered
-            GroupedCallbackEntry._triggeredEntries.push(this);
-            this.triggered = true;
-        } else if (GroupedCallbackEntry._handlingGroupedCallbacks) {
-            // triggered recursively - call later
-            this.triggeredAgain = true;
-        }
-    };
-
-
-    /**
-     * Checks the context(s) before calling groupedCallback
-     * @method handleGroupedCallback
-     */
-    //gcP.handleGroupedCallback =
-    function handleGroupedCallback() {
-        if (!this.context)
-            return;
-
-        // first, make sure there is at least one relevant context for this callback.
-        var allContexts = this.context;
-        // remove the contexts that have been disposed.
-        for (var i = 0; i < allContexts.length; i++)
-            if (WeaveAPI.SessionManager.objectWasDisposed(allContexts[i]))
-                allContexts.splice(i--, 1);
-            // if there are no more relevant contexts for this callback, don't run it.
-        if (allContexts.length === 0) {
-            this.dispose();
-            GroupedCallbackEntry._entryLookup.delete(this.callback);
-            return;
-        }
-
-        // avoid immediate recursion
-        if (this.recursionCount === 0) {
-            this.recursionCount++;
-            this.callback();
-            this.recursionCount--;
-        }
-        // avoid delayed recursion
-        this.triggeredAgain = false;
-    };
-
-    weavecore.GroupedCallbackEntry = GroupedCallbackEntry;
 
 }());

@@ -17,91 +17,68 @@ if (!this.WeaveAPI)
  */
 (function () {
 
-    // Internal class constructor
+    function EventManager() {
 
-    Object.defineProperty(EventCallbackCollection, 'eventTypes', {
-        value: ['tick']
+
+
+        // create a new callback collection for each type of event
+        for (var j = 0; j < weavecore.EventCallbackCollection.eventTypes.length; j++) {
+            var type = weavecore.EventCallbackCollection.eventTypes[j];
+            this.callbackCollections[type] = new weavecore.EventCallbackCollection(this, type);
+            // this.callbackCollections[type] = WeaveAPI.SessionManager.registerDisposableChild(WeaveAPI.globalHashMap, new weavecore.EventCallbackCollection(this, type));
+        }
+
+        //add event listeners
+        for (var eventtype in this.callbackCollections) {
+            this.callbackCollections[eventtype].listenToStage();
+        }
+    }
+    var ep = EventManager.prototype;
+
+    ep.userActivity = 0; // greater than 0 when there was user activity since the last frame.
+    ep.event = null;
+    ep.eventTime = 0;
+    ep.shiftKey = false;
+    ep.altKey = false;
+    ep.ctrlKey = false;
+    ep.mouseButtonDown = false;
+
+    ep.currentFrameStartTime = new Date().getTime(); // ep is the result of getTimer() on the last ENTER_FRAME event.
+    ep.previousFrameElapsedTime = 0; // this is the amount of time it took to process the previous frame.
+    ep.pointClicked = false;
+    ep.deactivated = true; // true when application is deactivated
+    ep.useDeactivatedFrameRate = false;
+
+    ep.triggeredThrottledMouseThisFrame = false; // set to false on enterFrame, set to true on throttled mouse move
+    ep.nextThrottledMouseMoveTime = 0; // time threshold before triggering throttled mouse move again
+    ep.throttledMouseMoveInterval = 100; // time threshold before triggering throttled mouse move again
+
+    Object.defineProperty(ep, 'callbackCollections', {
+        value: {}
     });
 
-    function EventCallbackCollection(eventManager, eventType) {
-        this.__proto__.setEvent = this.__proto__.setEvent.bind(this);
-        weavecore.CallbackCollection.call(this, this.setEvent);
-        this.__proto__._tickerListener = this.__proto__._tickerListener.bind(this);
-        this._eventManager = eventManager;
-        this._eventType = eventType;
 
-    }
-
-    EventCallbackCollection.prototype = new weavecore.CallbackCollection();
-    EventCallbackCollection.prototype.constructor = EventCallbackCollection;
-
-    var p = EventCallbackCollection.prototype;
+    weavecore.EventManager = EventManager;
 
     /**
-     * This is the _preCallback
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
      */
-    p.setEvent = function setEvent(event) {
-        this._eventManager.event = event;
+    ep.CLASS_INFO = {
+        names: [{
+            name: 'EventManager',
+            qName: 'weavecore.EventManager'
+        }]
     };
 
-    /**
-     * This function remembers the previous event value, runs callbacks using the new event value,
-     * then restores the previous event value. This is necessary because it is possible for a popup
-     * browser window to interrupt Flash with requests in the middle of an event.
-     */
-    p.runEventCallbacks = function (event) {
-        var previousEvent = this._eventManager.event; // remember previous value
-        this._runCallbacksImmediately(event); // make sure event is set before each immediate callback
-        this._preCallback(previousEvent); // restore the previous value
-    };
-
-    /**
-     * Call this when the stage is available to set up event listeners.
-     */
-    p.listenToStage = function () {
-        // do not create event listeners for these meta events
-        //if (eventType === POINT_CLICK_EVENT || eventType === THROTTLED_MOUSE_MOVE_EVENT)
-        //return;
-
-        //if (eventType === KeyboardEvent.KEY_DOWN && Capabilities.playerType === "Desktop")
-        //cancelable = false;
-
-        // Add a listener to the capture phase so the callbacks will run before the target gets the event.
-        //stage.addEventListener(eventType, captureListener, true, 0, true); // use capture phase
-
-        // If the target is the stage, the capture listener won't be called, so add
-        // an additional listener that runs callbacks when the stage is the target.
-        createjs.Ticker.addEventListener(this._eventType, this._tickerListener); // do not use capture phase
-
-        // when callbacks are disposed, remove the listeners
-        this.addDisposeCallback(null, function () {
-            //stage.removeEventListener(eventType, captureListener, true);
-            createjs.Ticker.removeEventListener(this._eventType, this._tickerListener);
-        });
-    };
-
-    p._tickerListener = function (event) {
-        this._eventManager.eventTime = new Date().getTime();
-        if (this._eventType === "tick") {
-            if (this._eventManager.userActivity > 0 && !this._eventManager.mouseButtonDown)
-                this._eventManager.userActivity--;
-            this._eventManager.previousFrameElapsedTime = this._eventManager.eventTime - this._eventManager.currentFrameStartTime;
-            this._eventManager.currentFrameStartTime = this._eventManager.eventTime;
-            //this._eventManager.triggeredThrottledMouseThisFrame = false;
-        }
-        // finally, trigger callbacks for non-mouse-move events
-        if (this._eventType === "tick") // altered temporarily
-            this.runEventCallbacks(event);
-
-    };
-
-    weavecore.EventCallbackCollection = EventCallbackCollection;
 
     StageUtils.debug_async_time = false;
     StageUtils.debug_async_stack = false;
     StageUtils.debug_delayTasks = false; // set this to true to delay async tasks
     StageUtils.debug_callLater = false; // set this to true to delay async tasks
-
+    StageUtils._time;
+    StageUtils._times = [];
 
     /**
      * This will generate an iterative task function that is the combination of a list of tasks to be completed in order.
@@ -144,64 +121,63 @@ if (!this.WeaveAPI)
 
     //constructor
     function StageUtils() {
-
-        this.averageFrameTime = 0;
-
-        Object.defineProperties(this, {
-            eventManager: {
-                value: new EventManager()
-            },
-            frameTimes: {
-                value: []
-            },
-            _stackTraceMap: {
-                value: new Map()
-            },
-            _taskElapsedTime: {
-                value: new Map()
-            },
-            _taskStartTime: {
-                value: new Map()
-            },
-
-        });
-
-        Object.defineProperty(this, 'currentFrameElapsedTime', {
-            get: function () {
-                return getTimer() - this.eventManager.currentFrameStartTime;
-            }
-        });
-        this._currentTaskStopTime = 0;
-
-        /**
-         * This is an Array of "callLater queues", each being an Array of function invocations to be done later.
-         * The Arrays get populated by callLater().
-         * There are four nested Arrays corresponding to the four priorities (0, 1, 2, 3) defined by static constants in WeaveAPI.
-         */
-        Object.defineProperties(this, {
-            _priorityCallLaterQueues: {
-                value: [[], [], [], []]
-            },
-            _priorityAllocatedTimes: {
-                value: [Number.MAX_VALUE, 300, 200, 100]
-            }
-        });
-        this._activePriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE + 1; // task priority that is currently being processed
-        this._activePriorityElapsedTime = 0;
-        this._deactivatedMaxComputationTimePerFrame = 1000;
-        this._nextCallLaterPriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE; // private variable to control the priority of the next callLater() internally
-
-        this.__proto__._iterateTask = this.__proto__._iterateTask.bind(this);
-        this.__proto__._handleCallLater = this.__proto__._handleCallLater.bind(this);
+        this._handleCallLater = goog.bind(_handleCallLater, this);
         this.addEventCallback("tick", null, this._handleCallLater);
-        this.maxComputationTimePerFrame = 100;
-        this.maxComputationTimePerFrame_noActivity = 250;
-
-        this._debugTaskTimes = new Map();
-
     }
 
     var suP = StageUtils.prototype;
+
+
+    suP.averageFrameTime = 0;
+
+    Object.defineProperties(suP, {
+        eventManager: {
+            value: new EventManager()
+        },
+        frameTimes: {
+            value: []
+        },
+        _stackTraceMap: {
+            value: new Map()
+        },
+        _taskElapsedTime: {
+            value: new Map()
+        },
+        _taskStartTime: {
+            value: new Map()
+        },
+
+    });
+
+    Object.defineProperty(suP, 'currentFrameElapsedTime', {
+        get: function () {
+            return getTimer() - this.eventManager.currentFrameStartTime;
+        }
+    });
+    suP._currentTaskStopTime = 0;
+
+    /**
+     * This is an Array of "callLater queues", each being an Array of function invocations to be done later.
+     * The Arrays get populated by callLater().
+     * There are four nested Arrays corresponding to the four priorities (0, 1, 2, 3) defined by static constants in WeaveAPI.
+     */
+    Object.defineProperties(suP, {
+        _priorityCallLaterQueues: {
+            value: [[], [], [], []]
+        },
+        _priorityAllocatedTimes: {
+            value: [Number.MAX_VALUE, 300, 200, 100]
+        }
+    });
+    suP._activePriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE + 1; // task priority that is currently being processed
+    suP._activePriorityElapsedTime = 0;
+    suP._deactivatedMaxComputationTimePerFrame = 1000;
+    suP._nextCallLaterPriority = WeaveAPI.TASK_PRIORITY_IMMEDIATE; // private variable to control the priority of the next callLater() internally
+
+    suP.maxComputationTimePerFrame = 100;
+    suP.maxComputationTimePerFrame_noActivity = 250;
+
+    suP._debugTaskTimes = new Map();
     suP.getMaxComputationTimePerFrame = function () {
         return this.maxComputationTimePerFrame;
     };
@@ -219,8 +195,7 @@ if (!this.WeaveAPI)
         this._priorityAllocatedTimes[priority] = Math.max(milliseconds, 5);
     };
 
-    StageUtils._time;
-    StageUtils._times = [];
+
 
     suP.callLater = function (relevantContext, method, parameters) {
         if (method === null || method === undefined) {
@@ -235,7 +210,7 @@ if (!this.WeaveAPI)
             this._stackTraceMap.set(args, new Error("This is the stack trace from when callLater() was called.").getStackTrace());
     };
 
-    suP._handleCallLater = function () {
+    function _handleCallLater() {
         if (this.maxComputationTimePerFrame === 0)
             this.maxComputationTimePerFrame = 100;
 
@@ -555,45 +530,12 @@ if (!this.WeaveAPI)
     weavecore.StageUtils = StageUtils;
     WeaveAPI.StageUtils = new StageUtils();
 
-
-    function EventManager() {
-        Object.defineProperty(this, 'callbackCollections', {
-            value: {}
-        });
-        this.userActivity = 0; // greater than 0 when there was user activity since the last frame.
-        this.event = null;
-        this.eventTime = 0;
-        this.shiftKey = false;
-        this.altKey = false;
-        this.ctrlKey = false;
-        this.mouseButtonDown = false;
-
-        this.currentFrameStartTime = new Date().getTime(); // this is the result of getTimer() on the last ENTER_FRAME event.
-        this.previousFrameElapsedTime = 0; // this is the amount of time it took to process the previous frame.
-        this.pointClicked = false;
-        this.deactivated = true; // true when application is deactivated
-        this.useDeactivatedFrameRate = false;
-
-        this.triggeredThrottledMouseThisFrame = false; // set to false on enterFrame, set to true on throttled mouse move
-        this.nextThrottledMouseMoveTime = 0; // time threshold before triggering throttled mouse move again
-        this.throttledMouseMoveInterval = 100; // time threshold before triggering throttled mouse move again
-
-        // create a new callback collection for each type of event
-        for (var j = 0; j < EventCallbackCollection.eventTypes.length; j++) {
-            var type = EventCallbackCollection.eventTypes[j];
-            this.callbackCollections[type] = new EventCallbackCollection(this, type);
-            // this.callbackCollections[type] = WeaveAPI.SessionManager.registerDisposableChild(WeaveAPI.globalHashMap, new EventCallbackCollection(this, type));
-        }
-
-        //add event listeners
-        for (var eventtype in this.callbackCollections) {
-            this.callbackCollections[eventtype].listenToStage();
-        }
-        this.event;
-    }
-
-
-    weavecore.EventManager = EventManager;
+    suP.CLASS_INFO = {
+        names: [{
+            name: 'StageUtils',
+            qName: 'weavecore.StageUtils'
+        }]
+    };
 
 
 

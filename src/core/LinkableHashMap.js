@@ -12,42 +12,7 @@ if (typeof window === 'undefined') {
 (function () {
     "use strict";
 
-    /**
-     * temporary solution to save the namespace for this class/prototype
-     * @static
-     * @public
-     * @property NS
-     * @default weavecore
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableHashMap, 'NS', {
-        value: 'weavecore'
-    });
 
-    /**
-     * TO-DO:temporary solution to save the CLASS_NAME constructor.name works for window object , but modular based won't work
-     * @static
-     * @public
-     * @property CLASS_NAME
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableHashMap, 'CLASS_NAME', {
-        value: 'LinkableHashMap'
-    });
-
-    /**
-     * TO-DO:temporary solution for checking class in sessionable
-     * @static
-     * @public
-     * @property SESSIONABLE
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(LinkableHashMap, 'SESSIONABLE', {
-        value: true
-    });
 
 
     // constructor:
@@ -60,129 +25,66 @@ if (typeof window === 'undefined') {
      * @param {Class} typeRestriction If specified, this will limit the type of objects that can be added to this LinkableHashMap.
      */
     function LinkableHashMap(typeRestriction) {
-        if (typeRestriction === undefined) typeRestriction = null;
+        typeRestriction = typeof typeRestriction !== 'undefined' ? typeRestriction : null;
+        LinkableHashMap.base(this, 'constructor', typeRestriction);
 
-        weavecore.CallbackCollection.call(this);
+        Object.defineProperties(this, {
+            '_orderedNames': {
+                value: []
+            },
+            '_nameToObjectMap': {
+                value: {}
+            },
+            '_objectToNameMap': {
+                value: new Map()
+            },
+            '_nameIsLocked': {
+                value: {}
+            },
+            '_previousNameMap': {
+                value: {}
+            }
 
-        /**
-         * restricts the type of object that can be stored
-         * @private
-         * @property _typeRestriction
-         * @type Class
-         */
-        this._typeRestriction;
-        /**
-         * qualified class name of _typeRestriction
-         * @private
-         * @property _typeRestrictionClassName
-         * @type String
-         */
-        this._typeRestrictionClassName;
+        });
+
+        this._childListCallbacks = WeaveAPI.linkableChild(this, weavecore.ChildListCallbackInterface);
+
 
         if (typeRestriction !== null && typeRestriction !== undefined) {
             this._typeRestriction = typeRestriction;
             this._typeRestrictionClassName = typeRestriction.name;
         }
+    }
 
-        /**
-         * @private
-         * @readOnly
-         * @property _childListCallbacks
-         * @type ChildListCallbackInterface
-         */
-        Object.defineProperty(this, '_childListCallbacks', {
-            value: WeaveAPI.SessionManager.registerLinkableChild(this, new weavecore.ChildListCallbackInterface())
-        });
+    goog.inherits(LinkableHashMap, weavecore.CallbackCollection);
 
-        /**
-         * an ordered list of names appearing in _nameToObjectMap
-         * @private
-         * @readOnly
-         * @property _orderedNames
-         * @type Array
-         */
-        Object.defineProperty(this, '_orderedNames', {
-            value: []
-        });
 
-        /**
-         * maps an identifying name to an object
-         * @private
-         * @readOnly
-         * @property _nameToObjectMap
-         * @type Object
-         */
-        Object.defineProperty(this, '_nameToObjectMap', {
-            value: {}
-        });
+    var p = LinkableHashMap.prototype;
 
-        /**
-         * maps an object to an identifying name
-         * @private
-         * @readOnly
-         * @property _objectToNameMap
-         * @type Map
-         */
-        Object.defineProperty(this, '_objectToNameMap', {
-            value: new Map()
-        });
-
-        /**
-         * maps an identifying name to a value of true if that name is locked.
-         * @private
-         * @readOnly
-         * @property _nameIsLocked
-         * @type Object
-         */
-        Object.defineProperty(this, '_nameIsLocked', {
-            value: {}
-        });
-
-        /**
-         * maps a previously used name to a value of true.  used when generating unique names.
-         * @private
-         * @readOnly
-         * @property _previousNameMap
-         * @type Object
-         */
-        Object.defineProperty(this, '_previousNameMap', {
-            value: {}
-        });
-
-        /**
-         * The child type restriction, or null if there is none.
-         * @public
-         * @readOnly
-         * @property typeRestriction
-         * @type Class
-         */
-        Object.defineProperty(this, 'typeRestriction', {
+    Object.defineProperties(p, {
+        /** @export */
+        typeRestriction: {
             get: function () {
                 return this._typeRestriction;
             }
-        });
-
-        /**
-         * This is an interface for adding and removing callbacks that will get triggered immediately
-         * when the list of child objects changes.
-         * @public
-         * @readOnly
-         * @property childListCallbacks
-         * @type ChildListCallbackInterface
-         */
-        Object.defineProperty(this, 'childListCallbacks', {
+        },
+        /** @export */
+        childListCallbacks: {
             get: function () {
                 return this._childListCallbacks;
             }
-        });
+        }
+    });
 
 
-    }
+    /**
+     * @private
+     * @type {Object}
+     */
+    p._childListCallbacks;
+    p._typeRestriction;
 
-    LinkableHashMap.prototype = new weavecore.CallbackCollection();
-    LinkableHashMap.prototype.constructor = LinkableHashMap;
-
-    var p = LinkableHashMap.prototype;
+    p._typeRestrictionClassName;
 
     /**
      * This function returns an ordered list of names in the hash map.
@@ -192,11 +94,11 @@ if (typeof window === 'undefined') {
      */
     p.getNames = function (filter) {
         // set default value for parameter
-        if (filter === undefined) filter = null;
+        filter = typeof filter !== 'undefined' ? filter : null;
         var result = [];
         for (var i = 0; i < this._orderedNames.length; i++) {
             var name = this._orderedNames[i];
-            if (filter === null || this._nameToObjectMap[name] instanceof filter)
+            if (filter === null || filter === undefined || weavecore.ClassUtils.is(this._nameToObjectMap[name], filter))
                 result.push(name);
         }
         return result;
@@ -210,12 +112,12 @@ if (typeof window === 'undefined') {
      */
     p.getObjects = function (filter) {
         // set default value for parameter
-        if (filter === undefined) filter = null;
+        filter = typeof filter !== 'undefined' ? filter : null;
         var result = [];
         for (var i = 0; i < this._orderedNames.length; i++) {
             var name = this._orderedNames[i];
             var object = this._nameToObjectMap[name];
-            if (filter === null || filter === undefined || object instanceof filter)
+            if (filter === null || filter === undefined || weavecore.ClassUtils.is(object, filter))
                 result.push(object);
         }
         return result;
@@ -296,8 +198,8 @@ if (typeof window === 'undefined') {
      * @return {Object} The object under the requested name of the requested type, or null if an error occurred.
      */
     p.requestObject = function (name, classDef, lockObject) {
-        var className = classDef ? classDef.NS + '.' + (classDef.CLASS_NAME ? classDef.CLASS_NAME : classDef.name) : null;
-        var result = this._initObjectByClassName.call(this, name, className, lockObject);
+        var className = classDef ? WeaveAPI.className(classDef) : null;
+        var result = this._initObjectByClassName(name, className, lockObject);
         return classDef ? result : null;
     };
 
@@ -316,13 +218,13 @@ if (typeof window === 'undefined') {
 
         this.delayCallbacks(); // make sure callbacks only trigger once
         var classDef = objectToCopy.constructor; //ClassUtils.getClassDefinition(className);
-        var sessionState = WeaveAPI.SessionManager.getSessionState(objectToCopy);
+        var sessionState = WeaveAPI.getState(objectToCopy);
         //  if the name refers to the same object, remove the existing object so it can be replaced with a new one.
         if (name === this.getName(objectToCopy))
             this.removeObject(name);
-        var object = requestObject(name, classDef, false);
+        var object = this.requestObject(name, classDef, false);
         if (object !== null && object !== undefined)
-            WeaveAPI.SessionManager.setSessionState(object, sessionState);
+            WeaveAPI.setState(object, sessionState);
         this.resumeCallbacks();
 
         return object;
@@ -365,23 +267,18 @@ if (typeof window === 'undefined') {
      * @return {ILinkableObject} The object associated with the given name, or null if an error occurred.
      */
     p._initObjectByClassName = function (name, className, lockObject) {
+        lockObject = typeof lockObject !== 'undefined' ? lockObject : false;
         if (className) {
             // if no name is specified, generate a unique one now.
             if (!name)
                 name = this.generateUniqueName(className);
-            if (className !== "delete") // to-do Add Support for class Utils - delete is temp solution
-            {
-                // If this name is not associated with an object of the specified type,
-                // associate the name with a new object of the specified type.
-                //console.log(className);
-                var classDef = eval(className);
-                //var classDef = window['weavecore'][className]; //TODO:remove hardcoded weavecore with namespace
+            var classDef = WeaveAPI.getDefinition(className);
+            if (WeaveAPI.isLinkable(classDef) && (this._typeRestriction === null || this._typeRestriction === undefined || weavecore.ClassUtils.is(classDef.prototype, this._typeRestriction))) {
                 var object = this._nameToObjectMap[name];
                 if (!object || object.constructor !== classDef)
-                    this._createAndSaveNewObject.call(this, name, classDef, lockObject);
+                    this._createAndSaveNewObject(name, classDef, lockObject);
                 else if (lockObject)
                     this._lockObject(name);
-
             } else {
                 this.removeObject(name);
             }
@@ -407,7 +304,7 @@ if (typeof window === 'undefined') {
         // create a new object
         var object = new classDef();
         // register the object as a child of this LinkableHashMap
-        WeaveAPI.SessionManager.registerLinkableChild(this, object);
+        WeaveAPI.linkableChild(this, object);
         // save the name-object mappings
         this._nameToObjectMap[name] = object;
         this._objectToNameMap.set(object, name);
@@ -458,7 +355,6 @@ if (typeof window === 'undefined') {
         if (object === null || object === undefined)
             return; // do nothing if the name isn't mapped to an object.
 
-        //console.log(LinkableHashMap, "removeObject",name,object);
         // remove name & associated object
         delete this._nameToObjectMap[name];
         this._objectToNameMap.delete(object);
@@ -469,7 +365,7 @@ if (typeof window === 'undefined') {
         this._childListCallbacks.runCallbacks(name, null, object);
 
         // dispose the object AFTER the callbacks know that the object was removed
-        WeaveAPI.SessionManager.disposeObject(object);
+        WeaveAPI.dispose(object);
     };
 
     /**
@@ -491,9 +387,9 @@ if (typeof window === 'undefined') {
      * adds implementaion to {{#crossLink "CallbackCollection/dispose:method"}}{{/crossLink}}
      * @method dispose
      */
-    p.dispose = function dispose() {
+    p.dispose = function () {
 
-        weavecore.CallbackCollection.prototype.dispose.call(this);
+        LinkableHashMap.base(this, 'dispose');;
 
         // first, remove all objects that aren't locked
         this.removeAllObjects();
@@ -532,8 +428,8 @@ if (typeof window === 'undefined') {
             var object = this._nameToObjectMap[name];
             result[i] = weavecore.DynamicState.create(
                 name,
-                object.constructor.NS + '.' + object.constructor.CLASS_NAME,
-                WeaveAPI.SessionManager.getSessionState(object)
+                WeaveAPI.className(object),
+                WeaveAPI.getState(object)
             );
         }
         return result;
@@ -567,7 +463,7 @@ if (typeof window === 'undefined') {
             // first pass: delay callbacks of all children
             for (var m = 0; m < this._orderedNames.length; m++) {
                 objectName = this._orderedNames[m]
-                callbacks = WeaveAPI.SessionManager.getCallbackCollection(this._nameToObjectMap[objectName]);
+                callbacks = WeaveAPI.getCallbacks(this._nameToObjectMap[objectName]);
                 delayed.push(callbacks)
                 callbacks.delayCallbacks();
             }
@@ -585,14 +481,14 @@ if (typeof window === 'undefined') {
                 if (className === null || className === undefined)
                     continue;
                 // initialize object and remember if a new one was just created
-                if (this._nameToObjectMap[objectName] !== this._initObjectByClassName.call(this, objectName, className))
+                if (this._nameToObjectMap[objectName] !== this._initObjectByClassName(objectName, className))
                     newObjects[objectName] = true;
             }
 
             // next pass: delay callbacks of all children (again, because there may be new children)
             for (var n = 0; n < this._orderedNames.length; n++) {
                 objectName = this._orderedNames[n]
-                callbacks = WeaveAPI.SessionManager.getCallbackCollection(this._nameToObjectMap[objectName]);
+                callbacks = WeaveAPI.getCallbacks(this._nameToObjectMap[objectName]);
                 delayed.push(callbacks)
                 callbacks.delayCallbacks();
             }
@@ -618,7 +514,7 @@ if (typeof window === 'undefined') {
                 if (object === null || object === undefined)
                     continue;
                 // if object is newly created, we want to apply an absolute session state
-                WeaveAPI.SessionManager.setSessionState(object, typedState[weavecore.DynamicState.SESSION_STATE], newObjects[objectName] || removeMissingDynamicObjects);
+                WeaveAPI.setState(object, typedState[weavecore.DynamicState.SESSION_STATE], newObjects[objectName] || removeMissingDynamicObjects);
                 if (removeMissingDynamicObjects)
                     remainingObjects[objectName] = true;
                 newNameOrder.push(objectName);
@@ -640,7 +536,7 @@ if (typeof window === 'undefined') {
 
         for (var k = 0; k < delayed.length; k++) {
             callbacks = delayed[k]
-            if (!WeaveAPI.SessionManager.objectWasDisposed(callbacks))
+            if (!WeaveAPI.wasDisposed(callbacks))
                 callbacks.resumeCallbacks();
         }
 
@@ -648,8 +544,20 @@ if (typeof window === 'undefined') {
     };
 
     weavecore.LinkableHashMap = LinkableHashMap;
-    weavecore.ClassUtils.registerClass('weavecore.LinkableHashMap', LinkableHashMap);
-    weavecore.ClassUtils.registerImplementation('weavecore.LinkableHashMap', 'weavecore.ILinkableCompositeObject');
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'LinkableHashMap',
+            qName: 'weavecore.LinkableHashMap'
+        }],
+        interfaces: [weavecore.ILinkableHashMap]
+    };
+
 
     // namespace
     if (typeof window === 'undefined') {

@@ -65,16 +65,27 @@ if (typeof window === 'undefined') {
 
     function ExternalSessionStateInterface() {
 
-
+        var p = this;
+        p.getSessionState = goog.bind(getSessionState, this);
+        p.setSessionState = goog.bind(setSessionState, this);
+        p.getObjectType = goog.bind(getObjectType, this);
+        p.getChildNames = goog.bind(getChildNames, this);
+        p.setChildNameOrder = goog.bind(setChildNameOrder, this);
+        p.requestObject = goog.bind(requestObject, this);
+        p.removeObject = goog.bind(removeObject, this);
+        p.evaluateExpression = goog.bind(evaluateExpression, this);
+        p.addCallback = goog.bind(addCallback, this);
+        p.removeCallback = goog.bind(removeCallback, this);
+        p.removeAllCallbacks = goog.bind(removeAllCallbacks, this);
 
     }
 
-    var p = ExternalSessionStateInterface.prototype;
+    //var p = ExternalSessionStateInterface.prototype;
 
     /**
      * @inheritDoc
      */
-    p.getSessionState = function (objectPath) {
+    function getSessionState(objectPath) {
         var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
         if (object) {
             var state = WeaveAPI.SessionManager.getSessionState(object);
@@ -101,7 +112,7 @@ if (typeof window === 'undefined') {
         }
     }
 
-    p.setSessionState = function (objectPath, newState, removeMissingObjects) {
+    function setSessionState(objectPath, newState, removeMissingObjects) {
         // default parameter values
         removeMissingObjects = (removeMissingObjects === undefined) ? true : removeMissingObjects;
         var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
@@ -114,7 +125,7 @@ if (typeof window === 'undefined') {
         return false;
     }
 
-    p.getObjectType = function (objectPath) {
+    function getObjectType(objectPath) {
         var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
         if (object)
             return object.constructor.NS + '.' + object.constructor.CLASS_NAME;
@@ -123,7 +134,7 @@ if (typeof window === 'undefined') {
         return null;
     }
 
-    p.getChildNames = function (objectPath) {
+    function getChildNames(objectPath) {
         var object = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, objectPath);
         if (object) {
             if (object instanceof weavecore.LinkableHashMap)
@@ -137,7 +148,7 @@ if (typeof window === 'undefined') {
         return null;
     }
 
-    p.setChildNameOrder = function (hashMapPath, orderedChildNames) {
+    function setChildNameOrder(hashMapPath, orderedChildNames) {
         var hashMap = WeaveAPI.SessionManager.getObject(WeaveAPI.globalHashMap, hashMapPath);
         hashMap = (hashMap && hashMap instanceof weavecore.LinkableHashMap) ? hashMap : null;
         if (hashMap) {
@@ -151,7 +162,7 @@ if (typeof window === 'undefined') {
         return false;
     }
 
-    p.requestObject = function (objectPath, objectType) {
+    function requestObject(objectPath, objectType) {
         // get class definition
         var classQName = objectType;
         var classDef = weavecore.ClassUtils.getClassDefinition(objectType);
@@ -196,7 +207,7 @@ if (typeof window === 'undefined') {
         return false;
     }
 
-    p.removeObject = function (objectPath) {
+    function removeObject(objectPath) {
         if (!objectPath || !objectPath.length) {
             externalError("Cannot remove root object");
             return false;
@@ -292,7 +303,7 @@ if (typeof window === 'undefined') {
     /**
      * @inheritDoc
      */
-    p.evaluateExpression = function (scopeObjectPathOrVariableName, expression, variables, staticLibraries, assignVariableName) {
+    function evaluateExpression(scopeObjectPathOrVariableName, expression, variables, staticLibraries, assignVariableName) {
         variables = (variables === undefined) ? null : variables;
         staticLibraries = (staticLibraries === undefined) ? null : staticLibraries;
         assignVariableName = (assignVariableName === undefined) ? null : assignVariableName;
@@ -320,7 +331,7 @@ if (typeof window === 'undefined') {
             // passed-in variables take precedence over stored ActionScript weave._variables
             var compiledMethod = ExternalSessionStateInterface._compiler.compileObjectToFunction(
                 compiledObject, [variables, ExternalSessionStateInterface._variables],
-                WeaveAPI.ErrorManager.reportError.bind(WeaveAPI.ErrorManager),
+                WeaveAPI.ErrorManager.reportError,
                 thisObject !== null,
                 null,
                 null,
@@ -341,7 +352,7 @@ if (typeof window === 'undefined') {
 
 
 
-    p.addCallback = function (scopeObjectPathOrVariableName, callback, triggerCallbackNow, immediateMode, delayWhileBusy) {
+    function addCallback(scopeObjectPathOrVariableName, callback, triggerCallbackNow, immediateMode, delayWhileBusy) {
         // set default values
         triggerCallbackNow = (triggerCallbackNow === undefined) ? false : triggerCallbackNow;
         immediateMode = (immediateMode === undefined) ? false : immediateMode;
@@ -399,7 +410,7 @@ if (typeof window === 'undefined') {
     /**
      * @inheritDoc
      */
-    p.removeCallback = function (objectPathOrVariableName, callback, everywhere) {
+    function removeCallback(objectPathOrVariableName, callback, everywhere) {
         //set parameter's default values
         everywhere = (everywhere === undefined) ? false : everywhere;
         var wrapper = ExternalSessionStateInterface._funcToWrapper.get(callback);
@@ -434,7 +445,8 @@ if (typeof window === 'undefined') {
             }
 
             ExternalSessionStateInterface._d2d_callback_target.remove(callback, object);
-            WeaveAPI.SessionManager.getCallbackCollection(object).removeCallback(callback);
+            var cc = WeaveAPI.SessionManager.getCallbackCollection(object);
+            cc.removeCallback(callback,cc);
             return true;
         } catch (e) {
             // unexpected error reported in Weave interface
@@ -446,12 +458,13 @@ if (typeof window === 'undefined') {
     /**
      * @inheritDoc
      */
-    p.removeAllCallbacks = function () {
+    function removeAllCallbacks() {
         var keys = ExternalSessionStateInterface._d2d_callback_target.dictionary.keys();
         keys.forEach(function (callback) {
             var targets = ExternalSessionStateInterface._d2d_callback_target.dictionary.get(callback).keys();
             targets.forEach(function (target) {
-                WeaveAPI.SessionManager.getCallbackCollection(target).removeCallback(callback);
+                var targetCC = WeaveAPI.SessionManager.getCallbackCollection(target);
+                targetCC.removeCallback( callback,targetCC);
             });
         });
 
