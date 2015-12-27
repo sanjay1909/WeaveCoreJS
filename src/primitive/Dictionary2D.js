@@ -31,28 +31,75 @@ if (typeof window === 'undefined') {
  */
 
 (function () {
-    function Dictionary2D(weakPrimaryKeys, weakSecondaryKeys, defaultType) {
-        weakPrimaryKeys = (weakPrimaryKeys === undefined) ? false : weakPrimaryKeys;
-        weakSecondaryKeys = (weakSecondaryKeys === undefined) ? false : weakSecondaryKeys;
 
-        this.dictionary = weakPrimaryKeys ? new Map() : new Map();
-        this.defaultType = defaultType; // used for creating objects automatically via get()
-        this.weak2 = weakSecondaryKeys // used as a constructor parameter for nested Dictionaries
+    /**
+     * @private
+     */
+    Dictionary2D.throwWeakIterationError = function () {
+        throw new Error("WeakMap cannot be iterated over");
+    };
+
+    function Dictionary2D(weakPrimaryKeys, weakSecondaryKeys, defaultType) {
+        weakPrimaryKeys = typeof weakPrimaryKeys !== 'undefined' ? weakPrimaryKeys : false;
+        weakSecondaryKeys = typeof weakSecondaryKeys !== 'undefined' ? weakSecondaryKeys : false;
+        defaultType = typeof defaultType !== 'undefined' ? defaultType : null;
+
+        this.map = weakPrimaryKeys ? new Map() : new Map();
+        this.weak1 = weakPrimaryKeys;
+        this.weak2 = weakSecondaryKeys;
+        this.defaultType = defaultType;
     }
 
     var p = Dictionary2D.prototype;
 
+
     /**
-     *
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @return The value in the dictionary.
+     * @export
+     * @type {Object}
+     */
+    p.map;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p.weak1;
+
+
+    /**
+     * @private
+     * @type {boolean}
+     */
+    p.weak2;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p.defaultType;
+
+    /**
+     * @private
+     * @type {*}
+     */
+    p._key2ToRemove;
+
+    /**
+     * @asparam key1 The first map key.
+     * @asparam key2 The second map key.
+     * @asreturn The value.
+     * @export
+     * @param {Object} key1
+     * @param {Object} key2
+     * @return {*}
      */
     p.get = function (key1, key2) {
         var value;
-        var d2 = this.dictionary.get(key1);
-        if (d2)
-            value = d2.get(key2);
+        var map2 = this.map.get(key1);
+        if (map2)
+            value = map2.get(key2);
         if (value === undefined && this.defaultType) {
             value = new this.defaultType();
             this.set(key1, key2, value);
@@ -61,36 +108,76 @@ if (typeof window === 'undefined') {
     };
 
     /**
-     * This will add or replace an entry in the dictionary.
-     * @param key1 The first dictionary key.
-     * @param key2 The second dictionary key.
-     * @param value The value to put into the dictionary.
+     * This will add or replace an entry in the map.
+     * @asparam key1 The first map key.
+     * @asparam key2 The second map key.
+     * @asparam value The value.
+     * @export
+     * @param {Object} key1
+     * @param {Object} key2
+     * @param {Object} value
      */
     p.set = function (key1, key2, value) {
-        var d2 = this.dictionary.get(key1);
-        if (d2 === null || d2 === undefined) {
-            d2 = this.weak2 ? new Map() : new Map();
-            this.dictionary.set(key1, d2);
+        var map2 = this.map.get(key1);
+        if (map2 === null || map2 === undefined) {
+            map2 = this.weak2 ? new Map() : new Map();
+            this.map.set(key1, map2);
         }
-        d2.set(key2, value);
+        map2.set(key2, value);
+    };
+
+    /**
+     * @export
+     * @return {Array}
+     */
+    p.primaryKeys = function () {
+        if (this.weak1)
+            Dictionary2D.throwWeakIterationError();
+        return weavecore.JS.mapKeys(this.map);
+    };
+
+    /**
+     * @export
+     * @param {Object} key1
+     * @return {Array}
+     */
+    p.secondaryKeys = function (key1) {
+        if (this.weak2)
+            Dictionary2D.throwWeakIterationError();
+        return weavecore.JS.mapKeys(this.map.get(key1));
     };
 
     /**
      * This removes all values associated with the given primary key.
-     * @param key1 The first dictionary key.
+     * @asparam key1 The first dictionary key.
+     * @export
+     * @param {Object} key1
      */
     p.removeAllPrimary = function (key1) {
-        this.dictionary.delete(key1);
+        this.map.delete(key1);
     };
 
     /**
      * This removes all values associated with the given secondary key.
-     * @param key2 The second dictionary key.
+     * @asparam key2 The second dictionary key.
+     * @asprivate
+     * @export
+     * @param {Object} key2
      */
     p.removeAllSecondary = function (key2) {
-        for (var key1 of this.dictionary.keys()) {
-            this.dictionary.get(key1).delete(key2);
-        };
+        if (this.weak1)
+            Dictionary2D.throwWeakIterationError();
+        this._key2ToRemove = key2;
+        this.map.forEach(this.removeAllSecondary_each, this);
+    };
+
+    /**
+     * @private
+     * @param {*} map2
+     * @param {*} key1
+     */
+    p.removeAllSecondary_each = function (map2, key1) {
+        map2['delete'](this._key2ToRemove);
     };
 
     /**
@@ -101,21 +188,105 @@ if (typeof window === 'undefined') {
      */
     p.remove = function (key1, key2) {
         var value;
-        var d2 = this.dictionary.get(key1);
-        if (d2) {
-            value = d2.get(key2);
-            d2.delete(key2);
+        var map2 = this.map.get(key1);
+        if (map2) {
+            value = map2.get(key2);
+            map2.delete(key2);
+            if (this.weak2 || map2.size)
+                return value;
+            this.map.delete(key1);
         }
-
-
-        for (var v2 of d2.values())
-            return value;
-
-        // otherwise, remove it
-        this.dictionary.delete(key1);
 
         return value;
     };
 
+
+
+
+    /**
+     * @private
+     * @type {Function}
+     */
+    p.forEach_fn;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p.forEach_this;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p.forEach_key1;
+
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    p.forEach_map2;
+
+
+    /**
+     * Iterates over pairs of keys and corresponding values.
+     * @asparam key1_key2_value A function which may return true to stop iterating.
+     * @asparam thisArg The 'this' argument for the function.
+     * @export
+     * @param {Function} key1_key2_value
+     * @param {Object} thisArg
+     */
+    p.forEach = function (key1_key2_value, thisArg) {
+        if (this.weak1 || this.weak2)
+            Dictionary2D.throwWeakIterationError();
+        this.forEach_fn = key1_key2_value;
+        this.forEach_this = thisArg;
+        this.map.forEach(this.forEach1, this);
+        this.forEach_fn = null;
+        this.forEach_this = null;
+        this.forEach_key1 = null;
+        this.forEach_map2 = null;
+    };
+
+    /**
+     * @private
+     * @param {*} map2
+     * @param {*} key1
+     */
+    p.forEach1 = function (map2, key1) {
+        if (this.forEach_fn == null)
+            return;
+        this.forEach_key1 = key1;
+        this.forEach_map2 = map2;
+        map2.forEach(this.forEach2, this);
+    };
+
+
+    /**
+     * @private
+     * @param {*} value
+     * @param {*} key2
+     */
+    p.forEach2 = function (value, key2) {
+        if (this.forEach_fn !== null && this.forEach_fn.call(this.forEach_this, this.forEach_key1, key2, value))
+            this.forEach_fn = null;
+    };
+
     weavecore.Dictionary2D = Dictionary2D;
+
+    /**
+     * Metadata
+     *
+     * @type {Object.<string, Array.<Object>>}
+     */
+    p.CLASS_INFO = {
+        names: [{
+            name: 'Dictionary2D',
+            qName: 'weavecore.Dictionary2D'
+        }]
+    };
+
 }());

@@ -43,7 +43,7 @@ if (typeof window === 'undefined') {
         if (groupedCallback !== null && groupedCallback !== undefined)
             WeaveAPI.getCallbacks(this).addGroupedCallback(null, groupedCallback);
 
-        this._pathDependencies = new weavecore.Dictionary2D(true, false); // Maps an ILinkableDynamicObject to its previous internalObject.
+        this._pathDependencies = new weavecore.Dictionary2D(); // Maps an ILinkableDynamicObject to its previous internalObject.
 
 
 
@@ -266,7 +266,7 @@ if (typeof window === 'undefined') {
         }
 
         // we found a desired target if there is no type restriction or the object fits the restriction
-        this._foundTarget = !this._typeRestriction || weavecore.ClassUtils.is(node, this._typeRestriction);
+        this._foundTarget = !this._typeRestriction || weavecore.JS.IS(node, this._typeRestriction);
         this.internalSetTarget(node);
     };
 
@@ -300,25 +300,38 @@ if (typeof window === 'undefined') {
 
 
     p._handlePathDependencies = function () {
-        var sm = WeaveAPI.SessionManager;
-        for (var parent of this._pathDependencies.dictionary.keys()) {
-            for (var pathElement of this._pathDependencies.dictionary.get(parent).keys()) {
-                var oldChild = this._pathDependencies.get(parent, pathElement);
-                var newChild = sm.getObject(parent, [pathElement]);
-                if (sm.objectWasDisposed(parent) || oldChild !== newChild) {
-                    this.resetPathDependencies();
-                    this.handlePath();
-                    return;
-                }
-            }
-        }
+        this._pathDependencies.forEach(this._handlePathDependencies_each, this);
+    };
 
+    /**
+     * @private
+     * @param {weavejs.api.core.ILinkableObject} parent
+     * @param {string} pathElement
+     * @param {weavejs.api.core.ILinkableObject} child
+     * @return {boolean}
+     */
+    p._handlePathDependencies_each = function (parent, pathElement, child) {
+        var newChild = WeaveAPI.followPath(parent, [pathElement]);
+        if (WeaveAPI.wasDisposed(parent) || child != newChild) {
+            this.resetPathDependencies();
+            this.handlePath();
+            return true;
+        }
+        return false;
     };
 
     p.resetPathDependencies = function () {
-        for (var parent of this._pathDependencies.dictionary.keys())
-            this.getDependencyCallbacks(parent).removeCallback(this._handlePathDependencies, this);
-        this._pathDependencies = new weavecore.Dictionary2D(true, false);
+        this._pathDependencies.map.forEach(this._resetPathDependencies_each, this);
+        this._pathDependencies = new weavecore.Dictionary2D();
+    };
+
+    /**
+     * @private
+     * @param {Object} map_child
+     * @param {weavejs.api.core.ILinkableObject} parent
+     */
+    p._resetPathDependencies_each = function (map_child, parent) {
+        this.getDependencyCallbacks(parent).removeCallback(this._handlePathDependencies, this);
     };
 
 

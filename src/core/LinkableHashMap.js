@@ -273,7 +273,7 @@ if (typeof window === 'undefined') {
             if (!name)
                 name = this.generateUniqueName(className);
             var classDef = WeaveAPI.getDefinition(className);
-            if (WeaveAPI.isLinkable(classDef) && (this._typeRestriction === null || this._typeRestriction === undefined || weavecore.ClassUtils.is(classDef.prototype, this._typeRestriction))) {
+            if (WeaveAPI.isLinkable(classDef) && (this._typeRestriction === null || this._typeRestriction === undefined || weavecore.JS.IS(classDef.prototype, this._typeRestriction))) {
                 var object = this._nameToObjectMap[name];
                 if (!object || object.constructor !== classDef)
                     this._createAndSaveNewObject(name, classDef, lockObject);

@@ -255,7 +255,7 @@ if (typeof window === 'undefined') {
 
         this.targetPath = null;
 
-        if (WeaveAPI.isLinkable(classDef) && (this._typeRestriction == null || weavecore.ClassUtils.is(classDef.prototype, this._typeRestriction))) {
+        if (WeaveAPI.isLinkable(classDef) && (this._typeRestriction == null || weavecore.JS.IS(classDef.prototype, this._typeRestriction))) {
             var obj = this.target;
             if (!obj || obj.constructor !== classDef)
                 weavecore.ClassUtils.superSetter(LinkableDynamicObject, this, 'target', new classDef());

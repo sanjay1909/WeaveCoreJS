@@ -190,6 +190,18 @@ WeaveAPI.findPath = function (root, descendant) {
 };
 
 /**
+ * Shortcut for WeaveAPI.SessionManager.getObject()
+ * @copy weavecore.ISessionManager#getObject()
+ * @export
+ * @param {weavecore.ILinkableObject} root
+ * @param {Array} path
+ * @return {weavecore.ILinkableObject}
+ */
+WeaveAPI.followPath = function (root, path) {
+    return WeaveAPI.SessionManager.getObject(root, path);
+};
+
+/**
  * @export
  * @const
  * @type {Array}
