@@ -35,7 +35,7 @@ if (typeof window === 'undefined') {
 //register all weave-method
 (function () {
     var es = new weavecore.ExternalSessionStateInterface();
-    keys = Object.keys(es.__proto__);
+    keys = Object.getOwnPropertyNames(es);
     keys.forEach(function (key) {
         if (key !== 'constructor' && es[key] instanceof Function)
             weavecore.JavaScript.registerMethod.call(weave, key, es[key]);

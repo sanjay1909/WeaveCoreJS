@@ -1306,6 +1306,7 @@ weavecore.JS.prototype.CLASS_INFO = {
         qName: 'weavecore.JS'
     }]
 };
+
 Array.CASEINSENSITIVE = 1;
 Array.DESCENDING = 2;
 Array.UNIQUESORT = 4;
@@ -6021,7 +6022,7 @@ if (typeof window === 'undefined') {
             return wrapperFunction.call(this);
         }
 
-        return wrapperFunction;
+        return wrapperFunction.bind(this);
     }
 
     /**
@@ -7228,7 +7229,6 @@ if (typeof window === 'undefined') {
     };
 
 }(this));
-
 if (typeof window === 'undefined') {
     //this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -9994,6 +9994,7 @@ if (typeof window === 'undefined') {
     };
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -11970,6 +11971,7 @@ WeaveAPI._needsReviving = function (key, value) {
         'weave[JSON_EXTENSIONS].push({"description": "ILinkableObject/WeavePath", "replacer": replacer, "reviver": reviver});'
     );
 };*/
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -15539,6 +15541,7 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
+
 /**
  * @module weavecore
  */
@@ -16109,6 +16112,7 @@ if (typeof window === 'undefined') {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
+
 /**
  * @module weavecore
  */
@@ -17366,6 +17370,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -18535,7 +18540,7 @@ if (typeof window === 'undefined') {
 //register all weave-method
 (function () {
     var es = new weavecore.ExternalSessionStateInterface();
-    keys = Object.keys(es.__proto__);
+    keys = Object.getOwnPropertyNames(es);
     keys.forEach(function (key) {
         if (key !== 'constructor' && es[key] instanceof Function)
             weavecore.JavaScript.registerMethod.call(weave, key, es[key]);

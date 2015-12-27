@@ -98,68 +98,68 @@
         </div>
     </div>
     <script>
-        window.evalExpression = function (expression, code, names, values) {
-            var compileMethod = this.compileObjectToFunction({
-                    method: 'function',
-                    evaluatedParams: [{
-                        'code': code,
-                        'names': names,
-                        'values': values
-                    }]
-                }, null,
-                null,
-                false,
-                null,
-                null,
-                true,
-                null
-            );
-            return compileMethod;
-        }
-        window.compileToFunction = function (expression, symbolTable, errorHandler, useThisScope, paramNames, paramDefaults) {
-            errorHandler = (errorHandler === undefined) ? null : errorHandler;
-            useThisScope = (useThisScope === undefined) ? false : useThisScope;
-            paramNames = (paramNames === undefined) ? null : paramNames;
-            paramDefaults = (paramDefaults === undefined) ? null : paramDefaults;
-
-            return this.compileObjectToFunction(null, null, errorHandler, useThisScope, paramNames, paramDefaults);
-        }
-
-        window.compileObjectToFunction = function (compiledObject, symbolTable, errorHandler, useThisScope, paramNames, paramDefaults, flattenFunctionDefinition, bindThis) {
-            paramNames = (paramNames === undefined) ? null : paramNames;
-            paramDefaults = (paramDefaults === undefined) ? null : paramDefaults;
-            flattenFunctionDefinition = (flattenFunctionDefinition === undefined) ? null : flattenFunctionDefinition;
-            bindThis = (bindThis === undefined) ? null : bindThis;
-
-            var recursiveCalls = [compiledObject];
-            var wrapperFunction = function () {
-                var method;
-                var call = recursiveCalls[0];
-                method = call && call.method ? call.method : null
-                console.log('wrapperFunction paramNames:', paramNames);
-                var result;
-                if (method) {
-                    var funcParams = call.evaluatedParams[0];
-                    result = this.compileObjectToFunction(
-                        funcParams['codes'],
+        /* window.evalExpression = function (expression, code, names, values) {
+                    var compileMethod = this.compileObjectToFunction({
+                            method: 'function',
+                            evaluatedParams: [{
+                                'code': code,
+                                'names': names,
+                                'values': values
+                            }]
+                        }, null,
                         null,
-                        errorHandler,
-                        useThisScope,
-                        funcParams['names'],
-                        funcParams['values'],
                         false,
+                        null,
+                        null,
+                        true,
                         null
                     );
+                    return compileMethod;
                 }
-                return result;
-            };
-            if (flattenFunctionDefinition) {
-                return wrapperFunction()
-            }
+                window.compileToFunction = function (expression, symbolTable, errorHandler, useThisScope, paramNames, paramDefaults) {
+                    errorHandler = (errorHandler === undefined) ? null : errorHandler;
+                    useThisScope = (useThisScope === undefined) ? false : useThisScope;
+                    paramNames = (paramNames === undefined) ? null : paramNames;
+                    paramDefaults = (paramDefaults === undefined) ? null : paramDefaults;
 
-            return wrapperFunction;
-        }
+                    return this.compileObjectToFunction(null, null, errorHandler, useThisScope, paramNames, paramDefaults);
+                }
 
+                window.compileObjectToFunction = function (compiledObject, symbolTable, errorHandler, useThisScope, paramNames, paramDefaults, flattenFunctionDefinition, bindThis) {
+                    paramNames = (paramNames === undefined) ? null : paramNames;
+                    paramDefaults = (paramDefaults === undefined) ? null : paramDefaults;
+                    flattenFunctionDefinition = (flattenFunctionDefinition === undefined) ? null : flattenFunctionDefinition;
+                    bindThis = (bindThis === undefined) ? null : bindThis;
+
+                    var recursiveCalls = [compiledObject];
+                    var wrapperFunction = function () {
+                        var method;
+                        var call = recursiveCalls[0];
+                        method = call && call.method ? call.method : null
+                        console.log('wrapperFunction paramNames:', paramNames);
+                        var result;
+                        if (method) {
+                            var funcParams = call.evaluatedParams[0];
+                            result = this.compileObjectToFunction(
+                                funcParams['codes'],
+                                null,
+                                errorHandler,
+                                useThisScope,
+                                funcParams['names'],
+                                funcParams['values'],
+                                false,
+                                null
+                            );
+                        }
+                        return result;
+                    };
+                    if (flattenFunctionDefinition) {
+                        return wrapperFunction()
+                    }
+
+                    return wrapperFunction;
+                }
+        */
         var testFn = function () {
             var checkType = weave.evaluateExpression(null, "function(obj, type){return obj instanceof type}");
             var nodesFn = weave.evaluateExpression(null, "(nodes) => {return nodes}");

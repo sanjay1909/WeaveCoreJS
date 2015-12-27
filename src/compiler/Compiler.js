@@ -1905,7 +1905,7 @@ if (typeof window === 'undefined') {
             return wrapperFunction.call(this);
         }
 
-        return wrapperFunction;
+        return wrapperFunction.bind(this);
     }
 
     /**
