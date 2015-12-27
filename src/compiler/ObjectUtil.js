@@ -317,6 +317,44 @@ if (typeof window === 'undefined') {
         return copy;
     };
 
+    /**
+     * AS->JS Language helper for Object.keys()
+     * @export
+     * @param {Object} object
+     * @return {Array}
+     */
+    ObjectUtil.objectKeys = function (object) {
+        return Object['keys'](object);
+    };
+
+
+    /**
+     * Tests if a value is of a primitive type.
+     * @export
+     * @param {*} value
+     * @return {boolean}
+     */
+    ObjectUtil.isPrimitive = function (value) {
+        return value === null || typeof (value) !== 'object';
+    };
+
+
+    /**
+     * Makes a deep copy of an object.
+     * @export
+     * @param {Object} object
+     * @return {Object}
+     */
+    ObjectUtil.copyObject = function (object) {
+        if (object === null || typeof (object) !== 'object')
+            return object;
+        var copy = weavecore.ClassUtils.is(object, Array) ? [] : {};
+        for (var key in object)
+            copy[key] = ObjectUtil.copyObject(object[key]);
+        return copy;
+    };
+
+
     weavecore.ObjectUtil = ObjectUtil;
 
 }());

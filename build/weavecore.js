@@ -27,6 +27,7 @@ weavecore.ILinkableObject.prototype.CLASS_INFO = {
         qName: 'weavecore.ILinkableObject'
     }]
 };
+
 /**
  * @module weavecore
  */
@@ -56,6 +57,7 @@ weavecore.IDisposableObject.prototype.CLASS_INFO = {
         qName: 'weavecore.IDisposableObject'
     }]
 };
+
 /**
  * @interface
  * @extends {weavecore.ILinkableObject}
@@ -77,6 +79,7 @@ weavecore.ILinkableVariable.prototype.CLASS_INFO = {
     }],
     interfaces: [weavecore.ILinkableObject]
 };
+
 /**
  * @interface
  * @extends {weavecore.ILinkableObject}
@@ -102,6 +105,7 @@ weavecore.IProgressIndicator.prototype.CLASS_INFO = {
     }],
     interfaces: [weavecore.ILinkableObject]
 };
+
 /**
  * @interface
  */
@@ -141,6 +145,7 @@ weavecore.ISessionManager.prototype.CLASS_INFO = {
         qName: 'weavecore.ISessionManager'
     }]
 };
+
 /**
  * @interface
  * @extends {weavecore.ILinkableObject}
@@ -162,6 +167,7 @@ weavecore.ILinkableCompositeObject.prototype.CLASS_INFO = {
     }],
     interfaces: [weavecore.ILinkableObject]
 };
+
 /**
  * @interface
  * @extends {weavecore.ILinkableCompositeObject}
@@ -189,6 +195,7 @@ weavecore.ILinkableDynamicObject.prototype.CLASS_INFO = {
     }],
     interfaces: [weavecore.ILinkableCompositeObject]
 };
+
 /**
  * @interface
  * @extends {weavecore.ILinkableCompositeObject}
@@ -223,6 +230,7 @@ weavecore.ILinkableHashMap.prototype.CLASS_INFO = {
     }],
     interfaces: [weavecore.ILinkableCompositeObject]
 };
+
 /**
  * @module weavecore
  */
@@ -263,6 +271,7 @@ weavecore.ICallbackCollection.prototype.CLASS_INFO = {
     }],
     interfaces: [weavecore.ILinkableObject]
 };
+
 /**
  * @interface
  * @extends {weavejs.api.core.ICallbackCollection}
@@ -285,6 +294,7 @@ weavecore.IChildListCallbackInterface.prototype.CLASS_INFO = {
     }],
     interfaces: [weavecore.ICallbackCollection]
 };
+
 if (typeof window === 'undefined') {
     //this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -750,6 +760,7 @@ if (typeof window === 'undefined') {
     //WeaveAPI.ClassUtils = new ClassUtils();
 
 }());
+
 Array.CASEINSENSITIVE = 1;
 Array.DESCENDING = 2;
 Array.UNIQUESORT = 4;
@@ -914,6 +925,7 @@ if (typeof window === 'undefined') {
     };
 
 }());
+
 /*
  * Event
  * Visit http://createjs.com/ for documentation, updates and examples.
@@ -2982,6 +2994,7 @@ if (typeof window === 'undefined') {
         }]
     };
 }());
+
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
@@ -3301,6 +3314,44 @@ if (typeof window === 'undefined') {
         return copy;
     };
 
+    /**
+     * AS->JS Language helper for Object.keys()
+     * @export
+     * @param {Object} object
+     * @return {Array}
+     */
+    ObjectUtil.objectKeys = function (object) {
+        return Object['keys'](object);
+    };
+
+
+    /**
+     * Tests if a value is of a primitive type.
+     * @export
+     * @param {*} value
+     * @return {boolean}
+     */
+    ObjectUtil.isPrimitive = function (value) {
+        return value === null || typeof (value) !== 'object';
+    };
+
+
+    /**
+     * Makes a deep copy of an object.
+     * @export
+     * @param {Object} object
+     * @return {Object}
+     */
+    ObjectUtil.copyObject = function (object) {
+        if (object === null || typeof (object) !== 'object')
+            return object;
+        var copy = weavecore.ClassUtils.is(object, Array) ? [] : {};
+        for (var key in object)
+            copy[key] = ObjectUtil.copyObject(object[key]);
+        return copy;
+    };
+
+
     weavecore.ObjectUtil = ObjectUtil;
 
 }());
@@ -3375,6 +3426,7 @@ if (typeof window === 'undefined') {
     };
 
 }());
+
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
@@ -3515,6 +3567,7 @@ if (typeof window === 'undefined') {
     };
 
 }());
+
 // namespace
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
@@ -6629,6 +6682,7 @@ if (typeof window === 'undefined') {
     };
 
 }(this));
+
 if (typeof window === 'undefined') {
     //this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -8049,6 +8103,7 @@ if (typeof window === 'undefined') {
 
 
 }())
+
 /**
  * @module weavecore
  */
@@ -8344,6 +8399,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 /**
  * @module weavecore
  */
@@ -8754,6 +8810,7 @@ if (typeof window === 'undefined') {
     };
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -10739,6 +10796,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -10785,6 +10843,7 @@ if (typeof window === 'undefined') {
     WeaveAPI.ErrorManager = new ErrorManager();
 
 }());
+
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -10879,6 +10938,7 @@ if (typeof window === 'undefined') {
     WeaveAPI.EditorManager = new EditorManager();
 
 }());
+
 createjs.Ticker.setFPS(50);
 //createjs.Ticker.
 
@@ -11182,6 +11242,7 @@ WeaveAPI._needsReviving = function (key, value) {
         'weave[JSON_EXTENSIONS].push({"description": "ILinkableObject/WeavePath", "replacer": replacer, "reviver": reviver});'
     );
 };*/
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -11838,6 +11899,7 @@ if (typeof window === 'undefined') {
     weavecore.CustomPromise = CustomPromise;
 
 }());
+
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     // this.weavecore = this.weavecore || {};
@@ -12717,6 +12779,7 @@ if (typeof window === 'undefined') {
     };
 
 }());
+
 /**
  * @module WeaveAPI
  */
@@ -12902,6 +12965,7 @@ WeaveAPI.detectLinkableObjectChange = function () {
     };
 
 }())
+
 // namespace
 
 if (!this.weavecore)
@@ -13444,6 +13508,7 @@ if (!this.WeaveAPI)
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -13709,6 +13774,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 /**
  * @module weavecore
  */
@@ -13762,6 +13828,7 @@ if (typeof window === 'undefined') {
     };
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -13846,6 +13913,7 @@ if (typeof window === 'undefined') {
     };
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -13904,6 +13972,7 @@ if (typeof window === 'undefined') {
     };
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -13964,6 +14033,7 @@ if (typeof window === 'undefined') {
     };
 
 }());
+
 /**
  * @module weavecore
  */
@@ -14141,6 +14211,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.WeaveAPI = this.WeaveAPI || {};
     this.weavecore = this.weavecore || {};
@@ -14346,6 +14417,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 /**
  * @module weavecore
  */
@@ -14727,6 +14799,7 @@ if (typeof window === 'undefined') {
 			// a.getState(null): "b value"
 		*/
 }());
+
 /**
  * @module weavecore
  */
@@ -15297,6 +15370,7 @@ if (typeof window === 'undefined') {
         window.WeaveAPI.globalHashMap = new LinkableHashMap();
     }
 }());
+
 /**
  * @module weavecore
  */
@@ -15637,6 +15711,7 @@ if (typeof window === 'undefined') {
     };
 
 }());
+
 /**
  * @module weavecore
  */
@@ -15927,6 +16002,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -16021,6 +16097,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -16144,6 +16221,7 @@ public function bindStyle(relevantContext:Object, destination:UIComponent):void
 		true
 	);
 }*/
+
 /**
  * @module weavecore
  */
@@ -16550,6 +16628,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -17044,6 +17123,7 @@ if (typeof window === 'undefined') {
     weavecore.ExternalSessionStateInterface = ExternalSessionStateInterface;
 
 }());
+
 /**
  * @module weavecore
  */
@@ -17138,6 +17218,7 @@ if (typeof window === 'undefined') {
     };
 
 }())
+
 if (typeof window === 'undefined') {
     this.weavecore = this.weavecore || {};
 } else {
@@ -17679,6 +17760,7 @@ if (typeof window === 'undefined') {
 
 
 }());
+
 /* ***** BEGIN LICENSE BLOCK *****
  *
  * This file is part of Weave.
