@@ -1,205 +1,202 @@
-if (typeof window === 'undefined') {
-    this.WeaveAPI = this.WeaveAPI || {};
-    this.weavecore = this.weavecore || {};
-} else {
-    window.WeaveAPI = window.WeaveAPI || {};
-    window.weavecore = window.weavecore || {};
+import JS from "../util/JS";
+import DebugUtils from "../util/DebugUtils";
+import WeavePromise from "../util/WeavePromise";
+import IProgressIndicator from "../api/core/IProgressIndicator";
+
+import Weave from "../Weave";
+import WeaveAPI from "../WeaveAPI";
+
+
+
+export default class ProgressIndicator
+{
+	constructor()
+	{
+
+		this.map_task_progress = new JS.Map();
+		this.map_task_description = new JS.Map();
+		this.map_task_stackTrace = new JS.Map();
+
+		this._taskCount = 0;
+		this._maxTaskCount = 1;
+
+		this.debugTasks = this.debugTasks.bind(this);
+		this.getDescriptions = this.getDescriptions.bind(this);
+		this.getTaskCount = this.getTaskCount.bind(this);
+		this.addTask = this.addTask.bind(this);
+		this.hasTask = this.hasTask.bind(this);
+		this.updateTask = this.updateTask.bind(this);
+		this.removeTask = this.removeTask.bind(this);
+		this.getNormalizedProgress = this.getNormalizedProgress.bind(this);
+	}
+
+	/**
+	 * For debugging, returns debugIds for active tasks.
+	 */
+	debugTasks()
+	{
+		var result = [];
+		var tasks = JS.mapKeys(this.map_task_progress);
+		for (var i in tasks)
+		{
+			var task = tasks[i];
+
+			result.push(DebugUtils.debugId(task));}
+
+		return result;
+	};
+
+
+	getDescriptions()
+	{
+		var result = [];
+		var tasks = JS.mapKeys(this.map_task_progress);
+		for (var i in tasks)
+		{
+			var task = tasks[i];
+			{
+				var  desc = this.map_task_description.get(task) || "Unnamed task";
+				if (desc)
+					result.push([task, this.map_task_progress.get(task), desc]);
+			}
+		}
+
+		return result;
+	};
+
+
+	getTaskCount()
+	{
+		return this._taskCount;
+	};
+
+
+	addTask(taskToken, busyObject, description)
+	{
+		busyObject = typeof busyObject !== 'undefined' ? busyObject : null;
+		description = typeof description !== 'undefined' ? description : null;
+		var  cc = Weave.getCallbacks(this);
+		cc.delayCallbacks();
+		var isNewTask = !this.map_task_progress.has(taskToken);
+		this.map_task_description.set(taskToken, description);
+		this.updateTask(taskToken, NaN);
+		if (isNewTask && WeavePromise.isThenable(taskToken)) {
+			var remove = this.removeTask.bind(this, taskToken);
+			taskToken.then(remove, remove);
+		}
+		if (busyObject)
+			WeaveAPI.SessionManager.assignBusyTask(taskToken, busyObject);
+		cc.resumeCallbacks();
+	};
+
+
+	hasTask(taskToken)
+	{
+		return this.map_task_progress.has(taskToken);
+	};
+
+
+	updateTask(taskToken, progress)
+	{
+		if (!this.map_task_progress.has(taskToken))
+		{
+			if (!isNaN(progress))
+				throw new Error("updateTask() called, but task was not previously added with addTask()");
+			if (WeaveAPI.debugAsyncStack)
+				this.map_task_stackTrace.set(taskToken, new Error("Stack trace"));
+			this._taskCount++;
+			this._maxTaskCount++;
+		}
+		if (this.map_task_progress.get(taskToken) !== progress) {
+			this.map_task_progress.set(taskToken, progress);
+			Weave.getCallbacks(this).triggerCallbacks();
+		}
+	};
+
+
+	removeTask(taskToken)
+	{
+		if (!this.map_task_progress.has(taskToken))
+			return;
+		var stackTrace = this.map_task_stackTrace.get(taskToken);
+		this.map_task_progress['delete'](taskToken);
+		this.map_task_description['delete'](taskToken);
+		this.map_task_stackTrace['delete'](taskToken);
+		this._taskCount--;
+		if (this._taskCount == 1)
+			this._maxTaskCount = this._taskCount;
+		WeaveAPI.SessionManager.unassignBusyTask(taskToken);
+		Weave.getCallbacks(this).triggerCallbacks();
+	};
+
+
+	getNormalizedProgress()
+	{
+		var sum = 0;
+		var tasks = JS.mapKeys(this.map_task_progress);
+
+		for (var i in tasks)
+		{
+			var task = tasks[i];
+			{
+				var stackTrace = this.map_task_stackTrace.get(task);
+				var progress = this.map_task_progress.get(task);
+				if (isFinite(progress))
+					sum += progress;
+			}
+		}
+
+		sum += this._maxTaskCount - this._taskCount;
+		if (sum)
+			return sum / this._maxTaskCount;
+		return this._taskCount ? 0 : 1;
+	};
+
+
+	test()
+	{
+		var tasks = JS.mapKeys(this.map_task_progress);
+		for (var i in tasks)
+		{
+			var task = tasks[i];
+			{
+				var stackTrace = this.map_task_stackTrace.get(task);
+				var description = this.map_task_description.get(task);
+				JS.log(DebugUtils.debugId(task), description, stackTrace);
+			}
+		}
+
+	};
+
+
+	 REFLECTION_INFO ()
+	 {
+		return {
+			variables: function () {
+				return {
+				};
+			},
+			accessors: function () {
+				return {
+				};
+			},
+			methods: function () {
+				return {
+					'debugTasks': { type: 'Array', declaredBy: 'weavejs.core.ProgressIndicator'},
+					'getDescriptions': { type: 'Array', declaredBy: 'weavejs.core.ProgressIndicator'},
+					'getTaskCount': { type: 'int', declaredBy: 'weavejs.core.ProgressIndicator'},
+					'addTask': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator'},
+					'hasTask': { type: 'Boolean', declaredBy: 'weavejs.core.ProgressIndicator'},
+					'updateTask': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator'},
+					'removeTask': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator'},
+					'getNormalizedProgress': { type: 'Number', declaredBy: 'weavejs.core.ProgressIndicator'},
+					'test': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator'}
+				};
+			}
+		};
+	};
 }
 
-/**
- * This is a LinkableVariable which limits its session state to Number values.
- * @author adufilie
- * @author sanjay1909
- */
-(function () {
+ProgressIndicator.prototype.CLASS_INFO = { names: [{ name: 'ProgressIndicator', qName: 'weavejs.core.ProgressIndicator'}], interfaces: [IProgressIndicator] };
 
 
-
-    Object.defineProperty(ProgressIndicator, 'debug', {
-        value: false
-    });
-
-    function ProgressIndicator() {}
-
-    var p = ProgressIndicator.prototype;
-
-    /**
-     * @private
-     * @type {number}
-     */
-    p._taskCount = 0;
-
-
-    /**
-     * @private
-     * @type {number}
-     */
-    p._maxTaskCount = 0;
-
-
-    Object.defineProperties(p, {
-        '_progress': {
-            value: new Map()
-        },
-        '_description': {
-            value: new Map()
-        },
-        '_stackTrace': {
-            value: new Map()
-        }
-    });
-    /**
-     * For debugging, returns debugIds for active tasks.
-     */
-    p.debugTasks = function () {
-        var result = [];
-        for (var task of this._progress.keys()) {
-            result.push(WeaveAPI.debugID(task));
-        };
-
-        return result;
-    }
-
-    p.getDescriptions = function () {
-        var result = [];
-        for (var task of this._progress.keys()) {
-            var desc = this._description.get(task) || "Unnamed task";
-            if (desc)
-                result.push(WeaveAPI.debugId(task) + " (" + (100 * this._progress.get(task)) + "%) " + desc);
-
-        };
-
-        WeaveAPI.StandardLib.sort(result);
-        return result;
-    }
-
-
-    /**
-     * @inheritDoc
-     */
-    p.getTaskCount = function () {
-        return this._taskCount;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    p.addTask = function (taskToken, busyObject, description) {
-        busyObject = (busyObject === undefined) ? null : busyObject;
-        description = (description === undefined) ? null : description;
-
-        var cc = WeaveAPI.SessionManager.getCallbackCollection(this);
-        cc.delayCallbacks();
-
-        if (taskToken instanceof weavecore.CustomPromise && this._progress.get(taskToken) === undefined)
-            taskToken.addResponder({
-                result: handleAsyncToken.bind(this),
-                fault: handleAsyncToken.bind(this),
-                token: taskToken
-            });
-
-        this._description.set(taskToken, description);
-
-        // add task before WeaveAPI.SessionManager.assignBusyTask()
-        this.updateTask(taskToken, NaN); // NaN is used as a special case when adding the task
-
-        if (busyObject)
-            WeaveAPI.SessionManager.assignBusyTask(taskToken, busyObject);
-
-        cc.resumeCallbacks();
-    }
-
-    function handleAsyncToken(response, token) {
-        this.removeTask(token);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    p.hasTask = function (taskToken) {
-        return this._progress.get(taskToken) !== undefined;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    p.updateTask = function (taskToken, progress) {
-        // if this token isn't in the Dictionary yet, increase count
-        if (this._progress.get(taskToken) === undefined) {
-            // expecting NaN from addTask()
-            if (!isNaN(progress))
-                console.error("updateTask() called, but task was not previously added with addTask()");
-            if (ProgressIndicator.debug)
-                this._stackTrace.set(taskToken, new Error("Stack trace").getStackTrace());
-
-            // increase count when new task is added
-            this._taskCount++;
-            this._maxTaskCount++;
-        }
-
-        if (this._progress.get(taskToken) !== progress) {
-            this._progress.set(taskToken, progress);
-            WeaveAPI.SessionManager.getCallbackCollection(this).triggerCallbacks();
-        }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    p.removeTask = function (taskToken) {
-        // if the token isn't in the dictionary, do nothing
-        if (this._progress.get(taskToken) === undefined)
-            return;
-
-        var stackTrace = this._stackTrace.get(taskToken); // check this when debugging
-
-        this._progress.delete(taskToken);
-        this._description.delete(taskToken);
-        this._stackTrace.delete(taskToken);
-        this._taskCount--;
-        // reset max count when count drops to 1
-        if (this._taskCount == 1)
-            this._maxTaskCount = this._taskCount;
-
-        WeaveAPI.SessionManager.unassignBusyTask(taskToken);
-
-        WeaveAPI.SessionManager.getCallbackCollection(this).triggerCallbacks();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    p.getNormalizedProgress = function () {
-        // add up the percentages
-        var sum = 0;
-        for (var task of this._progress.keys()) {
-            var stackTrace = this._stackTrace.get(task); // check this when debugging
-            var progress = this._progress.get(task);
-            if (isFinite(progress))
-                sum += progress;
-        };
-
-        // make any pending requests that no longer exist count as 100% done
-        sum += _maxTaskCount - _taskCount;
-        // divide by the max count to get overall percentage
-        return sum / _maxTaskCount;
-    }
-
-    weavecore.ProgressIndicator = ProgressIndicator;
-    WeaveAPI.ProgressIndicator = new ProgressIndicator();
-
-    /**
-     * Metadata
-     *
-     * @type {Object.<string, Array.<Object>>}
-     */
-    p.CLASS_INFO = {
-        names: [{
-            name: 'ProgressIndicator',
-            qName: 'weavecore.ProgressIndicator'
-        }],
-        interfaces: [weavecore.IProgressIndicator]
-    };
-
-
-}());
