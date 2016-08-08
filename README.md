@@ -16,9 +16,5 @@ How to use and best practices will be added soon
 
 <a href="http://sanjay1909.github.io/WeaveCoreJS/docs/" target="_blank">Under Progress</a>. Its my experimentation with Yuidoc, only few of the files were formatted to match yuidoc style.
 
-##Showcase
 
-**As~Me:** Personal Data Visualization 
-* ReactJS(UI Layer) + weaveCoreJS(data Layer) 
-* <a href="http://as-me.github.io/dashboard/demo.html#charts" target="_blank">Demo Link</a>
 
