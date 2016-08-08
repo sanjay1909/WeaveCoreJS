@@ -31,6 +31,8 @@ export default class CallbackCollection
 		this._runCallbacksCompleted;
 		this._wasDisposed = false;
 
+		this._delayCount = 0;
+
 		//EC6 doesn't call this with prototype mehtod with This
 		this.addImmediateCallback = this.addImmediateCallback.bind(this);
 		this.triggerCallbacks = this.triggerCallbacks.bind(this);
@@ -105,7 +107,8 @@ export default class CallbackCollection
 		this._runCallbacksCompleted = false;
 		for (var  schedule = 0; schedule < 2; schedule++)
 		{
-			for (var  i = 0; i < this._callbackEntries.length; i++)
+			let callbackEntriesLen = this._callbackEntries.length
+			for (var  i = 0; i < callbackEntriesLen; i++)
 			{
 				if (this._runCallbacksCompleted && this._preCallback == null)
 					break;
@@ -148,7 +151,8 @@ export default class CallbackCollection
 		for (var  outerLoop = 0; outerLoop < 2; outerLoop++)
 		{
 			var entries = outerLoop == 0 ? this._callbackEntries : this._disposeCallbackEntries;
-			for (var  index = 0; index < entries.length; index++)
+			let entriesLength = entries.length;
+			for (var  index = 0; index < entriesLength; index++)
 			{
 				var entry = entries[index];
 				if (entry.callback === callback && entry.context === relevantContext) {
@@ -214,7 +218,8 @@ export default class CallbackCollection
 		this.runDisposeCallbacks();
 	};
 
-	runDisposeCallbacks() {
+	runDisposeCallbacks()
+	{
 		var entries = this._disposeCallbackEntries;
 		for (var i in entries)
 		{

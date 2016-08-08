@@ -169,7 +169,8 @@ StandardLib.substitute = function(format, args)
 		args = Language.as(args[0], Array);
 	var split = format.split('{');
 	var output = split[0];
-	for (var i = 1; i < split.length; i++) {
+	let splitLength = split.length;
+	for (var i = 1; i < splitLength; i++) {
 		var str = Language.as(split[i], String);
 		if (StandardLib.argRef.test(str)) {
 			var j = str.indexOf("}");
@@ -213,9 +214,11 @@ StandardLib.unIndent = function(script, spacesPerTab)
 			while (line.charAt(lineIndent) == '\t')
 				lineIndent++;
 			commonIndent = Math.min(commonIndent, lineIndent);
-		}}
+		}
+	}
 
-	for (var  i = 0; i < lines.length; i++) {
+	let linesLength = lines.length;
+	for (var  i = 0; i < linesLength; i++) {
 		line = lines[i];
 		var  t = 0;
 		while (t < commonIndent && line.charAt(t) == '\t')
@@ -637,32 +640,42 @@ StandardLib.sortOn = function(array, params, sortDirections, inPlace, returnSort
 	sortDirections = typeof sortDirections !== 'undefined' ? sortDirections : undefined;
 	inPlace = typeof inPlace !== 'undefined' ? inPlace : true;
 	returnSortedIndexArray = typeof returnSortedIndexArray !== 'undefined' ? returnSortedIndexArray : false;
-	if (array.length == 0)
+
+	let arrayLength = array.length;
+	if (arrayLength == 0)
 		return inPlace ? array : [];
+
 	var  values;
 	var  param;
 	var  sortDirection;
 	var  i;
-	for (i = StandardLib._sortBuffer.length; i < array.length; i++)
+
+	for (i = StandardLib._sortBuffer.length; i < arrayLength; i++)
 		StandardLib._sortBuffer[i] = [];
-	if (params === array || !Language.is(params, Array)) {
+
+	if (params === array || !Language.is(params, Array))
+	{
 		params = [params];
 		if (sortDirections)
 			sortDirections = [sortDirections];
 	}
+
 	var  fields = new Array(params.length);
 	var  fieldOptions = new Array(params.length);
-	for (var  p = 0; p < params.length; p++) {
+
+	for (var  p = 0; p < params.length; p++)
+	{
 		param = params[p];
 		sortDirection = sortDirections && sortDirections[p] < 0 ? StandardLib.AS3_DESCENDING : 0;
 		i = array.length;
+
 		if (Language.is(param, Array))
 			while (i--)
 				StandardLib._sortBuffer[i][p] = param[i];
 		else if (Language.is(param, Function))
 			while (i--)
 				StandardLib._sortBuffer[i][p] = param(array[i]);
-		else if (Language.is(param, weavejs.util.JS.Map) || Language.is(param, weavejs.util.JS.WeakMap))
+		else if (Language.is(param, JS.Map) || Language.is(param, JS.WeakMap))
 			while (i--)
 				StandardLib._sortBuffer[i][p] = param.get(array[i]);
 		else if (typeof(param) === 'object')
@@ -674,16 +687,20 @@ StandardLib.sortOn = function(array, params, sortDirections, inPlace, returnSort
 		fields[p] = p;
 		fieldOptions[p] = StandardLib.AS3_RETURNINDEXEDARRAY | StandardLib.guessSortMode(StandardLib._sortBuffer, p) | sortDirection;
 	}
+
 	values = StandardLib._sortBuffer.slice(0, array.length);
 	values = StandardLib.as3SortOn(values, fields, fieldOptions);
+
 	if (returnSortedIndexArray)
 		return values;
+
 	var  array2 = new Array(array.length);
 	i = array.length;
 	while (i--)
 		array2[i] = array[values[i]];
 	if (!inPlace)
 		return array2;
+
 	i = array.length;
 	while (i--)
 		array[i] = array2[i];
@@ -722,7 +739,8 @@ StandardLib.getArrayType = function(a)
 		var item = a[i];
 
 		if (item == null || item.constructor != type)
-			return null;}
+			return null;
+	}
 
 	return type;
 };
@@ -739,7 +757,8 @@ StandardLib.arrayIsType = function(a, type)
 		var item = a[i];
 
 		if (!Language.is(item, type))
-			return false;}
+			return false;
+	}
 
 	return true;
 };
@@ -762,7 +781,9 @@ StandardLib.formatDate = function(value, formatString, formatAsUniversalTime)
 {
 	formatString = typeof formatString !== 'undefined' ? formatString : null;
 	formatAsUniversalTime = typeof formatAsUniversalTime !== 'undefined' ? formatAsUniversalTime : true;
-	if (Language.is(value, Number)) {
+
+	if (Language.is(value, Number))
+	{
 		var date = new Date();
 		date.setTime(Language.as(value, Number));
 		value = date;
@@ -795,6 +816,7 @@ StandardLib.compare = function(a, b, objectCompare)
 		return -1;
 	var  typeA = typeof(a);
 	var  typeB = typeof(b);
+
 	if (typeA != typeB)
 		return StandardLib.stringCompare(typeA, typeB);
 	if (typeA == 'boolean')
@@ -805,9 +827,12 @@ StandardLib.compare = function(a, b, objectCompare)
 		return StandardLib.stringCompare(Language.as(a, String), Language.as(b, String));
 	if (typeA != 'object')
 		return 1;
+
 	if (Language.is(a, Date) && Language.is(b, Date))
 		return StandardLib.dateCompare(Language.as(a, Date), Language.as(b, Date));
-	if (Language.is(a, Array) && Language.is(b, Array)) {
+
+	if (Language.is(a, Array) && Language.is(b, Array))
+	{
 		var  an = a.length;
 		var  bn = b.length;
 		if (an < bn)
@@ -821,21 +846,28 @@ StandardLib.compare = function(a, b, objectCompare)
 		}
 		return 0;
 	}
-	if (objectCompare != null) {
+
+	if (objectCompare != null)
+	{
 		var  result = objectCompare(a, b);
 		if (isFinite(result))
 			return result;
 	}
+
 	var  qna = String(a);
 	var  qnb = String(b);
 	if (qna != qnb)
 		return StandardLib.stringCompare(qna, qnb);
+
 	var  p;
-	for (p in a) {
+	for (p in a)
+	{
 		if (!b.hasOwnProperty(p))
 			return -1;
 	}
-	for (p in b) {
+
+	for (p in b)
+	{
 		if (!a.hasOwnProperty(p))
 			return 1;
 		c = StandardLib.compare(a[p], b[p]);
@@ -845,7 +877,8 @@ StandardLib.compare = function(a, b, objectCompare)
 	return 0;
 };
 
-StandardLib.numericCompare = function(a, b) {
+StandardLib.numericCompare = function(a, b)
+{
 	if (isNaN(a) && isNaN(b))
 		return 0;
 	if (isNaN(a))
@@ -860,7 +893,8 @@ StandardLib.numericCompare = function(a, b) {
 };
 
 
-StandardLib.stringCompare = function(a, b, caseInsensitive) {
+StandardLib.stringCompare = function(a, b, caseInsensitive)
+{
 	caseInsensitive = typeof caseInsensitive !== 'undefined' ? caseInsensitive : false;
 	if (a == null && b == null)
 		return 0;
@@ -880,7 +914,8 @@ StandardLib.stringCompare = function(a, b, caseInsensitive) {
 	return result;
 };
 
-StandardLib.dateCompare = function(a, b) {
+StandardLib.dateCompare = function(a, b)
+{
 	if (a == null && b == null)
 		return 0;
 	if (a == null)
@@ -935,9 +970,11 @@ StandardLib.byteArrayToString = function(byteArray) {
 	var  n = byteArray.length;
 	if (n <= CHUNK_SIZE)
 		return String.fromCharCode.apply(String, byteArray);
+
 	var  strings = [];
-	for (var  i = 0; i < byteArray.length;)
+	for (var  i = 0; i < n;)
 		strings.push(String.fromCharCode.apply(null, byteArray.subarray(i, i += CHUNK_SIZE)));
+
 	return strings.join('');
 };
 

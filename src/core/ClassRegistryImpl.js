@@ -116,9 +116,10 @@ export default class ClassRegistryImpl
 		
 		if (!def) {
 			var shortName = name.split('.').pop().split('::').pop();
-			for (var i in this.defaultPackages)
+			let defPackages = this.defaultPackages;
+			for (var i in defPackages)
 			{
-				var pkg = this.defaultPackages[i];
+				var pkg = defPackages[i];
 				{
 					var qName = pkg ? pkg + '.' + shortName : shortName;
 					def = this.map_name_class.get(qName) || this.evalChain(qName);
@@ -136,7 +137,6 @@ export default class ClassRegistryImpl
 	{
 		var chain = name.split('.');
 		var def = JS.global;
-		var foreachiter3_target = chain;
 		for (var i in chain)
 		{
 			var key = chain[i];

@@ -262,12 +262,14 @@ export default class SessionManager
 		var names;
 		var childObject;
 		var ignoreList = new JS.WeakMap();
+		//todo try using is rather checking by casting using as
 		var lhm = Language.as(object, ILinkableHashMap);
 		if (lhm)
 		{
 			names = lhm.getNames();
 			var childObjects = lhm.getObjects();
-			for (var i = 0; i < names.length; i++)
+			let len = names.length;
+			for (var i = 0; i < len; i++)
 			{
 				childObject = childObjects[i];
 				if (this.d2d_child_parent.get(childObject, lhm))
@@ -546,10 +548,12 @@ export default class SessionManager
 				}
 			}
 
-			if (resultNames.length > 0)
+			let resultNamesLength = resultNames.length;
+			if (resultNamesLength > 0)
 			{
 				result = new Object();
-				for (i = 0; i < resultNames.length; i++) {
+
+				for (i = 0; i < resultNamesLength; i++) {
 					var value = this.getSessionState(resultProperties[i]);
 					property = Language.as(resultProperties[i], ILinkableObject);
 					if (value == null && !Language.is(property, ILinkableVariable) && !Language.is(property, ILinkableCompositeObject))
@@ -604,10 +608,9 @@ export default class SessionManager
 				propertyNames = JS.getPropertyNames(linkableObject, true);
 		}
 		linkableNames = [];
-		var foreachiter6_target = propertyNames;
-		for (var foreachiter6 in foreachiter6_target)
+		for (var i in propertyNames)
 		{
-			name = foreachiter6_target[foreachiter6];
+			name = propertyNames[i];
 			{
 				property = linkableObject[name];
 				if (Weave.isLinkable(property))
@@ -747,10 +750,12 @@ export default class SessionManager
 		
 		if (!linkableObject)
 			return false;
+
 		var busy = false;
-		this.array_busyTraversal[this.array_busyTraversal.length] = linkableObject;
+		var arrayBusyTraversalLength = this.array_busyTraversal.length;
+		this.array_busyTraversal[arrayBusyTraversalLength] = linkableObject;
 		this.map_busyTraversal.set(linkableObject, true);
-		outerLoop : for (var i = 0; i < this.array_busyTraversal.length; i++) 
+		outerLoop : for (var i = 0; i < arrayBusyTraversalLength; i++)
 		{
 			linkableObject = this.array_busyTraversal[i];
 			var ilowbs = Language.as(linkableObject, ILinkableObjectWithBusyStatus);
@@ -783,7 +788,7 @@ export default class SessionManager
 				{
 					if (!this.map_busyTraversal.get(child))
 					{
-						this.array_busyTraversal[this.array_busyTraversal.length] = child;
+						this.array_busyTraversal[arrayBusyTraversalLength] = child;
 						this.map_busyTraversal.set(child, true);
 					}
 				}
@@ -798,7 +803,7 @@ export default class SessionManager
 			this.map_busyTraversal.set(linkableObject, false);
 		}
 
-		this.array_busyTraversal.length = 0;
+		this.array_busyTraversal.length = arrayBusyTraversalLength = 0;
 		return busy;
 	};
 
@@ -945,10 +950,10 @@ export default class SessionManager
 	{
 		var results = [];
 		var parents = this.d2d_child_parent.secondaryKeys(descendant);
-		var foreachiter15_target = parents;
-		for (var foreachiter15 in foreachiter15_target)
+
+		for (var i in parents)
 		{
-			var parent = foreachiter15_target[foreachiter15];
+			var parent = parents[i];
 			{
 				var  name = this._getChildPropertyName(Language.as(parent, ILinkableObject), descendant);
 				if (name != null) {
@@ -958,7 +963,8 @@ export default class SessionManager
 						results.push(result);
 					}
 				}
-			}}
+			}
+		}
 
 		if (results.length == 0)
 			return root == null ? results : null;
@@ -1020,7 +1026,8 @@ export default class SessionManager
 		if (!path)
 			return null;
 		var object = root;
-		for (var  i = 0; i < path.length; i++) 
+		let pathLength = path.length;
+		for (var  i = 0; i < pathLength; i++) 
 		{
 			var  propertyName = path[i];
 			if (object == null || this.map_disposed.get(object))
@@ -1075,7 +1082,8 @@ export default class SessionManager
 
 			return null;
 		}
-		for (var  i = startAtIndex; i < path.length; i++)
+		let pathLength = path.length;
+		for (var  i = startAtIndex; i < pathLength; i++)
 		{
 			if (!mapping || typeof(mapping) !== 'object')
 				return null;
@@ -1083,7 +1091,7 @@ export default class SessionManager
 
 			object = Language.as(mapping, ILinkableObject);
 			if (object)
-				return i + 1 == path.length ? object : this.getObject(object, path.slice(i + 1));
+				return i + 1 == pathLength ? object : this.getObject(object, path.slice(i + 1));
 		}
 		return null;
 	};
@@ -1179,32 +1187,40 @@ export default class SessionManager
 			var objectName;
 			var className;
 			var sessionState;
-			for (i = 0; i < oldState.length; i++)
+			
+			let oldStateLength =  oldState.length;
+			let newStateLength =  newState.length;
+			let DynStateObjName = DynamicState.OBJECT_NAME ;
+			let DynStateClassName = DynamicState.CLASS_NAME ;
+			let DynStateSessionState = DynamicState.SESSION_STATE ;
+			
+			for (i = 0; i < oldStateLength; i++)
 			{
 				typedState = oldState[i];
-				objectName = typedState[DynamicState.OBJECT_NAME];
+				objectName = typedState[DynStateObjName];
 				oldLookup[objectName || ''] = typedState;
 			}
-			if (oldState.length != newState.length)
+			
+			if (oldStateLength != newStateLength)
 				changeDetected = true;
 
 			var result = [];
-			for (i = 0; i < newState.length; i++)
+			for (i = 0; i < newStateLength; i++)
 			{
 				typedState = newState[i];
-				objectName = typedState[DynamicState.OBJECT_NAME];
-				className = typedState[DynamicState.CLASS_NAME];
-				sessionState = typedState[DynamicState.SESSION_STATE];
+				objectName = typedState[DynStateObjName];
+				className = typedState[DynStateClassName];
+				sessionState = typedState[DynStateSessionState];
 				var oldTypedState = oldLookup[objectName || ''];
 				delete oldLookup[objectName || ''];
 
-				if (oldTypedState != null && oldTypedState[DynamicState.CLASS_NAME] == className)
+				if (oldTypedState != null && oldTypedState[DynStateClassName] == className)
 				{
 					className = null;
-					diffValue = this.computeDiff(oldTypedState[DynamicState.SESSION_STATE], sessionState);
+					diffValue = this.computeDiff(oldTypedState[DynStateSessionState], sessionState);
 					if (diffValue === undefined) {
 						result.push(objectName);
-						if (!changeDetected && oldState[i][DynamicState.OBJECT_NAME] != objectName)
+						if (!changeDetected && oldState[i][DynStateObjName] != objectName)
 							changeDetected = true;
 						continue;
 					}
