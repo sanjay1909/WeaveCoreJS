@@ -7,13 +7,17 @@ import WeaveJS from './WeaveJS';
 
 import CallbackCollection from './core/CallbackCollection';
 import LinkableVariable from './core/LinkableVariable';
+import LinkableHashMap from './core/LinkableHashMap';
+import LinkablePlaceholder from './core/LinkablePlaceholder';
 
 
 new WeaveJS().start();
 
 var core = {
 	CallbackCollection,
-	LinkableVariable
+	LinkableVariable,
+	LinkableHashMap,
+	LinkablePlaceholder
 };
 
 export {

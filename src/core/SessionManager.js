@@ -13,6 +13,7 @@ import ISessionManager from "../api/core/ISessionManager";
 import IDisposableObject from "../api/core/IDisposableObject";
 
 import CallbackCollection from "./CallbackCollection";
+import ProgressIndicator from "./ProgressIndicator";
 
 import DynamicState from "../api/core/DynamicState";
 import WeaveTreeItem from "../util/WeaveTreeItem";

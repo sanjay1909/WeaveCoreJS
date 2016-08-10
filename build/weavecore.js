@@ -75,13 +75,23 @@
 	
 	var _LinkableVariable2 = _interopRequireDefault(_LinkableVariable);
 	
+	var _LinkableHashMap = __webpack_require__(337);
+	
+	var _LinkableHashMap2 = _interopRequireDefault(_LinkableHashMap);
+	
+	var _LinkablePlaceholder = __webpack_require__(338);
+	
+	var _LinkablePlaceholder2 = _interopRequireDefault(_LinkablePlaceholder);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	new _WeaveJS2.default().start();
 	
 	var core = {
 		CallbackCollection: _CallbackCollection2.default,
-		LinkableVariable: _LinkableVariable2.default
+		LinkableVariable: _LinkableVariable2.default,
+		LinkableHashMap: _LinkableHashMap2.default,
+		LinkablePlaceholder: _LinkablePlaceholder2.default
 	};
 	
 	exports.core = core;
@@ -25058,8 +25068,9 @@
 	
 				if (!def) {
 					var shortName = name.split('.').pop().split('::').pop();
-					for (var i in this.defaultPackages) {
-						var pkg = this.defaultPackages[i];
+					var defPackages = this.defaultPackages;
+					for (var i in defPackages) {
+						var pkg = defPackages[i];
 						{
 							var qName = pkg ? pkg + '.' + shortName : shortName;
 							def = this.map_name_class.get(qName) || this.evalChain(qName);
@@ -25075,7 +25086,6 @@
 			value: function evalChain(name) {
 				var chain = name.split('.');
 				var def = _JS2.default.global;
-				var foreachiter3_target = chain;
 				for (var i in chain) {
 					var key = chain[i];
 					{
@@ -25883,7 +25893,8 @@
 		if (args.length == 1 && _Language2.default.is(args[0], Array)) args = _Language2.default.as(args[0], Array);
 		var split = format.split('{');
 		var output = split[0];
-		for (var i = 1; i < split.length; i++) {
+		var splitLength = split.length;
+		for (var i = 1; i < splitLength; i++) {
 			var str = _Language2.default.as(split[i], String);
 			if (StandardLib.argRef.test(str)) {
 				var j = str.indexOf("}");
@@ -25923,7 +25934,8 @@
 			}
 		}
 	
-		for (var i = 0; i < lines.length; i++) {
+		var linesLength = lines.length;
+		for (var i = 0; i < linesLength; i++) {
 			line = lines[i];
 			var t = 0;
 			while (t < commonIndent && line.charAt(t) == '\t') {
@@ -26273,28 +26285,35 @@
 		sortDirections = typeof sortDirections !== 'undefined' ? sortDirections : undefined;
 		inPlace = typeof inPlace !== 'undefined' ? inPlace : true;
 		returnSortedIndexArray = typeof returnSortedIndexArray !== 'undefined' ? returnSortedIndexArray : false;
-		if (array.length == 0) return inPlace ? array : [];
+	
+		var arrayLength = array.length;
+		if (arrayLength == 0) return inPlace ? array : [];
+	
 		var values;
 		var param;
 		var sortDirection;
 		var i;
-		for (i = StandardLib._sortBuffer.length; i < array.length; i++) {
+	
+		for (i = StandardLib._sortBuffer.length; i < arrayLength; i++) {
 			StandardLib._sortBuffer[i] = [];
 		}if (params === array || !_Language2.default.is(params, Array)) {
 			params = [params];
 			if (sortDirections) sortDirections = [sortDirections];
 		}
+	
 		var fields = new Array(params.length);
 		var fieldOptions = new Array(params.length);
+	
 		for (var p = 0; p < params.length; p++) {
 			param = params[p];
 			sortDirection = sortDirections && sortDirections[p] < 0 ? StandardLib.AS3_DESCENDING : 0;
 			i = array.length;
+	
 			if (_Language2.default.is(param, Array)) while (i--) {
 				StandardLib._sortBuffer[i][p] = param[i];
 			} else if (_Language2.default.is(param, Function)) while (i--) {
 				StandardLib._sortBuffer[i][p] = param(array[i]);
-			} else if (_Language2.default.is(param, weavejs.util.JS.Map) || _Language2.default.is(param, weavejs.util.JS.WeakMap)) while (i--) {
+			} else if (_Language2.default.is(param, _JS2.default.Map) || _Language2.default.is(param, _JS2.default.WeakMap)) while (i--) {
 				StandardLib._sortBuffer[i][p] = param.get(array[i]);
 			} else if ((typeof param === "undefined" ? "undefined" : _typeof(param)) === 'object') while (i--) {
 				StandardLib._sortBuffer[i][p] = param[array[i]];
@@ -26303,14 +26322,18 @@
 			}fields[p] = p;
 			fieldOptions[p] = StandardLib.AS3_RETURNINDEXEDARRAY | StandardLib.guessSortMode(StandardLib._sortBuffer, p) | sortDirection;
 		}
+	
 		values = StandardLib._sortBuffer.slice(0, array.length);
 		values = StandardLib.as3SortOn(values, fields, fieldOptions);
+	
 		if (returnSortedIndexArray) return values;
+	
 		var array2 = new Array(array.length);
 		i = array.length;
 		while (i--) {
 			array2[i] = array[values[i]];
 		}if (!inPlace) return array2;
+	
 		i = array.length;
 		while (i--) {
 			array[i] = array2[i];
@@ -26375,6 +26398,7 @@
 	StandardLib.formatDate = function (value, formatString, formatAsUniversalTime) {
 		formatString = typeof formatString !== 'undefined' ? formatString : null;
 		formatAsUniversalTime = typeof formatAsUniversalTime !== 'undefined' ? formatAsUniversalTime : true;
+	
 		if (_Language2.default.is(value, Number)) {
 			var date = new Date();
 			date.setTime(_Language2.default.as(value, Number));
@@ -26402,12 +26426,15 @@
 		if (b == null) return -1;
 		var typeA = typeof a === "undefined" ? "undefined" : _typeof(a);
 		var typeB = typeof b === "undefined" ? "undefined" : _typeof(b);
+	
 		if (typeA != typeB) return StandardLib.stringCompare(typeA, typeB);
 		if (typeA == 'boolean') return StandardLib.numericCompare(Number(a), Number(b));
 		if (typeA == 'number') return StandardLib.numericCompare(_Language2.default.as(a, Number), _Language2.default.as(b, Number));
 		if (typeA == 'string') return StandardLib.stringCompare(_Language2.default.as(a, String), _Language2.default.as(b, String));
 		if (typeA != 'object') return 1;
+	
 		if (_Language2.default.is(a, Date) && _Language2.default.is(b, Date)) return StandardLib.dateCompare(_Language2.default.as(a, Date), _Language2.default.as(b, Date));
+	
 		if (_Language2.default.is(a, Array) && _Language2.default.is(b, Array)) {
 			var an = a.length;
 			var bn = b.length;
@@ -26419,17 +26446,21 @@
 			}
 			return 0;
 		}
+	
 		if (objectCompare != null) {
 			var result = objectCompare(a, b);
 			if (isFinite(result)) return result;
 		}
+	
 		var qna = String(a);
 		var qnb = String(b);
 		if (qna != qnb) return StandardLib.stringCompare(qna, qnb);
+	
 		var p;
 		for (p in a) {
 			if (!b.hasOwnProperty(p)) return -1;
 		}
+	
 		for (p in b) {
 			if (!a.hasOwnProperty(p)) return 1;
 			c = StandardLib.compare(a[p], b[p]);
@@ -26503,8 +26534,9 @@
 		var CHUNK_SIZE = 8192;
 		var n = byteArray.length;
 		if (n <= CHUNK_SIZE) return String.fromCharCode.apply(String, byteArray);
+	
 		var strings = [];
-		for (var i = 0; i < byteArray.length;) {
+		for (var i = 0; i < n;) {
 			strings.push(String.fromCharCode.apply(null, byteArray.subarray(i, i += CHUNK_SIZE)));
 		}return strings.join('');
 	};
@@ -28607,11 +28639,11 @@
 	
 	var _SessionManager2 = _interopRequireDefault(_SessionManager);
 	
-	var _Scheduler = __webpack_require__(333);
+	var _Scheduler = __webpack_require__(334);
 	
 	var _Scheduler2 = _interopRequireDefault(_Scheduler);
 	
-	var _ProgressIndicator = __webpack_require__(335);
+	var _ProgressIndicator = __webpack_require__(331);
 	
 	var _ProgressIndicator2 = _interopRequireDefault(_ProgressIndicator);
 	
@@ -28737,11 +28769,15 @@
 	
 	var _CallbackCollection2 = _interopRequireDefault(_CallbackCollection);
 	
+	var _ProgressIndicator = __webpack_require__(331);
+	
+	var _ProgressIndicator2 = _interopRequireDefault(_ProgressIndicator);
+	
 	var _DynamicState = __webpack_require__(314);
 	
 	var _DynamicState2 = _interopRequireDefault(_DynamicState);
 	
-	var _WeaveTreeItem = __webpack_require__(331);
+	var _WeaveTreeItem = __webpack_require__(333);
 	
 	var _WeaveTreeItem2 = _interopRequireDefault(_WeaveTreeItem);
 	
@@ -28991,11 +29027,13 @@
 				var names;
 				var childObject;
 				var ignoreList = new _JS2.default.WeakMap();
+				//todo try using is rather checking by casting using as
 				var lhm = _Language2.default.as(object, _ILinkableHashMap2.default);
 				if (lhm) {
 					names = lhm.getNames();
 					var childObjects = lhm.getObjects();
-					for (var i = 0; i < names.length; i++) {
+					var len = names.length;
+					for (var i = 0; i < len; i++) {
 						childObject = childObjects[i];
 						if (this.d2d_child_parent.get(childObject, lhm)) {
 							if (ignoreList.has(childObject)) continue;
@@ -29203,9 +29241,11 @@
 						}
 					}
 	
-					if (resultNames.length > 0) {
+					var resultNamesLength = resultNames.length;
+					if (resultNamesLength > 0) {
 						result = new Object();
-						for (i = 0; i < resultNames.length; i++) {
+	
+						for (i = 0; i < resultNamesLength; i++) {
 							var value = this.getSessionState(resultProperties[i]);
 							property = _Language2.default.as(resultProperties[i], _ILinkableObject2.default);
 							if (value == null && !_Language2.default.is(property, _ILinkableVariable2.default) && !_Language2.default.is(property, _ILinkableCompositeObject2.default)) continue;
@@ -29252,9 +29292,8 @@
 					if (_Weave2.default.isAsyncClass(linkableObject['constructor'])) propertyNames = _JS2.default.getOwnPropertyNames(linkableObject);else propertyNames = _JS2.default.getPropertyNames(linkableObject, true);
 				}
 				linkableNames = [];
-				var foreachiter6_target = propertyNames;
-				for (var foreachiter6 in foreachiter6_target) {
-					name = foreachiter6_target[foreachiter6];
+				for (var i in propertyNames) {
+					name = propertyNames[i];
 					{
 						property = linkableObject[name];
 						if (_Weave2.default.isLinkable(property)) if (!filtered || this.d2d_child_parent.get(property, linkableObject)) linkableNames.push(name);
@@ -29307,8 +29346,8 @@
 		}, {
 			key: "unassignBusyTask",
 			value: function unassignBusyTask(taskToken) {
-				if (ProgressIndicator.hasTask(taskToken)) {
-					ProgressIndicator.removeTask(taskToken);
+				if (_ProgressIndicator2.default.hasTask(taskToken)) {
+					_ProgressIndicator2.default.removeTask(taskToken);
 					return;
 				}
 				var owners = this.d2d_task_owner.secondaryKeys(taskToken);
@@ -29368,10 +29407,12 @@
 				if (_Language2.default.is(linkableObject, _ICallbackCollection2.default)) linkableObject = this.getLinkableObjectFromCallbackCollection(linkableObject);
 	
 				if (!linkableObject) return false;
+	
 				var busy = false;
-				this.array_busyTraversal[this.array_busyTraversal.length] = linkableObject;
+				var arrayBusyTraversalLength = this.array_busyTraversal.length;
+				this.array_busyTraversal[arrayBusyTraversalLength] = linkableObject;
 				this.map_busyTraversal.set(linkableObject, true);
-				outerLoop: for (var i = 0; i < this.array_busyTraversal.length; i++) {
+				outerLoop: for (var i = 0; i < arrayBusyTraversalLength; i++) {
 					linkableObject = this.array_busyTraversal[i];
 					var ilowbs = _Language2.default.as(linkableObject, _ILinkableObjectWithBusyStatus2.default);
 					if (ilowbs) {
@@ -29399,7 +29440,7 @@
 						var child = children[i];
 						{
 							if (!this.map_busyTraversal.get(child)) {
-								this.array_busyTraversal[this.array_busyTraversal.length] = child;
+								this.array_busyTraversal[arrayBusyTraversalLength] = child;
 								this.map_busyTraversal.set(child, true);
 							}
 						}
@@ -29412,7 +29453,7 @@
 					this.map_busyTraversal.set(linkableObject, false);
 				}
 	
-				this.array_busyTraversal.length = 0;
+				this.array_busyTraversal.length = arrayBusyTraversalLength = 0;
 				return busy;
 			}
 		}, {
@@ -29532,9 +29573,9 @@
 			value: function _getPaths(root, descendant) {
 				var results = [];
 				var parents = this.d2d_child_parent.secondaryKeys(descendant);
-				var foreachiter15_target = parents;
-				for (var foreachiter15 in foreachiter15_target) {
-					var parent = foreachiter15_target[foreachiter15];
+	
+				for (var i in parents) {
+					var parent = parents[i];
 					{
 						var name = this._getChildPropertyName(_Language2.default.as(parent, _ILinkableObject2.default), descendant);
 						if (name != null) {
@@ -29595,7 +29636,8 @@
 			value: function getObject(root, path) {
 				if (!path) return null;
 				var object = root;
-				for (var i = 0; i < path.length; i++) {
+				var pathLength = path.length;
+				for (var i = 0; i < pathLength; i++) {
 					var propertyName = path[i];
 					if (object == null || this.map_disposed.get(object)) return null;
 					if (_Language2.default.is(object, _ILinkableHashMap2.default)) {
@@ -29631,12 +29673,13 @@
 	
 					return null;
 				}
-				for (var i = startAtIndex; i < path.length; i++) {
+				var pathLength = path.length;
+				for (var i = startAtIndex; i < pathLength; i++) {
 					if (!mapping || (typeof mapping === "undefined" ? "undefined" : _typeof(mapping)) !== 'object') return null;
 					mapping = mapping[path[i]];
 	
 					object = _Language2.default.as(mapping, _ILinkableObject2.default);
-					if (object) return i + 1 == path.length ? object : this.getObject(object, path.slice(i + 1));
+					if (object) return i + 1 == pathLength ? object : this.getObject(object, path.slice(i + 1));
 				}
 				return null;
 			}
@@ -29709,28 +29752,36 @@
 					var objectName;
 					var className;
 					var sessionState;
-					for (i = 0; i < oldState.length; i++) {
+	
+					var oldStateLength = oldState.length;
+					var newStateLength = newState.length;
+					var DynStateObjName = _DynamicState2.default.OBJECT_NAME;
+					var DynStateClassName = _DynamicState2.default.CLASS_NAME;
+					var DynStateSessionState = _DynamicState2.default.SESSION_STATE;
+	
+					for (i = 0; i < oldStateLength; i++) {
 						typedState = oldState[i];
-						objectName = typedState[_DynamicState2.default.OBJECT_NAME];
+						objectName = typedState[DynStateObjName];
 						oldLookup[objectName || ''] = typedState;
 					}
-					if (oldState.length != newState.length) changeDetected = true;
+	
+					if (oldStateLength != newStateLength) changeDetected = true;
 	
 					var result = [];
-					for (i = 0; i < newState.length; i++) {
+					for (i = 0; i < newStateLength; i++) {
 						typedState = newState[i];
-						objectName = typedState[_DynamicState2.default.OBJECT_NAME];
-						className = typedState[_DynamicState2.default.CLASS_NAME];
-						sessionState = typedState[_DynamicState2.default.SESSION_STATE];
+						objectName = typedState[DynStateObjName];
+						className = typedState[DynStateClassName];
+						sessionState = typedState[DynStateSessionState];
 						var oldTypedState = oldLookup[objectName || ''];
 						delete oldLookup[objectName || ''];
 	
-						if (oldTypedState != null && oldTypedState[_DynamicState2.default.CLASS_NAME] == className) {
+						if (oldTypedState != null && oldTypedState[DynStateClassName] == className) {
 							className = null;
-							diffValue = this.computeDiff(oldTypedState[_DynamicState2.default.SESSION_STATE], sessionState);
+							diffValue = this.computeDiff(oldTypedState[DynStateSessionState], sessionState);
 							if (diffValue === undefined) {
 								result.push(objectName);
-								if (!changeDetected && oldState[i][_DynamicState2.default.OBJECT_NAME] != objectName) changeDetected = true;
+								if (!changeDetected && oldState[i][DynStateObjName] != objectName) changeDetected = true;
 								continue;
 							}
 							sessionState = diffValue;
@@ -30294,6 +30345,8 @@
 			this._runCallbacksCompleted;
 			this._wasDisposed = false;
 	
+			this._delayCount = 0;
+	
 			//EC6 doesn't call this with prototype mehtod with This
 			this.addImmediateCallback = this.addImmediateCallback.bind(this);
 			this.triggerCallbacks = this.triggerCallbacks.bind(this);
@@ -30369,7 +30422,8 @@
 				this._runCallbacksIsPending = false;
 				this._runCallbacksCompleted = false;
 				for (var schedule = 0; schedule < 2; schedule++) {
-					for (var i = 0; i < this._callbackEntries.length; i++) {
+					var callbackEntriesLen = this._callbackEntries.length;
+					for (var i = 0; i < callbackEntriesLen; i++) {
 						if (this._runCallbacksCompleted && this._preCallback == null) break;
 	
 						var entry = this._callbackEntries[i];
@@ -30400,7 +30454,8 @@
 				_GroupedCallbackEntry2.default.removeGroupedCallback(this, relevantContext, callback);
 				for (var outerLoop = 0; outerLoop < 2; outerLoop++) {
 					var entries = outerLoop == 0 ? this._callbackEntries : this._disposeCallbackEntries;
-					for (var index = 0; index < entries.length; index++) {
+					var entriesLength = entries.length;
+					for (var index = 0; index < entriesLength; index++) {
 						var entry = entries[index];
 						if (entry.callback === callback && entry.context === relevantContext) {
 							_Weave2.default.dispose(entry);
@@ -30826,9 +30881,218 @@
 
 /***/ },
 /* 331 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _JS = __webpack_require__(302);
+	
+	var _JS2 = _interopRequireDefault(_JS);
+	
+	var _DebugUtils = __webpack_require__(313);
+	
+	var _DebugUtils2 = _interopRequireDefault(_DebugUtils);
+	
+	var _WeavePromise = __webpack_require__(332);
+	
+	var _WeavePromise2 = _interopRequireDefault(_WeavePromise);
+	
+	var _IProgressIndicator = __webpack_require__(308);
+	
+	var _IProgressIndicator2 = _interopRequireDefault(_IProgressIndicator);
+	
+	var _Weave = __webpack_require__(310);
+	
+	var _Weave2 = _interopRequireDefault(_Weave);
+	
+	var _WeaveAPI = __webpack_require__(300);
+	
+	var _WeaveAPI2 = _interopRequireDefault(_WeaveAPI);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var ProgressIndicator = function () {
+		function ProgressIndicator() {
+			_classCallCheck(this, ProgressIndicator);
+	
+			this.map_task_progress = new _JS2.default.Map();
+			this.map_task_description = new _JS2.default.Map();
+			this.map_task_stackTrace = new _JS2.default.Map();
+	
+			this._taskCount = 0;
+			this._maxTaskCount = 1;
+	
+			this.debugTasks = this.debugTasks.bind(this);
+			this.getDescriptions = this.getDescriptions.bind(this);
+			this.getTaskCount = this.getTaskCount.bind(this);
+			this.addTask = this.addTask.bind(this);
+			this.hasTask = this.hasTask.bind(this);
+			this.updateTask = this.updateTask.bind(this);
+			this.removeTask = this.removeTask.bind(this);
+			this.getNormalizedProgress = this.getNormalizedProgress.bind(this);
+		}
+	
+		/**
+	  * For debugging, returns debugIds for active tasks.
+	  */
+	
+	
+		_createClass(ProgressIndicator, [{
+			key: "debugTasks",
+			value: function debugTasks() {
+				var result = [];
+				var tasks = _JS2.default.mapKeys(this.map_task_progress);
+				for (var i in tasks) {
+					var task = tasks[i];
+	
+					result.push(_DebugUtils2.default.debugId(task));
+				}
+	
+				return result;
+			}
+		}, {
+			key: "getDescriptions",
+			value: function getDescriptions() {
+				var result = [];
+				var tasks = _JS2.default.mapKeys(this.map_task_progress);
+				for (var i in tasks) {
+					var task = tasks[i];
+					{
+						var desc = this.map_task_description.get(task) || "Unnamed task";
+						if (desc) result.push([task, this.map_task_progress.get(task), desc]);
+					}
+				}
+	
+				return result;
+			}
+		}, {
+			key: "getTaskCount",
+			value: function getTaskCount() {
+				return this._taskCount;
+			}
+		}, {
+			key: "addTask",
+			value: function addTask(taskToken, busyObject, description) {
+				busyObject = typeof busyObject !== 'undefined' ? busyObject : null;
+				description = typeof description !== 'undefined' ? description : null;
+				var cc = _Weave2.default.getCallbacks(this);
+				cc.delayCallbacks();
+				var isNewTask = !this.map_task_progress.has(taskToken);
+				this.map_task_description.set(taskToken, description);
+				this.updateTask(taskToken, NaN);
+				if (isNewTask && _WeavePromise2.default.isThenable(taskToken)) {
+					var remove = this.removeTask.bind(this, taskToken);
+					taskToken.then(remove, remove);
+				}
+				if (busyObject) _WeaveAPI2.default.SessionManager.assignBusyTask(taskToken, busyObject);
+				cc.resumeCallbacks();
+			}
+		}, {
+			key: "hasTask",
+			value: function hasTask(taskToken) {
+				return this.map_task_progress.has(taskToken);
+			}
+		}, {
+			key: "updateTask",
+			value: function updateTask(taskToken, progress) {
+				if (!this.map_task_progress.has(taskToken)) {
+					if (!isNaN(progress)) throw new Error("updateTask() called, but task was not previously added with addTask()");
+					if (_WeaveAPI2.default.debugAsyncStack) this.map_task_stackTrace.set(taskToken, new Error("Stack trace"));
+					this._taskCount++;
+					this._maxTaskCount++;
+				}
+				if (this.map_task_progress.get(taskToken) !== progress) {
+					this.map_task_progress.set(taskToken, progress);
+					_Weave2.default.getCallbacks(this).triggerCallbacks();
+				}
+			}
+		}, {
+			key: "removeTask",
+			value: function removeTask(taskToken) {
+				if (!this.map_task_progress.has(taskToken)) return;
+				var stackTrace = this.map_task_stackTrace.get(taskToken);
+				this.map_task_progress['delete'](taskToken);
+				this.map_task_description['delete'](taskToken);
+				this.map_task_stackTrace['delete'](taskToken);
+				this._taskCount--;
+				if (this._taskCount == 1) this._maxTaskCount = this._taskCount;
+				_WeaveAPI2.default.SessionManager.unassignBusyTask(taskToken);
+				_Weave2.default.getCallbacks(this).triggerCallbacks();
+			}
+		}, {
+			key: "getNormalizedProgress",
+			value: function getNormalizedProgress() {
+				var sum = 0;
+				var tasks = _JS2.default.mapKeys(this.map_task_progress);
+	
+				for (var i in tasks) {
+					var task = tasks[i];
+					{
+						var stackTrace = this.map_task_stackTrace.get(task);
+						var progress = this.map_task_progress.get(task);
+						if (isFinite(progress)) sum += progress;
+					}
+				}
+	
+				sum += this._maxTaskCount - this._taskCount;
+				if (sum) return sum / this._maxTaskCount;
+				return this._taskCount ? 0 : 1;
+			}
+		}, {
+			key: "test",
+			value: function test() {
+				var tasks = _JS2.default.mapKeys(this.map_task_progress);
+				for (var i in tasks) {
+					var task = tasks[i];
+					{
+						var stackTrace = this.map_task_stackTrace.get(task);
+						var description = this.map_task_description.get(task);
+						_JS2.default.log(_DebugUtils2.default.debugId(task), description, stackTrace);
+					}
+				}
+			}
+		}, {
+			key: "REFLECTION_INFO",
+			value: function REFLECTION_INFO() {
+				return {
+					variables: function variables() {
+						return {};
+					},
+					accessors: function accessors() {
+						return {};
+					},
+					methods: function methods() {
+						return {
+							'debugTasks': { type: 'Array', declaredBy: 'weavejs.core.ProgressIndicator' },
+							'getDescriptions': { type: 'Array', declaredBy: 'weavejs.core.ProgressIndicator' },
+							'getTaskCount': { type: 'int', declaredBy: 'weavejs.core.ProgressIndicator' },
+							'addTask': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator' },
+							'hasTask': { type: 'Boolean', declaredBy: 'weavejs.core.ProgressIndicator' },
+							'updateTask': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator' },
+							'removeTask': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator' },
+							'getNormalizedProgress': { type: 'Number', declaredBy: 'weavejs.core.ProgressIndicator' },
+							'test': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator' }
+						};
+					}
+				};
+			}
+		}]);
+	
+		return ProgressIndicator;
+	}();
+	
+	exports.default = ProgressIndicator;
+	
+	
+	ProgressIndicator.prototype.CLASS_INFO = { names: [{ name: 'ProgressIndicator', qName: 'weavejs.core.ProgressIndicator' }], interfaces: [_IProgressIndicator2.default] };
 
 /***/ },
 /* 332 */
@@ -30850,6 +31114,12 @@
 
 /***/ },
 /* 333 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+/***/ },
+/* 334 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -30884,7 +31154,7 @@
 	
 	var _StandardLib2 = _interopRequireDefault(_StandardLib);
 	
-	var _DebugTimer = __webpack_require__(334);
+	var _DebugTimer = __webpack_require__(335);
 	
 	var _DebugTimer2 = _interopRequireDefault(_DebugTimer);
 	
@@ -31395,7 +31665,7 @@
 	};
 
 /***/ },
-/* 334 */
+/* 335 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -31491,221 +31761,6 @@
 		if (elapsedTime > 1000) _Language2.default.trace();
 		return elapsedTime;
 	};
-
-/***/ },
-/* 335 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _JS = __webpack_require__(302);
-	
-	var _JS2 = _interopRequireDefault(_JS);
-	
-	var _DebugUtils = __webpack_require__(313);
-	
-	var _DebugUtils2 = _interopRequireDefault(_DebugUtils);
-	
-	var _WeavePromise = __webpack_require__(332);
-	
-	var _WeavePromise2 = _interopRequireDefault(_WeavePromise);
-	
-	var _IProgressIndicator = __webpack_require__(308);
-	
-	var _IProgressIndicator2 = _interopRequireDefault(_IProgressIndicator);
-	
-	var _Weave = __webpack_require__(310);
-	
-	var _Weave2 = _interopRequireDefault(_Weave);
-	
-	var _WeaveAPI = __webpack_require__(300);
-	
-	var _WeaveAPI2 = _interopRequireDefault(_WeaveAPI);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	var ProgressIndicator = function () {
-		function ProgressIndicator() {
-			_classCallCheck(this, ProgressIndicator);
-	
-			this.map_task_progress = new _JS2.default.Map();
-			this.map_task_description = new _JS2.default.Map();
-			this.map_task_stackTrace = new _JS2.default.Map();
-	
-			this._taskCount = 0;
-			this._maxTaskCount = 1;
-	
-			this.debugTasks = this.debugTasks.bind(this);
-			this.getDescriptions = this.getDescriptions.bind(this);
-			this.getTaskCount = this.getTaskCount.bind(this);
-			this.addTask = this.addTask.bind(this);
-			this.hasTask = this.hasTask.bind(this);
-			this.updateTask = this.updateTask.bind(this);
-			this.removeTask = this.removeTask.bind(this);
-			this.getNormalizedProgress = this.getNormalizedProgress.bind(this);
-		}
-	
-		/**
-	  * For debugging, returns debugIds for active tasks.
-	  */
-	
-	
-		_createClass(ProgressIndicator, [{
-			key: "debugTasks",
-			value: function debugTasks() {
-				var result = [];
-				var tasks = _JS2.default.mapKeys(this.map_task_progress);
-				for (var i in tasks) {
-					var task = tasks[i];
-	
-					result.push(_DebugUtils2.default.debugId(task));
-				}
-	
-				return result;
-			}
-		}, {
-			key: "getDescriptions",
-			value: function getDescriptions() {
-				var result = [];
-				var tasks = _JS2.default.mapKeys(this.map_task_progress);
-				for (var i in tasks) {
-					var task = tasks[i];
-					{
-						var desc = this.map_task_description.get(task) || "Unnamed task";
-						if (desc) result.push([task, this.map_task_progress.get(task), desc]);
-					}
-				}
-	
-				return result;
-			}
-		}, {
-			key: "getTaskCount",
-			value: function getTaskCount() {
-				return this._taskCount;
-			}
-		}, {
-			key: "addTask",
-			value: function addTask(taskToken, busyObject, description) {
-				busyObject = typeof busyObject !== 'undefined' ? busyObject : null;
-				description = typeof description !== 'undefined' ? description : null;
-				var cc = _Weave2.default.getCallbacks(this);
-				cc.delayCallbacks();
-				var isNewTask = !this.map_task_progress.has(taskToken);
-				this.map_task_description.set(taskToken, description);
-				this.updateTask(taskToken, NaN);
-				if (isNewTask && _WeavePromise2.default.isThenable(taskToken)) {
-					var remove = this.removeTask.bind(this, taskToken);
-					taskToken.then(remove, remove);
-				}
-				if (busyObject) _WeaveAPI2.default.SessionManager.assignBusyTask(taskToken, busyObject);
-				cc.resumeCallbacks();
-			}
-		}, {
-			key: "hasTask",
-			value: function hasTask(taskToken) {
-				return this.map_task_progress.has(taskToken);
-			}
-		}, {
-			key: "updateTask",
-			value: function updateTask(taskToken, progress) {
-				if (!this.map_task_progress.has(taskToken)) {
-					if (!isNaN(progress)) throw new Error("updateTask() called, but task was not previously added with addTask()");
-					if (_WeaveAPI2.default.debugAsyncStack) this.map_task_stackTrace.set(taskToken, new Error("Stack trace"));
-					this._taskCount++;
-					this._maxTaskCount++;
-				}
-				if (this.map_task_progress.get(taskToken) !== progress) {
-					this.map_task_progress.set(taskToken, progress);
-					_Weave2.default.getCallbacks(this).triggerCallbacks();
-				}
-			}
-		}, {
-			key: "removeTask",
-			value: function removeTask(taskToken) {
-				if (!this.map_task_progress.has(taskToken)) return;
-				var stackTrace = this.map_task_stackTrace.get(taskToken);
-				this.map_task_progress['delete'](taskToken);
-				this.map_task_description['delete'](taskToken);
-				this.map_task_stackTrace['delete'](taskToken);
-				this._taskCount--;
-				if (this._taskCount == 1) this._maxTaskCount = this._taskCount;
-				_WeaveAPI2.default.SessionManager.unassignBusyTask(taskToken);
-				_Weave2.default.getCallbacks(this).triggerCallbacks();
-			}
-		}, {
-			key: "getNormalizedProgress",
-			value: function getNormalizedProgress() {
-				var sum = 0;
-				var tasks = _JS2.default.mapKeys(this.map_task_progress);
-	
-				for (var i in tasks) {
-					var task = tasks[i];
-					{
-						var stackTrace = this.map_task_stackTrace.get(task);
-						var progress = this.map_task_progress.get(task);
-						if (isFinite(progress)) sum += progress;
-					}
-				}
-	
-				sum += this._maxTaskCount - this._taskCount;
-				if (sum) return sum / this._maxTaskCount;
-				return this._taskCount ? 0 : 1;
-			}
-		}, {
-			key: "test",
-			value: function test() {
-				var tasks = _JS2.default.mapKeys(this.map_task_progress);
-				for (var i in tasks) {
-					var task = tasks[i];
-					{
-						var stackTrace = this.map_task_stackTrace.get(task);
-						var description = this.map_task_description.get(task);
-						_JS2.default.log(_DebugUtils2.default.debugId(task), description, stackTrace);
-					}
-				}
-			}
-		}, {
-			key: "REFLECTION_INFO",
-			value: function REFLECTION_INFO() {
-				return {
-					variables: function variables() {
-						return {};
-					},
-					accessors: function accessors() {
-						return {};
-					},
-					methods: function methods() {
-						return {
-							'debugTasks': { type: 'Array', declaredBy: 'weavejs.core.ProgressIndicator' },
-							'getDescriptions': { type: 'Array', declaredBy: 'weavejs.core.ProgressIndicator' },
-							'getTaskCount': { type: 'int', declaredBy: 'weavejs.core.ProgressIndicator' },
-							'addTask': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator' },
-							'hasTask': { type: 'Boolean', declaredBy: 'weavejs.core.ProgressIndicator' },
-							'updateTask': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator' },
-							'removeTask': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator' },
-							'getNormalizedProgress': { type: 'Number', declaredBy: 'weavejs.core.ProgressIndicator' },
-							'test': { type: 'void', declaredBy: 'weavejs.core.ProgressIndicator' }
-						};
-					}
-				};
-			}
-		}]);
-	
-		return ProgressIndicator;
-	}();
-	
-	exports.default = ProgressIndicator;
-	
-	
-	ProgressIndicator.prototype.CLASS_INFO = { names: [{ name: 'ProgressIndicator', qName: 'weavejs.core.ProgressIndicator' }], interfaces: [_IProgressIndicator2.default] };
 
 /***/ },
 /* 336 */
@@ -31954,6 +32009,927 @@
 	});
 	
 	LinkableVariable.prototype.CLASS_INFO = { names: [{ name: 'LinkableVariable', qName: 'LinkableVariable' }], interfaces: [_ILinkableVariable2.default, _ICallbackCollection2.default, _IDisposableObject2.default] };
+
+/***/ },
+/* 337 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _Weave = __webpack_require__(310);
+	
+	var _Weave2 = _interopRequireDefault(_Weave);
+	
+	var _WeaveAPI = __webpack_require__(300);
+	
+	var _WeaveAPI2 = _interopRequireDefault(_WeaveAPI);
+	
+	var _CallbackCollection2 = __webpack_require__(328);
+	
+	var _CallbackCollection3 = _interopRequireDefault(_CallbackCollection2);
+	
+	var _LinkablePlaceholder = __webpack_require__(338);
+	
+	var _LinkablePlaceholder2 = _interopRequireDefault(_LinkablePlaceholder);
+	
+	var _ChildListCallbackInterface = __webpack_require__(339);
+	
+	var _ChildListCallbackInterface2 = _interopRequireDefault(_ChildListCallbackInterface);
+	
+	var _DynamicState = __webpack_require__(314);
+	
+	var _DynamicState2 = _interopRequireDefault(_DynamicState);
+	
+	var _ILinkableHashMap = __webpack_require__(318);
+	
+	var _ILinkableHashMap2 = _interopRequireDefault(_ILinkableHashMap);
+	
+	var _JS = __webpack_require__(302);
+	
+	var _JS2 = _interopRequireDefault(_JS);
+	
+	var _Language = __webpack_require__(303);
+	
+	var _Language2 = _interopRequireDefault(_Language);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var LinkableHashMap = function (_CallbackCollection) {
+		_inherits(LinkableHashMap, _CallbackCollection);
+	
+		function LinkableHashMap(typeRestriction) {
+			_classCallCheck(this, LinkableHashMap);
+	
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LinkableHashMap).call(this));
+	
+			typeRestriction = typeof typeRestriction !== 'undefined' ? typeRestriction : null;
+	
+			_this._childListCallbacks = _Weave2.default.linkableChild(_this, _ChildListCallbackInterface2.default);
+			_this._orderedNames = [];
+			_this._nameToObjectMap = {};
+			_this._map_objectToNameMap = new _JS2.default.WeakMap();
+			_this._nameIsLocked = {};
+			_this._previousNameMap = {};
+	
+			_this._typeRestriction = typeRestriction;
+			return _this;
+		}
+	
+		_createClass(LinkableHashMap, [{
+			key: "REFLECTION_INFO",
+			value: function REFLECTION_INFO() {
+				return {
+					variables: function variables() {
+						return {};
+					},
+					accessors: function accessors() {
+						return {
+							'typeRestriction': { type: 'Class', declaredBy: 'LinkableHashMap' },
+							'childListCallbacks': { type: 'IChildListCallbackInterface', declaredBy: 'LinkableHashMap' }
+						};
+					},
+					methods: function methods() {
+						return {
+							'LinkableHashMap': { type: '', declaredBy: 'LinkableHashMap' },
+							'getNames': { type: 'Array', declaredBy: 'LinkableHashMap' },
+							'getObjects': { type: 'Array', declaredBy: 'LinkableHashMap' },
+							'toObject': { type: 'Object', declaredBy: 'LinkableHashMap' },
+							'toMap': { type: 'Object', declaredBy: 'LinkableHashMap' },
+							'getObject': { type: 'ILinkableObject', declaredBy: 'LinkableHashMap' },
+							'setObject': { type: 'void', declaredBy: 'LinkableHashMap' },
+							'getName': { type: 'String', declaredBy: 'LinkableHashMap' },
+							'setNameOrder': { type: 'void', declaredBy: 'LinkableHashMap' },
+							'requestObject': { type: '*', declaredBy: 'LinkableHashMap' },
+							'requestObjectCopy': { type: 'ILinkableObject', declaredBy: 'LinkableHashMap' },
+							'renameObject': { type: 'ILinkableObject', declaredBy: 'LinkableHashMap' },
+							'objectIsLocked': { type: 'Boolean', declaredBy: 'LinkableHashMap' },
+							'removeObject': { type: 'void', declaredBy: 'LinkableHashMap' },
+							'removeAllObjects': { type: 'void', declaredBy: 'LinkableHashMap' },
+							'dispose': { type: 'void', declaredBy: 'LinkableHashMap' },
+							'generateUniqueName': { type: 'String', declaredBy: 'LinkableHashMap' },
+							'getSessionState': { type: 'Array', declaredBy: 'LinkableHashMap' },
+							'setSessionState': { type: 'void', declaredBy: 'LinkableHashMap' }
+						};
+					}
+				};
+			}
+		}]);
+	
+		return LinkableHashMap;
+	}(_CallbackCollection3.default);
+	
+	exports.default = LinkableHashMap;
+	
+	
+	LinkableHashMap.prototype.getNames = function (filter, filterIncludesPlaceholders) {
+		filter = typeof filter !== 'undefined' ? filter : null;
+		filterIncludesPlaceholders = typeof filterIncludesPlaceholders !== 'undefined' ? filterIncludesPlaceholders : false;
+	
+		return this.getList(false, filter, filterIncludesPlaceholders);
+	};
+	
+	LinkableHashMap.prototype.getObjects = function (filter, filterIncludesPlaceholders) {
+		filter = typeof filter !== 'undefined' ? filter : null;
+		filterIncludesPlaceholders = typeof filterIncludesPlaceholders !== 'undefined' ? filterIncludesPlaceholders : false;
+	
+		return this.getList(true, filter, filterIncludesPlaceholders);
+	};
+	
+	LinkableHashMap.prototype.toObject = function (filter, filterIncludesPlaceholders) {
+		filter = typeof filter !== 'undefined' ? filter : null;
+		filterIncludesPlaceholders = typeof filterIncludesPlaceholders !== 'undefined' ? filterIncludesPlaceholders : false;
+	
+		var obj = {};
+		var list = this.getList(false, filter, filterIncludesPlaceholders);
+	
+		for (var i in list) {
+			var name = list[i];
+			obj[name] = this._nameToObjectMap[name];
+		}
+	
+		return obj;
+	};
+	
+	LinkableHashMap.prototype.toMap = function (filter, filterIncludesPlaceholders) {
+		filter = typeof filter !== 'undefined' ? filter : null;
+		filterIncludesPlaceholders = typeof filterIncludesPlaceholders !== 'undefined' ? filterIncludesPlaceholders : false;
+	
+		var map = new _JS2.default.Map();
+		var list = this.getList(false, filter, filterIncludesPlaceholders);
+		for (var i in list) {
+			var name = list[i];
+			map.set(name, this._nameToObjectMap[name]);
+		}
+	
+		return map;
+	};
+	
+	LinkableHashMap.prototype.getList = function (listObjects, filter, filterIncludesPlaceholders) {
+		if (_Language2.default.is(filter, String)) filter = _Weave2.default.getDefinition(String(filter), true);
+	
+		var result = [];
+		var orderedNamesLength = this._orderedNames.length;
+		for (var i = 0; i < orderedNamesLength; i++) {
+			var name = this._orderedNames[i];
+			var object = this._nameToObjectMap[name];
+	
+			if (!filter) {
+				result.push(listObjects ? object : name);
+			} else if (_Language2.default.is(object, filter)) {
+				result.push(listObjects ? object : name);
+			} else if (filterIncludesPlaceholders) {
+				var placeholder = _Language2.default.as(object, _LinkablePlaceholder2.default);
+				if (!placeholder) continue;
+				var classDef = placeholder.getClass();
+				if (classDef === filter || _Language2.default.is(classDef.prototype, filter)) result.push(listObjects ? object : name);
+			}
+		}
+		return result;
+	};
+	
+	LinkableHashMap.prototype.getObject = function (name) {
+		return this._nameToObjectMap[name];
+	};
+	
+	LinkableHashMap.prototype.setObject = function (name, object, lockObject) {
+		lockObject = typeof lockObject !== 'undefined' ? lockObject : false;
+	
+		if (this._nameIsLocked[name] || this._nameToObjectMap[name] === object) return;
+		var className = _Weave2.default.className(object);
+		if (!className) throw new Error("Cannot get class name from object");
+		if (_Weave2.default.getDefinition(className) != object['constructor']) throw new Error("The Class of the object is not registered");
+		if (_Weave2.default.getOwner(object)) throw new Error("LinkableHashMap cannot accept an object that is already registered with an owner.");
+	
+		if (object) {
+			if (!name) name = this.generateUniqueName(className.split('::').pop().split('.').pop());
+			this.delayCallbacks();
+			_Weave2.default.linkableChild(this, object);
+			var oldObject = this._nameToObjectMap[name];
+			this._nameToObjectMap[name] = object;
+			this._map_objectToNameMap.set(object, name);
+			if (this._orderedNames.indexOf(name) < 0) this._orderedNames.push(name);
+			if (lockObject) this._nameIsLocked[name] = true;
+			this._previousNameMap[name] = true;
+			this._childListCallbacks.runCallbacks(name, object, oldObject);
+			_Weave2.default.dispose(oldObject);
+			this.resumeCallbacks();
+		} else {
+			this.removeObject(name);
+		}
+	};
+	
+	LinkableHashMap.prototype.getName = function (object) {
+		return this._map_objectToNameMap.get(object);
+	};
+	
+	LinkableHashMap.prototype.setNameOrder = function (newOrder) {
+		var changeDetected = false;
+		var name;
+		var i;
+		var originalNameCount = this._orderedNames.length;
+		var newOrderLen = newOrder.length;
+	
+		var haveSeen = {};
+		for (i = 0; i < newOrderLen; i++) {
+			name = newOrder[i];
+			if (this._nameToObjectMap[name] == undefined || haveSeen[name] != undefined) continue;
+			haveSeen[name] = true;
+			this._orderedNames.push(name);
+		}
+	
+		var appendedCount = this._orderedNames.length - originalNameCount;
+		for (i = 0; i < appendedCount; i++) {
+			var newIndex = originalNameCount + i;
+			var oldIndex = this._orderedNames.indexOf(this._orderedNames[newIndex]);
+			if (newIndex - oldIndex != appendedCount) changeDetected = true;
+			this._orderedNames[oldIndex] = null;
+		}
+		var out = 0;
+		var orderedNamesLen = this._orderedNames.length;
+		for (i = 0; i < orderedNamesLen; i++) {
+			if (this._orderedNames[i] != null) this._orderedNames[out++] = this._orderedNames[i];
+		}this._orderedNames.length = orderedNamesLen = out;
+		if (changeDetected) this._childListCallbacks.runCallbacks(null, null, null);
+	};
+	
+	LinkableHashMap.prototype.requestObject = function (name, classDef, lockObject) {
+		lockObject = typeof lockObject !== 'undefined' ? lockObject : false;
+		if (_Language2.default.is(classDef, String)) classDef = _Weave2.default.getDefinition(String(classDef), true);
+		var className = classDef ? _Weave2.default.className(classDef) : null;
+		var result = this.initObjectByClassName(name, className, lockObject);
+		return classDef ? _Language2.default.as(result, classDef) : null;
+	};
+	
+	LinkableHashMap.prototype.requestObjectCopy = function (name, objectToCopy) {
+		if (objectToCopy == null) {
+			this.removeObject(name);
+			return null;
+		}
+		this.delayCallbacks();
+		var classDef = _LinkablePlaceholder2.default.getClass(objectToCopy);
+		var sessionState = _Weave2.default.getState(objectToCopy);
+		if (name == this.getName(objectToCopy)) this.removeObject(name);
+		this.requestObject(name, classDef, false);
+		var object = this.getObject(name);
+		if (classDef == _LinkablePlaceholder2.default.getClass(object)) _Weave2.default.setState(object, sessionState);
+		this.resumeCallbacks();
+		return object;
+	};
+	
+	LinkableHashMap.prototype.renameObject = function (oldName, newName) {
+		if (oldName != newName) {
+			this.delayCallbacks();
+			var newNameOrder = this._orderedNames.concat();
+			var index = newNameOrder.indexOf(oldName);
+			if (index >= 0) newNameOrder.splice(index, 1, newName);
+			this.requestObjectCopy(newName, this.getObject(oldName));
+			this.removeObject(oldName);
+			this.setNameOrder(newNameOrder);
+			this.resumeCallbacks();
+		}
+		return this.getObject(newName);
+	};
+	
+	/**
+	 * If there is an existing object associated with the specified name, it will be kept if it
+	 * is the specified type, or replaced with a new instance of the specified type if it is not.
+	 */
+	LinkableHashMap.prototype.initObjectByClassName = function (name, className, lockObject) {
+		lockObject = typeof lockObject !== 'undefined' ? lockObject : false;
+		if (className) {
+			var classDef = _Weave2.default.getDefinition(className);
+			if (_Weave2.default.isLinkable(classDef) && (this._typeRestriction == null || classDef === this._typeRestriction || _Language2.default.is(classDef.prototype, this._typeRestriction))) {
+				if (!name) {
+					var baseName = className.split('::').pop().split('.').pop();
+					if (name == '') baseName = _WeaveAPI2.default.ClassRegistry.getDisplayName(classDef) || baseName;
+					name = this.generateUniqueName(baseName);
+				}
+				var /** @type {Object} */object = this._nameToObjectMap[name];
+				if (classDef != _LinkablePlaceholder2.default.getClass(object)) this.createAndSaveNewObject(name, classDef, lockObject);else if (lockObject) this.lockObject(name);
+			} else {
+				this.removeObject(name);
+			}
+		} else {
+			this.removeObject(name);
+		}
+		return this._nameToObjectMap[name || ''];
+	};
+	
+	LinkableHashMap.prototype.createAndSaveNewObject = function (name, classDef, lockObject) {
+		if (this._nameIsLocked[name]) return;
+		try {
+			this.delayCallbacks();
+			this.removeObject(name);
+			var /** @type {weavejs.api.core.ILinkableObject} */object;
+			if (_Weave2.default.isAsyncClass(classDef)) object = new _LinkablePlaceholder2.default(classDef);else object = new classDef();
+			_Weave2.default.linkableChild(this, object);
+			this._nameToObjectMap[name] = object;
+			this._map_objectToNameMap.set(object, name);
+			this._orderedNames.push(name);
+			this._previousNameMap[name] = true;
+			if (lockObject) this.lockObject(name);
+			this._childListCallbacks.runCallbacks(name, object, null);
+		} finally {
+			this.resumeCallbacks();
+		}
+	};
+	
+	/**
+	 * This function will lock an object in place for a given identifying name.
+	 * If there is no object using the specified name, this function will have no effect.
+	 */
+	LinkableHashMap.prototype.lockObject = function (name) {
+		if (name != null && this._nameToObjectMap[name] != null) this._nameIsLocked[name] = true;
+	};
+	
+	LinkableHashMap.prototype.objectIsLocked = function (name) {
+		return this._nameIsLocked[name] ? true : false;
+	};
+	
+	LinkableHashMap.prototype.removeObject = function (name) {
+		if (!name || this._nameIsLocked[name]) return;
+		var object = this._nameToObjectMap[name];
+		if (object == null) return;
+		this.delayCallbacks();
+		delete this._nameToObjectMap[name];
+		this._map_objectToNameMap['delete'](object);
+		var index = this._orderedNames.indexOf(name);
+		this._orderedNames.splice(index, 1);
+		this._childListCallbacks.runCallbacks(name, null, object);
+		_Weave2.default.dispose(object);
+		this.resumeCallbacks();
+	};
+	
+	LinkableHashMap.prototype.removeAllObjects = function () {
+		this.delayCallbacks();
+		var names = this._orderedNames.concat();
+	
+		for (var i in names) {
+			var name = names[i];
+	
+			this.removeObject(name);
+		}
+	
+		this.resumeCallbacks();
+	};
+	
+	/**
+	 * This function removes all objects from this LinkableHashMap.
+	 */
+	LinkableHashMap.prototype.dispose = function () {
+		LinkableHashMap.base(this, 'dispose');
+		this.removeAllObjects();
+		var names = this._orderedNames.concat();
+	
+		for (var i in names) {
+			var name = names[i];
+			{
+				this._nameIsLocked[name] = undefined;
+				this.removeObject(name);
+			}
+		}
+	};
+	
+	LinkableHashMap.prototype.generateUniqueName = function (baseName) {
+		var count = 1;
+		var name = baseName;
+		while (this._previousNameMap[name] != undefined) {
+			name = baseName + ++count;
+		}this._previousNameMap[name] = true;
+		return name;
+	};
+	
+	LinkableHashMap.prototype.getSessionState = function () {
+		var orderedNamesLen = this._orderedNames.length;
+	
+		var result = new Array(orderedNamesLen);
+	
+		for (var i = 0; i < orderedNamesLen; i++) {
+			var name = this._orderedNames[i];
+			var object = this._nameToObjectMap[name];
+			result[i] = _DynamicState2.default.create(name, _Weave2.default.className(_LinkablePlaceholder2.default.getClass(object)), _Weave2.default.getState(object));
+		}
+		return result;
+	};
+	
+	LinkableHashMap.prototype.setSessionState = function (newStateArray, removeMissingDynamicObjects) {
+		if (newStateArray == null) return;
+	
+		this.delayCallbacks();
+		var i;
+		var delayed = [];
+		var callbacks;
+		var objectName;
+		var className;
+		var typedState;
+		var remainingObjects = removeMissingDynamicObjects ? {} : null;
+		var newObjects = {};
+		var newNameOrder = [];
+	
+		if (newStateArray != null) {
+			var orderedNames = this._orderedNames;
+			for (var i in orderedNames) {
+				objectName = orderedNames[i];
+				//todo: why it has to be block here?
+				{
+					callbacks = _Weave2.default.getCallbacks(this._nameToObjectMap[objectName]);
+					delayed.push(callbacks);
+					callbacks.delayCallbacks();
+				}
+			}
+	
+			var dynamicStateObjName = _DynamicState2.default.OBJECT_NAME;
+			var dynamicStateClassName = _DynamicState2.default.CLASS_NAME;
+			var dynamicStateSessionState = _DynamicState2.default.SESSION_STATE;
+			var newStateArrayLen = newStateArray.length;
+			for (i = 0; i < newStateArrayLen; i++) {
+				typedState = newStateArray[i];
+				if (!_DynamicState2.default.isDynamicState(typedState, true)) continue;
+				objectName = typedState[dynamicStateObjName];
+				className = typedState[dynamicStateClassName];
+				if (objectName == null) continue;
+				if (className == null) continue;
+				if (this._nameToObjectMap[objectName] != this.initObjectByClassName(objectName, className)) newObjects[objectName] = true;
+			}
+	
+			for (var i in orderedNames) {
+				objectName = orderedNames[i];
+				//todo: why it has to be block here?
+				{
+					callbacks = _Weave2.default.getCallbacks(this._nameToObjectMap[objectName]);
+					delayed.push(callbacks);
+					callbacks.delayCallbacks();
+				}
+			}
+	
+			for (i = 0; i < newStateArrayLen; i++) {
+				typedState = newStateArray[i];
+				if (typeof typedState === 'string') {
+					objectName = String(typedState);
+	
+					if (removeMissingDynamicObjects) remainingObjects[objectName] = true;
+	
+					newNameOrder.push(objectName);
+					continue;
+				}
+	
+				if (!_DynamicState2.default.isDynamicState(typedState, true)) continue;
+	
+				objectName = typedState[dynamicStateObjName];
+				if (objectName == null) continue;
+	
+				var object = this._nameToObjectMap[objectName];
+				if (object == null) continue;
+	
+				_Weave2.default.setState(object, typedState[dynamicStateSessionState], newObjects[objectName] || removeMissingDynamicObjects);
+	
+				if (removeMissingDynamicObjects) remainingObjects[objectName] = true;
+	
+				newNameOrder.push(objectName);
+			}
+		}
+	
+		if (removeMissingDynamicObjects) {
+			var names = this._orderedNames.concat();
+	
+			for (var i in names) {
+				objectName = names[i];
+				{
+					if (remainingObjects[objectName] !== true) {
+						this.removeObject(objectName);
+					}
+				}
+			}
+		}
+	
+		this.setNameOrder(newNameOrder);
+	
+		for (var i in delayed) {
+			callbacks = delayed[i];
+	
+			if (!_Weave2.default.wasDisposed(callbacks)) callbacks.resumeCallbacks();
+		}
+	
+		this.resumeCallbacks();
+	};
+	
+	Object.defineProperties(LinkableHashMap.prototype, {
+		typeRestriction: {
+			get: function get() {
+				return this._typeRestriction;
+			}
+		},
+		childListCallbacks: {
+			get: function get() {
+				return this._childListCallbacks;
+			}
+		}
+	});
+	
+	LinkableHashMap.prototype.CLASS_INFO = { names: [{ name: 'LinkableHashMap', qName: 'LinkableHashMap' }], interfaces: [_ILinkableHashMap2.default] };
+
+/***/ },
+/* 338 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	
+	var _LinkableVariable2 = __webpack_require__(336);
+	
+	var _LinkableVariable3 = _interopRequireDefault(_LinkableVariable2);
+	
+	var _CallbackCollection = __webpack_require__(328);
+	
+	var _CallbackCollection2 = _interopRequireDefault(_CallbackCollection);
+	
+	var _Language = __webpack_require__(303);
+	
+	var _Language2 = _interopRequireDefault(_Language);
+	
+	var _ILinkableHashMap = __webpack_require__(318);
+	
+	var _ILinkableHashMap2 = _interopRequireDefault(_ILinkableHashMap);
+	
+	var _ILinkableDynamicObject = __webpack_require__(319);
+	
+	var _ILinkableDynamicObject2 = _interopRequireDefault(_ILinkableDynamicObject);
+	
+	var _Weave = __webpack_require__(310);
+	
+	var _Weave2 = _interopRequireDefault(_Weave);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var LinkablePlaceholder = function (_LinkableVariable) {
+		_inherits(LinkablePlaceholder, _LinkableVariable);
+	
+		function LinkablePlaceholder(classDef) {
+			_classCallCheck(this, LinkablePlaceholder);
+	
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LinkablePlaceholder).call(this));
+	
+			if (!classDef) throw new Error("classDef cannot be null");
+	
+			_this.classDef = classDef;
+			_this._bypassDiff = classDef === _LinkableVariable3.default || _Language2.default.is(classDef.prototype, _LinkableVariable3.default);
+			_this.instance;
+	
+			_this.setSessionState = _this.setSessionState.bind(_this);
+	
+			return _this;
+		}
+	
+		_createClass(LinkablePlaceholder, [{
+			key: "setSessionState",
+			value: function setSessionState(value) {
+				_get(Object.getPrototypeOf(LinkablePlaceholder.prototype), "setSessionState", this).call(this, value);
+			}
+		}, {
+			key: "REFLECTION_INFO",
+			value: function REFLECTION_INFO() {
+				return {
+					variables: function variables() {
+						return {};
+					},
+					accessors: function accessors() {
+						return {};
+					},
+					methods: function methods() {
+						return {
+							'LinkablePlaceholder': { type: '', declaredBy: 'LinkablePlaceholder' },
+							'getClass': { type: 'Class', declaredBy: 'LinkablePlaceholder' },
+							'getInstance': { type: 'ILinkableObject', declaredBy: 'LinkablePlaceholder' },
+							'setInstance': { type: 'void', declaredBy: 'LinkablePlaceholder' },
+							'setSessionState': { type: 'void', declaredBy: 'LinkablePlaceholder' }
+						};
+					}
+				};
+			}
+		}]);
+	
+		return LinkablePlaceholder;
+	}(_LinkableVariable3.default);
+	
+	exports.default = LinkablePlaceholder;
+	
+	
+	LinkablePlaceholder.prototype.getClass = function () {
+		return this.classDef;
+	};
+	
+	LinkablePlaceholder.prototype.getInstance = function () {
+		return this.instance;
+	};
+	
+	LinkablePlaceholder.prototype.setInstance = function (instance) {
+		if (_Weave2.default.wasDisposed(this)) throw new Error("LinkablePlaceholder was already disposed");
+	
+		if (!_Language2.default.is(instance, this.classDef)) throw new Error("Unexpected object type");
+	
+		this.instance = instance;
+		LinkablePlaceholder.replace(this, instance);
+	};
+	
+	LinkablePlaceholder.replace = function (oldObject, newObject) {
+		var owner = _Weave2.default.getOwner(oldObject);
+		var oldPlaceholder = _Language2.default.as(oldObject, LinkablePlaceholder);
+		var lhm = _Language2.default.as(owner, _ILinkableHashMap2.default);
+		var ldo = _Language2.default.as(owner, _ILinkableDynamicObject2.default);
+	
+		if (!lhm && !ldo) throw new Error("Unable to replace object because owner is not an ILinkableHashMap or ILinkableDynamicObject");
+	
+		var ownerCC = _Weave2.default.getCallbacks(owner);
+		ownerCC.delayCallbacks();
+	
+		//todo: do we need try as we are not catching any error
+		try {
+			var sessionState = undefined;
+			if (_Weave2.default.getCallbacks(oldObject).triggerCounter != _CallbackCollection2.default.DEFAULT_TRIGGER_COUNT) sessionState = _Weave2.default.getState(oldObject);
+			if (oldPlaceholder) _Weave2.default.getCallbacks(oldPlaceholder).delayCallbacks();
+			if (lhm) lhm.setObject(lhm.getName(oldObject), newObject);else if (ldo) ldo.target = newObject;
+			if (sessionState !== undefined) _Weave2.default.setState(newObject, sessionState);
+			if (oldPlaceholder) _Weave2.default.getCallbacks(oldPlaceholder).resumeCallbacks();
+		} finally {
+			ownerCC.resumeCallbacks();
+		}
+	};
+	
+	/**
+	 * A utility function for getting the class definition from LinkablePlaceholders as well as regular objects.
+	 */
+	LinkablePlaceholder.getClass = function (object) {
+		var placeholder = _Language2.default.as(object, LinkablePlaceholder);
+		if (placeholder) return placeholder.getClass();
+		if (object) return object.constructor;
+		return null;
+	};
+	
+	/**
+	 * Replaces a LinkablePlaceholder with an instance of the expected type.
+	 */
+	LinkablePlaceholder.setInstance = function (possiblePlaceholder, instance) {
+		if (possiblePlaceholder === instance) return;
+		var placeholder = _Language2.default.as(possiblePlaceholder, LinkablePlaceholder);
+		if (!placeholder) throw new Error("Attempted to put an instance where there was no placeholder for it.");
+		placeholder.setInstance(instance);
+	};
+	
+	/**
+	 * @export
+	 * @param {weavejs.api.core.ILinkableObject} instance
+	 */
+	LinkablePlaceholder.replaceInstanceWithPlaceholder = function (instance) {
+		if (!instance || _Language2.default.is(instance, LinkablePlaceholder) || _Weave2.default.wasDisposed(instance)) return;
+		var placeholder = new LinkablePlaceholder(LinkablePlaceholder.getClass(instance));
+		try {
+			LinkablePlaceholder.replace(instance, placeholder);
+		} catch (e) {
+			_Weave2.default.dispose(placeholder);
+			throw e;
+		}
+	};
+	
+	/**
+	 * Calls a function after a placeholder has been replaced with an instance and the instance session state has been initialized.
+	 * The onReady function will be called immediately if possiblePlaceholder is not a LinkablePlaceholder.
+	 */
+	LinkablePlaceholder.whenReady = function (relevantContext, possiblePlaceholder, onReady) {
+		var localFn = function localFn() {
+			var instance = lp.getInstance();
+			if (instance) onReady(instance);
+		};
+	
+		var lp = _Weave2.default.AS(possiblePlaceholder, LinkablePlaceholder);
+		if (lp) {
+			_Weave2.default.getCallbacks(lp).addDisposeCallback(relevantContext, localFn, true);
+		} else if (possiblePlaceholder && !_Weave2.default.wasDisposed(relevantContext)) {
+			onReady(possiblePlaceholder);
+		}
+	};
+	
+	LinkablePlaceholder.prototype.CLASS_INFO = { names: [{ name: 'LinkablePlaceholder', qName: 'LinkablePlaceholder' }] };
+
+/***/ },
+/* 339 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _CallbackCollection2 = __webpack_require__(328);
+	
+	var _CallbackCollection3 = _interopRequireDefault(_CallbackCollection2);
+	
+	var _IChildListCallbackInterface = __webpack_require__(340);
+	
+	var _IChildListCallbackInterface2 = _interopRequireDefault(_IChildListCallbackInterface);
+	
+	var _Language = __webpack_require__(303);
+	
+	var _Language2 = _interopRequireDefault(_Language);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+	
+	var ChildListCallbackInterface = function (_CallbackCollection) {
+		_inherits(ChildListCallbackInterface, _CallbackCollection);
+	
+		function ChildListCallbackInterface() {
+			_classCallCheck(this, ChildListCallbackInterface);
+	
+			// as this is not allowed before super is called we have set CallbackCollection _precallback after super
+			var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ChildListCallbackInterface).call(this));
+	
+			_this._preCallback = _Language2.default.closure(_this.setCallbackVariables, _this, 'setCallbackVariables');
+	
+			_this._lastNameAdded = null;
+			_this._lastObjectAdded = null;
+			_this._lastNameRemoved = null;
+			_this._lastObjectRemoved = null;
+			return _this;
+		}
+	
+		_createClass(ChildListCallbackInterface, [{
+			key: "REFLECTION_INFO",
+			value: function REFLECTION_INFO() {
+				return {
+					variables: function variables() {
+						return {};
+					},
+					accessors: function accessors() {
+						return {
+							'lastNameAdded': { type: 'String', declaredBy: 'ChildListCallbackInterface' },
+							'lastObjectAdded': { type: 'ILinkableObject', declaredBy: 'ChildListCallbackInterface' },
+							'lastNameRemoved': { type: 'String', declaredBy: 'ChildListCallbackInterface' },
+							'lastObjectRemoved': { type: 'ILinkableObject', declaredBy: 'ChildListCallbackInterface' }
+						};
+					},
+					methods: function methods() {
+						return {
+							'ChildListCallbackInterface': { type: '', declaredBy: 'ChildListCallbackInterface' },
+							'runCallbacks': { type: 'void', declaredBy: 'ChildListCallbackInterface' }
+						};
+					},
+					metadata: function metadata() {
+						return [];
+					}
+				};
+			}
+		}]);
+	
+		return ChildListCallbackInterface;
+	}(_CallbackCollection3.default);
+	
+	/**
+	 * This function will set the list callback variables:
+	 *     lastNameAdded, lastObjectAdded, lastNameRemoved, lastObjectRemoved, childListChanged
+	 */
+	
+	
+	exports.default = ChildListCallbackInterface;
+	ChildListCallbackInterface.prototype.setCallbackVariables = function (name, objectAdded, objectRemoved) {
+		name = typeof name !== 'undefined' ? name : null;
+		objectAdded = typeof objectAdded !== 'undefined' ? objectAdded : null;
+		objectRemoved = typeof objectRemoved !== 'undefined' ? objectRemoved : null;
+	
+		this._lastNameAdded = objectAdded ? name : null;
+		this._lastObjectAdded = objectAdded;
+		this._lastNameRemoved = objectRemoved ? name : null;
+		this._lastObjectRemoved = objectRemoved;
+	};
+	
+	/**
+	 * This function will run callbacks immediately, setting the list callback variables before each one.
+	 */
+	ChildListCallbackInterface.prototype.runCallbacks = function (name, objectAdded, objectRemoved) {
+		var _name = this._lastNameAdded || this._lastNameRemoved;
+		var _added = this._lastObjectAdded;
+		var _removed = this._lastObjectRemoved;
+	
+		this._runCallbacksImmediately(name, objectAdded, objectRemoved);
+		this.setCallbackVariables(_name, _added, _removed);
+	};
+	
+	Object.defineProperties(ChildListCallbackInterface.prototype, {
+		lastNameAdded: {
+			get: function get() {
+				return this._lastNameAdded;
+			}
+		},
+		lastObjectAdded: {
+			get: function get() {
+				return this._lastObjectAdded;
+			}
+		},
+		lastNameRemoved: {
+			get: function get() {
+				return this._lastNameRemoved;
+			}
+		},
+		lastObjectRemoved: {
+			get: function get() {
+				return this._lastObjectRemoved;
+			}
+		}
+	});
+	
+	ChildListCallbackInterface.prototype.CLASS_INFO = { names: [{ name: 'ChildListCallbackInterface', qName: 'ChildListCallbackInterface' }], interfaces: [_IChildListCallbackInterface2.default] };
+
+/***/ },
+/* 340 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _ICallbackCollection = __webpack_require__(325);
+	
+	var _ICallbackCollection2 = _interopRequireDefault(_ICallbackCollection);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var IChildListCallbackInterface = function () {
+		function IChildListCallbackInterface() {
+			_classCallCheck(this, IChildListCallbackInterface);
+		}
+	
+		_createClass(IChildListCallbackInterface, [{
+			key: 'REFLECTION_INFO',
+			value: function REFLECTION_INFO() {
+				return {
+					variables: function variables() {
+						return {};
+					},
+					accessors: function accessors() {
+						return {
+							'lastObjectAdded': { type: 'ILinkableObject', declaredBy: 'IChildListCallbackInterface' },
+							'lastNameAdded': { type: 'String', declaredBy: 'IChildListCallbackInterface' },
+							'lastObjectRemoved': { type: 'ILinkableObject', declaredBy: 'IChildListCallbackInterface' },
+							'lastNameRemoved': { type: 'String', declaredBy: 'IChildListCallbackInterface' }
+						};
+					},
+					methods: function methods() {
+						return {};
+					}
+				};
+			}
+		}]);
+	
+		return IChildListCallbackInterface;
+	}();
+	
+	exports.default = IChildListCallbackInterface;
+	
+	
+	IChildListCallbackInterface.prototype.lastObjectAdded;
+	IChildListCallbackInterface.prototype.lastNameAdded;
+	IChildListCallbackInterface.prototype.lastObjectRemoved;
+	IChildListCallbackInterface.prototype.lastNameRemoved;
+	
+	IChildListCallbackInterface.prototype.CLASS_INFO = { names: [{ name: 'IChildListCallbackInterface', qName: 'IChildListCallbackInterface' }], interfaces: [_ICallbackCollection2.default] };
 
 /***/ }
 /******/ ]);
