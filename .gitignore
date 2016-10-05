@@ -2,9 +2,8 @@
 # https://help.github.com/articles/ignoring-files
 # Example .gitignore files: https://github.com/github/gitignore
 
-/node_modules/
-/.DS_Store
-/experiment/
-/.idea
-/.publish
-/.bowerrc
+.DS_Store
+.idea
+node_modules
+
+build

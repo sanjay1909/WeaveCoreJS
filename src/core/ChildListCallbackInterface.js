@@ -1,177 +1,114 @@
-/**
- * @module weavecore
- */
 
-//namesapce
-if (typeof window === 'undefined') {
-    this.weavecore = this.weavecore || {};
-} else {
-    window.weavecore = window.weavecore || {};
+
+import CallbackCollection from "./CallbackCollection";
+import IChildListCallbackInterface from "../api/core/IChildListCallbackInterface";
+
+import Language from "../util/Language";
+
+export default class ChildListCallbackInterface extends CallbackCollection
+{
+	constructor()
+	{
+		super();
+		// as this is not allowed before super is called we have set CallbackCollection _precallback after super
+		this._preCallback = Language.closure(this.setCallbackVariables, this, 'setCallbackVariables');
+
+		this._lastNameAdded = null;
+		this._lastObjectAdded = null;
+		this._lastNameRemoved = null;
+		this._lastObjectRemoved = null;
+	}
+
+
+	REFLECTION_INFO () {
+		return {
+			variables: function () {
+				return {
+				};
+			},
+			accessors: function () {
+				return {
+					'lastNameAdded': { type: 'String', declaredBy: 'ChildListCallbackInterface'},
+					'lastObjectAdded': { type: 'ILinkableObject', declaredBy: 'ChildListCallbackInterface'},
+					'lastNameRemoved': { type: 'String', declaredBy: 'ChildListCallbackInterface'},
+					'lastObjectRemoved': { type: 'ILinkableObject', declaredBy: 'ChildListCallbackInterface'}
+				};
+			},
+			methods: function () {
+				return {
+					'ChildListCallbackInterface': { type: '', declaredBy: 'ChildListCallbackInterface'},
+					'runCallbacks': { type: 'void', declaredBy: 'ChildListCallbackInterface'}
+				};
+			},
+			metadata: function () { return [ ]; }
+		};
+	};
+
 }
 
-(function () {
-    "use strict";
-
-
-
-    // constructor:
-    /**
-     * Private Class for use with {{#crossLink "LinkableHashMap"}}{{/crossLink}}
-     * @class ChildListCallbackInterface
-     * @extends CallbackCollection
-     * @private
-     * @constructor
-     */
-    function ChildListCallbackInterface() {
-        this._setCallbackVariables = goog.bind(_setCallbackVariables, this);
-
-        ChildListCallbackInterface.base(this, 'constructor', this._setCallbackVariables)
 
 
 
 
-    }
+
+/**
+ * This function will set the list callback variables:
+ *     lastNameAdded, lastObjectAdded, lastNameRemoved, lastObjectRemoved, childListChanged
+ */
+ChildListCallbackInterface.prototype.setCallbackVariables = function(name, objectAdded, objectRemoved) {
+	name = typeof name !== 'undefined' ? name : null;
+	objectAdded = typeof objectAdded !== 'undefined' ? objectAdded : null;
+	objectRemoved = typeof objectRemoved !== 'undefined' ? objectRemoved : null;
+
+	this._lastNameAdded = objectAdded ? name : null;
+	this._lastObjectAdded = objectAdded;
+	this._lastNameRemoved = objectRemoved ? name : null;
+	this._lastObjectRemoved = objectRemoved;
+};
 
 
-    goog.inherits(ChildListCallbackInterface, weavecore.CallbackCollection);
+/**
+ * This function will run callbacks immediately, setting the list callback variables before each one.
+ */
+ChildListCallbackInterface.prototype.runCallbacks = function(name, objectAdded, objectRemoved)
+{
+	var _name = this._lastNameAdded || this._lastNameRemoved;
+	var _added = this._lastObjectAdded;
+	var _removed = this._lastObjectRemoved;
 
-    var p = ChildListCallbackInterface.prototype;
+	this._runCallbacksImmediately(name, objectAdded, objectRemoved);
+	this.setCallbackVariables(_name, _added, _removed);
 
-    /**
-     * returned by public getter
-     * @private
-     * @property _lastNameAdded
-     * @default null
-     * @type String
-     **/
-    p._lastNameAdded = null;
-    /**
-     * returned by public getter
-     * @private
-     * @property _lastObjectAdded
-     * @default null
-     * @type ILinkableObject
-     **/
-    p._lastObjectAdded = null;
-    /**
-     * returned by public getter
-     * @private
-     * @property _lastNameRemoved
-     * @default null
-     * @type String
-     **/
-    p._lastNameRemoved = null;
-    /**
-     * returned by public getter
-     * @private
-     * @property _lastObjectRemoved
-     * @default null
-     * @type ILinkableObject
-     **/
-    p._lastObjectRemoved = null;
 
-    /**
-     * This is the name of the object that was added prior to running callbacks.
-     * @public
-     * @property lastNameAdded
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(p, 'lastNameAdded', {
-        get: function () {
-            return this._lastNameAdded;
-        }
-    });
+};
 
-    /**
-     * This is the object that was added prior to running callbacks.
-     * @public
-     * @property lastObjectAdded
-     * @readOnly
-     * @type ILinkableObject
-     */
-    Object.defineProperty(p, 'lastObjectAdded', {
-        get: function () {
-            return this._lastObjectAdded;
-        }
-    });
 
-    /**
-     * This is the name of the object that was removed prior to running callbacks.
-     * @public
-     * @property lastNameRemoved
-     * @readOnly
-     * @type String
-     */
-    Object.defineProperty(p, 'lastNameRemoved', {
-        get: function () {
-            return this._lastNameRemoved;
-        }
-    });
+Object.defineProperties(ChildListCallbackInterface.prototype,{
+	lastNameAdded: {
+		get: function() {
+			return this._lastNameAdded;
+		}
+	},
+	lastObjectAdded: {
+		get: function() {
+			return this._lastObjectAdded;
+		}
+	},
+	lastNameRemoved: {
+		get: function() {
+			return this._lastNameRemoved;
+		}
+	},
+	lastObjectRemoved: {
+		get: function() {
+			return this._lastObjectRemoved;
+		}
+	}
+});
 
-    /**
-     * This is the object that was removed prior to running callbacks.
-     * @public
-     * @property lastObjectRemoved
-     * @readOnly
-     * @type ILinkableObject
-     */
-    Object.defineProperty(p, 'lastObjectRemoved', {
-        get: function () {
-            return this._lastObjectRemoved;
-        }
-    });
-    /**
-     * This function will set the list callback variables:
-     *     lastNameAdded, lastObjectAdded, lastNameRemoved, lastObjectRemoved, childListChanged
-     * @method _setCallbackVariables
-     * @private
-     * @param {String} name This is the name of the object that was just added or removed from the hash map.
-     * @param {ILinkableObject} objectAdded This is the object that was just added to the hash map.
-     * @param {ILinkableObject} objectRemoved This is the object that was just removed from the hash map.
-     */
-    function _setCallbackVariables(name, objectAdded, objectRemoved) {
-        this._lastNameAdded = objectAdded ? name : null;
-        this._lastObjectAdded = objectAdded;
-        this._lastNameRemoved = objectRemoved ? name : null;
-        this._lastObjectRemoved = objectRemoved;
-    };
 
-    /**
-     * This function will run callbacks immediately, setting the list callback variables before each one.
-     * @method runCallbacks
-     * @param {String} name
-     * @param {ILinkableObject} objectAdded
-     * @param {ILinkableObject} objectRemoved
-     */
-    p.runCallbacks = function (name, objectAdded, objectRemoved) {
-        // remember previous values
-        var _name = this._lastNameAdded || this._lastNameRemoved;
-        var _added = this._lastObjectAdded;
-        var _removed = this._lastObjectRemoved;
-
-        this._runCallbacksImmediately(name, objectAdded, objectRemoved);
-
-        // restore previous values (in case an external JavaScript popup caused us to interrupt something else)
-        this._setCallbackVariables(_name, _added, _removed);
-    };
+ChildListCallbackInterface.prototype.CLASS_INFO = { names: [{ name: 'ChildListCallbackInterface', qName: 'ChildListCallbackInterface'}], interfaces: [IChildListCallbackInterface] };
 
 
 
-    weavecore.ChildListCallbackInterface = ChildListCallbackInterface;
 
-    /**
-     * Metadata
-     *
-     * @type {Object.<string, Array.<Object>>}
-     */
-    p.CLASS_INFO = {
-        names: [{
-            name: 'ChildListCallbackInterface',
-            qName: 'weavecore.ChildListCallbackInterface'
-        }],
-        interfaces: [weavecore.IChildListCallbackInterface]
-    };
-
-
-}());
