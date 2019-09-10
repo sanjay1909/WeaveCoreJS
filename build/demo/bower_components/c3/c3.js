@@ -46,7 +46,7 @@
 
     function ChartInternal(api) {
         var $$ = this;
-        $$.d3 = window.d3 ? window.d3 : typeof require !== 'undefined' ? require("d3") : undefined;
+        $$.d3 = window.d3 ? window.d3 : typeof require !== 'undefined' ? require("build/demo/bower_components/d3/d3") : undefined;
         $$.api = api;
         $$.config = $$.getDefaultConfig();
         $$.data = {};
@@ -7039,7 +7039,7 @@
     }
 
     if (typeof define === 'function' && define.amd) {
-        define("c3", ["d3"], c3);
+        define("c3", ["build/demo/bower_components/d3/d3"], c3);
     } else if ('undefined' !== typeof exports && 'undefined' !== typeof module) {
         module.exports = c3;
     } else {
